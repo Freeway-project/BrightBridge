@@ -1,4 +1,4 @@
-import { COURSE_STATUSES, ROLES } from "@coursebridge/workflow";
+import { COURSE_STATUSES, ROLES, getRoleLabel } from "@coursebridge/workflow";
 import {
   Card,
   CardContent,
@@ -19,11 +19,11 @@ const reviewSteps = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
-      <div className="border-b border-[color:var(--border)] bg-white">
+    <main className="min-h-screen bg-background">
+      <div className="border-b border-border bg-card/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div>
-            <p className="text-sm font-semibold text-[color:var(--accent)]">
+            <p className="text-sm font-semibold text-primary">
               CourseBridge
             </p>
             <h1 className="text-2xl font-semibold tracking-normal">
