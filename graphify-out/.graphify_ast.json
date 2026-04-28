@@ -1,0 +1,588 @@
+{
+  "nodes": [
+    {
+      "id": "packages_ui_src_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_index_badge",
+      "label": "Badge()",
+      "file_type": "code",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L3"
+    },
+    {
+      "id": "packages_config_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/config/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_auth_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/auth/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_storage_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/storage/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_workflow_src_statuses_ts",
+      "label": "statuses.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_statuses_getcoursestatuslabel",
+      "label": "getCourseStatusLabel()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_statuses_isfinalstatus",
+      "label": "isFinalStatus()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_statuses_isinstructorvisiblestatus",
+      "label": "isInstructorVisibleStatus()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "packages_workflow_src_transitions_ts",
+      "label": "transitions.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_transitions_cantransition",
+      "label": "canTransition()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L79"
+    },
+    {
+      "id": "src_transitions_getallowedtransitions",
+      "label": "getAllowedTransitions()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L88"
+    },
+    {
+      "id": "src_transitions_assertcantransition",
+      "label": "assertCanTransition()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L94"
+    },
+    {
+      "id": "src_transitions_transitionallowsrole",
+      "label": "transitionAllowsRole()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L102"
+    },
+    {
+      "id": "packages_workflow_src_roles_ts",
+      "label": "roles.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/roles.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_roles_getrolelabel",
+      "label": "getRoleLabel()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/roles.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "packages_workflow_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_validation_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/validation/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_postcss_config_mjs",
+      "label": "postcss.config.mjs",
+      "file_type": "code",
+      "source_file": "apps/web/postcss.config.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_next_env_d_ts",
+      "label": "next-env.d.ts",
+      "file_type": "code",
+      "source_file": "apps/web/next-env.d.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_next_config_ts",
+      "label": "next.config.ts",
+      "file_type": "code",
+      "source_file": "apps/web/next.config.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_app_layout_tsx",
+      "label": "layout.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_layout_rootlayout",
+      "label": "RootLayout()",
+      "file_type": "code",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L13"
+    },
+    {
+      "id": "apps_web_app_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_components_ui_button_tsx",
+      "label": "button.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "ui_button_cn",
+      "label": "cn()",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L61"
+    },
+    {
+      "id": "apps_web_lib_utils_ts",
+      "label": "utils.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_utils_cn",
+      "label": "cn()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "apps_web_lib_supabase_middleware_ts",
+      "label": "middleware.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "supabase_middleware_updatesession",
+      "label": "updateSession()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "apps_web_lib_supabase_client_ts",
+      "label": "client.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "supabase_client_createclient",
+      "label": "createClient()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "apps_web_lib_supabase_server_ts",
+      "label": "server.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "supabase_server_createclient",
+      "label": "createClient()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L8"
+    }
+  ],
+  "edges": [
+    {
+      "source": "packages_ui_src_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_ui_src_index_tsx",
+      "target": "src_index_badge",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_statuses_ts",
+      "target": "src_statuses_getcoursestatuslabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_statuses_ts",
+      "target": "src_statuses_isfinalstatus",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_statuses_ts",
+      "target": "src_statuses_isinstructorvisiblestatus",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "users_harshsaw_github_brightbridge_packages_workflow_src_roles",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "users_harshsaw_github_brightbridge_packages_workflow_src_statuses",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_cantransition",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_getallowedtransitions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_assertcantransition",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_transitionallowsrole",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_transitions_assertcantransition",
+      "target": "src_transitions_cantransition",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_roles_ts",
+      "target": "src_roles_getrolelabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/roles.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_next_env_d_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_next_types_routes_d_ts",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/next-env.d.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_next_config_ts",
+      "target": "next",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/next.config.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "next",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_app_globals_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "google",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "app_layout_rootlayout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_page_tsx",
+      "target": "workflow",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_page_tsx",
+      "target": "ui",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "class_variance_authority",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "radix_ui",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "ui_button_cn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_utils_ts",
+      "target": "clsx",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_utils_ts",
+      "target": "tailwind_merge",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_utils_ts",
+      "target": "lib_utils_cn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_middleware_ts",
+      "target": "ssr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_middleware_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_middleware_ts",
+      "target": "supabase_middleware_updatesession",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_client_ts",
+      "target": "ssr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_client_ts",
+      "target": "supabase_client_createclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_server_ts",
+      "target": "ssr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_server_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_server_ts",
+      "target": "supabase_server_createclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
