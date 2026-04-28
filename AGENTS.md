@@ -44,15 +44,21 @@ packages/ui
 packages/config
 docs
 
-## First Priority
+## Current Phase Status
 
-Set up the project foundation only:
-- Next.js app
-- Tailwind
-- shadcn/ui
-- shared packages
-- basic dashboard layout
-- documentation files
+- **Phase 0 (Foundation):** COMPLETE — Turborepo, Next.js 16, Tailwind 4, shadcn/ui, Supabase SSR
+- **Phase 1 (Workflow Spine):** COMPLETE — `packages/workflow` fully implemented
+  - `roles.ts`: 5 roles (ta, admin, communications, instructor, super_admin)
+  - `statuses.ts`: 10 course statuses with label/visibility helpers
+  - `transitions.ts`: 11 valid transitions with role-based guards
+  - `index.ts`: clean public API exporting all of the above
+- **Phase 2 (Data Model Draft):** COMPLETE — schema documented in `docs/data-model.md`
+  - Tables: profiles, courses, course_assignments, course_status_events, review_sections, review_responses, course_comments, review_invites
+- **Phase 3 (Initial Supabase Schema):** NEXT — write SQL migrations based on the data model
+
+## Next Task
+
+Write Supabase migration files for the data model defined in `docs/data-model.md`. Start with the core tables: `profiles`, `courses`, `course_assignments`. Do not add RLS policies or seed data yet — schema only.
 
 Do not implement the full database, auth, PDF generation, notifications, or R2 until requested.
 
