@@ -1,21 +1,23 @@
-export const ROLES = [
-  "TA",
-  "Admin",
-  "Communication Department",
-  "Instructor",
-  "Super Admin"
-] as const;
-
-export type Role = (typeof ROLES)[number];
-
-export const COURSE_STATUSES = [
-  "Course Created",
-  "Assigned to TA",
-  "TA Review Started",
-  "Submitted to Admin",
-  "Admin Approved",
-  "Sent to Instructor",
-  "Final Approved"
-] as const;
-
-export type CourseStatus = (typeof COURSE_STATUSES)[number];
+export {
+  getRoleLabel,
+  ROLE_LABELS,
+  ROLES,
+  type Role
+} from "./roles";
+export {
+  COURSE_STATUS_LABELS,
+  COURSE_STATUSES,
+  getCourseStatusLabel,
+  isFinalStatus,
+  isInstructorVisibleStatus,
+  type CourseStatus
+} from "./statuses";
+export {
+  assertCanTransition,
+  canTransition,
+  COURSE_TRANSITIONS,
+  getAllowedTransitions,
+  type AllowedTransitionsInput,
+  type CourseTransition,
+  type TransitionInput
+} from "./transitions";

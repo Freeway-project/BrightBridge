@@ -1,4 +1,9 @@
-import { COURSE_STATUSES, ROLES } from "@coursebridge/workflow";
+import {
+  COURSE_STATUSES,
+  getCourseStatusLabel,
+  getRoleLabel,
+  ROLES
+} from "@coursebridge/workflow";
 import { Badge } from "@coursebridge/ui";
 
 const reviewSteps = [
@@ -38,7 +43,7 @@ export default function Home() {
                 className="rounded-md border border-[color:var(--border)] px-3 py-2 text-sm"
                 key={role}
               >
-                {role}
+                {getRoleLabel(role)}
               </div>
             ))}
           </div>
@@ -56,7 +61,7 @@ export default function Home() {
                   left for later tasks.
                 </p>
               </div>
-              <Badge>{COURSE_STATUSES[0]}</Badge>
+              <Badge>{getCourseStatusLabel(COURSE_STATUSES[0])}</Badge>
             </div>
           </div>
 
