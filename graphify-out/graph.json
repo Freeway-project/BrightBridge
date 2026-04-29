@@ -9,7 +9,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L1",
       "id": "design_handoff_design_canvas_jsx",
-      "community": 9,
+      "community": 11,
       "norm_label": "design-canvas.jsx"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L71",
       "id": "design_handoff_design_canvas_designcanvas",
-      "community": 9,
+      "community": 11,
       "norm_label": "designcanvas()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L182",
       "id": "design_handoff_design_canvas_dcviewport",
-      "community": 9,
+      "community": 11,
       "norm_label": "dcviewport()"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L333",
       "id": "design_handoff_design_canvas_dcsection",
-      "community": 9,
+      "community": 11,
       "norm_label": "dcsection()"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L372",
       "id": "design_handoff_design_canvas_dcartboard",
-      "community": 9,
+      "community": 11,
       "norm_label": "dcartboard()"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L374",
       "id": "design_handoff_design_canvas_dcartboardframe",
-      "community": 9,
+      "community": 11,
       "norm_label": "dcartboardframe()"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L464",
       "id": "design_handoff_design_canvas_dceditable",
-      "community": 9,
+      "community": 11,
       "norm_label": "dceditable()"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L480",
       "id": "design_handoff_design_canvas_dcfocusoverlay",
-      "community": 9,
+      "community": 11,
       "norm_label": "dcfocusoverlay()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "design_handoff/design-canvas.jsx",
       "source_location": "L607",
       "id": "design_handoff_design_canvas_dcpostit",
-      "community": 9,
+      "community": 11,
       "norm_label": "dcpostit()"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L1",
       "id": "design_handoff_tweaks_panel_jsx",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaks-panel.jsx"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L139",
       "id": "design_handoff_tweaks_panel_usetweaks",
-      "community": 8,
+      "community": 7,
       "norm_label": "usetweaks()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L160",
       "id": "design_handoff_tweaks_panel_tweakspanel",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakspanel()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L250",
       "id": "design_handoff_tweaks_panel_tweaksection",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaksection()"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L259",
       "id": "design_handoff_tweaks_panel_tweakrow",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakrow()"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L273",
       "id": "design_handoff_tweaks_panel_tweakslider",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakslider()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L282",
       "id": "design_handoff_tweaks_panel_tweaktoggle",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaktoggle()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L293",
       "id": "design_handoff_tweaks_panel_tweakradio",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakradio()"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L347",
       "id": "design_handoff_tweaks_panel_tweakselect",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakselect()"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L361",
       "id": "design_handoff_tweaks_panel_tweaktext",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaktext()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L370",
       "id": "design_handoff_tweaks_panel_tweaknumber",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaknumber()"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L404",
       "id": "design_handoff_tweaks_panel_tweakcolor",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakcolor()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L414",
       "id": "design_handoff_tweaks_panel_tweakbutton",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakbutton()"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L1",
       "id": "scripts_check_core_rls_mjs",
-      "community": 5,
+      "community": 6,
       "norm_label": "check-core-rls.mjs"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L75",
       "id": "scripts_check_core_rls_checkadminaccess",
-      "community": 5,
+      "community": 6,
       "norm_label": "checkadminaccess()"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L85",
       "id": "scripts_check_core_rls_checktaaccess",
-      "community": 5,
+      "community": 6,
       "norm_label": "checktaaccess()"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L97",
       "id": "scripts_check_core_rls_checkinstructoraccess",
-      "community": 5,
+      "community": 6,
       "norm_label": "checkinstructoraccess()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L105",
       "id": "scripts_check_core_rls_checkcommunicationsaccess",
-      "community": 5,
+      "community": 6,
       "norm_label": "checkcommunicationsaccess()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L115",
       "id": "scripts_check_core_rls_checkmissingprofileaccess",
-      "community": 5,
+      "community": 6,
       "norm_label": "checkmissingprofileaccess()"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L195",
       "id": "scripts_check_core_rls_signin",
-      "community": 5,
+      "community": 6,
       "norm_label": "signin()"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L215",
       "id": "scripts_check_core_rls_visiblecourses",
-      "community": 5,
+      "community": 6,
       "norm_label": "visiblecourses()"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L228",
       "id": "scripts_check_core_rls_visiblestatusevents",
-      "community": 5,
+      "community": 6,
       "norm_label": "visiblestatusevents()"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L241",
       "id": "scripts_check_core_rls_asserthassource",
-      "community": 5,
+      "community": 6,
       "norm_label": "asserthassource()"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L247",
       "id": "scripts_check_core_rls_assertmissingsource",
-      "community": 5,
+      "community": 6,
       "norm_label": "assertmissingsource()"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L253",
       "id": "scripts_check_core_rls_assertequal",
-      "community": 5,
+      "community": 6,
       "norm_label": "assertequal()"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L259",
       "id": "scripts_check_core_rls_cleanup",
-      "community": 5,
+      "community": 6,
       "norm_label": "cleanup()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "scripts/check-core-rls.mjs",
       "source_location": "L277",
       "id": "scripts_check_core_rls_loadenvfiles",
-      "community": 5,
+      "community": 6,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L1",
       "id": "scripts_seed_dev_mjs",
-      "community": 3,
+      "community": 10,
       "norm_label": "seed-dev.mjs"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L85",
       "id": "scripts_seed_dev_ensureauthuser",
-      "community": 3,
+      "community": 10,
       "norm_label": "ensureauthuser()"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L109",
       "id": "scripts_seed_dev_finduserbyemail",
-      "community": 3,
+      "community": 10,
       "norm_label": "finduserbyemail()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L138",
       "id": "scripts_seed_dev_upsertprofiles",
-      "community": 3,
+      "community": 10,
       "norm_label": "upsertprofiles()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L150",
       "id": "scripts_seed_dev_seedcourses",
-      "community": 3,
+      "community": 10,
       "norm_label": "seedcourses()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L206",
       "id": "scripts_seed_dev_upsertcourse",
-      "community": 3,
+      "community": 10,
       "norm_label": "upsertcourse()"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L261",
       "id": "scripts_seed_dev_upsertassignments",
-      "community": 3,
+      "community": 10,
       "norm_label": "upsertassignments()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L278",
       "id": "scripts_seed_dev_ensurestatusevent",
-      "community": 3,
+      "community": 10,
       "norm_label": "ensurestatusevent()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L308",
       "id": "scripts_seed_dev_seedreviewresponses",
-      "community": 3,
+      "community": 10,
       "norm_label": "seedreviewresponses()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "scripts/seed-dev.mjs",
       "source_location": "L342",
       "id": "scripts_seed_dev_loadenvfiles",
-      "community": 3,
+      "community": 10,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L1",
       "id": "packages_workflow_src_transitions_ts",
-      "community": 11,
+      "community": 9,
       "norm_label": "transitions.ts"
     },
     {
@@ -567,7 +567,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L79",
       "id": "src_transitions_cantransition",
-      "community": 11,
+      "community": 9,
       "norm_label": "cantransition()"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L88",
       "id": "src_transitions_getallowedtransitions",
-      "community": 11,
+      "community": 9,
       "norm_label": "getallowedtransitions()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L94",
       "id": "src_transitions_assertcantransition",
-      "community": 11,
+      "community": 9,
       "norm_label": "assertcantransition()"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L102",
       "id": "src_transitions_transitionallowsrole",
-      "community": 11,
+      "community": 9,
       "norm_label": "transitionallowsrole()"
     },
     {
@@ -774,7 +774,7 @@
       "source_file": "apps/web/app/not-found.tsx",
       "source_location": "L1",
       "id": "apps_web_app_not_found_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "not-found.tsx"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "apps/web/app/not-found.tsx",
       "source_location": "L4",
       "id": "app_not_found_notfound",
-      "community": 1,
+      "community": 2,
       "norm_label": "notfound()"
     },
     {
@@ -810,7 +810,7 @@
       "source_file": "apps/web/app/auth/callback/route.ts",
       "source_location": "L1",
       "id": "apps_web_app_auth_callback_route_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "route.ts"
     },
     {
@@ -819,7 +819,7 @@
       "source_file": "apps/web/app/auth/callback/route.ts",
       "source_location": "L4",
       "id": "callback_route_get",
-      "community": 2,
+      "community": 1,
       "norm_label": "get()"
     },
     {
@@ -828,7 +828,7 @@
       "source_file": "apps/web/app/auth/login/actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_auth_login_actions_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -837,7 +837,7 @@
       "source_file": "apps/web/app/auth/login/actions.ts",
       "source_location": "L18",
       "id": "login_actions_signinwithemail",
-      "community": 2,
+      "community": 1,
       "norm_label": "signinwithemail()"
     },
     {
@@ -846,7 +846,7 @@
       "source_file": "apps/web/app/auth/login/actions.ts",
       "source_location": "L45",
       "id": "login_actions_signinasdevrole",
-      "community": 2,
+      "community": 1,
       "norm_label": "signinasdevrole()"
     },
     {
@@ -864,7 +864,7 @@
       "source_file": "apps/web/app/dashboard/actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_actions_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -873,7 +873,7 @@
       "source_file": "apps/web/app/dashboard/actions.ts",
       "source_location": "L6",
       "id": "dashboard_actions_signout",
-      "community": 2,
+      "community": 1,
       "norm_label": "signout()"
     },
     {
@@ -882,7 +882,7 @@
       "source_file": "apps/web/app/dashboard/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_page_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -891,17 +891,8 @@
       "source_file": "apps/web/app/dashboard/page.tsx",
       "source_location": "L13",
       "id": "dashboard_page_dashboardpage",
-      "community": 2,
+      "community": 1,
       "norm_label": "dashboardpage()"
-    },
-    {
-      "label": "page.tsx",
-      "file_type": "code",
-      "source_file": "apps/web/app/courses/page.tsx",
-      "source_location": "L1",
-      "id": "apps_web_app_courses_page_tsx",
-      "community": 62,
-      "norm_label": "page.tsx"
     },
     {
       "label": "layout.tsx",
@@ -909,7 +900,7 @@
       "source_file": "apps/web/app/(dashboard)/layout.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_layout_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "layout.tsx"
     },
     {
@@ -918,7 +909,7 @@
       "source_file": "apps/web/app/(dashboard)/layout.tsx",
       "source_location": "L6",
       "id": "dashboard_layout_dashboardlayout",
-      "community": 2,
+      "community": 1,
       "norm_label": "dashboardlayout()"
     },
     {
@@ -945,7 +936,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_actions_ts",
-      "community": 6,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -954,7 +945,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/actions.ts",
       "source_location": "L15",
       "id": "admin_actions_assigntatocourseaction",
-      "community": 6,
+      "community": 1,
       "norm_label": "assigntatocourseaction()"
     },
     {
@@ -963,7 +954,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_page_tsx",
-      "community": 63,
+      "community": 62,
       "norm_label": "page.tsx"
     },
     {
@@ -972,8 +963,26 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/admin-assignment-panel.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_components_admin_assignment_panel_tsx",
-      "community": 64,
+      "community": 63,
       "norm_label": "admin-assignment-panel.tsx"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/(dashboard)/courses/page.tsx",
+      "source_location": "L1",
+      "id": "apps_web_app_dashboard_courses_page_tsx",
+      "community": 1,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "CoursesPage()",
+      "file_type": "code",
+      "source_file": "apps/web/app/(dashboard)/courses/page.tsx",
+      "source_location": "L4",
+      "id": "courses_page_coursespage",
+      "community": 1,
+      "norm_label": "coursespage()"
     },
     {
       "label": "layout.tsx",
@@ -981,7 +990,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/layout.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_layout_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "layout.tsx"
     },
     {
@@ -990,7 +999,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/layout.tsx",
       "source_location": "L21",
       "id": "id_layout_courseworkspacelayout",
-      "community": 1,
+      "community": 2,
       "norm_label": "courseworkspacelayout()"
     },
     {
@@ -999,7 +1008,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/submit/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_submit_page_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1008,7 +1017,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/submit/page.tsx",
       "source_location": "L12",
       "id": "submit_page_submitpage",
-      "community": 1,
+      "community": 2,
       "norm_label": "submitpage()"
     },
     {
@@ -1017,7 +1026,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/issue-log/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_issue_log_page_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1026,7 +1035,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/issue-log/page.tsx",
       "source_location": "L13",
       "id": "issue_log_page_issuelogpage",
-      "community": 1,
+      "community": 2,
       "norm_label": "issuelogpage()"
     },
     {
@@ -1035,7 +1044,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/review-matrix/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_review_matrix_page_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1044,7 +1053,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/review-matrix/page.tsx",
       "source_location": "L16",
       "id": "review_matrix_page_reviewmatrixpage",
-      "community": 1,
+      "community": 2,
       "norm_label": "reviewmatrixpage()"
     },
     {
@@ -1098,16 +1107,25 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_components_syllabus_gradebook_form_tsx",
-      "community": 7,
+      "community": 4,
       "norm_label": "syllabus-gradebook-form.tsx"
+    },
+    {
+      "label": "onTick()",
+      "file_type": "code",
+      "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
+      "source_location": "L86",
+      "id": "components_syllabus_gradebook_form_ontick",
+      "community": 4,
+      "norm_label": "ontick()"
     },
     {
       "label": "handleSave()",
       "file_type": "code",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
-      "source_location": "L81",
+      "source_location": "L94",
       "id": "components_syllabus_gradebook_form_handlesave",
-      "community": 7,
+      "community": 4,
       "norm_label": "handlesave()"
     },
     {
@@ -1116,7 +1134,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/workspace-nav.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_components_workspace_nav_tsx",
-      "community": 65,
+      "community": 64,
       "norm_label": "workspace-nav.tsx"
     },
     {
@@ -1125,25 +1143,16 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/metadata-form.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_components_metadata_form_tsx",
-      "community": 7,
+      "community": 4,
       "norm_label": "metadata-form.tsx"
-    },
-    {
-      "label": "handleTimer()",
-      "file_type": "code",
-      "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/metadata-form.tsx",
-      "source_location": "L48",
-      "id": "components_metadata_form_handletimer",
-      "community": 7,
-      "norm_label": "handletimer()"
     },
     {
       "label": "handleSave()",
       "file_type": "code",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/metadata-form.tsx",
-      "source_location": "L59",
+      "source_location": "L37",
       "id": "components_metadata_form_handlesave",
-      "community": 7,
+      "community": 4,
       "norm_label": "handlesave()"
     },
     {
@@ -1152,25 +1161,34 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_components_review_matrix_form_tsx",
-      "community": 7,
+      "community": 4,
       "norm_label": "review-matrix-form.tsx"
+    },
+    {
+      "label": "onTick()",
+      "file_type": "code",
+      "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
+      "source_location": "L110",
+      "id": "components_review_matrix_form_ontick",
+      "community": 4,
+      "norm_label": "ontick()"
     },
     {
       "label": "handleSave()",
       "file_type": "code",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
-      "source_location": "L103",
+      "source_location": "L118",
       "id": "components_review_matrix_form_handlesave",
-      "community": 7,
+      "community": 4,
       "norm_label": "handlesave()"
     },
     {
       "label": "addIssue()",
       "file_type": "code",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
-      "source_location": "L118",
+      "source_location": "L136",
       "id": "components_review_matrix_form_addissue",
-      "community": 7,
+      "community": 4,
       "norm_label": "addissue()"
     },
     {
@@ -1179,7 +1197,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/submit-panel.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_components_submit_panel_tsx",
-      "community": 66,
+      "community": 65,
       "norm_label": "submit-panel.tsx"
     },
     {
@@ -1188,7 +1206,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/issue-drawer.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_components_issue_drawer_tsx",
-      "community": 7,
+      "community": 4,
       "norm_label": "issue-drawer.tsx"
     },
     {
@@ -1197,7 +1215,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/issue-drawer.tsx",
       "source_location": "L45",
       "id": "components_issue_drawer_handlesubmit",
-      "community": 7,
+      "community": 4,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1224,7 +1242,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/syllabus-gradebook/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_syllabus_gradebook_page_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1233,7 +1251,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/syllabus-gradebook/page.tsx",
       "source_location": "L17",
       "id": "syllabus_gradebook_page_syllabusgradebookpage",
-      "community": 1,
+      "community": 2,
       "norm_label": "syllabusgradebookpage()"
     },
     {
@@ -1242,7 +1260,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/metadata/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_metadata_page_tsx",
-      "community": 1,
+      "community": 2,
       "norm_label": "page.tsx"
     },
     {
@@ -1251,7 +1269,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/metadata/page.tsx",
       "source_location": "L13",
       "id": "metadata_page_metadatapage",
-      "community": 1,
+      "community": 2,
       "norm_label": "metadatapage()"
     },
     {
@@ -1260,7 +1278,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_super_admin_page_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1269,7 +1287,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/page.tsx",
       "source_location": "L7",
       "id": "super_admin_page_superadmindashboardpage",
-      "community": 2,
+      "community": 3,
       "norm_label": "superadmindashboardpage()"
     },
     {
@@ -1296,7 +1314,7 @@
       "source_file": "apps/web/app/(dashboard)/ta/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_ta_page_tsx",
-      "community": 1,
+      "community": 9,
       "norm_label": "page.tsx"
     },
     {
@@ -1305,26 +1323,8 @@
       "source_file": "apps/web/app/(dashboard)/ta/page.tsx",
       "source_location": "L5",
       "id": "ta_page_tadashboardpage",
-      "community": 1,
+      "community": 9,
       "norm_label": "tadashboardpage()"
-    },
-    {
-      "label": "ta-dashboard-client.tsx",
-      "file_type": "code",
-      "source_file": "apps/web/app/(dashboard)/ta/_components/ta-dashboard-client.tsx",
-      "source_location": "L1",
-      "id": "apps_web_app_dashboard_ta_components_ta_dashboard_client_tsx",
-      "community": 31,
-      "norm_label": "ta-dashboard-client.tsx"
-    },
-    {
-      "label": "TADashboardClient()",
-      "file_type": "code",
-      "source_file": "apps/web/app/(dashboard)/ta/_components/ta-dashboard-client.tsx",
-      "source_location": "L15",
-      "id": "components_ta_dashboard_client_tadashboardclient",
-      "community": 31,
-      "norm_label": "tadashboardclient()"
     },
     {
       "label": "page.tsx",
@@ -1332,7 +1332,7 @@
       "source_file": "apps/web/app/(dashboard)/communications/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_communications_page_tsx",
-      "community": 32,
+      "community": 31,
       "norm_label": "page.tsx"
     },
     {
@@ -1341,7 +1341,7 @@
       "source_file": "apps/web/app/(dashboard)/communications/page.tsx",
       "source_location": "L4",
       "id": "communications_page_communicationsdashboardpage",
-      "community": 32,
+      "community": 31,
       "norm_label": "communicationsdashboardpage()"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_file": "apps/web/components/dev-role-switcher.tsx",
       "source_location": "L1",
       "id": "apps_web_components_dev_role_switcher_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "dev-role-switcher.tsx"
     },
     {
@@ -1359,7 +1359,7 @@
       "source_file": "apps/web/components/dev-role-switcher.tsx",
       "source_location": "L14",
       "id": "components_dev_role_switcher_devroleswitcher",
-      "community": 2,
+      "community": 1,
       "norm_label": "devroleswitcher()"
     },
     {
@@ -1368,7 +1368,7 @@
       "source_file": "apps/web/components/dev-role-switcher-actions.ts",
       "source_location": "L1",
       "id": "apps_web_components_dev_role_switcher_actions_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "dev-role-switcher-actions.ts"
     },
     {
@@ -1377,7 +1377,7 @@
       "source_file": "apps/web/components/dev-role-switcher-actions.ts",
       "source_location": "L8",
       "id": "components_dev_role_switcher_actions_switchdevrole",
-      "community": 2,
+      "community": 1,
       "norm_label": "switchdevrole()"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_file": "apps/web/components/ui/tabs.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_tabs_tsx",
-      "community": 33,
+      "community": 32,
       "norm_label": "tabs.tsx"
     },
     {
@@ -1395,7 +1395,7 @@
       "source_file": "apps/web/components/ui/tabs.tsx",
       "source_location": "L65",
       "id": "ui_tabs_cn",
-      "community": 33,
+      "community": 32,
       "norm_label": "cn()"
     },
     {
@@ -1431,7 +1431,7 @@
       "source_file": "apps/web/components/ui/progress.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_progress_tsx",
-      "community": 67,
+      "community": 66,
       "norm_label": "progress.tsx"
     },
     {
@@ -1440,7 +1440,7 @@
       "source_file": "apps/web/components/ui/sheet.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_sheet_tsx",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheet.tsx"
     },
     {
@@ -1449,7 +1449,7 @@
       "source_file": "apps/web/components/ui/sheet.tsx",
       "source_location": "L10",
       "id": "ui_sheet_sheet",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheet()"
     },
     {
@@ -1458,7 +1458,7 @@
       "source_file": "apps/web/components/ui/sheet.tsx",
       "source_location": "L14",
       "id": "ui_sheet_sheettrigger",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheettrigger()"
     },
     {
@@ -1467,7 +1467,7 @@
       "source_file": "apps/web/components/ui/sheet.tsx",
       "source_location": "L20",
       "id": "ui_sheet_sheetclose",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheetclose()"
     },
     {
@@ -1476,7 +1476,7 @@
       "source_file": "apps/web/components/ui/sheet.tsx",
       "source_location": "L26",
       "id": "ui_sheet_sheetportal",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheetportal()"
     },
     {
@@ -1485,7 +1485,7 @@
       "source_file": "apps/web/components/ui/sheet.tsx",
       "source_location": "L64",
       "id": "ui_sheet_cn",
-      "community": 10,
+      "community": 12,
       "norm_label": "cn()"
     },
     {
@@ -1494,7 +1494,7 @@
       "source_file": "apps/web/components/ui/sheet.tsx",
       "source_location": "L125",
       "id": "ui_sheet_sheetdescription",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheetdescription()"
     },
     {
@@ -1557,7 +1557,7 @@
       "source_file": "apps/web/components/ui/badge.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_badge_tsx",
-      "community": 34,
+      "community": 33,
       "norm_label": "badge.tsx"
     },
     {
@@ -1566,7 +1566,7 @@
       "source_file": "apps/web/components/ui/badge.tsx",
       "source_location": "L30",
       "id": "ui_badge_badge",
-      "community": 34,
+      "community": 33,
       "norm_label": "badge()"
     },
     {
@@ -1575,7 +1575,7 @@
       "source_file": "apps/web/components/ui/table.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_table_tsx",
-      "community": 12,
+      "community": 13,
       "norm_label": "table.tsx"
     },
     {
@@ -1584,7 +1584,7 @@
       "source_file": "apps/web/components/ui/table.tsx",
       "source_location": "L7",
       "id": "ui_table_table",
-      "community": 12,
+      "community": 13,
       "norm_label": "table()"
     },
     {
@@ -1593,7 +1593,7 @@
       "source_file": "apps/web/components/ui/table.tsx",
       "source_location": "L22",
       "id": "ui_table_tableheader",
-      "community": 12,
+      "community": 13,
       "norm_label": "tableheader()"
     },
     {
@@ -1602,7 +1602,7 @@
       "source_file": "apps/web/components/ui/table.tsx",
       "source_location": "L32",
       "id": "ui_table_tablebody",
-      "community": 12,
+      "community": 13,
       "norm_label": "tablebody()"
     },
     {
@@ -1611,7 +1611,7 @@
       "source_file": "apps/web/components/ui/table.tsx",
       "source_location": "L46",
       "id": "ui_table_cn",
-      "community": 12,
+      "community": 13,
       "norm_label": "cn()"
     },
     {
@@ -1620,7 +1620,7 @@
       "source_file": "apps/web/components/ui/separator.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_separator_tsx",
-      "community": 35,
+      "community": 34,
       "norm_label": "separator.tsx"
     },
     {
@@ -1629,7 +1629,7 @@
       "source_file": "apps/web/components/ui/separator.tsx",
       "source_location": "L8",
       "id": "ui_separator_separator",
-      "community": 35,
+      "community": 34,
       "norm_label": "separator()"
     },
     {
@@ -1638,7 +1638,7 @@
       "source_file": "apps/web/components/ui/button.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_button_tsx",
-      "community": 36,
+      "community": 35,
       "norm_label": "button.tsx"
     },
     {
@@ -1647,7 +1647,7 @@
       "source_file": "apps/web/components/ui/button.tsx",
       "source_location": "L61",
       "id": "ui_button_cn",
-      "community": 36,
+      "community": 35,
       "norm_label": "cn()"
     },
     {
@@ -1656,7 +1656,7 @@
       "source_file": "apps/web/components/ui/collapsible.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_collapsible_tsx",
-      "community": 37,
+      "community": 36,
       "norm_label": "collapsible.tsx"
     },
     {
@@ -1665,7 +1665,7 @@
       "source_file": "apps/web/components/ui/collapsible.tsx",
       "source_location": "L5",
       "id": "ui_collapsible_collapsible",
-      "community": 37,
+      "community": 36,
       "norm_label": "collapsible()"
     },
     {
@@ -1674,7 +1674,7 @@
       "source_file": "apps/web/components/ui/select.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_select_tsx",
-      "community": 13,
+      "community": 3,
       "norm_label": "select.tsx"
     },
     {
@@ -1692,7 +1692,7 @@
       "source_file": "apps/web/components/ui/select.tsx",
       "source_location": "L15",
       "id": "ui_select_selectgroup",
-      "community": 13,
+      "community": 3,
       "norm_label": "selectgroup()"
     },
     {
@@ -1701,7 +1701,7 @@
       "source_file": "apps/web/components/ui/select.tsx",
       "source_location": "L28",
       "id": "ui_select_selectvalue",
-      "community": 13,
+      "community": 3,
       "norm_label": "selectvalue()"
     },
     {
@@ -1710,7 +1710,7 @@
       "source_file": "apps/web/components/ui/select.tsx",
       "source_location": "L34",
       "id": "ui_select_selecttrigger",
-      "community": 13,
+      "community": 3,
       "norm_label": "selecttrigger()"
     },
     {
@@ -1719,7 +1719,7 @@
       "source_file": "apps/web/components/ui/select.tsx",
       "source_location": "L60",
       "id": "ui_select_selectcontent",
-      "community": 13,
+      "community": 3,
       "norm_label": "selectcontent()"
     },
     {
@@ -1728,7 +1728,7 @@
       "source_file": "apps/web/components/ui/textarea.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_textarea_tsx",
-      "community": 38,
+      "community": 37,
       "norm_label": "textarea.tsx"
     },
     {
@@ -1737,7 +1737,7 @@
       "source_file": "apps/web/components/ui/textarea.tsx",
       "source_location": "L9",
       "id": "ui_textarea_cn",
-      "community": 38,
+      "community": 37,
       "norm_label": "cn()"
     },
     {
@@ -1746,7 +1746,7 @@
       "source_file": "apps/web/components/ui/input.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_input_tsx",
-      "community": 39,
+      "community": 38,
       "norm_label": "input.tsx"
     },
     {
@@ -1755,7 +1755,7 @@
       "source_file": "apps/web/components/ui/input.tsx",
       "source_location": "L5",
       "id": "ui_input_input",
-      "community": 39,
+      "community": 38,
       "norm_label": "input()"
     },
     {
@@ -1764,7 +1764,7 @@
       "source_file": "apps/web/components/layout/topbar.tsx",
       "source_location": "L1",
       "id": "apps_web_components_layout_topbar_tsx",
-      "community": 68,
+      "community": 67,
       "norm_label": "topbar.tsx"
     },
     {
@@ -1773,7 +1773,7 @@
       "source_file": "apps/web/components/layout/sidebar.tsx",
       "source_location": "L1",
       "id": "apps_web_components_layout_sidebar_tsx",
-      "community": 40,
+      "community": 39,
       "norm_label": "sidebar.tsx"
     },
     {
@@ -1782,7 +1782,7 @@
       "source_file": "apps/web/components/layout/sidebar.tsx",
       "source_location": "L16",
       "id": "layout_sidebar_sidebar",
-      "community": 40,
+      "community": 39,
       "norm_label": "sidebar()"
     },
     {
@@ -1791,7 +1791,7 @@
       "source_file": "apps/web/components/shared/error-display.tsx",
       "source_location": "L1",
       "id": "apps_web_components_shared_error_display_tsx",
-      "community": 69,
+      "community": 68,
       "norm_label": "error-display.tsx"
     },
     {
@@ -1800,7 +1800,7 @@
       "source_file": "apps/web/components/shared/stat-card.tsx",
       "source_location": "L1",
       "id": "apps_web_components_shared_stat_card_tsx",
-      "community": 41,
+      "community": 40,
       "norm_label": "stat-card.tsx"
     },
     {
@@ -1809,8 +1809,26 @@
       "source_file": "apps/web/components/shared/stat-card.tsx",
       "source_location": "L12",
       "id": "shared_stat_card_statcard",
-      "community": 41,
+      "community": 40,
       "norm_label": "statcard()"
+    },
+    {
+      "label": "course-card.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/courses/course-card.tsx",
+      "source_location": "L1",
+      "id": "apps_web_components_courses_course_card_tsx",
+      "community": 69,
+      "norm_label": "course-card.tsx"
+    },
+    {
+      "label": "course-sidebar-filters.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/courses/course-sidebar-filters.tsx",
+      "source_location": "L1",
+      "id": "apps_web_components_courses_course_sidebar_filters_tsx",
+      "community": 70,
+      "norm_label": "course-sidebar-filters.tsx"
     },
     {
       "label": "course-table.tsx",
@@ -1818,8 +1836,26 @@
       "source_file": "apps/web/components/courses/course-table.tsx",
       "source_location": "L1",
       "id": "apps_web_components_courses_course_table_tsx",
-      "community": 70,
+      "community": 71,
       "norm_label": "course-table.tsx"
+    },
+    {
+      "label": "course-list-view.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/courses/course-list-view.tsx",
+      "source_location": "L1",
+      "id": "apps_web_components_courses_course_list_view_tsx",
+      "community": 41,
+      "norm_label": "course-list-view.tsx"
+    },
+    {
+      "label": "clearFilters()",
+      "file_type": "code",
+      "source_file": "apps/web/components/courses/course-list-view.tsx",
+      "source_location": "L42",
+      "id": "courses_course_list_view_clearfilters",
+      "community": 41,
+      "norm_label": "clearfilters()"
     },
     {
       "label": "status-badge.tsx",
@@ -1917,7 +1953,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L1",
       "id": "apps_web_lib_auth_context_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "context.ts"
     },
     {
@@ -1926,7 +1962,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L20",
       "id": "auth_context_getauthcontext",
-      "community": 2,
+      "community": 1,
       "norm_label": "getauthcontext()"
     },
     {
@@ -1935,7 +1971,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L68",
       "id": "auth_context_requireprofile",
-      "community": 1,
+      "community": 2,
       "norm_label": "requireprofile()"
     },
     {
@@ -1944,7 +1980,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L77",
       "id": "auth_context_requireanyrole",
-      "community": 6,
+      "community": 8,
       "norm_label": "requireanyrole()"
     },
     {
@@ -1953,7 +1989,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L86",
       "id": "auth_context_isrole",
-      "community": 2,
+      "community": 1,
       "norm_label": "isrole()"
     },
     {
@@ -1962,7 +1998,7 @@
       "source_file": "apps/web/lib/constants/status.ts",
       "source_location": "L1",
       "id": "apps_web_lib_constants_status_ts",
-      "community": 71,
+      "community": 72,
       "norm_label": "status.ts"
     },
     {
@@ -1971,7 +2007,7 @@
       "source_file": "apps/web/lib/constants/nav.ts",
       "source_location": "L1",
       "id": "apps_web_lib_constants_nav_ts",
-      "community": 72,
+      "community": 73,
       "norm_label": "nav.ts"
     },
     {
@@ -1980,7 +2016,7 @@
       "source_file": "apps/web/lib/workspace/schemas.ts",
       "source_location": "L1",
       "id": "apps_web_lib_workspace_schemas_ts",
-      "community": 7,
+      "community": 4,
       "norm_label": "schemas.ts"
     },
     {
@@ -1989,7 +2025,7 @@
       "source_file": "apps/web/lib/workspace/types.ts",
       "source_location": "L1",
       "id": "apps_web_lib_workspace_types_ts",
-      "community": 73,
+      "community": 74,
       "norm_label": "types.ts"
     },
     {
@@ -1998,7 +2034,7 @@
       "source_file": "apps/web/lib/workspace/actions.ts",
       "source_location": "L1",
       "id": "apps_web_lib_workspace_actions_ts",
-      "community": 1,
+      "community": 2,
       "norm_label": "actions.ts"
     },
     {
@@ -2007,7 +2043,7 @@
       "source_file": "apps/web/lib/workspace/actions.ts",
       "source_location": "L14",
       "id": "workspace_actions_savedraft",
-      "community": 1,
+      "community": 2,
       "norm_label": "savedraft()"
     },
     {
@@ -2016,7 +2052,7 @@
       "source_file": "apps/web/lib/workspace/actions.ts",
       "source_location": "L39",
       "id": "workspace_actions_submitreview",
-      "community": 1,
+      "community": 2,
       "norm_label": "submitreview()"
     },
     {
@@ -2043,7 +2079,7 @@
       "source_file": "apps/web/lib/supabase/admin.ts",
       "source_location": "L1",
       "id": "apps_web_lib_supabase_admin_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "admin.ts"
     },
     {
@@ -2052,7 +2088,7 @@
       "source_file": "apps/web/lib/supabase/admin.ts",
       "source_location": "L3",
       "id": "supabase_admin_createadminclient",
-      "community": 2,
+      "community": 1,
       "norm_label": "createadminclient()"
     },
     {
@@ -2079,7 +2115,7 @@
       "source_file": "apps/web/lib/supabase/server.ts",
       "source_location": "L1",
       "id": "apps_web_lib_supabase_server_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "server.ts"
     },
     {
@@ -2088,7 +2124,7 @@
       "source_file": "apps/web/lib/supabase/server.ts",
       "source_location": "L8",
       "id": "supabase_server_createclient",
-      "community": 2,
+      "community": 1,
       "norm_label": "createclient()"
     },
     {
@@ -2097,97 +2133,106 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L1",
       "id": "apps_web_lib_courses_service_ts",
-      "community": 6,
+      "community": 8,
       "norm_label": "service.ts"
     },
     {
       "label": "getAccessibleCourses()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L63",
+      "source_location": "L76",
       "id": "courses_service_getaccessiblecourses",
-      "community": 6,
+      "community": 1,
       "norm_label": "getaccessiblecourses()"
+    },
+    {
+      "label": "fetchReviewProgressForCourses()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/courses/service.ts",
+      "source_location": "L107",
+      "id": "courses_service_fetchreviewprogressforcourses",
+      "community": 1,
+      "norm_label": "fetchreviewprogressforcourses()"
     },
     {
       "label": "createCourse()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L91",
+      "source_location": "L149",
       "id": "courses_service_createcourse",
-      "community": 6,
+      "community": 8,
       "norm_label": "createcourse()"
     },
     {
       "label": "assignUserToCourse()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L133",
+      "source_location": "L191",
       "id": "courses_service_assignusertocourse",
-      "community": 6,
+      "community": 8,
       "norm_label": "assignusertocourse()"
     },
     {
       "label": "transitionCourseStatus()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L173",
+      "source_location": "L231",
       "id": "courses_service_transitioncoursestatus",
-      "community": 6,
+      "community": 8,
       "norm_label": "transitioncoursestatus()"
     },
     {
       "label": "assertCanActOnCourse()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L231",
+      "source_location": "L289",
       "id": "courses_service_assertcanactoncourse",
-      "community": 6,
+      "community": 8,
       "norm_label": "assertcanactoncourse()"
     },
     {
       "label": "insertStatusEvent()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L254",
+      "source_location": "L312",
       "id": "courses_service_insertstatusevent",
-      "community": 6,
+      "community": 8,
       "norm_label": "insertstatusevent()"
     },
     {
       "label": "toCourseSummary()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L282",
+      "source_location": "L340",
       "id": "courses_service_tocoursesummary",
-      "community": 6,
+      "community": 8,
       "norm_label": "tocoursesummary()"
     },
     {
       "label": "toCourseStatus()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L297",
+      "source_location": "L355",
       "id": "courses_service_tocoursestatus",
-      "community": 6,
+      "community": 8,
       "norm_label": "tocoursestatus()"
     },
     {
       "label": "cleanOptionalText()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L305",
+      "source_location": "L363",
       "id": "courses_service_cleanoptionaltext",
-      "community": 6,
+      "community": 8,
       "norm_label": "cleanoptionaltext()"
     },
     {
       "label": "getAdminClientOrThrow()",
       "file_type": "code",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L310",
+      "source_location": "L368",
       "id": "courses_service_getadminclientorthrow",
-      "community": 6,
+      "community": 8,
       "norm_label": "getadminclientorthrow()"
     },
     {
@@ -2277,7 +2322,7 @@
       "source_file": "apps/web/lib/services/profiles.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_profiles_ts",
-      "community": 2,
+      "community": 3,
       "norm_label": "profiles.ts"
     },
     {
@@ -2286,7 +2331,7 @@
       "source_file": "apps/web/lib/services/profiles.ts",
       "source_location": "L13",
       "id": "services_profiles_admin",
-      "community": 2,
+      "community": 3,
       "norm_label": "admin()"
     },
     {
@@ -2295,7 +2340,7 @@
       "source_file": "apps/web/lib/services/profiles.ts",
       "source_location": "L19",
       "id": "services_profiles_getprofilesbyrole",
-      "community": 2,
+      "community": 3,
       "norm_label": "getprofilesbyrole()"
     },
     {
@@ -2304,7 +2349,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_courses_ts",
-      "community": 1,
+      "community": 9,
       "norm_label": "courses.ts"
     },
     {
@@ -2313,7 +2358,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L16",
       "id": "services_courses_admin",
-      "community": 1,
+      "community": 9,
       "norm_label": "admin()"
     },
     {
@@ -2322,7 +2367,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L22",
       "id": "services_courses_getassignedcourses",
-      "community": 1,
+      "community": 9,
       "norm_label": "getassignedcourses()"
     },
     {
@@ -2331,7 +2376,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L33",
       "id": "services_courses_getcoursebyid",
-      "community": 1,
+      "community": 2,
       "norm_label": "getcoursebyid()"
     },
     {
@@ -2340,7 +2385,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L48",
       "id": "services_courses_transitioncoursestatus",
-      "community": 1,
+      "community": 9,
       "norm_label": "transitioncoursestatus()"
     },
     {
@@ -2349,7 +2394,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_review_ts",
-      "community": 1,
+      "community": 2,
       "norm_label": "review.ts"
     },
     {
@@ -2358,7 +2403,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L23",
       "id": "services_review_admin",
-      "community": 1,
+      "community": 2,
       "norm_label": "admin()"
     },
     {
@@ -2367,7 +2412,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L29",
       "id": "services_review_getreviewsectionbykey",
-      "community": 1,
+      "community": 2,
       "norm_label": "getreviewsectionbykey()"
     },
     {
@@ -2376,7 +2421,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L40",
       "id": "services_review_getreviewresponse",
-      "community": 1,
+      "community": 2,
       "norm_label": "getreviewresponse()"
     },
     {
@@ -2385,7 +2430,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L55",
       "id": "services_review_getreviewresponses",
-      "community": 1,
+      "community": 2,
       "norm_label": "getreviewresponses()"
     },
     {
@@ -2394,7 +2439,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L65",
       "id": "services_review_upsertreviewresponse",
-      "community": 1,
+      "community": 2,
       "norm_label": "upsertreviewresponse()"
     },
     {
@@ -2403,7 +2448,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L97",
       "id": "services_review_markallresponsessubmitted",
-      "community": 1,
+      "community": 2,
       "norm_label": "markallresponsessubmitted()"
     },
     {
@@ -2415,7 +2460,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 74,
+      "community": 75,
       "norm_label": "coursebridge readme",
       "id": "coursebridge_readme"
     },
@@ -2480,7 +2525,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 75,
+      "community": 76,
       "norm_label": "tech stack doc",
       "id": "tech_stack_doc"
     },
@@ -2493,7 +2538,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 76,
+      "community": 77,
       "norm_label": "coursebridge project brief",
       "id": "project_brief"
     },
@@ -2545,7 +2590,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 77,
+      "community": 78,
       "norm_label": "@coursebridge/config readme",
       "id": "pkg_config_readme"
     },
@@ -2597,7 +2642,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 4,
       "norm_label": "@coursebridge/validation readme",
       "id": "pkg_validation_readme"
     },
@@ -2610,7 +2655,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "role: ta",
       "id": "role_ta"
     },
@@ -2623,7 +2668,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "role: admin",
       "id": "role_admin"
     },
@@ -2636,7 +2681,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "role: communications department",
       "id": "role_communications"
     },
@@ -2649,7 +2694,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "role: instructor",
       "id": "role_instructor"
     },
@@ -2662,7 +2707,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 78,
+      "community": 79,
       "norm_label": "role: super admin",
       "id": "role_super_admin"
     },
@@ -2675,7 +2720,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: course_created",
       "id": "status_course_created"
     },
@@ -2688,7 +2733,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: assigned_to_ta",
       "id": "status_assigned_to_ta"
     },
@@ -2701,7 +2746,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: ta_review_in_progress",
       "id": "status_ta_review_in_progress"
     },
@@ -2714,7 +2759,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: submitted_to_admin",
       "id": "status_submitted_to_admin"
     },
@@ -2727,7 +2772,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: admin_changes_requested",
       "id": "status_admin_changes_requested"
     },
@@ -2740,7 +2785,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: ready_for_instructor",
       "id": "status_ready_for_instructor"
     },
@@ -2753,7 +2798,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: sent_to_instructor",
       "id": "status_sent_to_instructor"
     },
@@ -2766,7 +2811,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: instructor_questions",
       "id": "status_instructor_questions"
     },
@@ -2779,7 +2824,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: instructor_approved",
       "id": "status_instructor_approved"
     },
@@ -2792,7 +2837,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "status: final_approved",
       "id": "status_final_approved"
     },
@@ -2909,7 +2954,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "cantransition() helper",
       "id": "can_transition_fn"
     },
@@ -2987,7 +3032,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 79,
+      "community": 80,
       "norm_label": "supabase realtime",
       "id": "supabase_realtime"
     },
@@ -3052,7 +3097,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 80,
+      "community": 81,
       "norm_label": "tailwind css",
       "id": "tailwind_css"
     },
@@ -3065,7 +3110,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 4,
       "norm_label": "react hook form",
       "id": "react_hook_form"
     },
@@ -3078,7 +3123,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 4,
       "norm_label": "zod",
       "id": "zod"
     },
@@ -3091,7 +3136,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 81,
+      "community": 82,
       "norm_label": "tanstack table",
       "id": "tanstack_table"
     },
@@ -3104,7 +3149,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 82,
+      "community": 83,
       "norm_label": "vercel hosting",
       "id": "vercel_hosting"
     },
@@ -4657,6 +4702,18 @@
       "target": "components_dev_role_switcher_actions_switchdevrole"
     },
     {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/lib/courses/service.ts",
+      "source_location": "L137",
+      "weight": 1.0,
+      "_src": "courses_service_fetchreviewprogressforcourses",
+      "_tgt": "callback_route_get",
+      "source": "callback_route_get",
+      "target": "courses_service_fetchreviewprogressforcourses"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/app/auth/login/actions.ts",
@@ -4835,6 +4892,30 @@
       "_tgt": "services_courses_transitioncoursestatus",
       "source": "admin_actions_assigntatocourseaction",
       "target": "services_courses_transitioncoursestatus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/(dashboard)/courses/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "apps_web_app_dashboard_courses_page_tsx",
+      "_tgt": "courses_page_coursespage",
+      "source": "apps_web_app_dashboard_courses_page_tsx",
+      "target": "courses_page_coursespage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/(dashboard)/courses/page.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "courses_page_coursespage",
+      "_tgt": "courses_service_getaccessiblecourses",
+      "source": "courses_page_coursespage",
+      "target": "courses_service_getaccessiblecourses"
     },
     {
       "relation": "contains",
@@ -5104,7 +5185,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
-      "source_location": "L81",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_src": "apps_web_app_dashboard_courses_id_components_syllabus_gradebook_form_tsx",
+      "_tgt": "components_syllabus_gradebook_form_ontick",
+      "source": "apps_web_app_dashboard_courses_id_components_syllabus_gradebook_form_tsx",
+      "target": "components_syllabus_gradebook_form_ontick",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
+      "source_location": "L94",
       "weight": 1.0,
       "_src": "apps_web_app_dashboard_courses_id_components_syllabus_gradebook_form_tsx",
       "_tgt": "components_syllabus_gradebook_form_handlesave",
@@ -5140,19 +5233,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/metadata-form.tsx",
-      "source_location": "L48",
-      "weight": 1.0,
-      "_src": "apps_web_app_dashboard_courses_id_components_metadata_form_tsx",
-      "_tgt": "components_metadata_form_handletimer",
-      "source": "apps_web_app_dashboard_courses_id_components_metadata_form_tsx",
-      "target": "components_metadata_form_handletimer",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/metadata-form.tsx",
-      "source_location": "L59",
+      "source_location": "L37",
       "weight": 1.0,
       "_src": "apps_web_app_dashboard_courses_id_components_metadata_form_tsx",
       "_tgt": "components_metadata_form_handlesave",
@@ -5188,7 +5269,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
-      "source_location": "L103",
+      "source_location": "L110",
+      "weight": 1.0,
+      "_src": "apps_web_app_dashboard_courses_id_components_review_matrix_form_tsx",
+      "_tgt": "components_review_matrix_form_ontick",
+      "source": "apps_web_app_dashboard_courses_id_components_review_matrix_form_tsx",
+      "target": "components_review_matrix_form_ontick",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
+      "source_location": "L118",
       "weight": 1.0,
       "_src": "apps_web_app_dashboard_courses_id_components_review_matrix_form_tsx",
       "_tgt": "components_review_matrix_form_handlesave",
@@ -5200,7 +5293,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
-      "source_location": "L118",
+      "source_location": "L136",
       "weight": 1.0,
       "_src": "apps_web_app_dashboard_courses_id_components_review_matrix_form_tsx",
       "_tgt": "components_review_matrix_form_addissue",
@@ -5456,6 +5549,18 @@
       "source_location": "L6",
       "weight": 1.0,
       "_src": "ta_page_tadashboardpage",
+      "_tgt": "courses_service_getaccessiblecourses",
+      "source": "ta_page_tadashboardpage",
+      "target": "courses_service_getaccessiblecourses"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/(dashboard)/ta/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "ta_page_tadashboardpage",
       "_tgt": "auth_context_requireprofile",
       "source": "ta_page_tadashboardpage",
       "target": "auth_context_requireprofile"
@@ -5471,18 +5576,6 @@
       "_tgt": "services_courses_getassignedcourses",
       "source": "ta_page_tadashboardpage",
       "target": "services_courses_getassignedcourses"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/app/(dashboard)/ta/_components/ta-dashboard-client.tsx",
-      "source_location": "L15",
-      "weight": 1.0,
-      "_src": "apps_web_app_dashboard_ta_components_ta_dashboard_client_tsx",
-      "_tgt": "components_ta_dashboard_client_tadashboardclient",
-      "source": "apps_web_app_dashboard_ta_components_ta_dashboard_client_tsx",
-      "target": "components_ta_dashboard_client_tadashboardclient",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5921,6 +6014,18 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "apps/web/lib/courses/service.ts",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_src": "courses_service_fetchreviewprogressforcourses",
+      "_tgt": "ui_select_select",
+      "source": "ui_select_select",
+      "target": "courses_service_fetchreviewprogressforcourses"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L102",
       "weight": 1.0,
       "_src": "ui_select_select",
@@ -6166,6 +6271,18 @@
       "_tgt": "shared_stat_card_statcard",
       "source": "apps_web_components_shared_stat_card_tsx",
       "target": "shared_stat_card_statcard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/courses/course-list-view.tsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "apps_web_components_courses_course_list_view_tsx",
+      "_tgt": "courses_course_list_view_clearfilters",
+      "source": "apps_web_components_courses_course_list_view_tsx",
+      "target": "courses_course_list_view_clearfilters",
       "confidence_score": 1.0
     },
     {
@@ -6569,6 +6686,18 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "apps/web/lib/courses/service.ts",
+      "source_location": "L112",
+      "weight": 1.0,
+      "_src": "courses_service_fetchreviewprogressforcourses",
+      "_tgt": "supabase_admin_createadminclient",
+      "source": "supabase_admin_createadminclient",
+      "target": "courses_service_fetchreviewprogressforcourses"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L311",
       "weight": 1.0,
       "_src": "supabase_admin_createadminclient",
@@ -6664,7 +6793,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L63",
+      "source_location": "L76",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_getaccessiblecourses",
@@ -6676,7 +6805,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L91",
+      "source_location": "L107",
+      "weight": 1.0,
+      "_src": "apps_web_lib_courses_service_ts",
+      "_tgt": "courses_service_fetchreviewprogressforcourses",
+      "source": "apps_web_lib_courses_service_ts",
+      "target": "courses_service_fetchreviewprogressforcourses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/courses/service.ts",
+      "source_location": "L149",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_createcourse",
@@ -6688,7 +6829,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L133",
+      "source_location": "L191",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_assignusertocourse",
@@ -6700,7 +6841,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L173",
+      "source_location": "L231",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_transitioncoursestatus",
@@ -6712,7 +6853,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L231",
+      "source_location": "L289",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_assertcanactoncourse",
@@ -6724,7 +6865,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L254",
+      "source_location": "L312",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_insertstatusevent",
@@ -6736,7 +6877,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L282",
+      "source_location": "L340",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_tocoursesummary",
@@ -6748,7 +6889,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L297",
+      "source_location": "L355",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_tocoursestatus",
@@ -6760,7 +6901,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L305",
+      "source_location": "L363",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_cleanoptionaltext",
@@ -6772,7 +6913,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L310",
+      "source_location": "L368",
       "weight": 1.0,
       "_src": "apps_web_lib_courses_service_ts",
       "_tgt": "courses_service_getadminclientorthrow",
@@ -6784,7 +6925,19 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L101",
+      "source_location": "L99",
+      "weight": 1.0,
+      "_src": "courses_service_getaccessiblecourses",
+      "_tgt": "courses_service_fetchreviewprogressforcourses",
+      "source": "courses_service_getaccessiblecourses",
+      "target": "courses_service_fetchreviewprogressforcourses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/courses/service.ts",
+      "source_location": "L159",
       "weight": 1.0,
       "_src": "courses_service_createcourse",
       "_tgt": "courses_service_getadminclientorthrow",
@@ -6796,7 +6949,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L105",
+      "source_location": "L163",
       "weight": 1.0,
       "_src": "courses_service_createcourse",
       "_tgt": "courses_service_cleanoptionaltext",
@@ -6808,7 +6961,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L122",
+      "source_location": "L180",
       "weight": 1.0,
       "_src": "courses_service_createcourse",
       "_tgt": "courses_service_insertstatusevent",
@@ -6820,7 +6973,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L130",
+      "source_location": "L188",
       "weight": 1.0,
       "_src": "courses_service_createcourse",
       "_tgt": "courses_service_tocoursesummary",
@@ -6832,7 +6985,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L141",
+      "source_location": "L199",
       "weight": 1.0,
       "_src": "courses_service_assignusertocourse",
       "_tgt": "courses_service_getadminclientorthrow",
@@ -6844,7 +6997,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L180",
+      "source_location": "L238",
       "weight": 1.0,
       "_src": "courses_service_transitioncoursestatus",
       "_tgt": "courses_service_getadminclientorthrow",
@@ -6856,7 +7009,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L193",
+      "source_location": "L251",
       "weight": 1.0,
       "_src": "courses_service_transitioncoursestatus",
       "_tgt": "courses_service_tocoursestatus",
@@ -6868,7 +7021,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L200",
+      "source_location": "L258",
       "weight": 1.0,
       "_src": "courses_service_transitioncoursestatus",
       "_tgt": "courses_service_assertcanactoncourse",
@@ -6880,7 +7033,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L220",
+      "source_location": "L278",
       "weight": 1.0,
       "_src": "courses_service_transitioncoursestatus",
       "_tgt": "courses_service_insertstatusevent",
@@ -6892,7 +7045,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L225",
+      "source_location": "L283",
       "weight": 1.0,
       "_src": "courses_service_transitioncoursestatus",
       "_tgt": "courses_service_cleanoptionaltext",
@@ -6904,7 +7057,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L228",
+      "source_location": "L286",
       "weight": 1.0,
       "_src": "courses_service_transitioncoursestatus",
       "_tgt": "courses_service_tocoursesummary",
@@ -6916,7 +7069,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L236",
+      "source_location": "L294",
       "weight": 1.0,
       "_src": "courses_service_assertcanactoncourse",
       "_tgt": "courses_service_getadminclientorthrow",
@@ -6928,7 +7081,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L267",
+      "source_location": "L325",
       "weight": 1.0,
       "_src": "courses_service_insertstatusevent",
       "_tgt": "courses_service_getadminclientorthrow",
@@ -6940,7 +7093,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L274",
+      "source_location": "L332",
       "weight": 1.0,
       "_src": "courses_service_insertstatusevent",
       "_tgt": "courses_service_cleanoptionaltext",
@@ -6952,7 +7105,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/lib/courses/service.ts",
-      "source_location": "L290",
+      "source_location": "L348",
       "weight": 1.0,
       "_src": "courses_service_tocoursesummary",
       "_tgt": "courses_service_tocoursestatus",

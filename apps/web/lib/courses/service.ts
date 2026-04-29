@@ -128,13 +128,19 @@ async function fetchReviewProgressForCourses(
     ])
   );
 
-  for (const row of (data ?? []) as { course_id: string; status: "draft" | "submitted"; response_data: Record<string, unknown>; review_sections: { key: string } }[]) {
+  for (const row of (data ?? []) as {
+    course_id: string;
+    status: "draft" | "submitted";
+    response_data: Record<string, unknown>;
+    review_sections: { key: string }[];
+  }[]) {
     const progress = map.get(row.course_id);
     if (!progress) continue;
     const section: SectionProgress = { exists: true, status: row.status, responseData: row.response_data };
-    if (row.review_sections.key === "course_metadata") progress.courseMetadata = section;
-    if (row.review_sections.key === "review_matrix") progress.reviewMatrix = section;
-    if (row.review_sections.key === "syllabus_review") progress.syllabusReview = section;
+    const key = row.review_sections[0]?.key;
+    if (key === "course_metadata") progress.courseMetadata = section;
+    if (key === "review_matrix") progress.reviewMatrix = section;
+    if (key === "syllabus_review") progress.syllabusReview = section;
   }
 
   return map;
