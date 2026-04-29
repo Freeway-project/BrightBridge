@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { saveDraft } from "@/lib/workspace/actions"
@@ -29,8 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ReviewTimer } from "./review-timer"
-
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
@@ -72,11 +70,26 @@ export function SyllabusGradebookForm({
 }: SyllabusGradebookFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
-  const timerStorageKey = `coursebridge:${courseId}:syllabus-gradebook-timer`
+  const timerStorageKey = `coursebridge:${courseId}:timer:syllabus-gradebook`
+  const elapsedRef = useRef(defaultValues.time_spent_seconds ?? 0)
   const form = useForm<SyllabusGradebookFormValues>({
     resolver: zodResolver(syllabusGradebookSchema),
     defaultValues,
   })
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(timerStorageKey)
+    if (stored) {
+      const parsed = Number.parseInt(stored, 10)
+      if (Number.isFinite(parsed)) elapsedRef.current = parsed
+    }
+    function onTick(e: Event) {
+      const { storageKey, elapsed } = (e as CustomEvent<{ storageKey: string; elapsed: number }>).detail
+      if (storageKey === timerStorageKey) elapsedRef.current = elapsed
+    }
+    window.addEventListener("coursebridge:review-timer", onTick)
+    return () => window.removeEventListener("coursebridge:review-timer", onTick)
+  }, [timerStorageKey])
 
   async function handleSave() {
     const valid = await form.trigger()
@@ -85,7 +98,10 @@ export function SyllabusGradebookForm({
     setStatus("saving")
     startTransition(async () => {
       try {
-        await saveDraft(courseId, "syllabus_review", form.getValues())
+        await saveDraft(courseId, "syllabus_review", {
+          ...form.getValues(),
+          time_spent_seconds: elapsedRef.current,
+        })
         setStatus("saved")
       } catch {
         setStatus("error")
@@ -96,12 +112,9 @@ export function SyllabusGradebookForm({
   return (
     <Card>
       <CardHeader>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
-            <SaveState isPending={isPending} status={status} />
-          </div>
-          <ReviewTimer label="Syllabus & gradebook time" storageKey={timerStorageKey} />
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
+          <SaveState isPending={isPending} status={status} />
         </div>
       </CardHeader>
       <CardContent>
@@ -281,6 +294,7 @@ export function buildSyllabusGradebookDefaults(
       notes: savedGradebook.get(item.id)?.notes ?? "",
       direct_link: savedGradebook.get(item.id)?.direct_link ?? "",
     })),
+    time_spent_seconds: saved?.time_spent_seconds ?? 0,
   }
 }
 

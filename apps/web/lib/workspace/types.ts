@@ -25,6 +25,7 @@ export type ReviewMatrixItem = {
 
 export type ReviewMatrixResponseData = {
   items: ReviewMatrixItem[];
+  time_spent_seconds: number;
 };
 
 // ── Step 3: syllabus_review + gradebook_review ───────────────────────────────
@@ -50,6 +51,7 @@ export type SyllabusGradebookResponseData = {
   instructor_email: string;
   syllabus_items: SyllabusItem[];
   gradebook_items: GradebookItem[];
+  time_spent_seconds: number;
 };
 
 // ── Step 4: issue_log (stored under general_notes section key) ───────────────

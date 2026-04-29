@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { CourseSummary } from "@/lib/courses/service";
 import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Search } from "lucide-react";
 import { assignTaToCourseAction, type AssignTaState } from "../actions";
 
 type AdminAssignmentPanelProps = {
@@ -26,7 +28,16 @@ const initialState: AssignTaState = {
 
 export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps) {
   const [state, formAction, pending] = useActionState(assignTaToCourseAction, initialState);
+  const [courseSearch, setCourseSearch] = useState("");
   const canAssign = courses.length > 0 && tas.length > 0;
+
+  const filteredCourses = courses.filter((course) => {
+    const term = courseSearch.toLowerCase();
+    return (
+      course.title.toLowerCase().includes(term) ||
+      course.sourceCourseId?.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <Card>
@@ -42,11 +53,27 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                 <SelectValue placeholder={courses.length ? "Select course" : "No courses available"} />
               </SelectTrigger>
               <SelectContent>
-                {courses.map((course) => (
-                  <SelectItem key={course.id} value={course.id}>
-                    {course.title}
-                  </SelectItem>
-                ))}
+                <div className="p-2 border-b sticky top-0 bg-popover z-10">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search courses..."
+                      value={courseSearch}
+                      onChange={(e) => setCourseSearch(e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      className="h-8 pl-7 text-xs"
+                    />
+                  </div>
+                </div>
+                {filteredCourses.length === 0 ? (
+                  <p className="p-2 text-xs text-center text-muted-foreground">No courses found</p>
+                ) : (
+                  filteredCourses.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.title} {course.sourceCourseId ? `(${course.sourceCourseId})` : ""}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </label>

@@ -26,6 +26,7 @@ const reviewMatrixItemSchema = z.object({
 
 export const reviewMatrixSchema = z.object({
   items: z.array(reviewMatrixItemSchema),
+  time_spent_seconds: z.number().int().nonnegative(),
 }).superRefine((data, ctx) => {
   data.items.forEach((item, index) => {
     if (
@@ -66,6 +67,7 @@ export const syllabusGradebookSchema = z.object({
   instructor_email: z.string(),
   syllabus_items: z.array(syllabusItemSchema),
   gradebook_items: z.array(gradebookItemSchema),
+  time_spent_seconds: z.number().int().nonnegative(),
 }).superRefine((data, ctx) => {
   data.gradebook_items.forEach((item, index) => {
     if (

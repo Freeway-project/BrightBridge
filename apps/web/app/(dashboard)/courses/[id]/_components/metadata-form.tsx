@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import type { CourseRow } from "@/lib/services/courses"
@@ -17,7 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ReviewTimer } from "./review-timer"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -30,31 +29,10 @@ const TERMS = ["Fall 2025", "Winter 2026", "Spring 2026", "Summer 2026"]
 export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
-  const timerStorageKey = `coursebridge:${course.id}:review-timer`
   const form = useForm<MetadataFormValues>({
     resolver: zodResolver(metadataSchema),
     defaultValues,
   })
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(timerStorageKey)
-    if (stored) {
-      const parsed = Number.parseInt(stored, 10)
-      if (Number.isFinite(parsed)) {
-        form.setValue("time_required_seconds", parsed)
-      }
-    }
-
-    function handleTimer(event: Event) {
-      const detail = (event as CustomEvent<{ storageKey: string; elapsed: number }>).detail
-      if (detail?.storageKey === timerStorageKey) {
-        form.setValue("time_required_seconds", detail.elapsed)
-      }
-    }
-
-    window.addEventListener("coursebridge:review-timer", handleTimer)
-    return () => window.removeEventListener("coursebridge:review-timer", handleTimer)
-  }, [form, timerStorageKey])
 
   async function handleSave() {
     const valid = await form.trigger()
@@ -76,12 +54,9 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   return (
     <Card className="max-w-3xl">
       <CardHeader>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-base">Course Metadata</CardTitle>
-            <SaveState isPending={isPending} status={status} />
-          </div>
-          <ReviewTimer label="Metadata time" storageKey={timerStorageKey} />
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-base">Course Metadata</CardTitle>
+          <SaveState isPending={isPending} status={status} />
         </div>
       </CardHeader>
       <CardContent>
@@ -154,8 +129,6 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
             <Textarea rows={6} {...form.register("migration_notes")} />
             <FieldError message={form.formState.errors.migration_notes?.message} />
           </label>
-
-          <input type="hidden" {...form.register("time_required_seconds", { valueAsNumber: true })} />
 
           <div className="flex justify-end">
             <Button disabled={isPending} onClick={() => void handleSave()} type="button">
