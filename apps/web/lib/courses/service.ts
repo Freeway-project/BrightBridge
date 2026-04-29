@@ -104,7 +104,7 @@ export async function getAccessibleCourses() {
   };
 }
 
-async function fetchReviewProgressForCourses(
+export async function fetchReviewProgressForCourses(
   courseIds: string[]
 ): Promise<Map<string, ReviewProgress>> {
   if (courseIds.length === 0) return new Map();
