@@ -30,8 +30,6 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
     0,
     STEPS.findIndex((step) => pathname.endsWith(`/${step.href}`)),
   )
-  const activeHref = STEPS[activeIndex]?.href ?? ""
-  const showTimer = activeHref !== "submit"
 
   return (
     <aside className="hidden w-64 shrink-0 border-r border-border bg-sidebar/40 p-5 lg:block">
@@ -88,12 +86,10 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
           })}
         </nav>
 
-        {showTimer && (
-          <ReviewTimer 
-            storageKey={`coursebridge:${courseId}:timer:active`} 
-            label="Review Timer"
-          />
-        )}
+        <ReviewTimer
+          storageKey={`coursebridge:${courseId}:timer:overall`}
+          label="Overall Review Time"
+        />
       </div>
     </aside>
   )

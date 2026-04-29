@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
@@ -29,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ReviewTimer, useStoredTimerValue } from "./review-timer"
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
@@ -70,8 +72,13 @@ export function SyllabusGradebookForm({
 }: SyllabusGradebookFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
   const timerStorageKey = `coursebridge:${courseId}:timer:syllabus-gradebook`
   const elapsedRef = useRef(defaultValues.time_spent_seconds ?? 0)
+  const overallElapsed = useStoredTimerValue(
+    `coursebridge:${courseId}:timer:overall`,
+    defaultValues.overall_time_spent_seconds ?? 0,
+  )
   const form = useForm<SyllabusGradebookFormValues>({
     resolver: zodResolver(syllabusGradebookSchema),
     defaultValues,
@@ -91,7 +98,7 @@ export function SyllabusGradebookForm({
     return () => window.removeEventListener("coursebridge:review-timer", onTick)
   }, [timerStorageKey])
 
-  async function handleSave() {
+  async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
 
@@ -101,8 +108,12 @@ export function SyllabusGradebookForm({
         await saveDraft(courseId, "syllabus_review", {
           ...form.getValues(),
           time_spent_seconds: elapsedRef.current,
+          overall_time_spent_seconds: overallElapsed,
         })
         setStatus("saved")
+        if (advance) {
+          router.push(`/courses/${courseId}/issue-log`)
+        }
       } catch {
         setStatus("error")
       }
@@ -113,7 +124,10 @@ export function SyllabusGradebookForm({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
+          <div className="space-y-2">
+            <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
+            <ReviewTimer storageKey={timerStorageKey} label="Syllabus & Gradebook Time" compact />
+          </div>
           <SaveState isPending={isPending} status={status} />
         </div>
       </CardHeader>
@@ -263,7 +277,7 @@ export function SyllabusGradebookForm({
           </section>
 
           <div className="flex justify-end">
-            <Button disabled={isPending} onClick={() => void handleSave()} type="button">
+            <Button disabled={isPending} onClick={() => void handleSave(true)} type="button">
               Save draft
             </Button>
           </div>
@@ -295,6 +309,7 @@ export function buildSyllabusGradebookDefaults(
       direct_link: savedGradebook.get(item.id)?.direct_link ?? "",
     })),
     time_spent_seconds: saved?.time_spent_seconds ?? 0,
+    overall_time_spent_seconds: saved?.overall_time_spent_seconds ?? 0,
   }
 }
 

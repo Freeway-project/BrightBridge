@@ -40,6 +40,7 @@ export default async function ReviewMatrixPage({ params }: Props) {
       direct_link: itemMap[item_id]?.direct_link ?? "",
     })),
     time_spent_seconds: saved.time_spent_seconds ?? 0,
+    overall_time_spent_seconds: saved.overall_time_spent_seconds ?? 0,
   };
 
   const initialIssues = ((issueResponse?.response_data as Partial<IssueLogResponseData> | null)?.issues ?? []);

@@ -1,19 +1,25 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Play, Pause } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Clock3 } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+export const REVIEW_TIMER_EVENT = "coursebridge:review-timer"
 
 type ReviewTimerProps = {
   storageKey: string
   label?: string
   onTick?: (elapsed: number) => void
+  compact?: boolean
 }
 
-export function ReviewTimer({ storageKey, label = "Review time", onTick }: ReviewTimerProps) {
+export function ReviewTimer({
+  storageKey,
+  label = "Review time",
+  onTick,
+  compact = false,
+}: ReviewTimerProps) {
   const [elapsed, setElapsed] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
 
   useEffect(() => {
     const stored = window.localStorage.getItem(storageKey)
@@ -27,14 +33,12 @@ export function ReviewTimer({ storageKey, label = "Review time", onTick }: Revie
   }, [onTick, storageKey])
 
   useEffect(() => {
-    if (isPaused) return
-
     const id = window.setInterval(() => {
       setElapsed((current) => {
         const next = current + 1
         window.localStorage.setItem(storageKey, String(next))
         window.dispatchEvent(
-          new CustomEvent("coursebridge:review-timer", {
+          new CustomEvent(REVIEW_TIMER_EVENT, {
             detail: { storageKey, elapsed: next },
           }),
         )
@@ -44,7 +48,7 @@ export function ReviewTimer({ storageKey, label = "Review time", onTick }: Revie
     }, 1000)
 
     return () => window.clearInterval(id)
-  }, [onTick, storageKey, isPaused])
+  }, [onTick, storageKey])
 
   const hours = Math.floor(elapsed / 3600)
   const minutes = Math.floor((elapsed % 3600) / 60)
@@ -53,6 +57,25 @@ export function ReviewTimer({ storageKey, label = "Review time", onTick }: Revie
     .map((value) => value.toString().padStart(2, "0"))
     .join(":")
 
+  if (compact) {
+    return (
+      <div className="rounded-lg border border-border/70 bg-card/80 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <Clock3 className="size-3.5 text-primary" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+              {label}
+            </p>
+            <p className="font-mono text-sm font-semibold tabular-nums text-foreground">
+              {displayTime}
+            </p>
+          </div>
+          <div className="ml-auto size-2 rounded-full bg-primary animate-pulse" />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="space-y-3">
@@ -60,40 +83,49 @@ export function ReviewTimer({ storageKey, label = "Review time", onTick }: Revie
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
             {label}
           </p>
-          <div className={cn(
-            "size-2 rounded-full animate-pulse",
-            isPaused ? "bg-orange-500" : "bg-primary"
-          )} />
+          <div className={cn("size-2 rounded-full animate-pulse bg-primary")} />
         </div>
-        
+
         <div className="flex items-baseline gap-1">
           <p className="font-mono text-3xl font-bold tabular-nums text-foreground tracking-tighter">
             {displayTime}
           </p>
           <p className="text-[10px] font-medium text-muted-foreground uppercase">
-            {isPaused ? "Paused" : "Running"}
+            Running
           </p>
         </div>
-
-        <Button 
-          variant={isPaused ? "default" : "outline"} 
-          size="sm" 
-          className="w-full h-8 text-xs font-bold gap-2"
-          onClick={() => setIsPaused(!isPaused)}
-        >
-          {isPaused ? (
-            <>
-              <Play className="size-3 fill-current" />
-              Resume Timer
-            </>
-          ) : (
-            <>
-              <Pause className="size-3 fill-current" />
-              Pause Review
-            </>
-          )}
-        </Button>
       </div>
     </div>
   )
+}
+
+export function useStoredTimerValue(storageKey: string, initialValue = 0) {
+  const [elapsed, setElapsed] = useState(initialValue)
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(storageKey)
+    if (stored) {
+      const parsed = Number.parseInt(stored, 10)
+      if (Number.isFinite(parsed)) {
+        setElapsed(parsed)
+        return
+      }
+    }
+
+    setElapsed(initialValue)
+  }, [initialValue, storageKey])
+
+  useEffect(() => {
+    function onTick(event: Event) {
+      const detail = (event as CustomEvent<{ storageKey: string; elapsed: number }>).detail
+      if (detail.storageKey === storageKey) {
+        setElapsed(detail.elapsed)
+      }
+    }
+
+    window.addEventListener(REVIEW_TIMER_EVENT, onTick)
+    return () => window.removeEventListener(REVIEW_TIMER_EVENT, onTick)
+  }, [storageKey])
+
+  return elapsed
 }
