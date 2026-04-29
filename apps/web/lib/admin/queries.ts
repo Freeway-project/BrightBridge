@@ -14,8 +14,10 @@ function getAdmin() {
 export type AdminCourseRow = {
   id: string
   sourceCourseId: string | null
+  targetCourseId: string | null
   title: string
   term: string | null
+  department: string | null
   status: CourseStatus
   updatedAt: string
   ta: { id: string; name: string | null; email: string } | null
@@ -28,7 +30,7 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
   const { data, error } = await admin
     .from("courses")
     .select(`
-      id, source_course_id, title, term, status, updated_at,
+      id, source_course_id, target_course_id, title, term, department, status, updated_at,
       course_assignments (
         role,
         profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -45,8 +47,10 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
     return {
       id: row.id,
       sourceCourseId: row.source_course_id,
+      targetCourseId: row.target_course_id,
       title: row.title,
       term: row.term,
+      department: row.department,
       status: row.status as CourseStatus,
       updatedAt: row.updated_at,
       ta: taAssignment?.profiles
@@ -75,7 +79,7 @@ export async function getAdminCourseDetail(courseId: string): Promise<AdminCours
   const { data, error } = await admin
     .from("courses")
     .select(`
-      id, source_course_id, title, term, status, updated_at,
+      id, source_course_id, target_course_id, title, term, department, status, updated_at,
       course_assignments (
         role,
         profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -95,8 +99,10 @@ export async function getAdminCourseDetail(courseId: string): Promise<AdminCours
   const course: AdminCourseRow = {
     id: row.id,
     sourceCourseId: row.source_course_id,
+    targetCourseId: row.target_course_id,
     title: row.title,
     term: row.term,
+    department: row.department,
     status: row.status as CourseStatus,
     updatedAt: row.updated_at,
     ta: taAssignment?.profiles
