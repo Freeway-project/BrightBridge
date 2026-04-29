@@ -11,7 +11,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   if (context.kind === "missing_profile") {
-    redirect("/dashboard")
+    redirect("/auth/login")
   }
 
   const role = context.profile.role

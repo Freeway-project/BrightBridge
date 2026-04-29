@@ -14,6 +14,18 @@ import { createClient } from "@/lib/supabase/server";
 const adminRoles: readonly Role[] = ["admin", "super_admin"];
 const roleWideCourseRoles: readonly Role[] = ["admin", "communications", "super_admin"];
 
+export type SectionProgress = {
+  exists: boolean;
+  status: "draft" | "submitted" | null;
+  responseData: Record<string, unknown> | null;
+};
+
+export type ReviewProgress = {
+  courseMetadata: SectionProgress;
+  reviewMatrix: SectionProgress;
+  syllabusReview: SectionProgress;
+};
+
 export type CourseSummary = {
   id: string;
   sourceCourseId: string | null;
@@ -25,6 +37,7 @@ export type CourseSummary = {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  reviewProgress?: ReviewProgress;
 };
 
 export type CreateCourseInput = {
@@ -82,10 +95,49 @@ export async function getAccessibleCourses() {
     throw new Error(`Could not load accessible courses: ${error.message}`);
   }
 
+  const summaries = (data ?? []).map(toCourseSummary);
+  const progressMap = await fetchReviewProgressForCourses(summaries.map((c) => c.id));
+
   return {
     context,
-    courses: (data ?? []).map(toCourseSummary)
+    courses: summaries.map((c) => ({ ...c, reviewProgress: progressMap.get(c.id) })),
   };
+}
+
+async function fetchReviewProgressForCourses(
+  courseIds: string[]
+): Promise<Map<string, ReviewProgress>> {
+  if (courseIds.length === 0) return new Map();
+
+  const admin = createAdminClient();
+  if (!admin) return new Map();
+
+  const { data, error } = await admin
+    .from("review_responses")
+    .select("course_id, status, response_data, review_sections!inner(key)")
+    .in("course_id", courseIds)
+    .in("review_sections.key", ["course_metadata", "review_matrix", "syllabus_review"]);
+
+  if (error) return new Map();
+
+  const defaultSection = (): SectionProgress => ({ exists: false, status: null, responseData: null });
+  const map = new Map<string, ReviewProgress>(
+    courseIds.map((id) => [
+      id,
+      { courseMetadata: defaultSection(), reviewMatrix: defaultSection(), syllabusReview: defaultSection() },
+    ])
+  );
+
+  for (const row of (data ?? []) as { course_id: string; status: "draft" | "submitted"; response_data: Record<string, unknown>; review_sections: { key: string } }[]) {
+    const progress = map.get(row.course_id);
+    if (!progress) continue;
+    const section: SectionProgress = { exists: true, status: row.status, responseData: row.response_data };
+    if (row.review_sections.key === "course_metadata") progress.courseMetadata = section;
+    if (row.review_sections.key === "review_matrix") progress.reviewMatrix = section;
+    if (row.review_sections.key === "syllabus_review") progress.syllabusReview = section;
+  }
+
+  return map;
 }
 
 export async function createCourse(input: CreateCourseInput) {

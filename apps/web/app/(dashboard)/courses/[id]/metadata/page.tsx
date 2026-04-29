@@ -1,25 +1,44 @@
-import { Topbar } from "@/components/layout/topbar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Topbar } from "@/components/layout/topbar";
+import { requireProfile } from "@/lib/auth/context";
+import { getCourseById } from "@/lib/services/courses";
+import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review";
+import { notFound } from "next/navigation";
+import { MetadataForm } from "../_components/metadata-form";
+import type { MetadataFormValues } from "@/lib/workspace/schemas";
 
 interface Props {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
 export default async function MetadataPage({ params }: Props) {
-  const { id } = await params
+  const { id } = await params;
+  const ctx = await requireProfile();
+  const course = await getCourseById(id, ctx.userId);
+  if (!course) notFound();
+
+  const section = await getReviewSectionByKey("course_metadata");
+  const existing = section ? await getReviewResponse(id, section.id) : null;
+
+  const defaultValues: MetadataFormValues = {
+    term: "",
+    section_numbers: [],
+    brightspace_url: "",
+    moodle_url: "",
+    migration_notes: "",
+    time_required_seconds: 0,
+    ...((existing?.response_data ?? {}) as Partial<MetadataFormValues>),
+  };
+
   return (
     <>
       <Topbar title="Course Workspace" subtitle="Step 1 of 5 — Metadata" />
       <main className="flex-1 overflow-y-auto p-6">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-base">Metadata — {id}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Form coming soon.</p>
-          </CardContent>
-        </Card>
+        <MetadataForm
+          course={course}
+          reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
+          defaultValues={defaultValues}
+        />
       </main>
     </>
-  )
+  );
 }
