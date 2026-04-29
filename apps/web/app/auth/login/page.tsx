@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getRoleLabel, ROLES } from "@coursebridge/workflow";
 import { signInAsDevRole, signInWithEmail } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -79,9 +78,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           ) : null}
 
-          <Button asChild className="mt-4 px-0" variant="link">
-            <Link href="/">Back to project overview</Link>
-          </Button>
         </CardContent>
       </Card>
     </main>
