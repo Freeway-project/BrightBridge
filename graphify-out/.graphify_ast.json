@@ -1,0 +1,1727 @@
+{
+  "nodes": [
+    {
+      "id": "scripts_seed_dev_mjs",
+      "label": "seed-dev.mjs",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_seed_dev_ensureauthuser",
+      "label": "ensureAuthUser()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L85"
+    },
+    {
+      "id": "scripts_seed_dev_finduserbyemail",
+      "label": "findUserByEmail()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L109"
+    },
+    {
+      "id": "scripts_seed_dev_upsertprofiles",
+      "label": "upsertProfiles()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L138"
+    },
+    {
+      "id": "scripts_seed_dev_seedcourses",
+      "label": "seedCourses()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L150"
+    },
+    {
+      "id": "scripts_seed_dev_upsertcourse",
+      "label": "upsertCourse()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L206"
+    },
+    {
+      "id": "scripts_seed_dev_upsertassignments",
+      "label": "upsertAssignments()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L261"
+    },
+    {
+      "id": "scripts_seed_dev_ensurestatusevent",
+      "label": "ensureStatusEvent()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L278"
+    },
+    {
+      "id": "scripts_seed_dev_seedreviewresponses",
+      "label": "seedReviewResponses()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L308"
+    },
+    {
+      "id": "scripts_seed_dev_loadenvfiles",
+      "label": "loadEnvFiles()",
+      "file_type": "code",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L342"
+    },
+    {
+      "id": "scripts_apply_migration_mjs",
+      "label": "apply-migration.mjs",
+      "file_type": "code",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_apply_migration_loadenvfiles",
+      "label": "loadEnvFiles()",
+      "file_type": "code",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L47"
+    },
+    {
+      "id": "scripts_apply_migration_parsedatabaseurl",
+      "label": "parseDatabaseUrl()",
+      "file_type": "code",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L78"
+    },
+    {
+      "id": "scripts_apply_migration_parsesupabasedatabaseurl",
+      "label": "parseSupabaseDatabaseUrl()",
+      "file_type": "code",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L89"
+    },
+    {
+      "id": "packages_ui_src_index_tsx",
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_index_badge",
+      "label": "Badge()",
+      "file_type": "code",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L3"
+    },
+    {
+      "id": "packages_config_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/config/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_auth_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/auth/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_storage_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/storage/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_workflow_src_statuses_ts",
+      "label": "statuses.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_statuses_getcoursestatuslabel",
+      "label": "getCourseStatusLabel()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_statuses_isfinalstatus",
+      "label": "isFinalStatus()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_statuses_isinstructorvisiblestatus",
+      "label": "isInstructorVisibleStatus()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "packages_workflow_src_transitions_ts",
+      "label": "transitions.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_transitions_cantransition",
+      "label": "canTransition()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L79"
+    },
+    {
+      "id": "src_transitions_getallowedtransitions",
+      "label": "getAllowedTransitions()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L88"
+    },
+    {
+      "id": "src_transitions_assertcantransition",
+      "label": "assertCanTransition()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L94"
+    },
+    {
+      "id": "src_transitions_transitionallowsrole",
+      "label": "transitionAllowsRole()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L102"
+    },
+    {
+      "id": "packages_workflow_src_roles_ts",
+      "label": "roles.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/roles.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_roles_getrolelabel",
+      "label": "getRoleLabel()",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/roles.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "packages_workflow_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/workflow/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "packages_validation_src_index_ts",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/validation/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_postcss_config_mjs",
+      "label": "postcss.config.mjs",
+      "file_type": "code",
+      "source_file": "apps/web/postcss.config.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_next_env_d_ts",
+      "label": "next-env.d.ts",
+      "file_type": "code",
+      "source_file": "apps/web/next-env.d.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_proxy_ts",
+      "label": "proxy.ts",
+      "file_type": "code",
+      "source_file": "apps/web/proxy.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_proxy_proxy",
+      "label": "proxy()",
+      "file_type": "code",
+      "source_file": "apps/web/proxy.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "apps_web_next_config_ts",
+      "label": "next.config.ts",
+      "file_type": "code",
+      "source_file": "apps/web/next.config.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_app_layout_tsx",
+      "label": "layout.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_layout_rootlayout",
+      "label": "RootLayout()",
+      "file_type": "code",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "apps_web_app_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_app_auth_check_email_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/check-email/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "check_email_page_checkemailpage",
+      "label": "CheckEmailPage()",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/check-email/page.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "apps_web_app_auth_callback_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/callback/route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "callback_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/callback/route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "apps_web_app_auth_login_actions_ts",
+      "label": "actions.ts",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "login_actions_signinwithemail",
+      "label": "signInWithEmail()",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "login_actions_signinasdevrole",
+      "label": "signInAsDevRole()",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L45"
+    },
+    {
+      "id": "apps_web_app_auth_login_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/auth/login/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "apps_web_app_dashboard_actions_ts",
+      "label": "actions.ts",
+      "file_type": "code",
+      "source_file": "apps/web/app/dashboard/actions.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_actions_signout",
+      "label": "signOut()",
+      "file_type": "code",
+      "source_file": "apps/web/app/dashboard/actions.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "apps_web_app_dashboard_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "dashboard_page_dashboardpage",
+      "label": "DashboardPage()",
+      "file_type": "code",
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "apps_web_app_courses_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/app/courses/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "courses_page_coursespage",
+      "label": "CoursesPage()",
+      "file_type": "code",
+      "source_file": "apps/web/app/courses/page.tsx",
+      "source_location": "L3"
+    },
+    {
+      "id": "apps_web_components_dev_role_switcher_tsx",
+      "label": "dev-role-switcher.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_dev_role_switcher_devroleswitcher",
+      "label": "DevRoleSwitcher()",
+      "file_type": "code",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "apps_web_components_dev_role_switcher_actions_ts",
+      "label": "dev-role-switcher-actions.ts",
+      "file_type": "code",
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_dev_role_switcher_actions_switchdevrole",
+      "label": "switchDevRole()",
+      "file_type": "code",
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "apps_web_components_ui_card_tsx",
+      "label": "card.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "ui_card_cn",
+      "label": "cn()",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "ui_card_cardaction",
+      "label": "CardAction()",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L59"
+    },
+    {
+      "id": "apps_web_components_ui_button_tsx",
+      "label": "button.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "ui_button_cn",
+      "label": "cn()",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L61"
+    },
+    {
+      "id": "apps_web_components_ui_input_tsx",
+      "label": "input.tsx",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/input.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "ui_input_input",
+      "label": "Input()",
+      "file_type": "code",
+      "source_file": "apps/web/components/ui/input.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "apps_web_lib_utils_ts",
+      "label": "utils.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_utils_cn",
+      "label": "cn()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "apps_web_lib_supabase_middleware_ts",
+      "label": "middleware.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "supabase_middleware_updatesession",
+      "label": "updateSession()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "apps_web_lib_supabase_admin_ts",
+      "label": "admin.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/admin.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "supabase_admin_createadminclient",
+      "label": "createAdminClient()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/admin.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "apps_web_lib_supabase_client_ts",
+      "label": "client.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "supabase_client_createclient",
+      "label": "createClient()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "apps_web_lib_supabase_server_ts",
+      "label": "server.ts",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "supabase_server_createclient",
+      "label": "createClient()",
+      "file_type": "code",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L8"
+    }
+  ],
+  "edges": [
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "node_fs",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "supabase_js",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_ensureauthuser",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_finduserbyemail",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_upsertprofiles",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L138",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_seedcourses",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_upsertcourse",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L206",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_upsertassignments",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L261",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_ensurestatusevent",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L278",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_seedreviewresponses",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L308",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_mjs",
+      "target": "scripts_seed_dev_loadenvfiles",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L342",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_ensureauthuser",
+      "target": "scripts_seed_dev_finduserbyemail",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_seedcourses",
+      "target": "scripts_seed_dev_upsertcourse",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L199",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_seedcourses",
+      "target": "scripts_seed_dev_upsertassignments",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L200",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_seedcourses",
+      "target": "scripts_seed_dev_ensurestatusevent",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_seedcourses",
+      "target": "scripts_seed_dev_seedreviewresponses",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L202",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_apply_migration_mjs",
+      "target": "node_fs",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_apply_migration_mjs",
+      "target": "node_process",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_apply_migration_mjs",
+      "target": "pg",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_apply_migration_mjs",
+      "target": "scripts_apply_migration_loadenvfiles",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_apply_migration_mjs",
+      "target": "scripts_apply_migration_parsedatabaseurl",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_apply_migration_mjs",
+      "target": "scripts_apply_migration_parsesupabasedatabaseurl",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_apply_migration_parsedatabaseurl",
+      "target": "scripts_apply_migration_parsesupabasedatabaseurl",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/apply-migration.mjs",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_ui_src_index_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_ui_src_index_tsx",
+      "target": "src_index_badge",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/ui/src/index.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_statuses_ts",
+      "target": "src_statuses_getcoursestatuslabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_statuses_ts",
+      "target": "src_statuses_isfinalstatus",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_statuses_ts",
+      "target": "src_statuses_isinstructorvisiblestatus",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/statuses.ts",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "users_harshsaw_github_brightbridge_packages_workflow_src_roles",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "users_harshsaw_github_brightbridge_packages_workflow_src_statuses",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_cantransition",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_getallowedtransitions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_assertcantransition",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_transitions_ts",
+      "target": "src_transitions_transitionallowsrole",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_transitions_assertcantransition",
+      "target": "src_transitions_cantransition",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/transitions.ts",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "packages_workflow_src_roles_ts",
+      "target": "src_roles_getrolelabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/workflow/src/roles.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_next_env_d_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_next_types_routes_d_ts",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/next-env.d.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_proxy_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/proxy.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_proxy_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_middleware",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_proxy_ts",
+      "target": "web_proxy_proxy",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/proxy.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_next_config_ts",
+      "target": "next",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/next.config.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "next",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_app_globals_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "google",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_dev_role_switcher",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_layout_tsx",
+      "target": "app_layout_rootlayout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/layout.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_page_tsx",
+      "target": "workflow",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_page_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_page_tsx",
+      "target": "ui",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/page.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_check_email_page_tsx",
+      "target": "link",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/check-email/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_check_email_page_tsx",
+      "target": "check_email_page_checkemailpage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/check-email/page.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_callback_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/callback/route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_callback_route_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/callback/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_callback_route_ts",
+      "target": "callback_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/callback/route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_actions_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_actions_ts",
+      "target": "navigation",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_actions_ts",
+      "target": "workflow",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_actions_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_actions_ts",
+      "target": "login_actions_signinwithemail",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_actions_ts",
+      "target": "login_actions_signinasdevrole",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_page_tsx",
+      "target": "link",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_page_tsx",
+      "target": "workflow",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_page_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_app_auth_login_actions",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_page_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_page_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/page.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_auth_login_page_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_ui_input",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/auth/login/page.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_actions_ts",
+      "target": "navigation",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/actions.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_actions_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/actions.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_actions_ts",
+      "target": "dashboard_actions_signout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/actions.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_page_tsx",
+      "target": "link",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_page_tsx",
+      "target": "navigation",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_page_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_actions",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_page_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_dashboard_page_tsx",
+      "target": "dashboard_page_dashboardpage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_courses_page_tsx",
+      "target": "link",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/courses/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_app_courses_page_tsx",
+      "target": "courses_page_coursespage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/app/courses/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_tsx",
+      "target": "workflow",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_dev_role_switcher_actions",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_ui_button",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_components_ui_card",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_admin",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_tsx",
+      "target": "components_dev_role_switcher_devroleswitcher",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_actions_ts",
+      "target": "cache",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_actions_ts",
+      "target": "workflow",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_actions_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_admin",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_actions_ts",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_dev_role_switcher_actions_ts",
+      "target": "components_dev_role_switcher_actions_switchdevrole",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_card_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_card_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_card_tsx",
+      "target": "ui_card_cn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_card_tsx",
+      "target": "ui_card_cn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_card_tsx",
+      "target": "ui_card_cn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_card_tsx",
+      "target": "ui_card_cardaction",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/card.tsx",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "class_variance_authority",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "radix_ui",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_button_tsx",
+      "target": "ui_button_cn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/button.tsx",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_input_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/input.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_input_tsx",
+      "target": "users_harshsaw_github_brightbridge_apps_web_lib_utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/input.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_components_ui_input_tsx",
+      "target": "ui_input_input",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/components/ui/input.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_utils_ts",
+      "target": "clsx",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_utils_ts",
+      "target": "tailwind_merge",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_utils_ts",
+      "target": "lib_utils_cn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/utils.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_middleware_ts",
+      "target": "ssr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_middleware_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_middleware_ts",
+      "target": "supabase_middleware_updatesession",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/middleware.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_admin_ts",
+      "target": "supabase_js",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/admin.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_admin_ts",
+      "target": "supabase_admin_createadminclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/admin.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_client_ts",
+      "target": "ssr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_client_ts",
+      "target": "supabase_client_createclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/client.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_server_ts",
+      "target": "ssr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_server_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_lib_supabase_server_ts",
+      "target": "supabase_server_createclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/lib/supabase/server.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_seed_dev_seedcourses",
+      "target": "callback_route_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "scripts/seed-dev.mjs",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "web_proxy_proxy",
+      "target": "supabase_middleware_updatesession",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/proxy.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "callback_route_get",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/auth/callback/route.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "login_actions_signinwithemail",
+      "target": "callback_route_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "login_actions_signinwithemail",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "login_actions_signinasdevrole",
+      "target": "callback_route_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "login_actions_signinasdevrole",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/auth/login/actions.ts",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_actions_signout",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/dashboard/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "dashboard_page_dashboardpage",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/app/dashboard/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "components_dev_role_switcher_devroleswitcher",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "components_dev_role_switcher_devroleswitcher",
+      "target": "supabase_admin_createadminclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/components/dev-role-switcher.tsx",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "components_dev_role_switcher_actions_switchdevrole",
+      "target": "callback_route_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "components_dev_role_switcher_actions_switchdevrole",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "components_dev_role_switcher_actions_switchdevrole",
+      "target": "supabase_admin_createadminclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/components/dev-role-switcher-actions.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "supabase_admin_createadminclient",
+      "target": "supabase_server_createclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/web/lib/supabase/admin.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
