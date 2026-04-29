@@ -1,6 +1,7 @@
 import { Topbar } from "@/components/layout/topbar";
 import { requireProfile } from "@/lib/auth/context";
 import { getCourseById } from "@/lib/services/courses";
+import { getProfilesByRole } from "@/lib/services/profiles";
 import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review";
 import { notFound } from "next/navigation";
 import { SyllabusGradebookForm } from "../_components/syllabus-gradebook-form";
@@ -19,7 +20,10 @@ export default async function SyllabusGradebookPage({ params }: Props) {
   const course = await getCourseById(id, ctx.userId);
   if (!course) notFound();
 
-  const section = await getReviewSectionByKey("syllabus_review");
+  const [section, instructors] = await Promise.all([
+    getReviewSectionByKey("syllabus_review"),
+    getProfilesByRole("instructor"),
+  ]);
   const existing = section ? await getReviewResponse(id, section.id) : null;
   const saved = (existing?.response_data ?? {}) as Partial<SyllabusGradebookFormValues>;
 
@@ -40,7 +44,11 @@ export default async function SyllabusGradebookPage({ params }: Props) {
     <>
       <Topbar title="Course Workspace" subtitle="Step 3 of 5 — Syllabus & Gradebook" />
       <main className="flex-1 overflow-y-auto p-6">
-        <SyllabusGradebookForm courseId={id} defaultValues={defaultValues} />
+        <SyllabusGradebookForm
+          courseId={id}
+          defaultValues={defaultValues}
+          instructors={instructors}
+        />
       </main>
     </>
   );
