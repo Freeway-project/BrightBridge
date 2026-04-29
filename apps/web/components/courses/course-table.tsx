@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/table"
 import { StatusBadge } from "./status-badge"
 import { CourseActionButton } from "./course-action-button"
-import type { MockCourse } from "@/lib/mock/courses"
+import type { CourseRow } from "@/lib/services/courses"
 
 interface CourseTableProps {
-  courses: MockCourse[]
+  courses: CourseRow[]
 }
 
 export function CourseTable({ courses }: CourseTableProps) {
@@ -27,42 +27,28 @@ export function CourseTable({ courses }: CourseTableProps) {
     <Table>
       <TableHeader>
         <TableRow className="border-border hover:bg-transparent">
-          <TableHead className="text-xs font-medium text-muted-foreground w-[100px]">Code</TableHead>
           <TableHead className="text-xs font-medium text-muted-foreground">Title</TableHead>
           <TableHead className="text-xs font-medium text-muted-foreground w-[110px]">Term</TableHead>
-          <TableHead className="text-xs font-medium text-muted-foreground w-[60px]">Sec.</TableHead>
-          <TableHead className="text-xs font-medium text-muted-foreground w-[180px]">Status</TableHead>
+          <TableHead className="text-xs font-medium text-muted-foreground w-[140px]">Department</TableHead>
+          <TableHead className="text-xs font-medium text-muted-foreground w-[190px]">Status</TableHead>
           <TableHead className="text-xs font-medium text-muted-foreground w-[100px]">Assigned</TableHead>
-          <TableHead className="text-xs font-medium text-muted-foreground w-[90px]">Time Spent</TableHead>
-          <TableHead className="text-xs font-medium text-muted-foreground w-[70px] text-center">Issues</TableHead>
           <TableHead className="text-xs font-medium text-muted-foreground w-[120px] text-right">Action</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {courses.map((course) => (
           <TableRow key={course.id} className="border-border">
-            <TableCell className="font-mono text-xs font-medium">{course.code}</TableCell>
-            <TableCell className="text-sm">{course.title}</TableCell>
-            <TableCell className="text-xs text-muted-foreground">{course.term}</TableCell>
-            <TableCell className="text-xs text-muted-foreground">{course.section}</TableCell>
+            <TableCell className="text-sm font-medium">{course.title}</TableCell>
+            <TableCell className="text-xs text-muted-foreground">{course.term ?? "—"}</TableCell>
+            <TableCell className="text-xs text-muted-foreground">{course.department ?? "—"}</TableCell>
             <TableCell>
               <StatusBadge status={course.status} />
             </TableCell>
             <TableCell className="text-xs text-muted-foreground">
-              {new Date(course.assignedDate).toLocaleDateString("en-US", {
+              {new Date(course.created_at).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
               })}
-            </TableCell>
-            <TableCell className="text-xs text-muted-foreground">{course.timeSpent}</TableCell>
-            <TableCell className="text-center">
-              {course.issueCount > 0 ? (
-                <span className="inline-flex size-5 items-center justify-center rounded-full bg-destructive/15 text-[10px] font-semibold text-destructive">
-                  {course.issueCount}
-                </span>
-              ) : (
-                <span className="text-xs text-muted-foreground">—</span>
-              )}
             </TableCell>
             <TableCell className="text-right">
               <CourseActionButton status={course.status} courseId={course.id} />

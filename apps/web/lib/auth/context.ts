@@ -1,7 +1,9 @@
 import "server-only";
 
+import { redirect } from "next/navigation";
 import { ROLES, type Role } from "@coursebridge/workflow";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type AppProfile = {
   id: string;
@@ -25,7 +27,10 @@ export async function getAuthContext(): Promise<AuthContext> {
     return { kind: "anonymous" };
   }
 
-  const { data: profile, error } = await supabase
+  const admin = createAdminClient();
+  if (!admin) throw new Error("Admin client unavailable — check SUPABASE_SERVICE_ROLE_KEY.");
+
+  const { data: profile, error } = await admin
     .from("profiles")
     .select("id,email,full_name,role")
     .eq("id", user.id)
@@ -63,16 +68,18 @@ export async function getAuthContext(): Promise<AuthContext> {
 export async function requireProfile() {
   const context = await getAuthContext();
 
-  if (context.kind !== "profile") {
-    throw new Error("A CourseBridge profile is required for this action.");
-  }
+  if (context.kind === "anonymous") redirect("/auth/login");
+  if (context.kind === "missing_profile") redirect("/auth/login");
 
   return context;
 }
 
-export function requireAnyRole(context: Extract<AuthContext, { kind: "profile" }>, roles: readonly Role[]) {
+export function requireAnyRole(
+  context: Extract<AuthContext, { kind: "profile" }>,
+  roles: readonly Role[],
+) {
   if (!roles.includes(context.profile.role)) {
-    throw new Error(`Role "${context.profile.role}" is not allowed for this action.`);
+    redirect("/dashboard");
   }
 }
 

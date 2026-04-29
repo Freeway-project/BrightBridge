@@ -1,10 +1,10 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { TA_COURSE_ACTIONS } from "@/lib/constants/status"
-import type { CourseStatus } from "@coursebridge/workflow"
+import type { CourseRow } from "@/lib/services/courses"
 
 interface CourseActionButtonProps {
-  status: CourseStatus
+  status: CourseRow["status"]
   courseId: string
 }
 
