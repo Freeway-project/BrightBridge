@@ -5,14 +5,22 @@ import { CourseCard } from "./course-card"
 import { CourseSidebarFilters } from "./course-sidebar-filters"
 import type { CourseSummary } from "@/lib/courses/service"
 import { Button } from "@/components/ui/button"
-import { Plus, Filter, Search as SearchIcon } from "lucide-react"
+import { Plus, Filter, Search as SearchIcon, type LucideIcon } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { StatCard } from "@/components/shared/stat-card"
+
+export interface CourseStat {
+  label: string
+  value: number | string
+  icon?: LucideIcon
+}
 
 interface CourseListViewProps {
   initialCourses: CourseSummary[]
+  stats?: CourseStat[]
 }
 
-export function CourseListView({ initialCourses }: CourseListViewProps) {
+export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("all")
   const [term, setTerm] = useState("all")
@@ -91,7 +99,15 @@ export function CourseListView({ initialCourses }: CourseListViewProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-background p-6">
+        <main className="flex-1 overflow-y-auto bg-background p-6 space-y-6">
+          {stats && stats.length > 0 && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+              {stats.map((stat, i) => (
+                <StatCard key={i} {...stat} />
+              ))}
+            </div>
+          )}
+
           {filteredCourses.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-border rounded-lg text-center p-12">
               <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-4">
