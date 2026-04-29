@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Brightspace Migration — Wireframes</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Patrick+Hand&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="80" fill="#1c1c2e"/>
+  <rect x="15" y="10" width="90" height="60" rx="4" fill="#f7f7fc"/>
+  <rect x="15" y="10" width="22" height="60" fill="#2a2a42"/>
+  <rect x="42" y="18" width="55" height="6" rx="2" fill="#4870ff"/>
+  <rect x="42" y="28" width="40" height="3" rx="1" fill="#d0d0e0"/>
+  <rect x="42" y="34" width="48" height="3" rx="1" fill="#d0d0e0"/>
+  <rect x="42" y="40" width="35" height="3" rx="1" fill="#d0d0e0"/>
+</svg>
+</template>
+<style id="font-override"></style>
+<style id="theme-override"></style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Caveat', cursive; }
+
+.wf { font-family: 'Caveat', cursive; overflow: hidden; background: white; }
+.wf * { font-family: 'Caveat', cursive; }
+
+/* Sidebar */
+.sb { width: 196px; min-width: 196px; background: #1c1c2e; display: flex; flex-direction: column; }
+.sb-logo { padding: 14px 16px; border-bottom: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 2px; }
+.sb-logo-name { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: 0.3px; }
+.sb-logo-role { font-size: 12px; color: #7b7b9e; }
+.sb-nav { flex: 1; padding: 6px 0; }
+.ni { padding: 7px 16px; font-size: 15px; color: #9090b8; display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.ni.a { background: rgba(72,112,255,0.15); color: #7f9fff; border-left: 3px solid #4870ff; padding-left: 13px; }
+.ni-dot { width: 7px; height: 7px; border-radius: 1px; background: currentColor; flex-shrink: 0; opacity: 0.7; }
+.sb-user { padding: 12px 16px; border-top: 1px solid #2e2e48; display: flex; align-items: center; gap: 9px; }
+.sb-avatar { width: 28px; height: 28px; border-radius: 50%; background: #4870ff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+.sb-uname { font-size: 13px; color: #9090b8; }
+
+/* Topbar */
+.topbar { height: 48px; border-bottom: 1px solid #e8e8f0; display: flex; align-items: center; padding: 0 20px; gap: 12px; background: white; flex-shrink: 0; }
+.topbar-title { font-size: 18px; font-weight: 700; color: #111; flex: 1; }
+.tb-badge-area { display: flex; align-items: center; gap: 8px; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.bg-gray { background: #f0f0f4; color: #555; border: 1px solid #d8d8e0; }
+.bg-blue { background: #eef2ff; color: #4059c7; border: 1px solid #c7d2fe; }
+.bg-yellow { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+.bg-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.bg-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.bg-orange { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+.bg-purple { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; padding: 5px 14px; border-radius: 5px; font-family: 'Caveat', cursive; font-size: 14px; font-weight: 700; cursor: pointer; border: 1.5px solid; line-height: 1; white-space: nowrap; }
+.btn-p { background: #4870ff; color: white; border-color: #4870ff; }
+.btn-o { background: white; color: #333; border-color: #ccc; }
+.btn-g { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+.btn-r { background: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
+.btn-sm { padding: 3px 9px; font-size: 13px; }
+
+/* Table */
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th { text-align: left; padding: 7px 10px; background: #f6f6fa; border-bottom: 1.5px solid #e4e4ee; font-size: 12px; color: #777; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.tbl td { padding: 8px 10px; border-bottom: 1px solid #f0f0f6; vertical-align: middle; font-size: 14px; }
+.tbl tr:hover td { background: #fafbff; }
+
+/* Stat cards */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.sc { background: white; border: 1.5px solid #e4e4ee; border-radius: 8px; padding: 14px 16px; }
+.sc-val { font-size: 30px; font-weight: 700; color: #111; line-height: 1; }
+.sc-lbl { font-size: 13px; color: #888; margin-top: 3px; }
+.sc-sub { font-size: 12px; color: #4870ff; margin-top: 2px; }
+
+/* Forms */
+.fl { margin-bottom: 13px; }
+.fl label { display: block; font-size: 12px; color: #666; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+.fi { width: 100%; height: 31px; background: #f7f7fc; border: 1.5px dashed #bbbbd0; border-radius: 4px; padding: 0 9px; font-family: 'Caveat', cursive; font-size: 15px; color: #333; }
+.fi.pre { background: #eef2ff; border-style: solid; border-color: #c7d2fe; color: #4059c7; }
+.fta { width: 100%; height: 60px; background: #f7f7fc; border: 1.5px dashed #bbbbd0; border-radius: 4px; padding: 7px 9px; font-family: 'Caveat', cursive; font-size: 15px; color: #333; resize: none; }
+
+/* Step nav */
+.steps { width: 172px; min-width: 172px; border-right: 1px solid #e8e8f0; background: #fafafa; padding: 12px 0; }
+.step { padding: 9px 12px; display: flex; align-items: flex-start; gap: 9px; cursor: pointer; }
+.step.sa { background: #eef2ff; }
+.sdot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.sdot-done { background: #22c55e; color: white; }
+.sdot-act { background: #4870ff; color: white; }
+.sdot-pend { background: #e0e0ec; color: #888; }
+.slabel { font-size: 14px; font-weight: 700; color: #222; line-height: 1.2; }
+.ssub { font-size: 12px; color: #999; }
+
+/* Info panel */
+.rp { width: 210px; min-width: 210px; border-left: 1px solid #e8e8f0; background: #fafafa; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+.rp-block { }
+.rp-title { font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.rp-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 5px; }
+.rp-key { color: #888; }
+.rp-val { color: #111; font-weight: 600; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1.5px solid #e0e0ee; gap: 0; flex-shrink: 0; }
+.tab { padding: 8px 16px; font-size: 15px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1.5px; color: #666; }
+.tab.ta { border-bottom-color: #4870ff; color: #4870ff; font-weight: 700; }
+
+/* Checklist rows */
+.ck-section { background: #f8f8fc; padding: 7px 12px; font-size: 13px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #eee; }
+.ck-row { display: grid; grid-template-columns: 1fr 110px 1fr 140px 80px; gap: 8px; align-items: center; padding: 7px 10px; border-bottom: 1px solid #f0f0f6; font-size: 14px; }
+.ck-row:hover { background: #fafbff; }
+.ck-dd { height: 28px; background: #f5f5fa; border: 1.5px dashed #bbb; border-radius: 4px; font-family: 'Caveat',cursive; font-size: 13px; padding: 0 6px; }
+
+/* Thread */
+.thread-msg { display: flex; gap: 10px; margin-bottom: 13px; }
+.t-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+.t-bubble { background: #f4f4fa; border-radius: 0 8px 8px 8px; padding: 8px 12px; flex: 1; }
+.t-meta { font-size: 11px; color: #999; margin-bottom: 3px; display: flex; gap: 8px; align-items: center; }
+.t-txt { font-size: 14px; color: #222; }
+.t-tag { background: #eef2ff; color: #4059c7; border-radius: 3px; padding: 1px 5px; font-size: 11px; }
+
+/* Filter bar */
+.fbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.fbar-in { height: 30px; background: white; border: 1.5px solid #ddd; border-radius: 5px; padding: 0 10px; font-family: 'Caveat',cursive; font-size: 14px; }
+
+/* Status flow */
+.flow-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.flow-node { border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; text-align: center; min-width: 120px; }
+.flow-arrow { font-size: 18px; color: #bbb; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel">
+
+/* ─── SHARED COMPONENTS ─── */
+const Sidebar = ({role, active}) => {
+  const navs = {
+    ta: [['My Courses', true],['My Issues'],['Messages']],
+    admin: [['Review Queue', true],['All Courses'],['Issues'],['Reports']],
+    comm: [['Handoff Queue', true],['Instructor Qs'],['Messages']],
+    instructor: [['My Courses', true],['Questions'],['Approvals']],
+  };
+  const roleLabel = {ta:'Teaching Assistant', admin:'Admin Reviewer', comm:'Communication Dept', instructor:'Instructor'};
+  const userNames = {ta:'Alex T.', admin:'Maria S.', comm:'Jordan K.', instructor:'Prof. Chen'};
+  return (
+    <div className="sb">
+      <div className="sb-logo">
+        <div className="sb-logo-name">BrightMigrate</div>
+        <div className="sb-logo-role">{roleLabel[role]}</div>
+      </div>
+      <div className="sb-nav">
+        {(navs[role]||[]).map(([label, act], i) => (
+          <div key={i} className={`ni${act ? ' a' : ''}`}>
+            <div className="ni-dot"></div>{label}
+          </div>
+        ))}
+      </div>
+      <div className="sb-user">
+        <div className="sb-avatar">{userNames[role][0]}</div>
+        <div className="sb-uname">{userNames[role]}</div>
+      </div>
+    </div>
+  );
+};
+
+const Badge = ({label, color='gray'}) => <span className={`badge bg-${color}`}>{label}</span>;
+
+// Canonical status keys → display labels
+const STATUS_LABELS = {
+  course_created:           'Course Created',
+  assigned_to_ta:           'Assigned to TA',
+  ta_review_in_progress:    'TA Review In Progress',
+  submitted_to_admin:       'Submitted to Admin',
+  admin_changes_requested:  'Changes Requested',
+  ready_for_instructor:     'Ready for Instructor',
+  sent_to_instructor:       'Sent to Instructor',
+  instructor_questions:     'Instructor Questions',
+  instructor_approved:      'Instructor Approved',
+  final_approved:           'Final Approved',
+};
+const STATUS_COLORS = {
+  course_created:           'gray',
+  assigned_to_ta:           'gray',
+  ta_review_in_progress:    'blue',
+  submitted_to_admin:       'yellow',
+  admin_changes_requested:  'orange',
+  ready_for_instructor:     'purple',
+  sent_to_instructor:       'purple',
+  instructor_questions:     'orange',
+  instructor_approved:      'green',
+  final_approved:           'green',
+};
+const SBadge = ({status}) => <Badge label={STATUS_LABELS[status]||status} color={STATUS_COLORS[status]||'gray'} />;
+
+const statusMap = {
+  'Not Started': 'gray', 'In Progress': 'blue', 'Submitted': 'yellow',
+  'Fix Requested': 'orange', 'Admin Approved': 'green', 'Sent to Instructor': 'purple',
+  'Instructor Q': 'orange', 'Final Approved': 'green', 'Pass': 'green',
+  'Fix Needed': 'orange', 'Missing': 'red', 'Escalate': 'red', 'N/A': 'gray',
+};
+
+/* ─── SCREEN 1: LOGIN ─── */
+const LoginScreen = () => (
+  <div className="wf" style={{width:900,height:620,background:'#f5f6fc',display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <div style={{display:'flex',gap:0,boxShadow:'0 4px 32px rgba(0,0,0,0.10)',borderRadius:10,overflow:'hidden',width:700,height:420}}>
+      <div style={{width:280,background:'#1c1c2e',padding:'36px 30px',display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
+        <div>
+          <div style={{fontSize:22,fontWeight:700,color:'white',marginBottom:8}}>BrightMigrate</div>
+          <div style={{fontSize:14,color:'#7b7b9e',lineHeight:1.4}}>Course Migration Review Platform</div>
+        </div>
+        <div style={{fontSize:13,color:'#555577'}}>Moodle → Brightspace workflow</div>
+      </div>
+      <div style={{flex:1,background:'white',padding:'36px 32px',display:'flex',flexDirection:'column',justifyContent:'center',gap:16}}>
+        <div style={{fontSize:22,fontWeight:700,color:'#111',marginBottom:4}}>Sign in</div>
+        <div className="fl"><label>Email</label><div className="fi" style={{display:'flex',alignItems:'center',color:'#aaa',fontSize:14}}>you@college.edu</div></div>
+        <div className="fl"><label>Password</label><div className="fi" style={{display:'flex',alignItems:'center',color:'#aaa',fontSize:14}}>••••••••••</div></div>
+        <div className="fl">
+          <label>Role</label>
+          <select className="fi" style={{appearance:'none',cursor:'pointer'}}>
+            <option>Teaching Assistant</option>
+            <option>Admin Reviewer</option>
+            <option>Communication Dept</option>
+            <option>Instructor</option>
+            <option>Super Admin</option>
+          </select>
+        </div>
+        <div className="btn btn-p" style={{alignSelf:'stretch',justifyContent:'center',marginTop:4,fontSize:16}}>Sign in → Route to Dashboard</div>
+        <div style={{fontSize:12,color:'#bbb',textAlign:'center'}}>SSO via college identity provider supported</div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── SCREEN 2: TA DASHBOARD ─── */
+const TADashboard = () => {
+  const courses = [
+    ['BIO 101-A','Intro to Biology','Fall 2025','01','ta_review_in_progress','Sep 12','1h 24m',2],
+    ['CHEM 201-B','Organic Chemistry','Fall 2025','02','assigned_to_ta','Sep 14','—',0],
+    ['HIST 110','World History','Fall 2025','01','submitted_to_admin','Sep 8','2h 10m',1],
+    ['MATH 301-A','Calculus III','Spring 2026','01','admin_changes_requested','Sep 5','3h 02m',4],
+  ];
+  const colors = STATUS_COLORS;
+  return (
+    <div className="wf" style={{width:1280,height:820,display:'flex'}}>
+      <Sidebar role="ta" />
+      <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+        <div className="topbar"><div className="topbar-title">My Courses</div>
+          <div style={{fontSize:13,color:'#aaa'}}>Fall 2025 · Term 3</div>
+          <div className="btn btn-o btn-sm">+ New Review</div>
+          <div style={{width:28,height:28,border:'1.5px solid #ddd',borderRadius:50,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#888'}}>🔔</div>
+        </div>
+        <div style={{flex:1,padding:'20px 24px',background:'#f7f7fc',overflowY:'hidden'}}>
+          <div className="stats">
+            {[['12','Assigned','All terms'],['4','TA In Progress','Currently active'],['6','Submitted to Admin','Awaiting review'],['2','Changes Requested','Needs attention']].map(([v,l,s],i)=>(
+              <div className="sc" key={i}>
+                <div className="sc-val" style={{color:['#111','#4870ff','#b45309','#b91c1c'][i]}}>{v}</div>
+                <div className="sc-lbl">{l}</div>
+                <div className="sc-sub">{s}</div>
+              </div>
+            ))}
+          </div>
+          <div className="fbar">
+            <input className="fbar-in" placeholder="🔍  Search course code or title..." style={{width:220}} readOnly />
+            <select className="fbar-in"><option>All Terms</option><option>Fall 2025</option><option>Spring 2026</option></select>
+            <select className="fbar-in"><option>All Statuses</option><option>In Progress</option><option>Submitted</option></select>
+            <select className="fbar-in"><option>All Instructors</option></select>
+          </div>
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,overflow:'hidden'}}>
+            <table className="tbl">
+              <thead><tr>
+                <th>Course Code</th><th>Title</th><th>Term</th><th>Sec.</th>
+                <th>Status</th><th>Assigned</th><th>Time Spent</th><th>Issues</th><th>Action</th>
+              </tr></thead>
+              <tbody>{courses.map(([code,title,term,sec,status,date,time,issues],i)=>(
+                <tr key={i}><td><strong>{code}</strong></td><td>{title}</td><td>{term}</td><td>{sec}</td>
+                  <td><Badge label={STATUS_LABELS[status]||status} color={STATUS_COLORS[status]||'gray'} /></td>
+                  <td style={{color:'#888'}}>{date}</td>
+                  <td style={{fontWeight:600}}>{time}</td>
+                  <td>{issues > 0 ? <span style={{background:'#fef2f2',color:'#b91c1c',borderRadius:20,padding:'1px 8px',fontSize:12,fontWeight:700}}>{issues} open</span> : <span style={{color:'#aaa',fontSize:13}}>—</span>}</td>
+                  <td>
+                    {status==='ta_review_in_progress' && <div className="btn btn-p btn-sm">Continue →</div>}
+                    {status==='assigned_to_ta' && <div className="btn btn-o btn-sm">Start Review</div>}
+                    {status==='submitted_to_admin' && <div className="btn btn-o btn-sm" style={{color:'#888'}}>View</div>}
+                    {status==='admin_changes_requested' && <div className="btn btn-r btn-sm">Fix Issues →</div>}
+                  </td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+          <div style={{fontSize:13,color:'#bbb',marginTop:10,textAlign:'right'}}>Showing 4 of 12 courses · Load more</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── SCREEN 3: TA COURSE REVIEW WORKSPACE — METADATA ─── */
+const TAWorkspaceMetadata = () => (
+  <div className="wf" style={{width:1280,height:900,display:'flex'}}>
+    <Sidebar role="ta" />
+    <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+      <div className="topbar" style={{height:'auto',padding:'10px 20px',flexWrap:'wrap',gap:8}}>
+        <div style={{flex:1}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{fontSize:18,fontWeight:700}}>BIO 101-A</span>
+            <span style={{fontSize:15,color:'#666'}}>Intro to Biology</span>
+            <Badge label="In Progress" color="blue" />
+          </div>
+          <div style={{fontSize:13,color:'#aaa',marginTop:2}}>Fall 2025 · Section 01 · Instructor: Prof. Lee</div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <div className="btn btn-o btn-sm">Save Draft</div>
+          <div className="btn btn-p btn-sm">Save & Continue →</div>
+        </div>
+      </div>
+      <div style={{flex:1,display:'flex',overflow:'hidden'}}>
+        {/* Step nav */}
+        <div className="steps">
+          {[['1','Metadata','Course info','done'],['2','Review Matrix','Checklist items','act'],['3','Syllabus & GB','Docs review','pend'],['4','Issue Log','Track problems','pend'],['5','Submit','Final review','pend']].map(([n,l,s,state],i)=>(
+            <div key={i} className={`step${state==='act'?' sa':''}`}>
+              <div className={`sdot sdot-${state}`}>{state==='done'?'✓':n}</div>
+              <div><div className="slabel">{l}</div><div className="ssub">{s}</div></div>
+            </div>
+          ))}
+          <div style={{borderTop:'1px dashed #ddd',margin:'10px 12px',paddingTop:10}}>
+            <div style={{fontSize:11,color:'#bbb',fontWeight:700,textTransform:'uppercase',marginBottom:6}}>Review Timer</div>
+            <div style={{fontSize:26,fontWeight:700,color:'#4870ff'}}>01:24:07</div>
+            <div style={{fontSize:12,color:'#bbb',marginTop:2}}>Running · Session 2</div>
+            <div className="btn btn-o btn-sm" style={{marginTop:8,fontSize:12}}>⏸ Pause</div>
+          </div>
+        </div>
+        {/* Form area */}
+        <div style={{flex:1,padding:'20px 22px',background:'#f7f7fc',overflowY:'auto'}}>
+          <div style={{fontSize:13,color:'#aaa',marginBottom:14}}>Step 1 of 5 · Course Metadata · Auto-saved 2 min ago</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 20px'}}>
+            <div className="fl"><label>Course Code <span style={{color:'red'}}>*</span></label><div className="fi pre">BIO 101-A</div></div>
+            <div className="fl"><label>Course Title</label><div className="fi pre">Intro to Biology</div></div>
+            <div className="fl"><label>Term <span style={{color:'red'}}>*</span></label>
+              <select className="fi"><option>Fall 2025</option></select></div>
+            <div className="fl"><label>Section(s)</label><div className="fi pre">01</div></div>
+            <div className="fl" style={{gridColumn:'1/-1'}}><label>Brightspace Course URL</label>
+              <div className="fi" style={{display:'flex',alignItems:'center',gap:6,color:'#4870ff',textDecoration:'underline',fontSize:13}}>https://brightspace.college.edu/d2l/home/BIO101A</div></div>
+            <div className="fl" style={{gridColumn:'1/-1'}}><label>Moodle Course URL (Archive)</label>
+              <div className="fi" style={{display:'flex',alignItems:'center',gap:6,color:'#4870ff',textDecoration:'underline',fontSize:13}}>https://moodle.college.edu/course/view.php?id=4827</div></div>
+            <div className="fl"><label>Reviewer</label><div className="fi pre">Alex T. (TA)</div></div>
+            <div className="fl"><label>Review Date</label><div className="fi pre">Sep 12, 2025</div></div>
+          </div>
+          <div className="fl"><label>Migration Notes Summary</label>
+            <textarea className="fta" defaultValue="Homepage rebuilt from scratch. Module order preserved. 3 external links removed — Moodle-specific. Gradebook categories not yet verified." /></div>
+          <div className="fl"><label>Time Required (auto-tracked)</label><div className="fi pre">1h 24m 07s (ongoing)</div></div>
+          <div style={{borderTop:'1px dashed #ddd',paddingTop:14,display:'flex',gap:10}}>
+            <div className="btn btn-o btn-sm">← Back</div>
+            <div className="btn btn-p btn-sm">Save & Continue to Review Matrix →</div>
+          </div>
+        </div>
+        {/* Right panel */}
+        <div className="rp">
+          <div className="rp-block">
+            <div className="rp-title">Course Status</div>
+            <Badge label="TA Review In Progress" color="blue" />
+          </div>
+          <div className="rp-block">
+            <div className="rp-title">People</div>
+            {[['TA','Alex T.'],['Instructor','Prof. Lee'],['Admin','Maria S.']].map(([k,v],i)=>(
+              <div key={i} className="rp-row"><span className="rp-key">{k}</span><span className="rp-val">{v}</span></div>
+            ))}
+          </div>
+          <div className="rp-block">
+            <div className="rp-title">Progress</div>
+            {[['Metadata','done'],['Review Matrix','active'],['Syllabus & GB','pending'],['Issues','pending'],['Submit','pending']].map(([l,s],i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:5}}>
+                <span style={{color:'#555'}}>{l}</span>
+                <span style={{color:s==='done'?'#22c55e':s==='active'?'#4870ff':'#ccc',fontWeight:700,fontSize:12}}>{s==='done'?'✓ Done':s==='active'?'In progress':'—'}</span>
+              </div>
+            ))}
+          </div>
+          <div className="rp-block">
+            <div className="rp-title">Last Updated</div>
+            <div style={{fontSize:13,color:'#555'}}>Today, 11:24 AM</div>
+          </div>
+          <div className="btn btn-r btn-sm" style={{marginTop:'auto'}}>Report Issue</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── SCREEN 4: TA REVIEW MATRIX ─── */
+const TAReviewMatrix = () => {
+  const rows = {
+    'A. Course Shell & Navigation': [
+      ['Homepage loads correctly','Pass','',''],
+      ['Modules present and logically ordered','Pass','',''],
+      ['No duplicate or empty modules','Fix Needed','Found 2 empty modules in Week 3 folder','https://bs.edu/...'],
+      ['Homepage tools function accordingly','N/A','Not applicable for this course type',''],
+    ],
+    'B. Pages & Files': [
+      ['Pages render correctly','Pass','',''],
+      ['Files open correctly','Missing','Week 5 PDF file returns 404','https://bs.edu/...'],
+      ['No Moodle references remain','Fix Needed','Footer still references "Moodle Portal"','https://bs.edu/...'],
+      ['Images display properly','Pass','',''],
+    ],
+    'C. Links & Embedded Content': [
+      ['Internal links functional','Pass','',''],
+      ['External links functional','Fix Needed','2 broken external links in Week 2',''],
+      ['Embedded media loads','Pass','',''],
+    ],
+  };
+  const statusColors = {Pass:'green','Fix Needed':'orange',Missing:'red',Escalate:'red','N/A':'gray'};
+  return (
+    <div className="wf" style={{width:1280,height:980,display:'flex'}}>
+      <Sidebar role="ta" />
+      <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+        <div className="topbar" style={{height:'auto',padding:'10px 20px',gap:8}}>
+          <div style={{flex:1}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontSize:18,fontWeight:700}}>BIO 101-A</span>
+              <span style={{fontSize:15,color:'#666'}}>Intro to Biology</span>
+              <Badge label="In Progress" color="blue" />
+            </div>
+            <div style={{fontSize:13,color:'#aaa',marginTop:2}}>Fall 2025 · Section 01</div>
+          </div>
+          <div className="btn btn-o btn-sm">Save Draft</div>
+          <div className="btn btn-p btn-sm">Save & Continue →</div>
+        </div>
+        <div style={{flex:1,display:'flex',overflow:'hidden'}}>
+          <div className="steps">
+            {[['1','Metadata','done'],['2','Review Matrix','act'],['3','Syllabus & GB','pend'],['4','Issue Log','pend'],['5','Submit','pend']].map(([n,l,s],i)=>(
+              <div key={i} className={`step${s==='act'?' sa':''}`}>
+                <div className={`sdot sdot-${s}`}>{s==='done'?'✓':n}</div>
+                <div><div className="slabel">{l}</div></div>
+              </div>
+            ))}
+            <div style={{borderTop:'1px dashed #ddd',margin:'10px 12px',paddingTop:10}}>
+              <div style={{fontSize:11,color:'#bbb',fontWeight:700,textTransform:'uppercase',marginBottom:6}}>Timer</div>
+              <div style={{fontSize:26,fontWeight:700,color:'#4870ff'}}>01:51:33</div>
+              <div style={{fontSize:12,color:'#bbb'}}>Running</div>
+            </div>
+          </div>
+          <div style={{flex:1,overflowY:'auto',background:'#f7f7fc'}}>
+            <div style={{padding:'14px 18px 6px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div>
+                <div style={{fontSize:18,fontWeight:700}}>Review Matrix</div>
+                <div style={{fontSize:13,color:'#888'}}>Check each item · Required notes when status = Fix Needed, Missing, or Escalate</div>
+              </div>
+              <div style={{display:'flex',gap:8}}>
+                <span className="badge bg-orange">3 Fix Needed</span>
+                <span className="badge bg-red">1 Missing</span>
+                <span className="badge bg-green">6 Pass</span>
+              </div>
+            </div>
+            <div style={{margin:'0 18px 16px',background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,overflow:'hidden'}}>
+              {/* Header row */}
+              <div className="ck-row" style={{background:'#f6f6fa',fontWeight:700,fontSize:12,color:'#777',textTransform:'uppercase',letterSpacing:'0.4px'}}>
+                <span>Check Item</span><span>Status</span><span>Notes / Findings</span><span>Direct Link</span><span>Action</span>
+              </div>
+              {Object.entries(rows).map(([section, items]) => (
+                <React.Fragment key={section}>
+                  <div className="ck-section">{section}</div>
+                  {items.map(([item, status, note, link], i) => (
+                    <div key={i} className="ck-row" style={{background: (status==='Fix Needed'||status==='Missing') ? '#fffbf8' : 'white'}}>
+                      <span style={{fontSize:14}}>{item}</span>
+                      <span><Badge label={status} color={statusColors[status]} /></span>
+                      <span>
+                        {note ? <span style={{fontSize:13,color:'#444'}}>{note}</span> :
+                          <span style={{fontSize:12,color:'#ccc',fontStyle:'italic'}}>No notes</span>}
+                      </span>
+                      <span>
+                        {link ? <span style={{fontSize:12,color:'#4870ff',textDecoration:'underline',cursor:'pointer'}}>View in BS →</span> :
+                          <input className="ck-dd" style={{width:'100%'}} placeholder="Paste link..." readOnly />}
+                      </span>
+                      <span>
+                        {(status==='Fix Needed'||status==='Missing'||status==='Escalate') &&
+                          <div className="btn btn-r btn-sm">+ Issue</div>}
+                      </span>
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
+            </div>
+            <div style={{padding:'0 18px 18px',display:'flex',gap:10}}>
+              <div className="btn btn-o btn-sm">← Metadata</div>
+              <div className="btn btn-p btn-sm">Save & Continue →</div>
+              <div className="btn btn-o btn-sm" style={{marginLeft:'auto'}}>+ Add Custom Row</div>
+            </div>
+          </div>
+          <div className="rp">
+            <div className="rp-block">
+              <div className="rp-title">Matrix Summary</div>
+              {[['Pass','6','green'],['Fix Needed','3','orange'],['Missing','1','red'],['N/A','1','gray']].map(([l,v,c],i)=>(
+                <div key={i} style={{display:'flex',justifyContent:'space-between',marginBottom:5,fontSize:14}}>
+                  <Badge label={l} color={c} /><strong>{v}</strong>
+                </div>
+              ))}
+            </div>
+            <div className="rp-block">
+              <div className="rp-title">Issues Created</div>
+              <div style={{fontSize:22,fontWeight:700,color:'#b91c1c'}}>2</div>
+              <div style={{fontSize:12,color:'#aaa'}}>from this matrix</div>
+              <div className="btn btn-r btn-sm" style={{marginTop:6}}>View Issue Log</div>
+            </div>
+            <div className="rp-block">
+              <div className="rp-title">Timer</div>
+              <div style={{fontSize:22,fontWeight:700,color:'#4870ff'}}>01:51:33</div>
+              <div style={{fontSize:12,color:'#aaa'}}>Session total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── SCREEN 5: ADMIN DASHBOARD ─── */
+const AdminDashboard = () => {
+  const courses = [
+    ['BIO 101-A','Intro to Biology','Alex T.','Sep 10','2h 10m',1,'TA Confirmed','—','submitted_to_admin'],
+    ['CHEM 201-B','Organic Chemistry','Sam R.','Sep 9','3h 02m',4,'TA Confirmed','—','submitted_to_admin'],
+    ['HIST 110','World History','Alex T.','Sep 7','1h 48m',0,'TA Confirmed','Admin Confirmed','ready_for_instructor'],
+    ['PSYC 200','Intro Psychology','Lee W.','Sep 6','2h 30m',2,'Pending','—','admin_changes_requested'],
+  ];
+  return (
+    <div className="wf" style={{width:1280,height:820,display:'flex'}}>
+      <Sidebar role="admin" />
+      <div style={{flex:1,display:'flex',flexDirection:'column',background:'#f7f7fc'}}>
+        <div className="topbar"><div className="topbar-title">Review Queue</div>
+          <span className="badge bg-orange">8 Awaiting Review</span>
+          <div className="btn btn-o btn-sm">Export</div>
+        </div>
+        <div style={{padding:'20px 24px',flex:1,overflow:'hidden'}}>
+          <div className="stats">
+            {[['8','Pending Review','Awaiting admin'],['3','Fix Requested','Returned to TA'],['12','Approved Today','This week: 12'],['5','Major Issues','Need attention']].map(([v,l,s],i)=>(
+              <div className="sc" key={i}>
+                <div className="sc-val" style={{color:['#b45309','#b91c1c','#15803d','#b91c1c'][i]}}>{v}</div>
+                <div className="sc-lbl">{l}</div><div className="sc-sub">{s}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,overflow:'hidden'}}>
+            <div style={{padding:'12px 16px',borderBottom:'1px solid #eee',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div style={{fontWeight:700,fontSize:16}}>Courses Awaiting Admin Review</div>
+              <div className="fbar" style={{marginBottom:0}}>
+                <input className="fbar-in" placeholder="Search..." style={{width:160}} readOnly />
+                <select className="fbar-in"><option>All Terms</option></select>
+                <select className="fbar-in"><option>All Statuses</option></select>
+              </div>
+            </div>
+            <table className="tbl">
+              <thead><tr>
+                <th>Course</th><th>TA Reviewer</th><th>Submitted</th><th>Review Time</th>
+                <th>Issues</th><th>Syllabus (TA)</th><th>Syllabus (Admin)</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody>{courses.map(([code,title,ta,date,time,issues,syllTA,syllAdmin,status],i)=>(
+                <tr key={i}><td><strong>{code}</strong><div style={{fontSize:12,color:'#888'}}>{title}</div></td>
+                  <td>{ta}</td><td style={{color:'#888',fontSize:13}}>{date}</td><td style={{fontWeight:600}}>{time}</td>
+                  <td>{issues>0?<span style={{background:'#fef2f2',color:'#b91c1c',borderRadius:20,padding:'1px 8px',fontSize:12,fontWeight:700}}>{issues}</span>:<span style={{color:'#ccc'}}>—</span>}</td>
+                  <td><Badge label={syllTA} color={syllTA==='TA Confirmed'?'green':'gray'}/></td>
+                  <td><Badge label={syllAdmin==='—'?'Pending':'Admin Confirmed'} color={syllAdmin==='—'?'gray':'green'}/></td>
+                  <td><SBadge status={status}/></td>
+                  <td><div style={{display:'flex',gap:5}}>
+                    <div className="btn btn-p btn-sm">Review</div>
+                    {status==='submitted_to_admin' && <div className="btn btn-g btn-sm" title="→ ready_for_instructor">✓ Approve</div>}
+                    {status==='submitted_to_admin' && <div className="btn btn-r btn-sm" title="→ admin_changes_requested">↩ Fix</div>}
+                    {status==='ready_for_instructor' && <div className="btn btn-sm" style={{background:'#faf5ff',color:'#7e22ce',borderColor:'#e9d5ff',fontSize:12}} title="→ sent_to_instructor via Comm Dept">Send to Comm →</div>}
+                    {status==='admin_changes_requested' && <div className="btn btn-r btn-sm">Pending TA Fix</div>}
+                  </div></td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── SCREEN 6: ADMIN REVIEW SCREEN ─── */
+const AdminReview = () => {
+  const threadMsgs = [
+    {av:'A',bg:'#4870ff',name:'Alex T. (TA)',role:'TA',time:'Sep 10, 9:42am',txt:'Submitted for admin review. Note: Week 5 PDF is still missing — flagged as Issue #3. The Moodle footer reference was fixed after initial submission.',tag:null},
+    {av:'M',bg:'#7c3aed',name:'Maria S. (Admin)',role:'Admin',time:'Sep 10, 11:15am',txt:'Reviewed Metadata and Review Matrix. Found 2 additional issues in Week 7 — adding comments. @Alex T. can you confirm the gradebook weighting is finalized?',tag:'@Alex T.'},
+    {av:'A',bg:'#4870ff',name:'Alex T. (TA)',role:'TA',time:'Sep 10, 11:48am',txt:'Confirmed — gradebook weighting matches the syllabus. All weighted categories sum to 100%. Screenshots attached.',tag:null},
+  ];
+  return (
+    <div className="wf" style={{width:1280,height:940,display:'flex'}}>
+      <Sidebar role="admin" />
+      <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+        <div className="topbar" style={{height:'auto',padding:'10px 20px',gap:8}}>
+          <div style={{flex:1}}>
+            <div style={{display:'flex',gap:10,alignItems:'center'}}>
+              <span style={{fontSize:18,fontWeight:700}}>BIO 101-A</span>
+              <span style={{fontSize:15,color:'#666'}}>Intro to Biology</span>
+              <Badge label="Admin Review Pending" color="yellow" />
+            </div>
+            <div style={{fontSize:13,color:'#aaa',marginTop:2}}>Fall 2025 · TA: Alex T. · Submitted Sep 10</div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <div className="btn btn-r btn-sm">Return to TA</div>
+            <div className="btn btn-g btn-sm">✓ Approve → ready_for_instructor</div>
+          </div>
+        </div>
+        <div className="tabs" style={{padding:'0 20px',background:'white'}}>
+          {['Metadata','Review Matrix','Syllabus & GB','Issues (3)','Thread','History'].map((t,i)=>(
+            <div key={i} className={`tab${i===4?' ta':''}`}>{t}</div>
+          ))}
+        </div>
+        <div style={{flex:1,display:'flex',overflow:'hidden',background:'#f7f7fc'}}>
+          {/* Thread panel */}
+          <div style={{flex:1,padding:'18px 22px',overflowY:'auto',display:'flex',flexDirection:'column',gap:0}}>
+            <div style={{marginBottom:14}}>
+              <div style={{fontWeight:700,fontSize:17,marginBottom:4}}>Collaboration Thread</div>
+              <div style={{fontSize:13,color:'#888'}}>All participants · Mentions notify via bell + email</div>
+            </div>
+            {threadMsgs.map((m,i)=>(
+              <div key={i} className="thread-msg">
+                <div className="t-av" style={{background:m.bg}}>{m.av}</div>
+                <div style={{flex:1}}>
+                  <div className="t-meta">
+                    <strong style={{color:'#222'}}>{m.name}</strong>
+                    <span className="badge bg-gray" style={{fontSize:10,padding:'1px 5px'}}>{m.role}</span>
+                    <span>{m.time}</span>
+                  </div>
+                  <div className="t-bubble">
+                    <div className="t-txt">
+                      {m.tag && <span className="t-tag">{m.tag}</span>}
+                      {m.tag ? ' ' : ''}{m.txt}
+                    </div>
+                  </div>
+                  <div style={{display:'flex',gap:8,marginTop:5}}>
+                    <span style={{fontSize:12,color:'#aaa',cursor:'pointer'}}>↩ Reply</span>
+                    <span style={{fontSize:12,color:'#aaa',cursor:'pointer'}}>📎 Attach</span>
+                    <span style={{fontSize:12,color:'#aaa',cursor:'pointer'}}>🔗 Link to Issue</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div style={{background:'white',border:'1.5px solid #ddd',borderRadius:8,padding:'10px 14px',marginTop:8}}>
+              <div style={{display:'flex',gap:8,marginBottom:8}}>
+                {['@Mention','📎 Attach','🔗 Link Issue'].map((l,i)=>(
+                  <div key={i} style={{fontSize:12,color:'#888',background:'#f5f5f5',border:'1px solid #e0e0e0',borderRadius:4,padding:'3px 8px',cursor:'pointer'}}>{l}</div>
+                ))}
+              </div>
+              <div className="fta" style={{background:'#f7f7fc',fontSize:14,color:'#aaa'}}>Type a message... (Shift+Enter for new line, Enter to send)</div>
+              <div style={{display:'flex',justifyContent:'flex-end',marginTop:8}}>
+                <div className="btn btn-p btn-sm">Post Message</div>
+              </div>
+            </div>
+          </div>
+          {/* Right panel */}
+          <div className="rp">
+            <div className="rp-block">
+              <div className="rp-title">Admin Actions</div>
+              <div style={{display:'flex',flexDirection:'column',gap:7}}>
+                <div className="btn btn-g btn-sm" style={{justifyContent:'center'}}>✓ Confirm Syllabus</div>
+                <div className="btn btn-p btn-sm" style={{justifyContent:'center'}}>Approve Course</div>
+                <div className="btn btn-r btn-sm" style={{justifyContent:'center'}}>Request Fix from TA</div>
+                <div className="btn btn-o btn-sm" style={{justifyContent:'center'}}>Escalate Issue</div>
+              </div>
+            </div>
+            <div className="rp-block">
+              <div className="rp-title">Participants</div>
+              {[['TA','Alex T.','#4870ff'],['Instructor','Prof. Lee','#16a34a'],['Admin','Maria S.','#7c3aed']].map(([role,name,c],i)=>(
+                <div key={i} style={{display:'flex',alignItems:'center',gap:7,marginBottom:6}}>
+                  <div style={{width:22,height:22,borderRadius:'50%',background:c,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:'white',flexShrink:0}}>{name[0]}</div>
+                  <div><div style={{fontSize:13,fontWeight:600}}>{name}</div><div style={{fontSize:11,color:'#aaa'}}>{role}</div></div>
+                </div>
+              ))}
+            </div>
+            <div className="rp-block">
+              <div className="rp-title">Open Issues</div>
+              {[['#3','Missing PDF','Major'],['#5','Footer ref','Minor'],['#7','Broken links','Minor']].map(([id,name,sev],i)=>(
+                <div key={i} style={{marginBottom:6,fontSize:13}}>
+                  <div style={{display:'flex',justifyContent:'space-between'}}>
+                    <span style={{color:'#555'}}>{id} {name}</span>
+                    <Badge label={sev} color={sev==='Major'?'red':'orange'} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="rp-block">
+              <div className="rp-title">Syllabus Status</div>
+              <div style={{fontSize:13,marginBottom:5}}>TA: <Badge label="TA Confirmed" color="green" /></div>
+              <div style={{fontSize:13}}>Admin: <Badge label="Pending" color="gray" /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── SCREEN 7: COMM DEPT DASHBOARD ─── */
+const CommDeptDashboard = () => {
+  const courses = [
+    ['CHEM 201-B','Organic Chemistry','Dr. Wong','Sep 9','ready_for_instructor','0','0','Sep 9, 4:10pm'],
+    ['BIO 101-A','Intro to Biology','Prof. Lee','Sep 10','ready_for_instructor','0','1','Sep 10, 2:30pm'],
+    ['HIST 110','World History','Dr. Avery','Sep 5','sent_to_instructor','0','3','Sep 11, 9:15am'],
+    ['PSYC 200','Intro Psychology','Prof. Marsh','Sep 3','instructor_questions','2','0','Sep 12, 8:00am'],
+    ['MATH 301-A','Calculus III','Dr. Kern','Aug 28','instructor_approved','0','0','Sep 6, 1:00pm'],
+  ];
+  const badgeColors = {};
+  return (
+    <div className="wf" style={{width:1280,height:800,display:'flex'}}>
+      <Sidebar role="comm" />
+      <div style={{flex:1,display:'flex',flexDirection:'column',background:'#f7f7fc'}}>
+        <div className="topbar"><div className="topbar-title">Handoff Queue</div>
+          <span className="badge bg-orange">2 Instructor Qs Pending</span>
+          <span className="badge bg-blue">2 Ready to Send</span>
+        </div>
+        <div style={{padding:'20px 24px',flex:1}}>
+          <div className="stats" style={{gridTemplateColumns:'repeat(5,1fr)'}}>
+            {[['2','Ready to Send','Admin approved'],['3','Sent','Awaiting instructor'],['2','Qs Pending','Need response'],['1','Blocked','Unresolved issues'],['14','Total Handled','This term']].map(([v,l,s],i)=>(
+              <div className="sc" key={i}><div className="sc-val" style={{fontSize:24}}>{v}</div><div className="sc-lbl">{l}</div><div className="sc-sub">{s}</div></div>
+            ))}
+          </div>
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,overflow:'hidden'}}>
+            <div style={{padding:'12px 16px',borderBottom:'1px solid #eee',fontWeight:700,fontSize:16}}>All Courses — Communication View</div>
+            <table className="tbl">
+              <thead><tr>
+                <th>Course</th><th>Instructor</th><th>Admin Approved</th>
+                <th>Comm. Status</th><th>Open Issues</th><th>Instructor Qs</th><th>Last Activity</th><th>Actions</th>
+              </tr></thead>
+              <tbody>{courses.map(([code,title,inst,date,status,issues,qs,last],i)=>(
+                <tr key={i}>
+                  <td><strong>{code}</strong><div style={{fontSize:12,color:'#888'}}>{title}</div></td>
+                  <td>{inst}</td>
+                  <td style={{color:'#888',fontSize:13}}>{date}</td>
+                  <td><SBadge status={status}/></td>
+                  <td>{issues>0?<span style={{color:'#b91c1c',fontWeight:700}}>{issues}</span>:<span style={{color:'#ccc'}}>—</span>}</td>
+                  <td>{qs>0?<span style={{background:'#fff7ed',color:'#c2410c',borderRadius:20,padding:'1px 8px',fontSize:12,fontWeight:700}}>{qs} open</span>:<span style={{color:'#ccc'}}>—</span>}</td>
+                  <td style={{fontSize:13,color:'#888'}}>{last}</td>
+                  <td>
+                    <div style={{display:'flex',gap:5}}>
+                      {status==='ready_for_instructor' && <div className="btn btn-p btn-sm" title="→ sent_to_instructor">📤 Send to Instructor</div>}
+                      {status==='sent_to_instructor' && <div className="btn btn-o btn-sm">View Thread</div>}
+                      {status==='instructor_questions' && <div className="btn btn-r btn-sm" title="comm/admin resolves → sent_to_instructor">Resolve Q →</div>}
+                      {status==='instructor_approved' && <div className="btn btn-g btn-sm">Forward to Admin →</div>}
+                      <div className="btn btn-o btn-sm">Thread</div>
+                    </div>
+                  </td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── SCREEN 8: INSTRUCTOR DASHBOARD ─── */
+const InstructorDashboard = () => {
+  const courses = [
+    {code:'BIO 101-A',title:'Intro to Biology',term:'Fall 2025',status:'sent_to_instructor',issues:1,msg:'1 instructor question pending'},
+    {code:'BIO 302-A',title:'Cell Biology Advanced',term:'Fall 2025',status:'ta_review_in_progress',issues:0,msg:'TA is reviewing — not yet visible to you'},
+    {code:'PSYC 101',title:'Intro Psychology',term:'Fall 2025',status:'final_approved',issues:0,msg:'Fully approved — migration complete'},
+  ];
+  return (
+    <div className="wf" style={{width:1280,height:860,display:'flex'}}>
+      <Sidebar role="instructor" />
+      <div style={{flex:1,display:'flex',flexDirection:'column',background:'#f7f7fc'}}>
+        <div className="topbar"><div className="topbar-title">My Course Reviews</div>
+          <span className="badge bg-orange">1 Action Required</span>
+        </div>
+        <div style={{padding:'20px 24px',flex:1,display:'flex',flexDirection:'column',gap:16}}>
+          <div style={{fontSize:14,color:'#666'}}>Your courses are being migrated from Moodle to Brightspace. Review the migration report, ask questions, and give final approval.</div>
+          {courses.map((c,i)=>(
+            <div key={i} style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:10,overflow:'hidden',boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
+              <div style={{padding:'16px 20px',borderBottom:'1px solid #f0f0f8',display:'flex',alignItems:'flex-start',justifyContent:'space-between'}}>
+                <div>
+                  <div style={{display:'flex',gap:10,alignItems:'center',marginBottom:4}}>
+                    <span style={{fontSize:20,fontWeight:700}}>{c.code}</span>
+                    <span style={{fontSize:16,color:'#555'}}>{c.title}</span>
+                    <SBadge status={c.status} />
+                  </div>
+                  <div style={{fontSize:13,color:'#888'}}>{c.term} · {c.msg}</div>
+                </div>
+                {c.status==='sent_to_instructor' && <div className="btn btn-p">View Review →</div>}
+                {c.status==='instructor_questions' && <div className="btn btn-p">View Review →</div>}
+                {c.status==='ta_review_in_progress' && <div className="btn btn-o" style={{color:'#aaa',cursor:'default'}}>In Review — Not Yet Available</div>}
+                {c.status==='final_approved' && <div className="btn btn-g">View Final Report</div>}
+              </div>
+              {(c.status==='sent_to_instructor'||c.status==='instructor_questions') && (
+                <div style={{padding:'14px 20px',display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12}}>
+                  {[['Course Info','Complete','green'],['Migration Notes','Available','green'],['Checklist','3 items flagged','orange'],['Gradebook','Verified','green'],['Final Approval','Waiting for you','blue']].map(([l,v,color],idx)=>(
+                    <div key={idx} style={{borderRadius:7,padding:'10px 12px',background:color==='green'?'#f0fdf4':color==='orange'?'#fffbeb':'#eef2ff',border:`1px solid ${color==='green'?'#bbf7d0':color==='orange'?'#fde68a':'#c7d2fe'}`}}>
+                      <div style={{fontSize:12,color:'#888',marginBottom:3}}>{l}</div>
+                      <div style={{fontSize:14,fontWeight:700,color:color==='green'?'#15803d':color==='orange'?'#b45309':'#4059c7'}}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {(c.status==='sent_to_instructor'||c.status==='instructor_questions') && (
+                <div style={{padding:'0 20px 16px',borderTop:'1px dashed #eee',marginTop:4,paddingTop:12,display:'flex',gap:10,alignItems:'center'}}>
+                  <div className="btn btn-o btn-sm">Request Revision</div>
+                  <div style={{flex:1}}></div>
+                  <div style={{fontSize:13,color:'#888'}}>Ready to approve? All issues must be resolved first.</div>
+                  <div className="btn btn-g btn-sm">✓ Approve Course</div>
+                </div>
+              )}
+            </div>
+          ))}
+          {/* Instructor view of thread snippet */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:10,padding:'16px 20px'}}>
+            <div style={{fontWeight:700,fontSize:16,marginBottom:10}}>Recent Messages — BIO 101-A</div>
+            {[{av:'J',bg:'#16a34a',name:'Jordan K. (Comm Dept)',time:'Sep 11, 10:30am',txt:'Hi Prof. Lee — the review for BIO 101-A is ready. Please review the checklist and approve when ready. Let us know if you have questions.'},
+              {av:'P',bg:'#ea580c',name:'Prof. Lee (You)',time:'Sep 11, 2:15pm',txt:'Thanks! I noticed the Week 5 reading list looks incomplete. Can someone check if the file attachments came over correctly?'}
+            ].map((m,i)=>(
+              <div key={i} className="thread-msg">
+                <div className="t-av" style={{background:m.bg}}>{m.av}</div>
+                <div style={{flex:1}}>
+                  <div className="t-meta"><strong style={{color:'#222'}}>{m.name}</strong><span>{m.time}</span></div>
+                  <div className="t-bubble"><div className="t-txt">{m.txt}</div></div>
+                </div>
+              </div>
+            ))}
+            <div style={{display:'flex',gap:10,marginTop:8}}>
+              <div className="fta" style={{flex:1,height:40,background:'#f7f7fc',fontSize:14,color:'#aaa',padding:'8px 12px'}}>Reply to thread...</div>
+              <div className="btn btn-p btn-sm" style={{alignSelf:'flex-end'}}>Send</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── SCREEN 9: SYLLABUS & GRADEBOOK ─── */
+const SyllabusGradebook = () => (
+  <div className="wf" style={{width:1280,height:980,display:'flex'}}>
+    <Sidebar role="ta" />
+    <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+      <div className="topbar" style={{height:'auto',padding:'10px 20px',gap:8}}>
+        <div style={{flex:1}}>
+          <div style={{display:'flex',gap:10,alignItems:'center'}}>
+            <span style={{fontSize:18,fontWeight:700}}>BIO 101-A</span>
+            <span style={{fontSize:15,color:'#666'}}>Intro to Biology</span>
+            <Badge label="In Progress" color="blue" />
+          </div>
+        </div>
+        <div className="btn btn-o btn-sm">Save Draft</div>
+        <div className="btn btn-p btn-sm">Save & Continue →</div>
+      </div>
+      <div style={{flex:1,display:'flex',overflow:'hidden'}}>
+        <div className="steps">
+          {[['1','Metadata','done'],['2','Review Matrix','done'],['3','Syllabus & GB','act'],['4','Issue Log','pend'],['5','Submit','pend']].map(([n,l,s],i)=>(
+            <div key={i} className={`step${s==='act'?' sa':''}`}>
+              <div className={`sdot sdot-${s}`}>{s==='done'?'✓':n}</div>
+              <div><div className="slabel">{l}</div></div>
+            </div>
+          ))}
+          <div style={{borderTop:'1px dashed #ddd',margin:'10px 12px',paddingTop:10}}>
+            <div style={{fontSize:11,color:'#bbb',fontWeight:700,textTransform:'uppercase',marginBottom:6}}>Review Timer</div>
+            <div style={{fontSize:26,fontWeight:700,color:'#4870ff'}}>01:51:33</div>
+            <div style={{fontSize:12,color:'#bbb',marginTop:2}}>Running · Session 3</div>
+            <div className="btn btn-o btn-sm" style={{marginTop:8,fontSize:12}}>⏸ Pause</div>
+          </div>
+        </div>
+        <div style={{flex:1,overflowY:'auto',background:'#f7f7fc',padding:'18px 22px'}}>
+          {/* Syllabus Section */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px 18px',marginBottom:18}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+              <div>
+                <div style={{fontSize:17,fontWeight:700}}>Syllabus</div>
+                <div style={{fontSize:13,color:'#888'}}>Requires both TA and Admin confirmation before course can proceed</div>
+              </div>
+              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                <span style={{fontSize:13,color:'#888'}}>Overall status:</span>
+                <Badge label="TA Confirmed" color="green" />
+              </div>
+            </div>
+            <div style={{background:'#f8f8fc',borderRadius:6,border:'1px solid #e4e4ee',overflow:'hidden'}}>
+              <div className="ck-row" style={{background:'#f2f2f8',fontWeight:700,fontSize:12,color:'#777',textTransform:'uppercase',letterSpacing:'0.4px',gridTemplateColumns:'1fr 150px 150px 1fr 120px'}}>
+                <span>Check Item</span><span>TA Status</span><span>Admin Status</span><span>Notes</span><span>Link</span>
+              </div>
+              <div className="ck-row" style={{gridTemplateColumns:'1fr 150px 150px 1fr 120px',background:'white'}}>
+                <span style={{fontWeight:600}}>Transferred into blueprint template</span>
+                <span>
+                  <select className="ck-dd" style={{width:'100%'}}>
+                    <option>TA Confirmed</option>
+                    <option>Pending TA Review</option>
+                    <option>Fix Needed</option>
+                  </select>
+                </span>
+                <span>
+                  <div style={{display:'flex',flexDirection:'column',gap:3}}>
+                    <Badge label="Pending Admin" color="gray" />
+                    <span style={{fontSize:11,color:'#bbb'}}>Admin confirms after TA</span>
+                  </div>
+                </span>
+                <textarea className="ck-dd" style={{height:40,width:'100%',resize:'none',padding:'4px 6px'}} placeholder="Notes..." readOnly></textarea>
+                <span style={{color:'#4870ff',fontSize:13,textDecoration:'underline',cursor:'pointer'}}>View in BS →</span>
+              </div>
+            </div>
+            <div style={{marginTop:12,padding:'10px 14px',background:'#fffbeb',border:'1px solid #fde68a',borderRadius:6,fontSize:13,color:'#92400e'}}>
+              ⚠ Dual confirmation required — this item will show <strong>Pending Admin Confirmation</strong> until Admin reviews and confirms in their review screen.
+            </div>
+          </div>
+          {/* Instructor / Contact */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px 18px',marginBottom:18}}>
+            <div style={{fontSize:17,fontWeight:700,marginBottom:12}}>Instructor & Contact</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'0 16px'}}>
+              <div className="fl"><label>Instructor</label>
+                <select className="fi"><option>Prof. Lee</option><option>Dr. Wong</option></select></div>
+              <div className="fl"><label>Instructor Email (auto-filled)</label>
+                <div className="fi pre">prof.lee@college.edu</div></div>
+              <div className="fl"><label>Comm. Contact (optional)</label>
+                <div className="fi" style={{color:'#aaa',fontSize:13}}>Select communication contact...</div></div>
+            </div>
+          </div>
+          {/* Gradebook Section */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px 18px',marginBottom:18}}>
+            <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>Gradebook</div>
+            <div style={{background:'#f8f8fc',borderRadius:6,border:'1px solid #e4e4ee',overflow:'hidden'}}>
+              <div className="ck-row" style={{background:'#f2f2f8',fontWeight:700,fontSize:12,color:'#777',textTransform:'uppercase',letterSpacing:'0.4px',gridTemplateColumns:'1fr 110px 1fr 140px'}}>
+                <span>Check Item</span><span>Status</span><span>Notes</span><span>Direct Link</span>
+              </div>
+              {[
+                ['Weighted grade categories present','Pass','',''],
+                ['Assignments visible in Gradebook','Pass','',''],
+                ['Quizzes visible in Gradebook','Fix Needed','Quiz 3 not appearing in gradebook view','https://bs.edu/...'],
+                ['Forums visible in Gradebook','N/A','Forum grading not used in this course',''],
+                ['Calculations behave accordingly','Pass','',''],
+                ['Final grade visible','Pass','',''],
+              ].map(([item, status, note, link], i) => (
+                <div key={i} className="ck-row" style={{gridTemplateColumns:'1fr 110px 1fr 140px',background:status==='Fix Needed'?'#fffbf8':'white'}}>
+                  <span style={{fontSize:14}}>{item}</span>
+                  <span><Badge label={status} color={status==='Pass'?'green':status==='Fix Needed'?'orange':status==='Missing'?'red':'gray'} /></span>
+                  <span style={{fontSize:13,color:note?'#444':'#ccc',fontStyle:note?'normal':'italic'}}>{note||'No notes'}</span>
+                  <span>{link?<span style={{fontSize:12,color:'#4870ff',textDecoration:'underline'}}>View in BS →</span>:<span style={{fontSize:12,color:'#ccc'}}>—</span>}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{display:'flex',gap:10}}>
+            <div className="btn btn-o btn-sm">← Review Matrix</div>
+            <div className="btn btn-p btn-sm">Save & Continue to Issue Log →</div>
+          </div>
+        </div>
+        <div className="rp">
+          <div className="rp-block">
+            <div className="rp-title">Syllabus Status</div>
+            <div style={{display:'flex',flexDirection:'column',gap:6}}>
+              {[['TA','TA Confirmed','green'],['Admin','Pending','gray']].map(([r,s,c],i)=>(
+                <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:13}}>
+                  <span style={{color:'#888'}}>{r}</span><Badge label={s} color={c} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rp-block">
+            <div className="rp-title">Gradebook Summary</div>
+            {[['Pass','4','green'],['Fix Needed','1','orange'],['N/A','1','gray']].map(([l,v,c],i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',fontSize:14,marginBottom:5}}>
+                <Badge label={l} color={c} /><strong>{v}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── SCREEN 10: ISSUE LOG ─── */
+const IssueLog = () => {
+  const [open, setOpen] = React.useState(true);
+  const issues = [
+    {id:'#001',type:'Missing File',loc:'Week 5 / Reading List',sev:'Major',owner:'TA',status:'Open',desc:'Week 5 PDF returns 404. File was not migrated.',created:'Alex T.',date:'Sep 10'},
+    {id:'#002',type:'Moodle Reference',loc:'Homepage / Footer',sev:'Minor',owner:'TA',status:'Fixed',desc:'Footer text still says "Moodle Portal". Updated to remove reference.',created:'Alex T.',date:'Sep 10'},
+    {id:'#003',type:'Broken Link',loc:'Week 2 / External Links',sev:'Minor',owner:'TA',status:'Open',desc:'2 external links return 404 — publisher site may have changed URLs.',created:'Alex T.',date:'Sep 11'},
+    {id:'#004',type:'Gradebook Item',loc:'Gradebook / Quiz 3',sev:'Major',owner:'Ed Tech',status:'Escalated',desc:'Quiz 3 not appearing in gradebook. Grade item may need manual creation.',created:'Alex T.',date:'Sep 11'},
+  ];
+  const sevColor = {Major:'red',Minor:'orange',Critical:'red'};
+  const statusColor = {Open:'blue',Fixed:'green',Escalated:'red',Resolved:'gray'};
+  return (
+    <div className="wf" style={{width:1280,height:900,display:'flex'}}>
+      <Sidebar role="ta" />
+      <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+        <div className="topbar" style={{height:'auto',padding:'10px 20px',gap:8}}>
+          <div style={{flex:1}}>
+            <div style={{display:'flex',gap:10,alignItems:'center'}}>
+              <span style={{fontSize:18,fontWeight:700}}>BIO 101-A</span>
+              <span style={{fontSize:15,color:'#666'}}>Issue Log</span>
+              <Badge label="In Progress" color="blue" />
+            </div>
+          </div>
+          <div className="btn btn-p btn-sm">+ New Issue</div>
+        </div>
+        <div style={{flex:1,display:'flex',overflow:'hidden'}}>
+          <div className="steps">
+            {[['1','Metadata','done'],['2','Review Matrix','done'],['3','Syllabus & GB','done'],['4','Issue Log','act'],['5','Submit','pend']].map(([n,l,s],i)=>(
+              <div key={i} className={`step${s==='act'?' sa':''}`}>
+                <div className={`sdot sdot-${s}`}>{s==='done'?'✓':n}</div>
+                <div><div className="slabel">{l}</div></div>
+              </div>
+            ))}
+          </div>
+          <div style={{flex:1,display:'flex',overflow:'hidden'}}>
+            {/* Issue table */}
+            <div style={{flex:1,padding:'16px 18px',overflowY:'auto',background:'#f7f7fc'}}>
+              <div style={{display:'flex',gap:10,marginBottom:14,flexWrap:'wrap'}}>
+                <input className="fbar-in" placeholder="🔍 Search issues..." style={{width:200}} readOnly />
+                <select className="fbar-in"><option>All Statuses</option><option>Open</option><option>Fixed</option><option>Escalated</option></select>
+                <select className="fbar-in"><option>All Severity</option><option>Major</option><option>Minor</option></select>
+                <select className="fbar-in"><option>All Owners</option><option>TA</option><option>Ed Tech</option><option>IT</option></select>
+              </div>
+              <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,overflow:'hidden'}}>
+                <table className="tbl">
+                  <thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Severity</th><th>Owner</th><th>Status</th><th>Created</th><th>Date</th></tr></thead>
+                  <tbody>{issues.map((iss,i)=>(
+                    <tr key={i} style={{cursor:'pointer',background:open&&i===0?'#f0f4ff':''}} onClick={()=>setOpen(true)}>
+                      <td style={{color:'#4870ff',fontWeight:700}}>{iss.id}</td>
+                      <td>{iss.type}</td>
+                      <td style={{fontSize:13,color:'#666'}}>{iss.loc}</td>
+                      <td><Badge label={iss.sev} color={sevColor[iss.sev]||'gray'} /></td>
+                      <td style={{fontSize:13}}>{iss.owner}</td>
+                      <td><Badge label={iss.status} color={statusColor[iss.status]||'gray'} /></td>
+                      <td style={{fontSize:13,color:'#888'}}>{iss.created}</td>
+                      <td style={{fontSize:13,color:'#888'}}>{iss.date}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+              <div style={{fontSize:13,color:'#aaa',marginTop:10}}>4 issues · 2 open · 1 fixed · 1 escalated</div>
+            </div>
+            {/* Side drawer */}
+            {open && (
+              <div style={{width:340,borderLeft:'1.5px solid #e4e4ee',background:'white',display:'flex',flexDirection:'column',overflow:'hidden'}}>
+                <div style={{padding:'14px 16px',borderBottom:'1px solid #eee',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:16}}>#001 · Missing File</div>
+                    <div style={{fontSize:12,color:'#aaa',marginTop:2}}>Week 5 / Reading List · Created Sep 10 by Alex T.</div>
+                  </div>
+                  <div style={{cursor:'pointer',fontSize:16,color:'#bbb'}} onClick={()=>setOpen(false)}>✕</div>
+                </div>
+                <div style={{flex:1,overflowY:'auto',padding:'14px 16px'}}>
+                  <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:14}}>
+                    <Badge label="Major" color="red" />
+                    <Badge label="Open" color="blue" />
+                    <Badge label="Owner: TA" color="gray" />
+                  </div>
+                  <div className="rp-block" style={{marginBottom:14}}>
+                    <div className="rp-title">Description</div>
+                    <div style={{fontSize:14,color:'#333',lineHeight:1.5}}>Week 5 PDF returns 404. File was not migrated correctly from Moodle. Source file may need to be re-uploaded manually.</div>
+                  </div>
+                  <div className="rp-block" style={{marginBottom:14}}>
+                    <div className="rp-title">Location</div>
+                    <div style={{fontSize:13,color:'#4870ff',textDecoration:'underline',cursor:'pointer'}}>Week 5 → Reading List → File Block</div>
+                  </div>
+                  <div className="rp-block" style={{marginBottom:14}}>
+                    <div className="rp-title">Status History</div>
+                    {[['Open','Alex T.','Sep 10, 9:42am'],['Assigned to TA','Maria S.','Sep 10, 11:00am']].map(([e,u,t],i)=>(
+                      <div key={i} style={{display:'flex',gap:8,marginBottom:6,fontSize:13}}>
+                        <span style={{color:'#bbb'}}>•</span>
+                        <span><strong>{e}</strong> — {u}<br/><span style={{color:'#aaa'}}>{t}</span></span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="rp-block" style={{marginBottom:14}}>
+                    <div className="rp-title">Comments</div>
+                    <div style={{background:'#f5f5fa',borderRadius:6,padding:'8px 10px',marginBottom:8,fontSize:13}}>
+                      <div style={{fontWeight:700,marginBottom:2}}>Alex T. <span style={{color:'#bbb',fontWeight:400}}>Sep 10</span></div>
+                      <div>Confirmed file is missing. Original Moodle file path: /course/files/week5/reading.pdf</div>
+                    </div>
+                    <div className="fta" style={{height:48,fontSize:13,color:'#aaa'}}>Add a comment...</div>
+                  </div>
+                  <div className="rp-block">
+                    <div className="rp-title">Attachment</div>
+                    <div style={{border:'1.5px dashed #ccc',borderRadius:6,padding:'10px',textAlign:'center',fontSize:13,color:'#bbb'}}>📎 Drop screenshot or file</div>
+                  </div>
+                </div>
+                <div style={{padding:'12px 16px',borderTop:'1px solid #eee',display:'flex',gap:8}}>
+                  <select className="fbar-in" style={{flex:1}}>
+                    <option>Change status...</option>
+                    <option>Mark Fixed</option>
+                    <option>Escalate</option>
+                    <option>Resolve</option>
+                  </select>
+                  <div className="btn btn-g btn-sm">Mark Fixed</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── SCREEN 11: SUPER ADMIN DASHBOARD ─── */
+const SuperAdminDashboard = () => (
+  <div className="wf" style={{width:1280,height:860,display:'flex',background:'#f7f7fc'}}>
+    <Sidebar role="admin" />
+    <div style={{flex:1,display:'flex',flexDirection:'column'}}>
+      <div className="topbar"><div className="topbar-title">Super Admin — System Overview</div>
+        <div className="btn btn-o btn-sm">Export Report</div>
+        <div className="btn btn-o btn-sm">Manage Users</div>
+      </div>
+      <div style={{flex:1,padding:'20px 24px',overflowY:'auto'}}>
+        {/* Top stats */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:20}}>
+          {[['47','Total Courses','This term'],['12','In Progress','TA reviewing'],['8','Pending Admin','Queue'],['6','With Instructor','Awaiting approval'],['21','Completed','Final approved']].map(([v,l,s],i)=>(
+            <div className="sc" key={i}><div className="sc-val" style={{fontSize:26}}>{v}</div><div className="sc-lbl">{l}</div><div className="sc-sub">{s}</div></div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+          {/* Status breakdown */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px'}}>
+            <div style={{fontWeight:700,fontSize:15,marginBottom:12}}>Courses by Status</div>
+            {[['Not Started','5','gray'],['TA In Progress','12','blue'],['Pending Admin','8','yellow'],['Admin Fix Req.','3','orange'],['Sent to Instructor','6','purple'],['Final Approved','21','green']].map(([l,v,c],i)=>(
+              <div key={i} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                <Badge label={l} color={c} />
+                <div style={{flex:1,height:12,background:'#f0f0f6',borderRadius:6,overflow:'hidden'}}>
+                  <div style={{height:'100%',background:c==='green'?'#22c55e':c==='blue'?'#4870ff':c==='yellow'?'#f59e0b':c==='orange'?'#f97316':c==='purple'?'#a855f7':'#d0d0d0',width:`${[10,26,17,6,13,45][i]}%`,borderRadius:6}}></div>
+                </div>
+                <span style={{fontWeight:700,fontSize:14,width:20,textAlign:'right'}}>{v}</span>
+              </div>
+            ))}
+          </div>
+          {/* Common issues */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px'}}>
+            <div style={{fontWeight:700,fontSize:15,marginBottom:12}}>Most Common Issue Types</div>
+            {[['Missing File / Attachment','18'],['Moodle Reference Remaining','14'],['Broken External Link','12'],['Gradebook Item Missing','9'],['Module Ordering Issue','6'],['Embedded Media Failure','4']].map(([l,v],i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8,fontSize:14}}>
+                <span style={{color:'#444'}}>{l}</span>
+                <span style={{fontWeight:700,background:'#f0f0f6',padding:'1px 9px',borderRadius:20,fontSize:13}}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+          {/* TA performance */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px'}}>
+            <div style={{fontWeight:700,fontSize:15,marginBottom:12}}>TA Review Times (Avg)</div>
+            <table className="tbl">
+              <thead><tr><th>TA</th><th>Courses</th><th>Avg Time</th><th>Avg Issues</th></tr></thead>
+              <tbody>{[['Alex T.','8','2h 14m','2.1'],['Sam R.','6','3h 02m','3.8'],['Lee W.','5','1h 48m','1.4'],['Jordan M.','4','2h 33m','2.9']].map(([ta,c,t,iss],i)=>(
+                <tr key={i}><td>{ta}</td><td>{c}</td><td style={{fontWeight:600}}>{t}</td><td>{iss}</td></tr>
+              ))}</tbody>
+            </table>
+          </div>
+          {/* Stuck courses */}
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px'}}>
+            <div style={{fontWeight:700,fontSize:15,marginBottom:12}}>Courses Stuck Longest</div>
+            <table className="tbl">
+              <thead><tr><th>Course</th><th>Status</th><th>Days Stuck</th></tr></thead>
+              <tbody>{[['MATH 301-A','Fix Requested','9d','red'],['PSYC 200','Pending Admin','6d','orange'],['CHEM 110','TA In Progress','5d','yellow'],['ENG 200','Not Started','4d','gray']].map(([c,s,d,col],i)=>(
+                <tr key={i}><td><strong>{c}</strong></td><td><Badge label={s} color={col} /></td><td style={{fontWeight:700,color:'#b91c1c'}}>{d}</td></tr>
+              ))}</tbody>
+            </table>
+          </div>
+        </div>
+        {/* Quick actions */}
+        <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px',marginTop:16}}>
+          <div style={{fontWeight:700,fontSize:15,marginBottom:12}}>Quick Actions</div>
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+            {['Manage Users & Roles','Create Course Batch','Configure Checklist Templates','Configure Dropdown Values','View Audit Logs','Export All Data'].map((l,i)=>(
+              <div key={i} className="btn btn-o btn-sm">{l}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─── SCREEN 12: WORKFLOW DEMO ─── */
+const WorkflowDemo = () => {
+  const steps = [
+    {n:1,status:'course_created',label:'Course Created',sub:'course_created → assigned_to_ta',role:'admin / super_admin',bg:'#f0f0f6',tc:'#555',
+      actors:['Admin or Super Admin creates course record','Admin assigns a TA to the course'],
+      note:'Transition: course_created → assigned_to_ta'},
+    {n:2,status:'assigned_to_ta',label:'Assigned to TA',sub:'assigned_to_ta → ta_review_in_progress',role:'ta / admin / super_admin',bg:'#eef2ff',tc:'#4059c7',
+      actors:['TA sees course in dashboard with status: Assigned to TA','TA clicks “Start Review” — no auto-start'],
+      note:'TA must explicitly trigger start — no auto-start on assignment'},
+    {n:3,status:'ta_review_in_progress',label:'TA Review In Progress',sub:'TA completes all 4 forms',role:'ta',bg:'#eef2ff',tc:'#4059c7',
+      actors:['TA fills Metadata → Review Matrix → Syllabus & GB → Issue Log','Timer tracked per session','Issues logged for Fix Needed / Missing items'],
+      note:'Admin / super_admin can also move course to in_progress directly'},
+    {n:4,status:'submitted_to_admin',label:'Submitted to Admin',sub:'ta_review_in_progress → submitted_to_admin',role:'ta / super_admin',bg:'#fffbeb',tc:'#b45309',
+      actors:['TA clicks Submit — forms locked','Admin notified in Review Queue','Admin sees all TA entries, issues, notes'],
+      note:'Only ta and super_admin can trigger this transition'},
+    {n:5,status:'admin_changes_requested',label:'Changes Requested',sub:'submitted_to_admin → admin_changes_requested',role:'admin / super_admin',bg:'#fff7ed',tc:'#c2410c',
+      actors:['Admin finds issues needing TA fixes','Admin adds notes, clicks Request Changes','TA notified — course returns to ta_review_in_progress'],
+      note:'Branch loop: admin_changes_requested → ta_review_in_progress (TA re-edits and resubmits)'},
+    {n:6,status:'ready_for_instructor',label:'Ready for Instructor',sub:'submitted_to_admin → ready_for_instructor',role:'admin / super_admin',bg:'#faf5ff',tc:'#7e22ce',
+      actors:['Admin confirms syllabus (dual-confirmation complete)','Admin approves all forms and issues','Course enters Comm Dept queue as ready_for_instructor'],
+      note:'Happy path: Admin Approve → ready_for_instructor (NOT directly to sent_to_instructor)'},
+    {n:7,status:'sent_to_instructor',label:'Sent to Instructor',sub:'ready_for_instructor → sent_to_instructor',role:'communications / admin / super_admin',bg:'#f0fdf4',tc:'#15803d',
+      actors:['Comm Dept sends package to instructor','Instructor receives notification + email','Admin can bypass Comm Dept as a fallback (likely intentional)'],
+      note:'Confirm: admin bypassing Comm Dept on this transition — intentional fallback?'},
+    {n:8,status:'instructor_questions',label:'Instructor Questions',sub:'sent_to_instructor → instructor_questions',role:'instructor / super_admin',bg:'#fff7ed',tc:'#c2410c',
+      actors:['Instructor posts questions in thread','Comm Dept and Admin alerted'],
+      note:'Instructor CANNOT self-resolve — only communications / admin / super_admin can return to sent_to_instructor'},
+    {n:9,status:'sent_to_instructor',label:'Questions Resolved',sub:'instructor_questions → sent_to_instructor',role:'communications / admin / super_admin',bg:'#f0fdf4',tc:'#15803d',
+      actors:['Comm Dept coordinates resolution','Comm Dept moves back to sent_to_instructor','Instructor notified'],
+      note:'Instructor cannot un-ask their own question. Comm Dept closes the loop.'},
+    {n:10,status:'instructor_approved',label:'Instructor Approved',sub:'sent_to_instructor → instructor_approved',role:'instructor / super_admin',bg:'#fffbeb',tc:'#b45309',
+      actors:['Instructor clicks Approve Course','Admin notified: instructor approved'],
+      note:'No hard rejection — instructor can only approve or ask questions. Intentional?'},
+    {n:11,status:'final_approved',label:'Final Approved',sub:'instructor_approved → final_approved',role:'admin / super_admin',bg:'#dcfce7',tc:'#15803d',
+      actors:['Admin gives final sign-off','Course status: final_approved','Super Admin archives / marks ready for staging'],
+      note:'isFinalStatus = true. isInstructorVisibleStatus = true.'},
+  ];
+  const [active, setActive] = React.useState(0);
+  const roleColors = {TA:'#4870ff',Admin:'#7c3aed','Comm Dept':'#16a34a',Instructor:'#ea580c',System:'#888',All:'#333'};
+  const s = steps[active];
+  return (
+    <div className="wf" style={{width:1280,height:700,display:'flex',flexDirection:'column',background:'#f7f7fc'}}>
+      <div style={{padding:'14px 24px',background:'white',borderBottom:'1.5px solid #e4e4ee',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <div style={{fontSize:19,fontWeight:700}}>Workflow Demo — Full Review Lifecycle</div>
+          <div style={{fontSize:13,color:'#888'}}>Step {active+1} of {steps.length} · Click any step or use the arrows to walk through the flow</div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <div className="btn btn-o btn-sm" onClick={()=>setActive(Math.max(0,active-1))}>← Prev</div>
+          <div className="btn btn-p btn-sm" onClick={()=>setActive(Math.min(steps.length-1,active+1))}>Next →</div>
+        </div>
+      </div>
+      <div style={{flex:1,display:'flex',overflow:'hidden'}}>
+        {/* Step list */}
+        <div style={{width:280,borderRight:'1px solid #e4e4ee',background:'white',overflowY:'auto',padding:'8px 0'}}>
+          {steps.map((st,i)=>(
+            <div key={i} onClick={()=>setActive(i)} style={{padding:'9px 14px',cursor:'pointer',display:'flex',gap:10,alignItems:'flex-start',background:i===active?'#eef2ff':'transparent',borderLeft:i===active?'3px solid #4870ff':'3px solid transparent'}}>
+              <div style={{width:22,height:22,borderRadius:'50%',background:i<active?'#22c55e':i===active?'#4870ff':'#e0e0ec',color:'white',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0}}>{i<active?'✓':i+1}</div>
+              <div>
+                <div style={{fontSize:14,fontWeight:600,color:i===active?'#111':'#444'}}>{st.label}</div>
+                <div style={{fontSize:12,color:'#aaa'}}>{st.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Step detail */}
+        <div style={{flex:1,padding:'28px 32px',display:'flex',flexDirection:'column',gap:20}}>
+          <div style={{display:'flex',gap:14,alignItems:'flex-start'}}>
+            <div style={{width:48,height:48,borderRadius:'50%',background:s.bg,border:`2px solid ${s.tc}`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:18,color:s.tc,flexShrink:0}}>{s.n}</div>
+            <div>
+              <div style={{fontSize:24,fontWeight:700,color:'#111'}}>{s.label}</div>
+              <div style={{fontSize:13,color:'#888',marginTop:2,fontFamily:'monospace'}}>{s.sub}</div>
+              <div style={{marginTop:8,display:'flex',gap:8,alignItems:'center'}}>
+                <span style={{fontSize:13,color:'#888'}}>Role:</span>
+                <span style={{fontWeight:700,color:roleColors[s.role.split(' / ')[0]]||'#333'}}>{s.role}</span>
+                {s.status && <SBadge status={s.status} />}
+              </div>
+            </div>
+          </div>
+          <div style={{background:'white',border:'1.5px solid #e4e4ee',borderRadius:8,padding:'16px 20px'}}>
+            <div style={{fontSize:12,fontWeight:700,color:'#aaa',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:10}}>What happens at this step</div>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {s.actors.map((a,i)=>(
+                <div key={i} style={{display:'flex',gap:10,alignItems:'flex-start',fontSize:15}}>
+                  <span style={{color:'#4870ff',fontWeight:700,marginTop:1}}>→</span>
+                  <span>{a}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {s.note && (
+            <div style={{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:8,padding:'12px 16px'}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#92400e',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:4}}>⚠️ Note / Gap to verify</div>
+              <div style={{fontSize:14,color:'#78350f'}}>{s.note}</div>
+            </div>
+          )}
+          {/* Progress bar */}
+          <div style={{marginTop:'auto'}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:12,color:'#aaa',marginBottom:5}}>
+              <span>Workflow progress</span><span>{Math.round((active+1)/steps.length*100)}%</span>
+            </div>
+            <div style={{height:8,background:'#e4e4ee',borderRadius:6,overflow:'hidden'}}>
+              <div style={{height:'100%',background:'#4870ff',borderRadius:6,width:`${(active+1)/steps.length*100}%`,transition:'width 0.3s'}}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── APP ─── */
+const App = () => (
+  <DCCanvas title="Brightspace Migration Review — Wireframes">
+    <DCSection id="auth" title="Authentication">
+      <DCArtboard id="login" label="01 · Login / Role Routing" width={900} height={620}>
+        <LoginScreen />
+      </DCArtboard>
+    </DCSection>
+    <DCSection id="ta" title="TA Role">
+      <DCArtboard id="ta-dash" label="02 · TA Dashboard" width={1280} height={820}>
+        <TADashboard />
+      </DCArtboard>
+      <DCArtboard id="ta-meta" label="03 · Course Workspace — Metadata" width={1280} height={900}>
+        <TAWorkspaceMetadata />
+      </DCArtboard>
+      <DCArtboard id="ta-matrix" label="04 · Course Workspace — Review Matrix" width={1280} height={980}>
+        <TAReviewMatrix />
+      </DCArtboard>
+      <DCArtboard id="ta-syllabus" label="05 · Course Workspace — Syllabus & Gradebook" width={1280} height={980}>
+        <SyllabusGradebook />
+      </DCArtboard>
+      <DCArtboard id="ta-issues" label="06 · Issue Log + Side Drawer" width={1280} height={900}>
+        <IssueLog />
+      </DCArtboard>
+    </DCSection>
+    <DCSection id="admin" title="Admin Role">
+      <DCArtboard id="admin-dash" label="07 · Admin Dashboard — Review Queue" width={1280} height={820}>
+        <AdminDashboard />
+      </DCArtboard>
+      <DCArtboard id="admin-review" label="08 · Admin Review Screen — Thread Tab" width={1280} height={940}>
+        <AdminReview />
+      </DCArtboard>
+    </DCSection>
+    <DCSection id="comm-inst" title="Comm Dept & Instructor">
+      <DCArtboard id="comm" label="09 · Communication Dept — Handoff Queue" width={1280} height={800}>
+        <CommDeptDashboard />
+      </DCArtboard>
+      <DCArtboard id="instructor" label="10 · Instructor Dashboard" width={1280} height={860}>
+        <InstructorDashboard />
+      </DCArtboard>
+    </DCSection>
+    <DCSection id="superadmin" title="Super Admin">
+      <DCArtboard id="super-admin" label="11 · Super Admin — System Overview" width={1280} height={860}>
+        <SuperAdminDashboard />
+      </DCArtboard>
+    </DCSection>
+  </DCCanvas>
+);
+
+const { DesignCanvas, DCSection, DCArtboard } = window;
+const DCCanvas = DesignCanvas;
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "font": "System UI",
+  "theme": "Blue Steel",
+  "density": "relaxed"
+}/*EDITMODE-END*/;
+
+const THEMES = {
+  'Blue Steel':   { accent:'#3b63ee', sidebar:'#1c1c2e', sidebarText:'#9090b8' },
+  'Slate':        { accent:'#475569', sidebar:'#1e293b', sidebarText:'#94a3b8' },
+  'Teal':         { accent:'#0d9488', sidebar:'#134e4a', sidebarText:'#99d6d0' },
+  'Indigo':       { accent:'#6366f1', sidebar:'#1e1b3a', sidebarText:'#a5b4fc' },
+  'Warm Neutral': { accent:'#b45309', sidebar:'#292524', sidebarText:'#a8a29e' },
+};
+
+const applyTheme = (t) => {
+  let el = document.getElementById('theme-override');
+  if (!el) { el = document.createElement('style'); el.id = 'theme-override'; document.head.appendChild(el); }
+  el.textContent = `
+    .sb { background: ${t.sidebar} !important; }
+    .sb-logo-role, .ni, .sb-uname { color: ${t.sidebarText} !important; }
+    .ni.a { background: ${t.accent}22 !important; color: ${t.accent}dd !important; border-left-color: ${t.accent} !important; }
+    .btn-p { background: ${t.accent} !important; border-color: ${t.accent} !important; }
+    .tab.ta { border-bottom-color: ${t.accent} !important; color: ${t.accent} !important; }
+    .sdot-act { background: ${t.accent} !important; }
+    .step.sa { background: ${t.accent}18 !important; }
+    .sc-sub { color: ${t.accent} !important; }
+    .badge.bg-blue { background: ${t.accent}18 !important; color: ${t.accent} !important; border-color: ${t.accent}44 !important; }
+  `;
+};
+
+const WireframeTweaks = () => {
+  const { TweaksPanel, TweakSection, TweakSelect, useTweaks } = window;
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    const fontFamilies = {
+      'System UI': 'system-ui, -apple-system, sans-serif',
+      'Caveat': "'Caveat', cursive",
+      'Patrick Hand': "'Patrick Hand', cursive",
+      'Kalam': "'Kalam', cursive",
+    };
+    const ff = fontFamilies[tweaks.font] || 'system-ui, sans-serif';
+    let fo = document.getElementById('font-override');
+    if (!fo) { fo = document.createElement('style'); fo.id = 'font-override'; document.head.appendChild(fo); }
+    fo.textContent =
+      `body, .wf, .wf *, .sb, .sb *, select, input, textarea { font-family: ${ff} !important; }`;
+  }, [tweaks.font]);
+
+  React.useEffect(() => {
+    const t = THEMES[tweaks.theme] || THEMES['Blue Steel'];
+    applyTheme(t);
+  }, [tweaks.theme]);
+
+  // Apply on mount
+  React.useEffect(() => {
+    applyTheme(THEMES[TWEAK_DEFAULTS.theme]);
+  }, []);
+
+  return (
+    <TweaksPanel>
+      <TweakSection label="Color Theme">
+        <TweakSelect id="theme" label="Theme"
+          options={Object.keys(THEMES)}
+          value={tweaks.theme} onChange={v => setTweak('theme', v)} />
+        <div style={{display:'flex',gap:6,marginTop:8,flexWrap:'wrap'}}>
+          {Object.entries(THEMES).map(([name, t]) => (
+            <div key={name} onClick={() => setTweak('theme', name)}
+              title={name}
+              style={{width:28,height:28,borderRadius:6,background:t.accent,cursor:'pointer',border:tweaks.theme===name?'3px solid #111':'3px solid transparent',boxSizing:'border-box'}}>
+            </div>
+          ))}
+        </div>
+      </TweakSection>
+      <TweakSection label="Font">
+        <TweakSelect id="font" label="Wireframe Font"
+          options={['System UI','Caveat','Patrick Hand','Kalam']}
+          value={tweaks.font} onChange={v => setTweak('font', v)} />
+      </TweakSection>
+      <TweakSection label="Density">
+        <TweakSelect id="density" label="Row Density"
+          options={['compact','normal','relaxed']}
+          value={tweaks.density} onChange={v => setTweak('density', v)} />
+      </TweakSection>
+    </TweaksPanel>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('tweaks')).render(<WireframeTweaks />);
+</script>
+<div id="tweaks"></div>
+</body>
+</html>
