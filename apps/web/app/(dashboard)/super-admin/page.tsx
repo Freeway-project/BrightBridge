@@ -1,20 +1,24 @@
 import { Topbar } from "@/components/layout/topbar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SuperAdminShell } from "@/components/super-admin/super-admin-shell"
+import { getSuperAdminData } from "@/lib/super-admin/queries"
+import { getAuthContext } from "@/lib/auth/context"
+import { redirect } from "next/navigation"
 
-export default function SuperAdminDashboardPage() {
+export default async function SuperAdminDashboardPage() {
+  const context = await getAuthContext()
+
+  if (context.kind !== "profile" || context.profile.role !== "super_admin") {
+    redirect("/dashboard")
+  }
+
+  const data = await getSuperAdminData()
+
   return (
     <>
-      <Topbar title="System Overview" />
-      <main className="flex-1 overflow-y-auto p-6">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-base">Super Admin — System Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Coming soon.</p>
-          </CardContent>
-        </Card>
-      </main>
+      <Topbar title="System Overview" subtitle="Super Admin" />
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <SuperAdminShell data={data} />
+      </div>
     </>
   )
 }
