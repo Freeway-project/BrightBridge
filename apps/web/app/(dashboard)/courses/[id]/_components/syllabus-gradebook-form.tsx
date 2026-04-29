@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ReviewTimer } from "./review-timer"
 
 type SyllabusGradebookFormProps = {
   courseId: string
@@ -71,6 +72,7 @@ export function SyllabusGradebookForm({
 }: SyllabusGradebookFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
+  const timerStorageKey = `coursebridge:${courseId}:syllabus-gradebook-timer`
   const form = useForm<SyllabusGradebookFormValues>({
     resolver: zodResolver(syllabusGradebookSchema),
     defaultValues,
@@ -94,9 +96,12 @@ export function SyllabusGradebookForm({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
-          <SaveState isPending={isPending} status={status} />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
+            <SaveState isPending={isPending} status={status} />
+          </div>
+          <ReviewTimer label="Syllabus & gradebook time" storageKey={timerStorageKey} />
         </div>
       </CardHeader>
       <CardContent>

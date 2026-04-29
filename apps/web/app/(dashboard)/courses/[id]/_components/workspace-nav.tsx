@@ -6,7 +6,6 @@ import { CheckCircle2, Circle } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
-import { ReviewTimer } from "./review-timer"
 
 const STEPS = [
   { label: "Metadata", href: "metadata" },
@@ -65,7 +64,6 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
           })}
         </nav>
 
-        <ReviewTimer storageKey={`coursebridge:${courseId}:review-timer`} />
       </div>
     </aside>
   )
