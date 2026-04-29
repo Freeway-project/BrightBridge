@@ -36,45 +36,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
+import { CHECKLIST } from "@/lib/workspace/constants"
+
 type ReviewMatrixFormProps = {
   courseId: string
   defaultValues: ReviewMatrixFormValues
   initialIssues: Issue[]
 }
-
-type ChecklistSection = {
-  title: string
-  items: { id: string; label: string }[]
-}
-
-const CHECKLIST: ChecklistSection[] = [
-  {
-    title: "A. Course Shell & Navigation",
-    items: [
-      { id: "A1", label: "Course banner / hero image present and correctly sized" },
-      { id: "A2", label: "Navigation bar matches Brightspace standard template" },
-      { id: "A3", label: "Welcome page with instructor intro and course overview" },
-      { id: "A4", label: "Module folders follow naming convention" },
-    ],
-  },
-  {
-    title: "B. Pages & Files",
-    items: [
-      { id: "B1", label: "All page content readable and correctly formatted" },
-      { id: "B2", label: "Files accessible (no broken download links)" },
-      { id: "B3", label: "Images have alt text" },
-      { id: "B4", label: "No Moodle-specific UI artifacts visible" },
-    ],
-  },
-  {
-    title: "C. Links & Embedded Content",
-    items: [
-      { id: "C1", label: "All hyperlinks resolve (no 404s)" },
-      { id: "C2", label: "Embedded videos play correctly" },
-      { id: "C3", label: "External tools (Turnitin, Echo360, etc.) configured" },
-    ],
-  },
-]
 
 const STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string }[] = [
   { value: "pass", label: "Pass" },

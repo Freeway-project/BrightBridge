@@ -11,8 +11,10 @@ import type {
 } from "@/lib/workspace/types"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ChevronDown, ChevronRight, ExternalLink, AlertTriangle, CheckCircle2, MinusCircle, HelpCircle, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ITEM_LABELS, SYLLABUS_ITEM_LABELS, GRADEBOOK_ITEM_LABELS } from "@/lib/workspace/constants"
 
 type Props = {
   course: AdminCourseRow
@@ -144,6 +146,14 @@ const STATUS_COLOR: Record<string, string> = {
   na: "text-muted-foreground",
 }
 
+const STATUS_ICON: Record<string, React.ReactNode> = {
+  pass: <CheckCircle2 className="size-3.5 text-green-600" />,
+  fix_needed: <AlertTriangle className="size-3.5 text-orange-600" />,
+  missing: <AlertTriangle className="size-3.5 text-red-600" />,
+  escalate: <HelpCircle className="size-3.5 text-purple-600" />,
+  na: <MinusCircle className="size-3.5 text-muted-foreground" />,
+}
+
 function ReviewMatrixCard({
   data,
   responseStatus,
@@ -151,6 +161,7 @@ function ReviewMatrixCard({
   data: ReviewMatrixResponseData | undefined
   responseStatus: "draft" | "submitted" | null
 }) {
+  const [showAll, setShowAll] = useState(false)
   const items = data?.items ?? []
   const counts = items.reduce<Record<string, number>>((acc, item) => {
     acc[item.status] = (acc[item.status] ?? 0) + 1
@@ -163,43 +174,95 @@ function ReviewMatrixCard({
     <CollapsibleCard title="Review Matrix" chip={<SectionStatusChip responseStatus={responseStatus} />}>
       {items.length > 0 ? (
         <div className="space-y-4">
-          {/* Summary row */}
-          <div className="flex flex-wrap gap-3">
-            {Object.entries(counts).map(([status, count]) => (
-              <span key={status} className={cn("text-sm font-medium", STATUS_COLOR[status])}>
-                {count} {STATUS_LABEL[status] ?? status}
-              </span>
+          {/* Summary bar */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md border border-border bg-muted/20 px-3 py-2">
+            {Object.entries(STATUS_LABEL).map(([status, label]) => (
+              <div key={status} className="flex items-center gap-1.5">
+                {STATUS_ICON[status]}
+                <span className="text-xs font-medium">
+                  {counts[status] ?? 0} {label}
+                </span>
+              </div>
             ))}
           </div>
 
-          {/* Flagged items */}
-          {flagged.length > 0 && (
-            <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Items needing attention</p>
-              {flagged.map((item) => (
-                <div key={item.item_id} className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-xs font-medium", STATUS_COLOR[item.status])}>
-                      {STATUS_LABEL[item.status]}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{item.item_id}</span>
-                  </div>
-                  {item.notes && <p className="text-sm text-foreground pl-1">{item.notes}</p>}
-                  {item.direct_link && (
-                    <a
-                      href={item.direct_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline pl-1"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {item.direct_link}
-                    </a>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {showAll ? "All checklist items" : "Items needing attention"}
+            </p>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-7 text-[10px] uppercase font-bold tracking-tight"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAll(!showAll);
+              }}
+            >
+              {showAll ? "Show flagged only" : "Show all items"}
+            </Button>
+          </div>
+
+          <div className="grid gap-2">
+            {(showAll ? items : flagged).length > 0 ? (
+              (showAll ? items : flagged).map((item) => (
+                <div 
+                  key={item.item_id} 
+                  className={cn(
+                    "group relative flex flex-col gap-1 rounded-md border border-border p-3 transition-colors hover:bg-muted/30",
+                    item.status !== "pass" && item.status !== "na" ? "bg-card shadow-sm" : "bg-muted/10 opacity-75"
                   )}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="mt-0.5 shrink-0">
+                        {STATUS_ICON[item.status]}
+                      </div>
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px] font-mono py-0 h-4">
+                            {item.item_id}
+                          </Badge>
+                          <span className={cn("text-[10px] font-bold uppercase", STATUS_COLOR[item.status])}>
+                            {STATUS_LABEL[item.status]}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-foreground leading-snug">
+                          {ITEM_LABELS[item.item_id] ?? item.item_id}
+                        </p>
+                        {item.notes && (
+                          <div className="mt-2 flex items-start gap-2 rounded-sm bg-orange-500/5 p-2 border-l-2 border-orange-500/30">
+                            <p className="text-sm text-muted-foreground italic leading-relaxed">
+                              &ldquo;{item.notes}&rdquo;
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {item.direct_link && (
+                      <a
+                        href={item.direct_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors border border-transparent hover:border-border"
+                        onClick={(e) => e.stopPropagation()}
+                        title="Open direct link"
+                      >
+                        <ExternalLink className="size-4" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="text-center py-8 border-2 border-dashed rounded-md bg-muted/5">
+                <CheckCircle2 className="mx-auto size-8 text-green-500/50 mb-2" />
+                <p className="text-sm font-medium text-muted-foreground">All items passed!</p>
+                <p className="text-xs text-muted-foreground/60">No flags or issues to display in this view.</p>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">No data saved yet.</p>
@@ -208,16 +271,16 @@ function ReviewMatrixCard({
   )
 }
 
-const SYLLABUS_STATUS_ICON: Record<string, string> = {
-  confirmed: "✓",
-  fix_needed: "⚠",
-  pending: "—",
+const SYLLABUS_STATUS_ICON: Record<string, React.ReactNode> = {
+  confirmed: <CheckCircle2 className="size-3.5 text-green-600" />,
+  fix_needed: <AlertTriangle className="size-3.5 text-orange-600" />,
+  pending: <Clock className="size-3.5 text-muted-foreground" />,
 }
 
-const SYLLABUS_STATUS_COLOR: Record<string, string> = {
-  confirmed: "text-green-600",
-  fix_needed: "text-orange-600",
-  pending: "text-muted-foreground",
+const SYLLABUS_STATUS_LABEL: Record<string, string> = {
+  confirmed: "Confirmed",
+  fix_needed: "Fix Needed",
+  pending: "Pending",
 }
 
 function SyllabusCard({
@@ -227,50 +290,164 @@ function SyllabusCard({
   data: SyllabusGradebookResponseData | undefined
   responseStatus: "draft" | "submitted" | null
 }) {
+  const [showAll, setShowAll] = useState(false)
   const syllabusItems = data?.syllabus_items ?? []
   const gradebookItems = data?.gradebook_items ?? []
+
+  const flaggedSyllabus = syllabusItems.filter((i) => i.ta_status === "fix_needed")
+  const flaggedGradebook = gradebookItems.filter((i) => i.status !== "pass" && i.status !== "na")
+
+  const totalFlagged = flaggedSyllabus.length + flaggedGradebook.length
 
   return (
     <CollapsibleCard title="Syllabus & Gradebook" chip={<SectionStatusChip responseStatus={responseStatus} />}>
       {data ? (
-        <div className="space-y-5">
-          {data.instructor_email && (
-            <Field label="Instructor" value={data.instructor_email} />
-          )}
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4">
+            {data.instructor_email && (
+              <Field label="Instructor" value={data.instructor_email} />
+            )}
 
-          {syllabusItems.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Syllabus Items</p>
-              {syllabusItems.map((item) => (
-                <div key={item.item_id} className="flex items-start gap-2">
-                  <span className={cn("w-4 shrink-0 text-sm font-bold", SYLLABUS_STATUS_COLOR[item.ta_status])}>
-                    {SYLLABUS_STATUS_ICON[item.ta_status] ?? "—"}
-                  </span>
-                  <div>
-                    <p className="text-sm text-foreground">{item.item_id}</p>
-                    {item.notes && <p className="text-xs text-muted-foreground">{item.notes}</p>}
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Detailed Review
+              </p>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 text-[10px] uppercase font-bold tracking-tight"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAll(!showAll);
+                }}
+              >
+                {showAll ? "Show flagged only" : `Show all (${syllabusItems.length + gradebookItems.length})`}
+              </Button>
             </div>
-          )}
+          </div>
 
-          {gradebookItems.length > 0 && (
+          <div className="space-y-4">
+            {/* Syllabus Section */}
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Gradebook Items</p>
-              {gradebookItems.map((item) => (
-                <div key={item.item_id} className="flex items-start gap-2">
-                  <span className={cn("w-4 shrink-0 text-sm font-bold", STATUS_COLOR[item.status])}>
-                    {item.status === "pass" ? "✓" : item.status === "na" ? "—" : "⚠"}
-                  </span>
-                  <div>
-                    <p className="text-sm text-foreground">{item.item_id}</p>
-                    {item.notes && <p className="text-xs text-muted-foreground">{item.notes}</p>}
-                  </div>
-                </div>
-              ))}
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-tight">Syllabus</h4>
+                <div className="h-px flex-1 bg-border/50" />
+              </div>
+              
+              <div className="grid gap-2">
+                {(showAll ? syllabusItems : flaggedSyllabus).length > 0 ? (
+                  (showAll ? syllabusItems : flaggedSyllabus).map((item) => (
+                    <div 
+                      key={item.item_id} 
+                      className={cn(
+                        "flex flex-col gap-1 rounded-md border border-border p-3 transition-colors hover:bg-muted/30",
+                        item.ta_status === "fix_needed" ? "bg-card shadow-sm" : "bg-muted/10 opacity-75"
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 shrink-0">
+                          {SYLLABUS_STATUS_ICON[item.ta_status]}
+                        </div>
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-[10px] font-mono py-0 h-4">
+                              {item.item_id}
+                            </Badge>
+                            <span className={cn("text-[10px] font-bold uppercase", item.ta_status === "confirmed" ? "text-green-600" : item.ta_status === "fix_needed" ? "text-orange-600" : "text-muted-foreground")}>
+                              {SYLLABUS_STATUS_LABEL[item.ta_status]}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium text-foreground leading-snug">
+                            {SYLLABUS_ITEM_LABELS[item.item_id] ?? item.item_id}
+                          </p>
+                          {item.notes && (
+                            <div className="mt-2 flex items-start gap-2 rounded-sm bg-orange-500/5 p-2 border-l-2 border-orange-500/30">
+                              <p className="text-sm text-muted-foreground italic leading-relaxed">
+                                &ldquo;{item.notes}&rdquo;
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : !showAll ? (
+                  <p className="text-xs text-muted-foreground italic py-1 pl-1">No syllabus flags.</p>
+                ) : null}
+              </div>
             </div>
-          )}
+
+            {/* Gradebook Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-tight">Gradebook</h4>
+                <div className="h-px flex-1 bg-border/50" />
+              </div>
+
+              <div className="grid gap-2">
+                {(showAll ? gradebookItems : flaggedGradebook).length > 0 ? (
+                  (showAll ? gradebookItems : flaggedGradebook).map((item) => (
+                    <div 
+                      key={item.item_id} 
+                      className={cn(
+                        "flex flex-col gap-1 rounded-md border border-border p-3 transition-colors hover:bg-muted/30",
+                        item.status !== "pass" && item.status !== "na" ? "bg-card shadow-sm" : "bg-muted/10 opacity-75"
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="mt-0.5 shrink-0">
+                            {STATUS_ICON[item.status]}
+                          </div>
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-[10px] font-mono py-0 h-4">
+                                {item.item_id}
+                              </Badge>
+                              <span className={cn("text-[10px] font-bold uppercase", STATUS_COLOR[item.status])}>
+                                {STATUS_LABEL[item.status]}
+                              </span>
+                            </div>
+                            <p className="text-sm font-medium text-foreground leading-snug">
+                              {GRADEBOOK_ITEM_LABELS[item.item_id] ?? item.item_id}
+                            </p>
+                            {item.notes && (
+                              <div className="mt-2 flex items-start gap-2 rounded-sm bg-orange-500/5 p-2 border-l-2 border-orange-500/30">
+                                <p className="text-sm text-muted-foreground italic leading-relaxed">
+                                  &ldquo;{item.notes}&rdquo;
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {item.direct_link && (
+                          <a
+                            href={item.direct_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors border border-transparent hover:border-border"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="size-4" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : !showAll ? (
+                  <p className="text-xs text-muted-foreground italic py-1 pl-1">No gradebook flags.</p>
+                ) : null}
+              </div>
+            </div>
+
+            {!showAll && totalFlagged === 0 && (
+              <div className="text-center py-6 border-2 border-dashed rounded-md bg-muted/5">
+                <CheckCircle2 className="mx-auto size-6 text-green-500/50 mb-2" />
+                <p className="text-xs font-medium text-muted-foreground">Everything looks good!</p>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">No data saved yet.</p>

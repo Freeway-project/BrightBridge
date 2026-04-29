@@ -22,34 +22,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { ProfileOption } from "@/lib/services/profiles"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
+import { SYLLABUS_ITEMS_LIST as SYLLABUS_ITEMS, GRADEBOOK_ITEMS_LIST as GRADEBOOK_ITEMS } from "@/lib/workspace/constants"
+
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
   instructors: ProfileOption[]
 }
-
-const SYLLABUS_ITEMS = [
-  { id: "S1", label: "Instructor contact and office hours are current" },
-  { id: "S2", label: "Course schedule matches Brightspace modules" },
-  { id: "S3", label: "Assessment weights match gradebook categories" },
-  { id: "S4", label: "Academic integrity and accessibility statements are present" },
-]
-
-const GRADEBOOK_ITEMS = [
-  { id: "G1", label: "Grade categories match syllabus weighting" },
-  { id: "G2", label: "Calculated final grade is configured" },
-  { id: "G3", label: "Hidden columns are intentional" },
-  { id: "G4", label: "Release conditions and due dates are correct" },
-]
 
 const SYLLABUS_STATUS_OPTIONS: { value: SyllabusRowStatus; label: string }[] = [
   { value: "pending", label: "Pending" },
