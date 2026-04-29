@@ -9,24 +9,24 @@
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Community 0|Community 0]]
-- [[_COMMUNITY_Community 1|Community 1]]
-- [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 3|Community 3]]
-- [[_COMMUNITY_Community 4|Community 4]]
-- [[_COMMUNITY_Community 5|Community 5]]
-- [[_COMMUNITY_Community 6|Community 6]]
-- [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 17|Community 17]]
-- [[_COMMUNITY_Community 27|Community 27]]
-- [[_COMMUNITY_Community 28|Community 28]]
-- [[_COMMUNITY_Community 29|Community 29]]
-- [[_COMMUNITY_Community 30|Community 30]]
-- [[_COMMUNITY_Community 31|Community 31]]
-- [[_COMMUNITY_Community 32|Community 32]]
-- [[_COMMUNITY_Community 33|Community 33]]
-- [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Web App and Workflow UI|Web App and Workflow UI]]
+- [[_COMMUNITY_Project Config and Tech Stack|Project Config and Tech Stack]]
+- [[_COMMUNITY_Workflow Transitions and Data Model|Workflow Transitions and Data Model]]
+- [[_COMMUNITY_Role-Status Workflow Rules|Role-Status Workflow Rules]]
+- [[_COMMUNITY_Review Sections|Review Sections]]
+- [[_COMMUNITY_Transitions Module|Transitions Module]]
+- [[_COMMUNITY_UI Components and Middleware|UI Components and Middleware]]
+- [[_COMMUNITY_Validation and Forms|Validation and Forms]]
+- [[_COMMUNITY_UI Package Docs|UI Package Docs]]
+- [[_COMMUNITY_README|README]]
+- [[_COMMUNITY_Tech Stack Docs|Tech Stack Docs]]
+- [[_COMMUNITY_Project Brief|Project Brief]]
+- [[_COMMUNITY_Config Package Docs|Config Package Docs]]
+- [[_COMMUNITY_Super Admin Role|Super Admin Role]]
+- [[_COMMUNITY_Supabase Realtime|Supabase Realtime]]
+- [[_COMMUNITY_Tailwind CSS|Tailwind CSS]]
+- [[_COMMUNITY_TanStack Table|TanStack Table]]
+- [[_COMMUNITY_Vercel Hosting|Vercel Hosting]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `workflow/index` - 19 edges
@@ -54,114 +54,114 @@
 
 ## Communities
 
-### Community 0 - "Community 0"
+### Community 0 - "Web App and Workflow UI"
 Cohesion: 0.18
 Nodes (22): Badge, nextConfig, Home, getRoleLabel, Role, ROLE_LABELS, ROLES, COURSE_STATUS_LABELS (+14 more)
 
-### Community 1 - "Community 1"
+### Community 1 - "Project Config and Tech Stack"
 Cohesion: 0.13
 Nodes (18): AGENTS.md — Coding Agent Instructions, auth.users (Supabase owned), CLAUDE.md — AI Development Context, Cloudflare R2 Storage, CourseBridge Development Plan, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SUPABASE_URL, Next.js App Router (+10 more)
 
-### Community 2 - "Community 2"
+### Community 2 - "Workflow Transitions and Data Model"
 Cohesion: 0.25
 Nodes (16): assertCanTransition() helper, CourseBridge Data Model Draft, getAllowedTransitions() helper, @coursebridge/workflow README, Engineering Principle: No direct status updates from UI, Engineering Principle: Keep instructor-visible and internal comments separate, Engineering Principle: Use workflow state-machine layer, DB Table: course_assignments (+8 more)
 
-### Community 3 - "Community 3"
+### Community 3 - "Role-Status Workflow Rules"
 Cohesion: 0.17
 Nodes (15): canTransition() helper, Role: Admin, Role: Communications Department, Role: Instructor, Role: TA, Status: admin_changes_requested, Status: assigned_to_ta, Status: course_created (+7 more)
 
-### Community 4 - "Community 4"
+### Community 4 - "Review Sections"
 Cohesion: 0.33
 Nodes (6): Review Section: course_metadata, Review Section: general_notes, Review Section: gradebook_review, Review Section: review_matrix, Review Section: syllabus_review, DB Table: review_sections
 
-### Community 5 - "Community 5"
+### Community 5 - "Transitions Module"
 Cohesion: 0.5
 Nodes (2): assertCanTransition(), canTransition()
 
-### Community 6 - "Community 6"
+### Community 6 - "UI Components and Middleware"
 Cohesion: 0.6
 Nodes (5): Button, buttonVariants, RootLayout, updateSession, cn
 
-### Community 8 - "Community 8"
+### Community 8 - "Validation and Forms"
 Cohesion: 0.67
 Nodes (3): @coursebridge/validation README, React Hook Form, Zod
 
-### Community 17 - "Community 17"
+### Community 17 - "UI Package Docs"
 Cohesion: 1.0
 Nodes (2): @coursebridge/ui README, shadcn/ui
 
-### Community 27 - "Community 27"
+### Community 27 - "README"
 Cohesion: 1.0
 Nodes (1): CourseBridge README
 
-### Community 28 - "Community 28"
+### Community 28 - "Tech Stack Docs"
 Cohesion: 1.0
 Nodes (1): Tech Stack Doc
 
-### Community 29 - "Community 29"
+### Community 29 - "Project Brief"
 Cohesion: 1.0
 Nodes (1): CourseBridge Project Brief
 
-### Community 30 - "Community 30"
+### Community 30 - "Config Package Docs"
 Cohesion: 1.0
 Nodes (1): @coursebridge/config README
 
-### Community 31 - "Community 31"
+### Community 31 - "Super Admin Role"
 Cohesion: 1.0
 Nodes (1): Role: Super Admin
 
-### Community 32 - "Community 32"
+### Community 32 - "Supabase Realtime"
 Cohesion: 1.0
 Nodes (1): Supabase Realtime
 
-### Community 33 - "Community 33"
+### Community 33 - "Tailwind CSS"
 Cohesion: 1.0
 Nodes (1): Tailwind CSS
 
-### Community 34 - "Community 34"
+### Community 34 - "TanStack Table"
 Cohesion: 1.0
 Nodes (1): TanStack Table
 
-### Community 35 - "Community 35"
+### Community 35 - "Vercel Hosting"
 Cohesion: 1.0
 Nodes (1): Vercel Hosting
 
 ## Knowledge Gaps
 - **33 isolated node(s):** `buttonVariants`, `CourseBridge README`, `Workflow Overview Doc`, `Tech Stack Doc`, `CourseBridge Project Brief` (+28 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 5`** (5 nodes): `transitions.ts`, `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`
+- **Thin community `Transitions Module`** (5 nodes): `transitions.ts`, `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
+- **Thin community `UI Package Docs`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (1 nodes): `CourseBridge README`
+- **Thin community `README`** (1 nodes): `CourseBridge README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 28`** (1 nodes): `Tech Stack Doc`
+- **Thin community `Tech Stack Docs`** (1 nodes): `Tech Stack Doc`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (1 nodes): `CourseBridge Project Brief`
+- **Thin community `Project Brief`** (1 nodes): `CourseBridge Project Brief`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (1 nodes): `@coursebridge/config README`
+- **Thin community `Config Package Docs`** (1 nodes): `@coursebridge/config README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 31`** (1 nodes): `Role: Super Admin`
+- **Thin community `Super Admin Role`** (1 nodes): `Role: Super Admin`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (1 nodes): `Supabase Realtime`
+- **Thin community `Supabase Realtime`** (1 nodes): `Supabase Realtime`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (1 nodes): `Tailwind CSS`
+- **Thin community `Tailwind CSS`** (1 nodes): `Tailwind CSS`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (1 nodes): `TanStack Table`
+- **Thin community `TanStack Table`** (1 nodes): `TanStack Table`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 35`** (1 nodes): `Vercel Hosting`
+- **Thin community `Vercel Hosting`** (1 nodes): `Vercel Hosting`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `CourseBridge Data Model Draft` connect `Community 2` to `Community 1`, `Community 4`?**
+- **Why does `CourseBridge Data Model Draft` connect `Workflow Transitions and Data Model` to `Project Config and Tech Stack`, `Review Sections`?**
   _High betweenness centrality (0.072) - this node is a cross-community bridge._
-- **Why does `CourseBridge Development Plan` connect `Community 1` to `Community 2`?**
+- **Why does `CourseBridge Development Plan` connect `Project Config and Tech Stack` to `Workflow Transitions and Data Model`?**
   _High betweenness centrality (0.067) - this node is a cross-community bridge._
-- **Why does `Workflow Transitions Doc` connect `Community 2` to `Community 1`, `Community 3`?**
+- **Why does `Workflow Transitions Doc` connect `Workflow Transitions and Data Model` to `Project Config and Tech Stack`, `Role-Status Workflow Rules`?**
   _High betweenness centrality (0.057) - this node is a cross-community bridge._
 - **What connects `buttonVariants`, `CourseBridge README`, `Workflow Overview Doc` to the rest of the system?**
   _33 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Community 1` be split into smaller, more focused modules?**
+- **Should `Project Config and Tech Stack` be split into smaller, more focused modules?**
   _Cohesion score 0.13 - nodes in this community are weakly interconnected._
