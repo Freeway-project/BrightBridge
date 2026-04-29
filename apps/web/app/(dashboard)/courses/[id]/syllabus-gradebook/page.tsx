@@ -38,6 +38,7 @@ export default async function SyllabusGradebookPage({ params }: Props) {
       const found = saved.gradebook_items?.find((i) => i.item_id === item_id);
       return { item_id, status: found?.status ?? "na", notes: found?.notes ?? "", direct_link: found?.direct_link ?? "" };
     }),
+    time_spent_seconds: saved.time_spent_seconds ?? 0,
   };
 
   return (

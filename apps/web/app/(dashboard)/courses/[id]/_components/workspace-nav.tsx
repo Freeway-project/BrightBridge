@@ -6,6 +6,7 @@ import { CheckCircle2, Circle } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
+import { ReviewTimer } from "./review-timer"
 
 const STEPS = [
   { label: "Metadata", href: "metadata" },
@@ -14,6 +15,8 @@ const STEPS = [
   { label: "Issue Log", href: "issue-log" },
   { label: "Submit", href: "submit" },
 ] as const
+
+const TIMER_STEPS = new Set(["review-matrix", "syllabus-gradebook"])
 
 type WorkspaceNavProps = {
   courseId: string
@@ -27,6 +30,8 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
     0,
     STEPS.findIndex((step) => pathname.endsWith(`/${step.href}`)),
   )
+  const activeHref = STEPS[activeIndex]?.href ?? ""
+  const showTimer = TIMER_STEPS.has(activeHref)
 
   return (
     <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar/35 p-4 lg:block">
@@ -64,6 +69,9 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
           })}
         </nav>
 
+        {showTimer && (
+          <ReviewTimer storageKey={`coursebridge:${courseId}:timer:${activeHref}`} />
+        )}
       </div>
     </aside>
   )

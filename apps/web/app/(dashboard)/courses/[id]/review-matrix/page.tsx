@@ -29,8 +29,8 @@ export default async function ReviewMatrixPage({ params }: Props) {
     issueSection ? getReviewResponse(id, issueSection.id) : null,
   ]);
 
-  const savedItems = (matrixResponse?.response_data as Partial<ReviewMatrixFormValues> | null)?.items ?? [];
-  const itemMap = Object.fromEntries(savedItems.map((i) => [i.item_id, i]));
+  const saved = (matrixResponse?.response_data as Partial<ReviewMatrixFormValues> | null) ?? {};
+  const itemMap = Object.fromEntries((saved.items ?? []).map((i) => [i.item_id, i]));
 
   const defaultValues: ReviewMatrixFormValues = {
     items: ALL_ITEM_IDS.map((item_id) => ({
@@ -39,6 +39,7 @@ export default async function ReviewMatrixPage({ params }: Props) {
       notes: itemMap[item_id]?.notes ?? "",
       direct_link: itemMap[item_id]?.direct_link ?? "",
     })),
+    time_spent_seconds: saved.time_spent_seconds ?? 0,
   };
 
   const initialIssues = ((issueResponse?.response_data as Partial<IssueLogResponseData> | null)?.issues ?? []);

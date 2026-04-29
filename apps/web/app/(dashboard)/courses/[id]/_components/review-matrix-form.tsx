@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { AlertCircle, ChevronDown, Plus } from "lucide-react"
@@ -34,8 +34,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ReviewTimer } from "./review-timer"
-
 type ReviewMatrixFormProps = {
   courseId: string
   defaultValues: ReviewMatrixFormValues
@@ -94,11 +92,28 @@ export function ReviewMatrixForm({
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [issues, setIssues] = useState(initialIssues)
   const [isPending, startTransition] = useTransition()
-  const timerStorageKey = `coursebridge:${courseId}:review-matrix-timer`
+  const timerStorageKey = `coursebridge:${courseId}:timer:review-matrix`
+  const elapsedRef = useRef(defaultValues.time_spent_seconds ?? 0)
   const form = useForm<ReviewMatrixFormValues>({
     resolver: zodResolver(reviewMatrixSchema),
     defaultValues,
   })
+
+  useEffect(() => {
+    // Restore elapsed from localStorage on mount
+    const stored = window.localStorage.getItem(timerStorageKey)
+    if (stored) {
+      const parsed = Number.parseInt(stored, 10)
+      if (Number.isFinite(parsed)) elapsedRef.current = parsed
+    }
+    // Keep ref in sync as timer ticks
+    function onTick(e: Event) {
+      const { storageKey, elapsed } = (e as CustomEvent<{ storageKey: string; elapsed: number }>).detail
+      if (storageKey === timerStorageKey) elapsedRef.current = elapsed
+    }
+    window.addEventListener("coursebridge:review-timer", onTick)
+    return () => window.removeEventListener("coursebridge:review-timer", onTick)
+  }, [timerStorageKey])
 
   async function handleSave() {
     const valid = await form.trigger()
@@ -107,7 +122,10 @@ export function ReviewMatrixForm({
     setStatus("saving")
     startTransition(async () => {
       try {
-        await saveDraft(courseId, "review_matrix", form.getValues())
+        await saveDraft(courseId, "review_matrix", {
+          ...form.getValues(),
+          time_spent_seconds: elapsedRef.current,
+        })
         setStatus("saved")
       } catch {
         setStatus("error")
@@ -141,12 +159,9 @@ export function ReviewMatrixForm({
   return (
     <Card>
       <CardHeader>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-base">Review Matrix</CardTitle>
-            <SaveState isPending={isPending} status={status} />
-          </div>
-          <ReviewTimer label="Review matrix time" storageKey={timerStorageKey} />
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-base">Review Matrix</CardTitle>
+          <SaveState isPending={isPending} status={status} />
         </div>
       </CardHeader>
       <CardContent>
@@ -269,6 +284,7 @@ export function buildReviewMatrixDefaults(
         direct_link: savedItems.get(item.id)?.direct_link ?? "",
       })),
     ),
+    time_spent_seconds: saved?.time_spent_seconds ?? 0,
   }
 }
 
