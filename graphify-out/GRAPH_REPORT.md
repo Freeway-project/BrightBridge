@@ -1,12 +1,12 @@
 # Graph Report - BrightBridge  (2026-04-29)
 
 ## Corpus Check
-- 107 files · ~51,702 words
+- 112 files · ~53,422 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 361 nodes · 463 edges · 22 communities detected
-- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 123 edges (avg confidence: 0.8)
+- 374 nodes · 491 edges · 23 communities detected
+- Extraction: 72% EXTRACTED · 28% INFERRED · 0% AMBIGUOUS · INFERRED: 139 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -20,11 +20,10 @@
 - [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 10|Community 10]]
-- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 17|Community 17]]
-- [[_COMMUNITY_Community 53|Community 53]]
-- [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 54|Community 54]]
 - [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
@@ -32,18 +31,20 @@
 - [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Select()` - 32 edges
-2. `requireProfile()` - 14 edges
-3. `createAdminClient()` - 12 edges
-4. `createClient()` - 12 edges
-5. `getCourseById()` - 11 edges
-6. `CourseBridge Data Model Draft` - 11 edges
-7. `getAuthContext()` - 10 edges
-8. `transitionCourseStatus()` - 10 edges
-9. `CourseBridge Development Plan` - 10 edges
-10. `getSuperAdminData()` - 9 edges
+1. `Select()` - 35 edges
+2. `requireProfile()` - 17 edges
+3. `createAdminClient()` - 15 edges
+4. `GET()` - 11 edges
+5. `createClient()` - 11 edges
+6. `getCourseById()` - 11 edges
+7. `CourseBridge Data Model Draft` - 11 edges
+8. `getAuthContext()` - 10 edges
+9. `transitionCourseStatus()` - 10 edges
+10. `CourseBridge Development Plan` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `checkMissingProfileAccess()` --calls--> `Select()`  [INFERRED]
@@ -64,20 +65,20 @@ Cohesion: 0.09
 Nodes (35): AGENTS.md — Coding Agent Instructions, assertCanTransition() helper, auth.users (Supabase owned), CLAUDE.md — AI Development Context, Cloudflare R2 Storage, CourseBridge Data Model Draft, CourseBridge Development Plan, getAllowedTransitions() helper (+27 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.1
-Nodes (19): getAdmin(), getAdminCourseDetail(), getAdminCourses(), getAuthContext(), isRole(), GET(), switchDevRole(), DevRoleSwitcher() (+11 more)
+Cohesion: 0.11
+Nodes (19): getAdmin(), getAdminCourseDetail(), getAdminCourses(), GET(), switchDevRole(), DevRoleSwitcher(), fetchReviewProgressForCourses(), signOut() (+11 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.17
-Nodes (17): NotFound(), requireProfile(), CourseWorkspaceLayout(), IssueLogPage(), MetadataPage(), ReviewMatrixPage(), getCourseById(), admin() (+9 more)
+Cohesion: 0.15
+Nodes (18): NotFound(), requireProfile(), CourseWorkspaceLayout(), AdminCourseDetailPage(), IssueLogPage(), MetadataPage(), ReviewMatrixPage(), getCourseById() (+10 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.15
-Nodes (14): createTempCourse(), getProfileByEmail(), admin(), getProfilesByRole(), SuperAdminDashboardPage(), fetchAuditEvents(), fetchCourses(), fetchStatusCounts() (+6 more)
+Cohesion: 0.17
+Nodes (13): createTempCourse(), getProfileByEmail(), admin(), getProfilesByRole(), fetchAuditEvents(), fetchCourses(), fetchStatusCounts(), fetchStuckCourses() (+5 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.18
-Nodes (9): approveReviewAction(), assignTaToCourseAction(), requestFixesAction(), admin(), getAssignedCourses(), transitionCourseStatus(), assertCanTransition(), canTransition() (+1 more)
+Cohesion: 0.15
+Nodes (11): approveReviewAction(), assignTaToCourseAction(), requestFixesAction(), CoursesPage(), getAccessibleCourses(), admin(), getAssignedCourses(), transitionCourseStatus() (+3 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.17
@@ -99,96 +100,100 @@ Nodes (10): requireAnyRole(), assertCanActOnCourse(), assignUserToCourse(), clea
 Cohesion: 0.31
 Nodes (7): ensureAuthUser(), ensureStatusEvent(), findUserByEmail(), seedCourses(), seedReviewResponses(), upsertAssignments(), upsertCourse()
 
-### Community 15 - "Community 15"
+### Community 12 - "Community 12"
+Cohesion: 0.25
+Nodes (5): getAuthContext(), isRole(), DashboardLayout(), DashboardPage(), SuperAdminDashboardPage()
+
+### Community 17 - "Community 17"
 Cohesion: 0.67
 Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
-### Community 17 - "Community 17"
+### Community 19 - "Community 19"
 Cohesion: 0.5
 Nodes (2): updateSession(), proxy()
 
-### Community 53 - "Community 53"
+### Community 54 - "Community 54"
 Cohesion: 1.0
 Nodes (2): @coursebridge/ui README, shadcn/ui
 
-### Community 80 - "Community 80"
+### Community 82 - "Community 82"
 Cohesion: 1.0
 Nodes (1): CourseBridge README
 
-### Community 81 - "Community 81"
+### Community 83 - "Community 83"
 Cohesion: 1.0
 Nodes (1): Tech Stack Doc
 
-### Community 82 - "Community 82"
+### Community 84 - "Community 84"
 Cohesion: 1.0
 Nodes (1): CourseBridge Project Brief
 
-### Community 83 - "Community 83"
+### Community 85 - "Community 85"
 Cohesion: 1.0
 Nodes (1): @coursebridge/config README
 
-### Community 84 - "Community 84"
+### Community 86 - "Community 86"
 Cohesion: 1.0
 Nodes (1): Role: Super Admin
 
-### Community 85 - "Community 85"
+### Community 87 - "Community 87"
 Cohesion: 1.0
 Nodes (1): Supabase Realtime
 
-### Community 86 - "Community 86"
+### Community 88 - "Community 88"
 Cohesion: 1.0
 Nodes (1): Tailwind CSS
 
-### Community 87 - "Community 87"
+### Community 89 - "Community 89"
 Cohesion: 1.0
 Nodes (1): TanStack Table
 
-### Community 88 - "Community 88"
+### Community 90 - "Community 90"
 Cohesion: 1.0
 Nodes (1): Vercel Hosting
 
 ## Knowledge Gaps
 - **30 isolated node(s):** `CourseBridge README`, `Workflow Overview Doc`, `Tech Stack Doc`, `CourseBridge Project Brief`, `@coursebridge/ui README` (+25 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 15`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 17`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
+- **Thin community `Community 19`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 53`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
+- **Thin community `Community 54`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 80`** (1 nodes): `CourseBridge README`
+- **Thin community `Community 82`** (1 nodes): `CourseBridge README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 81`** (1 nodes): `Tech Stack Doc`
+- **Thin community `Community 83`** (1 nodes): `Tech Stack Doc`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 82`** (1 nodes): `CourseBridge Project Brief`
+- **Thin community `Community 84`** (1 nodes): `CourseBridge Project Brief`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 83`** (1 nodes): `@coursebridge/config README`
+- **Thin community `Community 85`** (1 nodes): `@coursebridge/config README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 84`** (1 nodes): `Role: Super Admin`
+- **Thin community `Community 86`** (1 nodes): `Role: Super Admin`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 85`** (1 nodes): `Supabase Realtime`
+- **Thin community `Community 87`** (1 nodes): `Supabase Realtime`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 86`** (1 nodes): `Tailwind CSS`
+- **Thin community `Community 88`** (1 nodes): `Tailwind CSS`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 87`** (1 nodes): `TanStack Table`
+- **Thin community `Community 89`** (1 nodes): `TanStack Table`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 88`** (1 nodes): `Vercel Hosting`
+- **Thin community `Community 90`** (1 nodes): `Vercel Hosting`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Select()` connect `Community 3` to `Community 1`, `Community 2`, `Community 4`, `Community 7`, `Community 9`, `Community 10`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
-- **Why does `getAuthContext()` connect `Community 1` to `Community 2`, `Community 3`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `createClient()` connect `Community 1` to `Community 7`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Are the 31 inferred relationships involving `Select()` (e.g. with `checkMissingProfileAccess()` and `createTempCourse()`) actually correct?**
-  _`Select()` has 31 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 12 inferred relationships involving `requireProfile()` (e.g. with `CourseWorkspaceLayout()` and `SubmitPage()`) actually correct?**
-  _`requireProfile()` has 12 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 11 inferred relationships involving `createAdminClient()` (e.g. with `DevRoleSwitcher()` and `switchDevRole()`) actually correct?**
-  _`createAdminClient()` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 11 inferred relationships involving `createClient()` (e.g. with `signIn()` and `GET()`) actually correct?**
-  _`createClient()` has 11 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `Select()` connect `Community 3` to `Community 1`, `Community 2`, `Community 4`, `Community 7`, `Community 9`, `Community 10`, `Community 12`?**
+  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `getAuthContext()` connect `Community 12` to `Community 1`, `Community 2`, `Community 3`, `Community 4`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `requireProfile()` connect `Community 2` to `Community 1`, `Community 12`, `Community 4`, `Community 9`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Are the 34 inferred relationships involving `Select()` (e.g. with `checkMissingProfileAccess()` and `createTempCourse()`) actually correct?**
+  _`Select()` has 34 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 15 inferred relationships involving `requireProfile()` (e.g. with `postCommentAction()` and `AdminCourseDetailPage()`) actually correct?**
+  _`requireProfile()` has 15 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 14 inferred relationships involving `createAdminClient()` (e.g. with `getAdminClientOrThrow()` and `DevRoleSwitcher()`) actually correct?**
+  _`createAdminClient()` has 14 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 10 inferred relationships involving `GET()` (e.g. with `seedCourses()` and `createClient()`) actually correct?**
+  _`GET()` has 10 INFERRED edges - model-reasoned connections that need verification._

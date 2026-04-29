@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useActionState, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -11,11 +11,28 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { StatCard } from "@/components/shared/stat-card"
+import { Button } from "@/components/ui/button"
 import {
-  AlertTriangle, Search,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  AlertTriangle, Search, ShieldPlus, UserCog,
 } from "lucide-react"
-import { COURSE_STATUS_LABELS, type CourseStatus } from "@coursebridge/workflow"
+import { COURSE_STATUS_LABELS, ROLES, type CourseStatus, type Role } from "@coursebridge/workflow"
 import type { SuperAdminData } from "@/lib/super-admin/queries"
+import {
+  createUserAction,
+  updateUserRoleAction,
+} from "@/app/(dashboard)/super-admin/actions"
+
+const initialManageUserState = {
+  kind: "idle" as const,
+  message: null,
+}
 
 const ROLE_BADGE_CLASS: Record<string, string> = {
   ta:             "bg-blue-500/15 text-blue-400 border-blue-500/20",
@@ -48,6 +65,11 @@ export function SuperAdminShell({ data }: Props) {
   const { courses, users, statusCounts, stuckCourses, taWorkload, auditEvents } = data
   const [courseSearch, setCourseSearch] = useState("")
   const [userSearch, setUserSearch] = useState("")
+  const [newUserRole, setNewUserRole] = useState<Role>("ta")
+  const [createState, createFormAction, createPending] = useActionState(
+    createUserAction,
+    initialManageUserState,
+  )
 
   // Stats
   const totalCourses = courses.length
@@ -274,6 +296,57 @@ export function SuperAdminShell({ data }: Props) {
 
       {/* ─── All Users ────────────────────────────────────────────────────── */}
       <TabsContent value="users" className="flex-1 overflow-y-auto p-6 space-y-4 mt-0">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <ShieldPlus className="size-4" />
+              Create User
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={createFormAction} className="grid gap-4 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto]">
+              <label className="grid gap-1.5 text-sm font-medium">
+                Full name
+                <Input name="fullName" placeholder="Jane Doe" required />
+              </label>
+              <label className="grid gap-1.5 text-sm font-medium">
+                Email
+                <Input name="email" placeholder="jane@institution.edu" required type="email" />
+              </label>
+              <label className="grid gap-1.5 text-sm font-medium">
+                Password
+                <Input name="password" required type="password" />
+              </label>
+              <label className="grid gap-1.5 text-sm font-medium">
+                Role
+                <input name="role" type="hidden" value={newUserRole} />
+                <Select onValueChange={(value) => setNewUserRole(value as Role)} value={newUserRole}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {ROLE_LABELS[role] ?? role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              <div className="flex items-end">
+                <Button disabled={createPending} type="submit">
+                  {createPending ? "Creating..." : "Create User"}
+                </Button>
+              </div>
+            </form>
+            {createState.message ? (
+              <p className={createState.kind === "error" ? "mt-3 text-sm text-destructive" : "mt-3 text-sm text-green-600"}>
+                {createState.message}
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
+
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{filteredUsers.length} users</p>
           <div className="relative w-64">
@@ -293,13 +366,14 @@ export function SuperAdminShell({ data }: Props) {
                 <TableHead className="text-xs pl-4">Name</TableHead>
                 <TableHead className="text-xs">Email</TableHead>
                 <TableHead className="text-xs w-[140px]">Role</TableHead>
+                <TableHead className="text-xs w-[180px]">Manage</TableHead>
                 <TableHead className="text-xs w-[120px]">Joined</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-sm text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">
                     No users found.
                   </TableCell>
                 </TableRow>
@@ -312,6 +386,9 @@ export function SuperAdminShell({ data }: Props) {
                       <Badge variant="outline" className={`text-xs font-medium ${ROLE_BADGE_CLASS[u.role]}`}>
                         {ROLE_LABELS[u.role] ?? u.role}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <RoleUpdateForm userId={u.id} currentRole={u.role} />
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{fmt(u.created_at)}</TableCell>
                   </TableRow>
@@ -373,5 +450,38 @@ export function SuperAdminShell({ data }: Props) {
         </div>
       </TabsContent>
     </Tabs>
+  )
+}
+
+function RoleUpdateForm({ userId, currentRole }: { userId: string; currentRole: Role }) {
+  const [selectedRole, setSelectedRole] = useState<Role>(currentRole)
+  const [state, formAction, pending] = useActionState(
+    updateUserRoleAction,
+    initialManageUserState,
+  )
+
+  return (
+    <form action={formAction} className="flex items-center gap-2">
+      <input name="userId" type="hidden" value={userId} />
+      <input name="role" type="hidden" value={selectedRole} />
+      <Select onValueChange={(value) => setSelectedRole(value as Role)} value={selectedRole}>
+        <SelectTrigger className="h-8 w-[130px] text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {ROLES.map((role) => (
+            <SelectItem key={role} value={role}>
+              {ROLE_LABELS[role] ?? role}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button size="sm" type="submit" variant="outline">
+        <UserCog className="size-3.5" />
+        {pending ? "Saving..." : "Save"}
+      </Button>
+      {state.kind === "error" ? <span className="text-[11px] text-destructive">{state.message}</span> : null}
+      {state.kind === "success" ? <span className="text-[11px] text-green-600">Updated</span> : null}
+    </form>
   )
 }
