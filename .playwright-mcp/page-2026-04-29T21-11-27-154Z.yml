@@ -1,0 +1,67 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: CB
+        - generic [ref=e6]: CourseBridge
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - heading "Course migration, done right." [level=1] [ref=e9]:
+            - text: Course migration,
+            - text: done right.
+          - paragraph [ref=e10]: The internal review platform that keeps every Moodle → Brightspace migration on track.
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - img [ref=e14]
+            - generic [ref=e18]:
+              - paragraph [ref=e19]: Structured migration reviews
+              - paragraph [ref=e20]: Step-by-step TA checklists for every Moodle → Brightspace course.
+          - generic [ref=e21]:
+            - img [ref=e23]
+            - generic [ref=e28]:
+              - paragraph [ref=e29]: Multi-role workflow
+              - paragraph [ref=e30]: TAs, Admins, Instructors, and Comm Dept each see exactly what they need.
+          - generic [ref=e31]:
+            - img [ref=e33]
+            - generic [ref=e37]:
+              - paragraph [ref=e38]: Full audit trail
+              - paragraph [ref=e39]: Every status change, comment, and approval is tracked end-to-end.
+      - paragraph [ref=e40]: © 2026 CourseBridge. Internal platform.
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - heading "Welcome back" [level=2] [ref=e44]
+        - paragraph [ref=e45]: Enter your institutional email to receive a 6-digit code.
+      - generic [ref=e46]:
+        - generic [ref=e48]:
+          - generic [ref=e49]:
+            - text: Email address
+            - generic [ref=e50]:
+              - img [ref=e51]
+              - textbox "Email address" [ref=e54]:
+                - /placeholder: you@institution.edu
+          - button "Send code" [ref=e55]:
+            - text: Send code
+            - img
+        - generic:
+          - generic:
+            - generic:
+              - text: Verification code
+              - generic:
+                - img
+                - textbox "Verification code":
+                  - /placeholder: "000000"
+            - button "Verify & Sign in"
+            - button "Didn't get a code? Try again"
+      - generic [ref=e58]: or
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - paragraph [ref=e62]: Dev quick login
+          - paragraph [ref=e63]: Bypasses email — dev environment only.
+        - generic [ref=e64]:
+          - button "TA" [ref=e66]
+          - button "Admin" [ref=e68]
+          - button "Communications" [ref=e70]
+          - button "Instructor" [ref=e72]
+          - button "Super Admin" [ref=e74]
+  - button "Open Next.js Dev Tools" [ref=e80] [cursor=pointer]:
+    - img [ref=e81]
