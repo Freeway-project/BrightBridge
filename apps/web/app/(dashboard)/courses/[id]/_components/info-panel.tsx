@@ -23,7 +23,7 @@ export function InfoPanel({
   lastSavedAt,
 }: InfoPanelProps) {
   return (
-    <aside className="hidden w-56 shrink-0 border-l border-border bg-background p-4 xl:block">
+    <aside className="hidden w-72 shrink-0 border-l border-border bg-background p-5 xl:block">
       <div className="space-y-5">
         <section className="space-y-2">
           <p className="text-xs font-medium uppercase text-muted-foreground">Status</p>
