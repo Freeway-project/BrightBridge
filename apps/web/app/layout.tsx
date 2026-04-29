@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +23,8 @@ export default function RootLayout({
       <body>
         {children}
         <DevRoleSwitcher />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
