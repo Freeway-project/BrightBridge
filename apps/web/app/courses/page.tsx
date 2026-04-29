@@ -46,8 +46,8 @@ export default async function CoursesPage() {
         <section className="rounded-lg border border-border bg-card p-6">
           <h2 className="text-xl font-semibold">Accessible Courses</h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Signed in as {context.profile.email} with role {context.profile.role}.
-            RLS filters this list at the database layer.
+            Signed in as {context.profile.email} with role{" "}
+            {context.profile.role}. RLS filters this list at the database layer.
           </p>
 
           <div className="mt-6 overflow-hidden rounded-md border border-border">
