@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Role } from "@coursebridge/workflow";
 import { createClient } from "@/lib/supabase/server";
@@ -15,31 +14,44 @@ const devUsers: Record<Role, string> = {
 
 const devPassword = "CourseBridgeDev123!";
 
-export async function signInWithEmail(formData: FormData) {
-  const email = String(formData.get("email") ?? "")
-    .trim()
-    .toLowerCase();
+export type ActionState = {
+  error?: string;
+  success?: boolean;
+  email?: string;
+};
 
-  if (!email) {
-    redirect("/auth/login?error=missing_email");
-  }
+export async function sendOTP(email: string): Promise<ActionState> {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail) return { error: "Email is required" };
 
-  const requestHeaders = await headers();
-  const origin = requestHeaders.get("origin") ?? "http://localhost:3000";
   const supabase = await createClient();
-
   const { error } = await supabase.auth.signInWithOtp({
-    email,
+    email: cleanEmail,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=/dashboard`
+      // If we don't provide a redirect, Supabase defaults to sending a 6-digit code
+      // that can be verified via the API.
+      shouldCreateUser: true,
     }
   });
 
-  if (error) {
-    redirect(`/auth/login?error=${encodeURIComponent(error.message)}`);
-  }
+  if (error) return { error: error.message };
+  return { success: true, email: cleanEmail };
+}
 
-  redirect(`/auth/check-email?email=${encodeURIComponent(email)}`);
+export async function verifyOTP(email: string, token: string): Promise<ActionState> {
+  const supabase = await createClient();
+  
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  });
+
+  if (error) return { error: error.message };
+  
+  // Verification successful, Next.js Middleware/Supabase will handle the session.
+  // We redirect to /dashboard which will then route based on role.
+  redirect("/dashboard");
 }
 
 export async function signInAsDevRole(formData: FormData) {

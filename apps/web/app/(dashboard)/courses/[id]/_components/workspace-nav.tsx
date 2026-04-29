@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils"
 import { ReviewTimer } from "./review-timer"
 
 const STEPS = [
-  { label: "Metadata", href: "metadata" },
-  { label: "Review Matrix", href: "review-matrix" },
-  { label: "Syllabus & Gradebook", href: "syllabus-gradebook" },
-  { label: "Issue Log", href: "issue-log" },
-  { label: "Submit", href: "submit" },
+  { label: "Metadata", sub: "Course info", href: "metadata" },
+  { label: "Review Matrix", sub: "Checklist items", href: "review-matrix" },
+  { label: "Syllabus & GB", sub: "Docs review", href: "syllabus-gradebook" },
+  { label: "Issue Log", sub: "Track problems", href: "issue-log" },
+  { label: "Submit", sub: "Final review", href: "submit" },
 ] as const
 
 const TIMER_STEPS = new Set(["review-matrix", "syllabus-gradebook"])
@@ -31,46 +31,68 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
     STEPS.findIndex((step) => pathname.endsWith(`/${step.href}`)),
   )
   const activeHref = STEPS[activeIndex]?.href ?? ""
-  const showTimer = TIMER_STEPS.has(activeHref)
+  const showTimer = activeHref !== "submit"
 
   return (
-    <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar/35 p-4 lg:block">
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase text-muted-foreground">Course review</p>
-          <h2 className="line-clamp-2 text-sm font-semibold text-foreground">{courseTitle}</h2>
-          <StatusBadge status={courseStatus} />
+    <aside className="hidden w-64 shrink-0 border-r border-border bg-sidebar/40 p-5 lg:block">
+      <div className="flex flex-col h-full gap-6">
+        <div className="space-y-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+            Active Review
+          </p>
+          <div className="space-y-1">
+            <h2 className="line-clamp-2 text-sm font-bold text-foreground leading-tight">
+              {courseTitle}
+            </h2>
+            <StatusBadge status={courseStatus} className="text-[10px]" />
+          </div>
         </div>
 
-        <nav className="space-y-1">
+        <nav className="flex-1 space-y-1">
           {STEPS.map((step, index) => {
             const active = index === activeIndex
             const done = index < activeIndex
 
             return (
               <Link
-                className={cn(
-                  "flex min-h-9 items-center gap-2 rounded-md px-2 text-sm transition-colors",
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-                href={`/courses/${courseId}/${step.href}`}
                 key={step.href}
-              >
-                {done ? (
-                  <CheckCircle2 className="size-4 shrink-0" />
-                ) : (
-                  <Circle className="size-4 shrink-0" />
+                href={`/courses/${courseId}/${step.href}`}
+                className={cn(
+                  "group flex items-start gap-3 rounded-lg px-3 py-2.5 transition-all duration-200",
+                  active
+                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                 )}
-                <span className="truncate">{step.label}</span>
+              >
+                <div className={cn(
+                  "flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold border-2 transition-colors",
+                  active
+                    ? "bg-primary-foreground text-primary border-primary-foreground"
+                    : done 
+                      ? "bg-green-500/10 text-green-500 border-green-500/20" 
+                      : "bg-muted text-muted-foreground border-border group-hover:border-foreground/20"
+                )}>
+                  {done ? "✓" : index + 1}
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold leading-none">{step.label}</p>
+                  <p className={cn(
+                    "text-[11px] leading-tight",
+                    active ? "text-primary-foreground/70" : "text-muted-foreground"
+                  )}>
+                    {step.sub}
+                  </p>
+                </div>
               </Link>
             )
           })}
         </nav>
 
         {showTimer && (
-          <ReviewTimer storageKey={`coursebridge:${courseId}:timer:${activeHref}`} />
+          <ReviewTimer 
+            storageKey={`coursebridge:${courseId}:timer:active`} 
+            label="Review Timer"
+          />
         )}
       </div>
     </aside>

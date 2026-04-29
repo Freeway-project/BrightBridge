@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { CourseSummary } from "@/lib/courses/service";
 import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +15,14 @@ import {
 import { Search } from "lucide-react";
 import { assignTaToCourseAction, type AssignTaState } from "../actions";
 
+type AssignableCourse = {
+  id: string;
+  title: string;
+  sourceCourseId: string | null;
+};
+
 type AdminAssignmentPanelProps = {
-  courses: CourseSummary[];
+  courses: AssignableCourse[];
   tas: ProfileOption[];
 };
 
@@ -50,7 +55,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
             Course
             <Select disabled={!canAssign || pending} name="courseId" required>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={courses.length ? "Select course" : "No courses available"} />
+                <SelectValue placeholder={courses.length ? "Select course" : "All courses assigned"} />
               </SelectTrigger>
               <SelectContent>
                 <div className="p-2 border-b sticky top-0 bg-popover z-10">

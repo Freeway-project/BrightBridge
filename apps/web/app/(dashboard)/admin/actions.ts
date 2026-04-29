@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   assignUserToCourse,
@@ -65,4 +66,26 @@ export async function assignTaToCourseAction(
       message: error instanceof Error ? error.message : "Could not assign TA.",
     };
   }
+}
+
+export async function approveReviewAction(courseId: string): Promise<void> {
+  await transitionCourseStatus({
+    courseId,
+    toStatus: "ready_for_instructor",
+    note: "Approved by admin.",
+  });
+  revalidatePath("/admin");
+  revalidatePath(`/admin/courses/${courseId}`);
+  redirect("/admin");
+}
+
+export async function requestFixesAction(courseId: string, note: string): Promise<void> {
+  await transitionCourseStatus({
+    courseId,
+    toStatus: "admin_changes_requested",
+    note: note.trim() || "Admin requested fixes.",
+  });
+  revalidatePath("/admin");
+  revalidatePath(`/admin/courses/${courseId}`);
+  redirect("/admin");
 }
