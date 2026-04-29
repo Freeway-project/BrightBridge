@@ -1,9 +1,11 @@
+import { COURSE_STATUSES, ROLES, getRoleLabel } from "@coursebridge/workflow";
 import {
-  COURSE_STATUSES,
-  getCourseStatusLabel,
-  getRoleLabel,
-  ROLES
-} from "@coursebridge/workflow";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
 import { Badge } from "@coursebridge/ui";
 
 const reviewSteps = [
@@ -17,11 +19,11 @@ const reviewSteps = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
-      <div className="border-b border-[color:var(--border)] bg-white">
+    <main className="min-h-screen bg-background">
+      <div className="border-b border-border bg-card/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div>
-            <p className="text-sm font-semibold text-[color:var(--accent)]">
+            <p className="text-sm font-semibold text-primary">
               CourseBridge
             </p>
             <h1 className="text-2xl font-semibold tracking-normal">
@@ -33,54 +35,58 @@ export default function Home() {
       </div>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[260px_1fr]">
-        <aside className="rounded-lg border border-[color:var(--border)] bg-white p-4">
-          <h2 className="text-sm font-semibold uppercase text-[color:var(--muted)]">
-            Roles
-          </h2>
-          <div className="mt-4 grid gap-2">
+        <Card>
+            <CardHeader>
+              <CardTitle className="text-sm uppercase text-muted-foreground">
+                Roles
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2">
             {ROLES.map((role) => (
               <div
-                className="rounded-md border border-[color:var(--border)] px-3 py-2 text-sm"
+                className="rounded-md border border-border px-3 py-2 text-sm"
                 key={role}
               >
                 {getRoleLabel(role)}
               </div>
             ))}
-          </div>
-        </aside>
+            </CardContent>
+        </Card>
 
         <section className="grid gap-6">
-          <div className="rounded-lg border border-[color:var(--border)] bg-white p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold">Foundation Ready</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[color:var(--muted)]">
+                <CardTitle className="text-xl">Foundation Ready</CardTitle>
+                <CardDescription className="mt-2 max-w-2xl leading-6">
                   This starter shell keeps the first step focused on project
                   structure, shared packages, and a visible app surface. Business
                   features, Supabase, storage, and PDF export are intentionally
                   left for later tasks.
-                </p>
+                </CardDescription>
               </div>
-              <Badge>{getCourseStatusLabel(COURSE_STATUSES[0])}</Badge>
-            </div>
-          </div>
+              <Badge>{COURSE_STATUSES[0]}</Badge>
+            </CardHeader>
+          </Card>
 
-          <div className="rounded-lg border border-[color:var(--border)] bg-white p-6">
-            <h2 className="text-xl font-semibold">MVP Review Flow</h2>
-            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">MVP Review Flow</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {reviewSteps.map((step, index) => (
                 <div
-                  className="rounded-md border border-[color:var(--border)] p-4"
+                  className="rounded-md border border-border p-4"
                   key={step}
                 >
-                  <div className="text-sm font-semibold text-[color:var(--accent)]">
+                  <div className="text-sm font-semibold text-muted-foreground">
                     Step {index + 1}
                   </div>
                   <div className="mt-2 text-sm">{step}</div>
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </section>
       </div>
     </main>
