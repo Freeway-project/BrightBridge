@@ -17,6 +17,9 @@ export async function saveDraft(
   data: unknown,
 ): Promise<{ ok: boolean; savedAt: string }> {
   const ctx = await requireProfile();
+  const course = await getCourseById(courseId, ctx.userId);
+  if (!course) throw new Error("Course not found or not accessible.");
+
   const section = await getReviewSectionByKey(sectionKey);
   if (!section) throw new Error(`Section not found: ${sectionKey}`);
 

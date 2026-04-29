@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { ProfileOption } from "@/lib/services/profiles"
 import {
   Table,
   TableBody,
@@ -32,13 +33,8 @@ import {
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
+  instructors: ProfileOption[]
 }
-
-const INSTRUCTORS = [
-  { id: "pending", name: "Pending instructor", email: "" },
-  { id: "instructor-a", name: "Dr. Maya Chen", email: "maya.chen@example.edu" },
-  { id: "instructor-b", name: "Dr. Alex Morgan", email: "alex.morgan@example.edu" },
-]
 
 const SYLLABUS_ITEMS = [
   { id: "S1", label: "Instructor contact and office hours are current" },
@@ -71,6 +67,7 @@ const REVIEW_STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string }[] = [
 export function SyllabusGradebookForm({
   courseId,
   defaultValues,
+  instructors,
 }: SyllabusGradebookFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
@@ -112,28 +109,34 @@ export function SyllabusGradebookForm({
                 name="instructor_id"
                 render={({ field }) => (
                   <Select
+                    disabled={instructors.length === 0}
                     onValueChange={(value) => {
                       field.onChange(value)
-                      const instructor = INSTRUCTORS.find((item) => item.id === value)
+                      const instructor = instructors.find((item) => item.id === value)
                       form.setValue("instructor_email", instructor?.email ?? "", {
                         shouldDirty: true,
                       })
                     }}
                     value={field.value}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full" disabled={instructors.length === 0}>
                       <SelectValue placeholder="Select instructor" />
                     </SelectTrigger>
                     <SelectContent>
-                      {INSTRUCTORS.map((instructor) => (
+                      {instructors.map((instructor) => (
                         <SelectItem key={instructor.id} value={instructor.id}>
-                          {instructor.name}
+                          {instructor.fullName ?? instructor.email}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 )}
               />
+              {instructors.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No instructor profiles found in Supabase.
+                </p>
+              ) : null}
             </label>
             <label className="grid gap-1.5 text-sm font-medium">
               Instructor Email
@@ -259,7 +262,7 @@ export function buildSyllabusGradebookDefaults(
   const savedGradebook = new Map((saved?.gradebook_items ?? []).map((item) => [item.item_id, item]))
 
   return {
-    instructor_id: saved?.instructor_id ?? "pending",
+    instructor_id: saved?.instructor_id ?? "",
     instructor_email: saved?.instructor_email ?? "",
     syllabus_items: SYLLABUS_ITEMS.map((item) => ({
       item_id: item.id,
