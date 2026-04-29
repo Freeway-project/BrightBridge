@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ReviewTimer } from "./review-timer"
 
 type ReviewMatrixFormProps = {
   courseId: string
@@ -93,6 +94,7 @@ export function ReviewMatrixForm({
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [issues, setIssues] = useState(initialIssues)
   const [isPending, startTransition] = useTransition()
+  const timerStorageKey = `coursebridge:${courseId}:review-matrix-timer`
   const form = useForm<ReviewMatrixFormValues>({
     resolver: zodResolver(reviewMatrixSchema),
     defaultValues,
@@ -139,9 +141,12 @@ export function ReviewMatrixForm({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-base">Review Matrix</CardTitle>
-          <SaveState isPending={isPending} status={status} />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-base">Review Matrix</CardTitle>
+            <SaveState isPending={isPending} status={status} />
+          </div>
+          <ReviewTimer label="Review matrix time" storageKey={timerStorageKey} />
         </div>
       </CardHeader>
       <CardContent>
