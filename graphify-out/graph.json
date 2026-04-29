@@ -4708,8 +4708,8 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L137",
       "weight": 1.0,
-      "_src": "courses_service_fetchreviewprogressforcourses",
-      "_tgt": "callback_route_get",
+      "_src": "callback_route_get",
+      "_tgt": "courses_service_fetchreviewprogressforcourses",
       "source": "callback_route_get",
       "target": "courses_service_fetchreviewprogressforcourses"
     },
@@ -6016,8 +6016,8 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L115",
       "weight": 1.0,
-      "_src": "courses_service_fetchreviewprogressforcourses",
-      "_tgt": "ui_select_select",
+      "_src": "ui_select_select",
+      "_tgt": "courses_service_fetchreviewprogressforcourses",
       "source": "ui_select_select",
       "target": "courses_service_fetchreviewprogressforcourses"
     },
@@ -6688,8 +6688,8 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L112",
       "weight": 1.0,
-      "_src": "courses_service_fetchreviewprogressforcourses",
-      "_tgt": "supabase_admin_createadminclient",
+      "_src": "supabase_admin_createadminclient",
+      "_tgt": "courses_service_fetchreviewprogressforcourses",
       "source": "supabase_admin_createadminclient",
       "target": "courses_service_fetchreviewprogressforcourses"
     },
