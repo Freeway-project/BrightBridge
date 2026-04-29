@@ -1,167 +1,191 @@
-# Graph Report - .  (2026-04-28)
+# Graph Report - BrightBridge  (2026-04-29)
 
 ## Corpus Check
-- Corpus is ~6,388 words - fits in a single context window. You may not need a graph.
+- 99 files · ~45,713 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 131 nodes · 150 edges · 18 communities detected
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.81)
+- 331 nodes · 424 edges · 21 communities detected
+- Extraction: 74% EXTRACTED · 26% INFERRED · 0% AMBIGUOUS · INFERRED: 109 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Web App and Workflow UI|Web App and Workflow UI]]
-- [[_COMMUNITY_Project Config and Tech Stack|Project Config and Tech Stack]]
-- [[_COMMUNITY_Workflow Transitions and Data Model|Workflow Transitions and Data Model]]
-- [[_COMMUNITY_Role-Status Workflow Rules|Role-Status Workflow Rules]]
-- [[_COMMUNITY_Review Sections|Review Sections]]
-- [[_COMMUNITY_Transitions Module|Transitions Module]]
-- [[_COMMUNITY_UI Components and Middleware|UI Components and Middleware]]
-- [[_COMMUNITY_Validation and Forms|Validation and Forms]]
-- [[_COMMUNITY_UI Package Docs|UI Package Docs]]
-- [[_COMMUNITY_README|README]]
-- [[_COMMUNITY_Tech Stack Docs|Tech Stack Docs]]
-- [[_COMMUNITY_Project Brief|Project Brief]]
-- [[_COMMUNITY_Config Package Docs|Config Package Docs]]
-- [[_COMMUNITY_Super Admin Role|Super Admin Role]]
-- [[_COMMUNITY_Supabase Realtime|Supabase Realtime]]
-- [[_COMMUNITY_Tailwind CSS|Tailwind CSS]]
-- [[_COMMUNITY_TanStack Table|TanStack Table]]
-- [[_COMMUNITY_Vercel Hosting|Vercel Hosting]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `workflow/index` - 19 edges
-2. `CourseBridge Data Model Draft` - 11 edges
-3. `CourseBridge Development Plan` - 10 edges
-4. `Workflow Transitions Doc` - 8 edges
-5. `DB Table: courses` - 8 edges
-6. `CourseStatus` - 7 edges
-7. `DB Table: profiles` - 7 edges
-8. `DB Table: review_sections` - 7 edges
-9. `Home` - 6 edges
-10. `Workflow State Machine Layer` - 6 edges
+1. `Select()` - 29 edges
+2. `requireProfile()` - 14 edges
+3. `createClient()` - 11 edges
+4. `getCourseById()` - 11 edges
+5. `CourseBridge Data Model Draft` - 11 edges
+6. `getAuthContext()` - 10 edges
+7. `createAdminClient()` - 10 edges
+8. `transitionCourseStatus()` - 10 edges
+9. `CourseBridge Development Plan` - 10 edges
+10. `getSuperAdminData()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `createClient (browser)` --conceptually_related_to--> `Supabase Postgres`  [INFERRED]
-  apps/web/lib/supabase/client.ts → docs/tech-stack.md
-- `createClient (server)` --conceptually_related_to--> `Supabase Auth`  [INFERRED]
-  apps/web/lib/supabase/server.ts → docs/tech-stack.md
-- `Role: Instructor` --conceptually_related_to--> `DB Table: review_invites`  [INFERRED]
-  CLAUDE.md → docs/data-model.md
-- `Home` --calls--> `Badge`  [EXTRACTED]
-  apps/web/app/page.tsx → packages/ui/src/index.tsx
-- `Home` --calls--> `COURSE_STATUSES`  [EXTRACTED]
-  apps/web/app/page.tsx → packages/workflow/src/statuses.ts
+- `checkMissingProfileAccess()` --calls--> `Select()`  [INFERRED]
+  scripts/check-core-rls.mjs → apps/web/components/ui/select.tsx
+- `createTempCourse()` --calls--> `Select()`  [INFERRED]
+  scripts/check-core-rls.mjs → apps/web/components/ui/select.tsx
+- `getProfileByEmail()` --calls--> `Select()`  [INFERRED]
+  scripts/check-core-rls.mjs → apps/web/components/ui/select.tsx
+- `signIn()` --calls--> `createClient()`  [INFERRED]
+  scripts/check-core-rls.mjs → apps/web/lib/supabase/server.ts
+- `visibleCourses()` --calls--> `Select()`  [INFERRED]
+  scripts/check-core-rls.mjs → apps/web/components/ui/select.tsx
 
 ## Communities
 
-### Community 0 - "Web App and Workflow UI"
-Cohesion: 0.18
-Nodes (22): Badge, nextConfig, Home, getRoleLabel, Role, ROLE_LABELS, ROLES, COURSE_STATUS_LABELS (+14 more)
+### Community 0 - "Community 0"
+Cohesion: 0.09
+Nodes (35): AGENTS.md — Coding Agent Instructions, assertCanTransition() helper, auth.users (Supabase owned), CLAUDE.md — AI Development Context, Cloudflare R2 Storage, CourseBridge Data Model Draft, CourseBridge Development Plan, getAllowedTransitions() helper (+27 more)
 
-### Community 1 - "Project Config and Tech Stack"
+### Community 1 - "Community 1"
 Cohesion: 0.13
-Nodes (18): AGENTS.md — Coding Agent Instructions, auth.users (Supabase owned), CLAUDE.md — AI Development Context, Cloudflare R2 Storage, CourseBridge Development Plan, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SUPABASE_URL, Next.js App Router (+10 more)
+Nodes (21): NotFound(), requireProfile(), CourseWorkspaceLayout(), IssueLogPage(), MetadataPage(), ReviewMatrixPage(), admin(), getAssignedCourses() (+13 more)
 
-### Community 2 - "Workflow Transitions and Data Model"
-Cohesion: 0.25
-Nodes (16): assertCanTransition() helper, CourseBridge Data Model Draft, getAllowedTransitions() helper, @coursebridge/workflow README, Engineering Principle: No direct status updates from UI, Engineering Principle: Keep instructor-visible and internal comments separate, Engineering Principle: Use workflow state-machine layer, DB Table: course_assignments (+8 more)
+### Community 2 - "Community 2"
+Cohesion: 0.1
+Nodes (15): getAuthContext(), isRole(), GET(), switchDevRole(), DevRoleSwitcher(), signOut(), DashboardLayout(), DashboardPage() (+7 more)
 
-### Community 3 - "Role-Status Workflow Rules"
+### Community 3 - "Community 3"
+Cohesion: 0.17
+Nodes (18): createTempCourse(), getProfileByEmail(), ensureAuthUser(), ensureStatusEvent(), findUserByEmail(), seedCourses(), seedReviewResponses(), upsertAssignments() (+10 more)
+
+### Community 4 - "Community 4"
 Cohesion: 0.17
 Nodes (15): canTransition() helper, Role: Admin, Role: Communications Department, Role: Instructor, Role: TA, Status: admin_changes_requested, Status: assigned_to_ta, Status: course_created (+7 more)
 
-### Community 4 - "Review Sections"
-Cohesion: 0.33
-Nodes (6): Review Section: course_metadata, Review Section: general_notes, Review Section: gradebook_review, Review Section: review_matrix, Review Section: syllabus_review, DB Table: review_sections
+### Community 5 - "Community 5"
+Cohesion: 0.41
+Nodes (11): assertEqual(), assertHasSource(), assertMissingSource(), checkAdminAccess(), checkCommunicationsAccess(), checkInstructorAccess(), checkMissingProfileAccess(), checkTaAccess() (+3 more)
 
-### Community 5 - "Transitions Module"
+### Community 6 - "Community 6"
+Cohesion: 0.33
+Nodes (12): assignTaToCourseAction(), requireAnyRole(), assertCanActOnCourse(), assignUserToCourse(), cleanOptionalText(), createCourse(), getAccessibleCourses(), getAdminClientOrThrow() (+4 more)
+
+### Community 7 - "Community 7"
+Cohesion: 0.19
+Nodes (3): @coursebridge/validation README, React Hook Form, Zod
+
+### Community 11 - "Community 11"
 Cohesion: 0.5
 Nodes (2): assertCanTransition(), canTransition()
 
-### Community 6 - "UI Components and Middleware"
-Cohesion: 0.6
-Nodes (5): Button, buttonVariants, RootLayout, updateSession, cn
-
-### Community 8 - "Validation and Forms"
+### Community 14 - "Community 14"
 Cohesion: 0.67
-Nodes (3): @coursebridge/validation README, React Hook Form, Zod
+Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
-### Community 17 - "UI Package Docs"
+### Community 16 - "Community 16"
+Cohesion: 0.5
+Nodes (2): updateSession(), proxy()
+
+### Community 48 - "Community 48"
 Cohesion: 1.0
 Nodes (2): @coursebridge/ui README, shadcn/ui
 
-### Community 27 - "README"
+### Community 74 - "Community 74"
 Cohesion: 1.0
 Nodes (1): CourseBridge README
 
-### Community 28 - "Tech Stack Docs"
+### Community 75 - "Community 75"
 Cohesion: 1.0
 Nodes (1): Tech Stack Doc
 
-### Community 29 - "Project Brief"
+### Community 76 - "Community 76"
 Cohesion: 1.0
 Nodes (1): CourseBridge Project Brief
 
-### Community 30 - "Config Package Docs"
+### Community 77 - "Community 77"
 Cohesion: 1.0
 Nodes (1): @coursebridge/config README
 
-### Community 31 - "Super Admin Role"
+### Community 78 - "Community 78"
 Cohesion: 1.0
 Nodes (1): Role: Super Admin
 
-### Community 32 - "Supabase Realtime"
+### Community 79 - "Community 79"
 Cohesion: 1.0
 Nodes (1): Supabase Realtime
 
-### Community 33 - "Tailwind CSS"
+### Community 80 - "Community 80"
 Cohesion: 1.0
 Nodes (1): Tailwind CSS
 
-### Community 34 - "TanStack Table"
+### Community 81 - "Community 81"
 Cohesion: 1.0
 Nodes (1): TanStack Table
 
-### Community 35 - "Vercel Hosting"
+### Community 82 - "Community 82"
 Cohesion: 1.0
 Nodes (1): Vercel Hosting
 
 ## Knowledge Gaps
-- **33 isolated node(s):** `buttonVariants`, `CourseBridge README`, `Workflow Overview Doc`, `Tech Stack Doc`, `CourseBridge Project Brief` (+28 more)
+- **30 isolated node(s):** `CourseBridge README`, `Workflow Overview Doc`, `Tech Stack Doc`, `CourseBridge Project Brief`, `@coursebridge/ui README` (+25 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Transitions Module`** (5 nodes): `transitions.ts`, `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`
+- **Thin community `Community 11`** (5 nodes): `transitions.ts`, `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `UI Package Docs`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
+- **Thin community `Community 14`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `README`** (1 nodes): `CourseBridge README`
+- **Thin community `Community 16`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Tech Stack Docs`** (1 nodes): `Tech Stack Doc`
+- **Thin community `Community 48`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Project Brief`** (1 nodes): `CourseBridge Project Brief`
+- **Thin community `Community 74`** (1 nodes): `CourseBridge README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Config Package Docs`** (1 nodes): `@coursebridge/config README`
+- **Thin community `Community 75`** (1 nodes): `Tech Stack Doc`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Super Admin Role`** (1 nodes): `Role: Super Admin`
+- **Thin community `Community 76`** (1 nodes): `CourseBridge Project Brief`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Supabase Realtime`** (1 nodes): `Supabase Realtime`
+- **Thin community `Community 77`** (1 nodes): `@coursebridge/config README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Tailwind CSS`** (1 nodes): `Tailwind CSS`
+- **Thin community `Community 78`** (1 nodes): `Role: Super Admin`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `TanStack Table`** (1 nodes): `TanStack Table`
+- **Thin community `Community 79`** (1 nodes): `Supabase Realtime`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Vercel Hosting`** (1 nodes): `Vercel Hosting`
+- **Thin community `Community 80`** (1 nodes): `Tailwind CSS`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 81`** (1 nodes): `TanStack Table`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 82`** (1 nodes): `Vercel Hosting`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `CourseBridge Data Model Draft` connect `Workflow Transitions and Data Model` to `Project Config and Tech Stack`, `Review Sections`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
-- **Why does `CourseBridge Development Plan` connect `Project Config and Tech Stack` to `Workflow Transitions and Data Model`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
-- **Why does `Workflow Transitions Doc` connect `Workflow Transitions and Data Model` to `Project Config and Tech Stack`, `Role-Status Workflow Rules`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
-- **What connects `buttonVariants`, `CourseBridge README`, `Workflow Overview Doc` to the rest of the system?**
-  _33 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Project Config and Tech Stack` be split into smaller, more focused modules?**
-  _Cohesion score 0.13 - nodes in this community are weakly interconnected._
+- **Why does `Select()` connect `Community 3` to `Community 1`, `Community 2`, `Community 5`, `Community 6`, `Community 13`?**
+  _High betweenness centrality (0.069) - this node is a cross-community bridge._
+- **Why does `getAuthContext()` connect `Community 2` to `Community 1`, `Community 3`, `Community 6`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `createClient()` connect `Community 2` to `Community 5`, `Community 6`?**
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+- **Are the 28 inferred relationships involving `Select()` (e.g. with `checkMissingProfileAccess()` and `createTempCourse()`) actually correct?**
+  _`Select()` has 28 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 12 inferred relationships involving `requireProfile()` (e.g. with `CourseWorkspaceLayout()` and `SubmitPage()`) actually correct?**
+  _`requireProfile()` has 12 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 10 inferred relationships involving `createClient()` (e.g. with `signIn()` and `GET()`) actually correct?**
+  _`createClient()` has 10 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 9 inferred relationships involving `getCourseById()` (e.g. with `CourseWorkspaceLayout()` and `SubmitPage()`) actually correct?**
+  _`getCourseById()` has 9 INFERRED edges - model-reasoned connections that need verification._
