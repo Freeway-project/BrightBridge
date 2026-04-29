@@ -82,7 +82,7 @@ async function fetchCourses(admin: ReturnType<typeof createAdminClient>): Promis
       id, title, status, term, department, created_at, updated_at,
       course_assignments (
         role,
-        profiles ( full_name, email )
+        profiles!course_assignments_profile_id_fkey ( full_name, email )
       )
     `)
     .order("updated_at", { ascending: false })
