@@ -1,9 +1,10 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { AlertCircle, ChevronDown, Plus } from "lucide-react"
+import { ChevronDown, Plus } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
   reviewMatrixSchema,
@@ -34,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ReviewTimer, useStoredTimerValue } from "./review-timer"
 type ReviewMatrixFormProps = {
   courseId: string
   defaultValues: ReviewMatrixFormValues
@@ -92,8 +94,13 @@ export function ReviewMatrixForm({
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [issues, setIssues] = useState(initialIssues)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
   const timerStorageKey = `coursebridge:${courseId}:timer:review-matrix`
   const elapsedRef = useRef(defaultValues.time_spent_seconds ?? 0)
+  const overallElapsed = useStoredTimerValue(
+    `coursebridge:${courseId}:timer:overall`,
+    defaultValues.overall_time_spent_seconds ?? 0,
+  )
   const form = useForm<ReviewMatrixFormValues>({
     resolver: zodResolver(reviewMatrixSchema),
     defaultValues,
@@ -115,7 +122,7 @@ export function ReviewMatrixForm({
     return () => window.removeEventListener("coursebridge:review-timer", onTick)
   }, [timerStorageKey])
 
-  async function handleSave() {
+  async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
 
@@ -125,8 +132,12 @@ export function ReviewMatrixForm({
         await saveDraft(courseId, "review_matrix", {
           ...form.getValues(),
           time_spent_seconds: elapsedRef.current,
+          overall_time_spent_seconds: overallElapsed,
         })
         setStatus("saved")
+        if (advance) {
+          router.push(`/courses/${courseId}/syllabus-gradebook`)
+        }
       } catch {
         setStatus("error")
       }
@@ -160,7 +171,10 @@ export function ReviewMatrixForm({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-base">Review Matrix</CardTitle>
+          <div className="space-y-2">
+            <CardTitle className="text-base">Review Matrix</CardTitle>
+            <ReviewTimer storageKey={timerStorageKey} label="Review Matrix Time" compact />
+          </div>
           <SaveState isPending={isPending} status={status} />
         </div>
       </CardHeader>
@@ -189,7 +203,6 @@ export function ReviewMatrixForm({
                         const index = defaultValues.items.findIndex((value) => value.item_id === item.id)
                         const statusValue = form.watch(`items.${index}.status`)
                         const needsIssue = NEEDS_ISSUE.has(statusValue)
-                        const notesError = form.formState.errors.items?.[index]?.notes?.message
 
                         return (
                           <TableRow key={item.id}>
@@ -220,19 +233,10 @@ export function ReviewMatrixForm({
                               />
                             </TableCell>
                             <TableCell>
-                              <div className="space-y-1">
-                                <Input
-                                  className={needsIssue && notesError ? "border-orange-500 ring-2 ring-orange-500/20" : ""}
-                                  placeholder={needsIssue ? "Required" : "Optional"}
-                                  {...form.register(`items.${index}.notes`)}
-                                />
-                                {notesError ? (
-                                  <p className="flex items-center gap-1 text-xs text-orange-600">
-                                    <AlertCircle className="size-3" />
-                                    {notesError}
-                                  </p>
-                                ) : null}
-                              </div>
+                              <Input
+                                placeholder="Optional"
+                                {...form.register(`items.${index}.notes`)}
+                              />
                             </TableCell>
                             <TableCell>
                               <Input placeholder="https://..." {...form.register(`items.${index}.direct_link`)} />
@@ -257,11 +261,11 @@ export function ReviewMatrixForm({
                   </Table>
                 </CollapsibleContent>
               </div>
-            </Collapsible>
+          </Collapsible>
           ))}
 
           <div className="flex justify-end pt-2">
-            <Button disabled={isPending} onClick={() => void handleSave()} type="button">
+            <Button disabled={isPending} onClick={() => void handleSave(true)} type="button">
               Save draft
             </Button>
           </div>
@@ -285,6 +289,7 @@ export function buildReviewMatrixDefaults(
       })),
     ),
     time_spent_seconds: saved?.time_spent_seconds ?? 0,
+    overall_time_spent_seconds: saved?.overall_time_spent_seconds ?? 0,
   }
 }
 

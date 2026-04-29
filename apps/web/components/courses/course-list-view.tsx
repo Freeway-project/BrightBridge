@@ -5,14 +5,14 @@ import { CourseCard } from "./course-card"
 import { CourseSidebarFilters } from "./course-sidebar-filters"
 import type { CourseSummary } from "@/lib/courses/service"
 import { Button } from "@/components/ui/button"
-import { Plus, Filter, Search as SearchIcon, type LucideIcon } from "lucide-react"
+import { Plus, Filter, Search as SearchIcon } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { StatCard } from "@/components/shared/stat-card"
+import { StatCard, type StatCardIcon } from "@/components/shared/stat-card"
 
 export interface CourseStat {
   label: string
   value: number | string
-  icon?: LucideIcon
+  icon?: StatCardIcon
 }
 
 interface CourseListViewProps {

@@ -36,7 +36,7 @@ export function CourseCard({ course }: CourseCardProps) {
             </p>
           </div>
           <Button variant="outline" size="sm" asChild className="shrink-0">
-            <Link href={`/courses/${course.id}`}>
+            <Link href={`/courses/${course.id}/metadata`}>
               View Review
               <ChevronRight className="ml-1 size-3" />
             </Link>

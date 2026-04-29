@@ -12,7 +12,6 @@ import { Progress } from "@/components/ui/progress"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { StatCard } from "@/components/shared/stat-card"
 import {
-  BookOpen, Clock, ShieldCheck, GraduationCap, CheckCircle2,
   AlertTriangle, Search,
 } from "lucide-react"
 import { COURSE_STATUS_LABELS, type CourseStatus } from "@coursebridge/workflow"
@@ -101,11 +100,11 @@ export function SuperAdminShell({ data }: Props) {
       <TabsContent value="overview" className="flex-1 overflow-y-auto p-6 space-y-6 mt-0">
         {/* Stat cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-          <StatCard label="Total Courses"    value={totalCourses}    icon={BookOpen} />
-          <StatCard label="TA In Progress"   value={inProgress}      icon={Clock} />
-          <StatCard label="Pending Admin"    value={pendingAdmin}    icon={ShieldCheck} />
-          <StatCard label="With Instructor"  value={withInstructor}  icon={GraduationCap} />
-          <StatCard label="Completed"        value={completed}       icon={CheckCircle2} />
+          <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
+          <StatCard label="TA In Progress"   value={inProgress}      icon="clock" />
+          <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
+          <StatCard label="With Instructor"  value={withInstructor}  icon="book-open" />
+          <StatCard label="Completed"        value={completed}       icon="check-square" />
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

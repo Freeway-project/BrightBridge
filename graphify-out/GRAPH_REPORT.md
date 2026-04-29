@@ -1,11 +1,11 @@
 # Graph Report - BrightBridge  (2026-04-29)
 
 ## Corpus Check
-- 106 files · ~51,484 words
+- 107 files · ~51,702 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 358 nodes · 461 edges · 22 communities detected
+- 361 nodes · 463 edges · 22 communities detected
 - Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 123 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -19,10 +19,10 @@
 - [[_COMMUNITY_Community 6|Community 6]]
 - [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 9|Community 9]]
-- [[_COMMUNITY_Community 11|Community 11]]
-- [[_COMMUNITY_Community 16|Community 16]]
-- [[_COMMUNITY_Community 18|Community 18]]
-- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 53|Community 53]]
 - [[_COMMUNITY_Community 80|Community 80]]
 - [[_COMMUNITY_Community 81|Community 81]]
 - [[_COMMUNITY_Community 82|Community 82]]
@@ -64,20 +64,20 @@ Cohesion: 0.09
 Nodes (35): AGENTS.md — Coding Agent Instructions, assertCanTransition() helper, auth.users (Supabase owned), CLAUDE.md — AI Development Context, Cloudflare R2 Storage, CourseBridge Data Model Draft, CourseBridge Development Plan, getAllowedTransitions() helper (+27 more)
 
 ### Community 1 - "Community 1"
+Cohesion: 0.1
+Nodes (19): getAdmin(), getAdminCourseDetail(), getAdminCourses(), getAuthContext(), isRole(), GET(), switchDevRole(), DevRoleSwitcher() (+11 more)
+
+### Community 2 - "Community 2"
 Cohesion: 0.17
 Nodes (17): NotFound(), requireProfile(), CourseWorkspaceLayout(), IssueLogPage(), MetadataPage(), ReviewMatrixPage(), getCourseById(), admin() (+9 more)
 
-### Community 2 - "Community 2"
-Cohesion: 0.13
-Nodes (15): getAdmin(), getAdminCourseDetail(), getAdminCourses(), GET(), switchDevRole(), DevRoleSwitcher(), fetchReviewProgressForCourses(), signOut() (+7 more)
-
 ### Community 3 - "Community 3"
-Cohesion: 0.17
-Nodes (18): createTempCourse(), getProfileByEmail(), ensureAuthUser(), ensureStatusEvent(), findUserByEmail(), seedCourses(), seedReviewResponses(), upsertAssignments() (+10 more)
+Cohesion: 0.15
+Nodes (14): createTempCourse(), getProfileByEmail(), admin(), getProfilesByRole(), SuperAdminDashboardPage(), fetchAuditEvents(), fetchCourses(), fetchStatusCounts() (+6 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.15
-Nodes (11): approveReviewAction(), assignTaToCourseAction(), requestFixesAction(), CoursesPage(), getAccessibleCourses(), admin(), getAssignedCourses(), transitionCourseStatus() (+3 more)
+Cohesion: 0.18
+Nodes (9): approveReviewAction(), assignTaToCourseAction(), requestFixesAction(), admin(), getAssignedCourses(), transitionCourseStatus(), assertCanTransition(), canTransition() (+1 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.17
@@ -95,19 +95,19 @@ Nodes (11): assertEqual(), assertHasSource(), assertMissingSource(), checkAdminA
 Cohesion: 0.47
 Nodes (10): requireAnyRole(), assertCanActOnCourse(), assignUserToCourse(), cleanOptionalText(), createCourse(), getAdminClientOrThrow(), insertStatusEvent(), toCourseStatus() (+2 more)
 
-### Community 11 - "Community 11"
-Cohesion: 0.25
-Nodes (5): getAuthContext(), isRole(), DashboardLayout(), DashboardPage(), SuperAdminDashboardPage()
+### Community 10 - "Community 10"
+Cohesion: 0.31
+Nodes (7): ensureAuthUser(), ensureStatusEvent(), findUserByEmail(), seedCourses(), seedReviewResponses(), upsertAssignments(), upsertCourse()
 
-### Community 16 - "Community 16"
+### Community 15 - "Community 15"
 Cohesion: 0.67
 Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
-### Community 18 - "Community 18"
+### Community 17 - "Community 17"
 Cohesion: 0.5
 Nodes (2): updateSession(), proxy()
 
-### Community 52 - "Community 52"
+### Community 53 - "Community 53"
 Cohesion: 1.0
 Nodes (2): @coursebridge/ui README, shadcn/ui
 
@@ -150,11 +150,11 @@ Nodes (1): Vercel Hosting
 ## Knowledge Gaps
 - **30 isolated node(s):** `CourseBridge README`, `Workflow Overview Doc`, `Tech Stack Doc`, `CourseBridge Project Brief`, `@coursebridge/ui README` (+25 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 16`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 15`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
+- **Thin community `Community 17`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 52`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
+- **Thin community `Community 53`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 80`** (1 nodes): `CourseBridge README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -178,11 +178,11 @@ Nodes (1): Vercel Hosting
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Select()` connect `Community 3` to `Community 1`, `Community 2`, `Community 4`, `Community 7`, `Community 9`, `Community 11`, `Community 14`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
-- **Why does `getAuthContext()` connect `Community 11` to `Community 1`, `Community 2`, `Community 3`, `Community 4`?**
+- **Why does `Select()` connect `Community 3` to `Community 1`, `Community 2`, `Community 4`, `Community 7`, `Community 9`, `Community 10`?**
+  _High betweenness centrality (0.067) - this node is a cross-community bridge._
+- **Why does `getAuthContext()` connect `Community 1` to `Community 2`, `Community 3`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `createClient()` connect `Community 2` to `Community 11`, `Community 4`, `Community 7`?**
+- **Why does `createClient()` connect `Community 1` to `Community 7`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Are the 31 inferred relationships involving `Select()` (e.g. with `checkMissingProfileAccess()` and `createTempCourse()`) actually correct?**
   _`Select()` has 31 INFERRED edges - model-reasoned connections that need verification._

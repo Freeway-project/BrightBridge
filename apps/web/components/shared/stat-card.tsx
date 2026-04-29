@@ -1,15 +1,26 @@
-import type { LucideIcon } from "lucide-react"
+import { AlertTriangle, BookOpen, CheckSquare, Clock, type LucideIcon } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+
+export type StatCardIcon = "book-open" | "clock" | "check-square" | "alert-triangle"
 
 interface StatCardProps {
   label: string
   value: number | string
-  icon?: LucideIcon
+  icon?: StatCardIcon
   className?: string
 }
 
-export function StatCard({ label, value, icon: Icon, className }: StatCardProps) {
+const ICONS: Record<StatCardIcon, LucideIcon> = {
+  "book-open": BookOpen,
+  "clock": Clock,
+  "check-square": CheckSquare,
+  "alert-triangle": AlertTriangle,
+}
+
+export function StatCard({ label, value, icon, className }: StatCardProps) {
+  const Icon = icon ? ICONS[icon] : null
+
   return (
     <Card className={cn("", className)}>
       <CardHeader className="pb-1 pt-4 px-4">
