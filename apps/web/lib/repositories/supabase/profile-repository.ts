@@ -50,24 +50,44 @@ export function createSupabaseProfileRepository(): ProfileRepository {
       }));
     },
 
-    async listUsers() {
+    async listUsers(page = 1, pageSize = 20, search = "") {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin
+      
+      let query = admin
         .from("profiles")
-        .select("id, email, full_name, role, created_at")
-        .order("role", { ascending: true });
+        .select("id, email, full_name, role, created_at", { count: "exact" });
+
+      if (search) {
+        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,role.ilike.%${search}%`);
+      }
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await query
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
       if (error) {
         throw new Error(`profiles: ${error.message}`);
       }
 
-      return (data ?? []).map((profile) => ({
+      const rows = (data ?? []).map((profile) => ({
         id: profile.id,
         email: profile.email,
         fullName: profile.full_name,
         role: profile.role as Role,
         createdAt: profile.created_at,
       }));
+
+      const total = count ?? 0;
+      return {
+        data: rows,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
     },
 
     async upsertProfile(input) {

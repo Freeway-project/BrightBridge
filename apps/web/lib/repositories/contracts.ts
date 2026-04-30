@@ -221,6 +221,14 @@ export type UpsertReviewResponseInput = {
   status?: "draft" | "submitted";
 };
 
+export type PaginatedResult<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
   listAssignedCourses(userId: string): Promise<AssignedCourse[]>;
@@ -234,7 +242,7 @@ export interface CourseRepository {
   insertStatusEvent(input: InsertStatusEventInput): Promise<void>;
   listAdminCourses(): Promise<AdminCourseRow[]>;
   getAdminCourse(courseId: string): Promise<AdminCourseRow | null>;
-  listSuperAdminCourses(): Promise<SuperAdminCourseRow[]>;
+  listSuperAdminCourses(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<SuperAdminCourseRow>>;
   listStatusCounts(): Promise<StatusCount[]>;
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
@@ -245,7 +253,7 @@ export interface CourseRepository {
 export interface ProfileRepository {
   getProfileById(profileId: string): Promise<AppProfileRecord | null>;
   getProfilesByRole(role: Role): Promise<ProfileOption[]>;
-  listUsers(): Promise<UserSummary[]>;
+  listUsers(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<UserSummary>>;
   upsertProfile(input: {
     id: string;
     email: string;

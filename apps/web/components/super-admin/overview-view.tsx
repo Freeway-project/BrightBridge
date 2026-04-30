@@ -15,19 +15,15 @@ const STATUS_ORDER: CourseStatus[] = [
 ]
 
 export function OverviewView({ data }: { data: SuperAdminData }) {
-  const { courses, statusCounts, taWorkload } = data
-
-  const totalCourses = courses.length
-  const inProgress  = courses.filter((c) => c.status === "ta_review_in_progress").length
-  const pendingAdmin = courses.filter((c) =>
-    c.status === "submitted_to_admin" || c.status === "admin_changes_requested"
-  ).length
-  const withInstructor = courses.filter((c) =>
-    c.status === "sent_to_instructor" || c.status === "instructor_questions"
-  ).length
-  const completed = courses.filter((c) => c.status === "final_approved").length
+  const { statusCounts, taWorkload } = data
 
   const countByStatus = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
+
+  const totalCourses = statusCounts.reduce((acc, curr) => acc + curr.count, 0)
+  const inProgress  = countByStatus["ta_review_in_progress"] ?? 0
+  const pendingAdmin = (countByStatus["submitted_to_admin"] ?? 0) + (countByStatus["admin_changes_requested"] ?? 0)
+  const withInstructor = (countByStatus["sent_to_instructor"] ?? 0) + (countByStatus["instructor_questions"] ?? 0)
+  const completed = countByStatus["final_approved"] ?? 0
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-background">
