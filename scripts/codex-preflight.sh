@@ -5,6 +5,9 @@ set -u
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR" || exit 1
 
+# Ensure common local binary paths are available in non-interactive shells.
+export PATH="$HOME/.local/bin:$PATH"
+
 PASS=0
 WARN=0
 FAIL=0
@@ -27,8 +30,9 @@ fail() {
 check_command() {
   local name="$1"
   local severity="${2:-warn}"
+  local fallback="$HOME/.local/bin/$name"
 
-  if command -v "$name" >/dev/null 2>&1; then
+  if command -v "$name" >/dev/null 2>&1 || [ -x "$fallback" ]; then
     ok "command available: $name"
   else
     if [ "$severity" = "fail" ]; then
@@ -37,6 +41,22 @@ check_command() {
       warn "missing optional command: $name"
     fi
   fi
+}
+
+check_supabase_cli() {
+  if command -v supabase >/dev/null 2>&1 || [ -x "$HOME/.local/bin/supabase" ]; then
+    ok "command available: supabase"
+    return
+  fi
+
+  if command -v npx >/dev/null 2>&1; then
+    if npx supabase --version >/dev/null 2>&1; then
+      ok "Supabase CLI available through npx"
+      return
+    fi
+  fi
+
+  warn "missing optional command: supabase (use npx supabase as fallback)"
 }
 
 printf 'Codex preflight for BrightBridge\n'
@@ -68,7 +88,7 @@ check_command "rg" "fail"
 check_command "node" "fail"
 check_command "npm" "fail"
 check_command "graphify" "warn"
-check_command "supabase" "warn"
+check_supabase_cli
 
 if [ -f "graphify-out/GRAPH_REPORT.md" ]; then
   ok "found graphify-out/GRAPH_REPORT.md"
@@ -79,7 +99,7 @@ fi
 if [ -f "graphify-out/wiki/index.md" ]; then
   ok "found graphify-out/wiki/index.md"
 else
-  warn "missing graphify-out/wiki/index.md"
+  ok "graphify wiki index is optional and currently not present"
 fi
 
 if [ -f ".env.local" ] || [ -f "apps/web/.env.local" ]; then

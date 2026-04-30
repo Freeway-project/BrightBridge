@@ -9,7 +9,7 @@ This repo includes:
 - `.codex/hooks.json`
 - `.codex/prehook.sh`
 
-The prehook is fail-safe (`|| true`) and only adds context/warnings. It does not block commands.
+The prehook is fail-safe (`|| true`) and intentionally silent to avoid hook-protocol errors in Codex. It does not block commands.
 
 ## 2) Run Preflight
 
@@ -47,6 +47,11 @@ Fill required Supabase values:
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `DATABASE_URL` (for migration scripts)
+
+Supabase CLI note:
+
+- Global `npm install -g supabase` is not supported by Supabase.
+- Use `npx supabase ...` (for example `npx supabase --version`).
 
 ## 4) Session Start Routine
 
