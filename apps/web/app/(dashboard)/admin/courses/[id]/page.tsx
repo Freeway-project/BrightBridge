@@ -6,6 +6,7 @@ import { getCourseComments } from "@/lib/services/comments"
 import { CourseReviewDetail } from "./_components/course-review-detail"
 import { AdminCourseSidebar } from "./_components/admin-course-sidebar"
 import { CourseChat } from "./_components/course-chat"
+import { TweakProvider } from "@/components/shared/tweak-provider"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -18,7 +19,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
 
   const [detail, comments] = await Promise.all([
     getAdminCourseDetail(id),
-    getCourseComments(id)
+    getCourseComments(id),
   ])
   
   if (!detail) notFound()
@@ -26,7 +27,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const { course, responses, sectionKeyById } = detail
 
   return (
-    <>
+    <TweakProvider>
       <Topbar 
         title="Course Review" 
         subtitle={course.sourceCourseId ? `${course.sourceCourseId} — ${course.title}` : course.title} 
@@ -34,7 +35,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
       <main className="flex-1 flex overflow-hidden bg-muted/10">
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-4xl mx-auto space-y-6">
+          <div className="max-w-6xl mx-auto space-y-[var(--card-spacing,1.5rem)]">
             <CourseReviewDetail
               course={course}
               responses={responses}
@@ -52,11 +53,11 @@ export default async function AdminCourseDetailPage({ params }: Props) {
             <CourseChat 
               courseId={course.id} 
               comments={comments} 
-              currentUserId={context.profile.id} 
+              currentUserId={context.userId} 
             />
           </div>
         </aside>
       </main>
-    </>
+    </TweakProvider>
   )
 }
