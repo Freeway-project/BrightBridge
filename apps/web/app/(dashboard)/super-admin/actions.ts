@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { ROLES, type Role } from "@coursebridge/workflow"
 import { getAuthService } from "@/lib/auth/service"
 import { requireProfile } from "@/lib/auth/context"
-import { getProfileRepository } from "@/lib/repositories"
+import { getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
 
 export type ManageUserState = {
   kind: "idle" | "success" | "error"
@@ -103,6 +103,66 @@ export async function updateUserRoleAction(
   revalidatePath("/super-admin")
 
   return { kind: "success", message: `Updated ${profile.email} to ${role}.` }
+}
+
+export async function createUnitAction(
+  _state: ManageUserState,
+  formData: FormData,
+): Promise<ManageUserState> {
+  await requireSuperAdmin()
+
+  const name = String(formData.get("name") ?? "").trim()
+  const type = String(formData.get("type") ?? "").trim()
+  const parentId = String(formData.get("parentId") ?? "") || null
+
+  if (!name || !type) {
+    return { kind: "error", message: "Name and type are required." }
+  }
+
+  try {
+    await getHierarchyRepository().createUnit({ name, type, parentId })
+  } catch (error) {
+    return {
+      kind: "error",
+      message: error instanceof Error ? error.message : "Could not create unit.",
+    }
+  }
+
+  revalidatePath("/super-admin")
+  return { kind: "success", message: `Created unit ${name}.` }
+}
+
+export async function addUnitMemberAction(
+  _state: ManageUserState,
+  formData: FormData,
+): Promise<ManageUserState> {
+  await requireSuperAdmin()
+
+  const profileId = String(formData.get("profileId") ?? "")
+  const orgUnitId = String(formData.get("orgUnitId") ?? "")
+  const title = String(formData.get("title") ?? "").trim()
+
+  if (!profileId || !orgUnitId || !title) {
+    return { kind: "error", message: "User, unit, and title are required." }
+  }
+
+  try {
+    await getHierarchyRepository().addMember({ profileId, orgUnitId, title })
+  } catch (error) {
+    return {
+      kind: "error",
+      message: error instanceof Error ? error.message : "Could not add member.",
+    }
+  }
+
+  revalidatePath("/super-admin")
+  return { kind: "success", message: "Added member to unit." }
+}
+
+export async function removeUnitMemberAction(memberId: string): Promise<void> {
+  await requireSuperAdmin()
+  await getHierarchyRepository().removeMember(memberId)
+  revalidatePath("/super-admin")
 }
 
 async function requireSuperAdmin() {

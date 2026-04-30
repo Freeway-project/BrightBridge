@@ -12,6 +12,11 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "db:push": "node scripts/apply-migration.mjs",
+    "db:migrate:all": "node scripts/db-migrate-all.mjs",
+    "db:inspect": "node scripts/db-inspect.mjs",
+    "import:dry-run": "node scripts/import-course-instructors-dry-run.mjs",
+    "import:instructors": "node scripts/import-course-instructors.mjs",
+    "import:courses": "node scripts/import-courses-and-assignments.mjs",
     "check:rls": "node scripts/check-core-rls.mjs",
     "seed:dev": "node scripts/seed-dev.mjs"
   },

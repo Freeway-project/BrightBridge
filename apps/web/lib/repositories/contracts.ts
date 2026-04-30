@@ -1,4 +1,4 @@
-import type { CourseStatus, Role } from "@coursebridge/workflow";
+import type { AssignmentRole, CourseStatus, Role } from "@coursebridge/workflow";
 
 export type AppProfileRecord = {
   id: string;
@@ -41,6 +41,7 @@ export type CourseSummary = {
   title: string;
   term: string | null;
   department: string | null;
+  orgUnitId: string | null;
   status: CourseStatus;
   createdBy: string;
   createdAt: string;
@@ -68,6 +69,13 @@ export type AdminCourseRow = {
   updatedAt: string;
   ta: { id: string; name: string | null; email: string } | null;
   reviewProgress?: ReviewProgress;
+};
+
+export type AdminCourseListFilters = {
+  search?: string;
+  status?: CourseStatus;
+  taProfileId?: string;
+  assignedOnly?: boolean;
 };
 
 export type SuperAdminCourseRow = {
@@ -156,12 +164,34 @@ export type CourseComment = {
   created_at: string;
 };
 
+export type CourseAssignmentRecord = {
+  profileId: string;
+  courseId: string;
+  role: AssignmentRole;
+};
+
+export type OrgUnit = {
+  id: string;
+  parentId: string | null;
+  name: string;
+  type: string;
+};
+
+export type OrgUnitMember = {
+  id: string;
+  profileId: string;
+  orgUnitId: string;
+  title: string;
+  isPrimary: boolean;
+};
+
 export type CreateCourseRecordInput = {
   sourceCourseId?: string | null;
   targetCourseId?: string | null;
   title: string;
   term?: string | null;
   department?: string | null;
+  orgUnitId?: string | null;
   status: CourseStatus;
   createdBy: string;
 };
@@ -169,7 +199,7 @@ export type CreateCourseRecordInput = {
 export type AssignUserToCourseRecordInput = {
   courseId: string;
   profileId: string;
-  role: Role;
+  role: AssignmentRole;
   assignedBy: string;
 };
 
@@ -198,6 +228,14 @@ export type UpsertReviewResponseInput = {
   status?: "draft" | "submitted";
 };
 
+export type PaginatedResult<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
   listAssignedCourses(userId: string): Promise<AssignedCourse[]>;
@@ -205,22 +243,29 @@ export interface CourseRepository {
   createCourse(input: CreateCourseRecordInput): Promise<CourseSummary>;
   getCourseSummaryById(courseId: string): Promise<CourseSummary>;
   updateCourseStatus(courseId: string, status: CourseStatus): Promise<CourseSummary>;
-  hasAssignment(courseId: string, profileId: string, role: Role): Promise<boolean>;
+  getCourseAssignment(courseId: string, profileId: string): Promise<CourseAssignmentRecord | null>;
+  hasAssignment(courseId: string, profileId: string, role: AssignmentRole): Promise<boolean>;
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;
   insertStatusEvent(input: InsertStatusEventInput): Promise<void>;
   listAdminCourses(): Promise<AdminCourseRow[]>;
+  listAdminCoursesPage(
+    page?: number,
+    pageSize?: number,
+    filters?: AdminCourseListFilters,
+  ): Promise<PaginatedResult<AdminCourseRow>>;
   getAdminCourse(courseId: string): Promise<AdminCourseRow | null>;
-  listSuperAdminCourses(): Promise<SuperAdminCourseRow[]>;
+  listSuperAdminCourses(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<SuperAdminCourseRow>>;
   listStatusCounts(): Promise<StatusCount[]>;
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
+  listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
 }
 
 export interface ProfileRepository {
   getProfileById(profileId: string): Promise<AppProfileRecord | null>;
   getProfilesByRole(role: Role): Promise<ProfileOption[]>;
-  listUsers(): Promise<UserSummary[]>;
+  listUsers(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<UserSummary>>;
   upsertProfile(input: {
     id: string;
     email: string;
@@ -243,4 +288,15 @@ export interface ReviewRepository {
 export interface CommentRepository {
   listCourseComments(courseId: string): Promise<CourseComment[]>;
   postCourseComment(input: PostCourseCommentInput): Promise<CourseComment>;
+}
+
+export interface HierarchyRepository {
+  listUnits(): Promise<OrgUnit[]>;
+  getUnitById(id: string): Promise<OrgUnit | null>;
+  getUserUnits(profileId: string): Promise<OrgUnitMember[]>;
+  listAllMembers(): Promise<OrgUnitMember[]>;
+  hasHierarchyAccess(profileId: string, courseId: string): Promise<boolean>;
+  createUnit(input: { name: string; type: string; parentId?: string | null }): Promise<OrgUnit>;
+  addMember(input: { profileId: string; orgUnitId: string; title: string; isPrimary?: boolean }): Promise<void>;
+  removeMember(memberId: string): Promise<void>;
 }

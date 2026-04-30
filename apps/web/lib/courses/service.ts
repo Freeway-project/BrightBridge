@@ -3,16 +3,18 @@ import "server-only";
 import {
   assertCanTransition,
   COURSE_STATUSES,
-  ROLES,
+  ASSIGNMENT_ROLES,
   type CourseStatus,
-  type Role
+  type Role,
+  type AssignmentRole,
+  type EffectiveRole
 } from "@coursebridge/workflow";
 import { getAuthContext, requireAnyRole, requireProfile, type AppProfile } from "@/lib/auth/context";
 import { getCourseRepository, getProfileRepository, getReviewRepository } from "@/lib/repositories";
-import type { CourseSummary, ReviewProgress, SectionProgress } from "@/lib/repositories/contracts";
+import type { CourseSummary, ReviewProgress, SectionProgress, CourseAssignmentRecord } from "@/lib/repositories/contracts";
 
-const adminRoles: readonly Role[] = ["admin", "super_admin"];
-const roleWideCourseRoles: readonly Role[] = ["admin", "communications", "super_admin"];
+const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
+const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
 
 export type { CourseSummary, ReviewProgress, SectionProgress } from "@/lib/repositories/contracts";
 
@@ -27,7 +29,7 @@ export type CreateCourseInput = {
 export type AssignUserToCourseInput = {
   courseId: string;
   profileId: string;
-  role: Role;
+  role: AssignmentRole;
 };
 
 export type TransitionCourseStatusInput = {
@@ -93,7 +95,7 @@ export async function assignUserToCourse(input: AssignUserToCourseInput) {
   const context = await requireProfile();
   requireAnyRole(context, adminRoles);
 
-  if (!ROLES.includes(input.role)) {
+  if (!(ASSIGNMENT_ROLES as readonly string[]).includes(input.role)) {
     throw new Error(`Unsupported assignment role: ${input.role}`);
   }
 
@@ -121,15 +123,26 @@ export async function transitionCourseStatus(input: TransitionCourseStatusInput)
   const course = await getCourseRepository().getCourseSummaryById(input.courseId);
   const fromStatus = course.status;
 
+  const assignment = await getCourseRepository().getCourseAssignment(
+    input.courseId,
+    context.profile.id
+  );
+
+  const effectiveRole: EffectiveRole =
+    context.profile.role === "standard_user"
+      ? (assignment?.role ?? "standard_user")
+      : context.profile.role;
+
   assertCanTransition({
-    role: context.profile.role,
+    role: effectiveRole,
     from: fromStatus,
     to: input.toStatus
   });
 
   await assertCanActOnCourse({
     courseId: course.id,
-    profile: context.profile
+    profile: context.profile,
+    assignment
   });
 
   const updatedCourse = await getCourseRepository().updateCourseStatus(course.id, input.toStatus);
@@ -145,15 +158,21 @@ export async function transitionCourseStatus(input: TransitionCourseStatusInput)
   return updatedCourse;
 }
 
-async function assertCanActOnCourse({ courseId, profile }: { courseId: string; profile: AppProfile }) {
+async function assertCanActOnCourse({
+  courseId,
+  profile,
+  assignment
+}: {
+  courseId: string;
+  profile: AppProfile;
+  assignment: CourseAssignmentRecord | null;
+}) {
   if ((roleWideCourseRoles as readonly Role[]).includes(profile.role)) {
     return;
   }
 
-  const isAssigned = await getCourseRepository().hasAssignment(courseId, profile.id, profile.role);
-
-  if (!isAssigned) {
-    throw new Error("You are not assigned to this course with the required role.");
+  if (!assignment) {
+    throw new Error("You are not assigned to this course.");
   }
 }
 

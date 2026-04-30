@@ -1,13 +1,17 @@
 import "server-only";
 
+import type { AssignmentRole } from "@coursebridge/workflow";
 import type {
+  AdminCourseListFilters,
   AdminCourseRow,
   AssignedCourse,
   AuditEvent,
+  CourseAssignmentRecord,
   CourseRepository,
   CourseSummary,
   CreateCourseRecordInput,
   InsertStatusEventInput,
+  PaginatedResult,
   StatusCount,
   StuckCourse,
   SuperAdminCourseRow,
@@ -22,6 +26,7 @@ type CourseRow = {
   title: string;
   term: string | null;
   department: string | null;
+  org_unit_id: string | null;
   status: string;
   created_by: string;
   created_at: string;
@@ -46,7 +51,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .order("updated_at", { ascending: false });
 
@@ -98,11 +103,12 @@ export function createSupabaseCourseRepository(): CourseRepository {
           title: input.title,
           term: cleanOptionalText(input.term),
           department: cleanOptionalText(input.department),
+          org_unit_id: input.orgUnitId ?? null,
           status: input.status,
           created_by: input.createdBy,
         })
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .single();
 
@@ -118,7 +124,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .eq("id", courseId)
         .single();
@@ -137,7 +143,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         .update({ status })
         .eq("id", courseId)
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .single();
 
@@ -146,6 +152,28 @@ export function createSupabaseCourseRepository(): CourseRepository {
       }
 
       return toCourseSummary(data as CourseRow);
+    },
+
+    async getCourseAssignment(courseId, profileId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("course_assignments")
+        .select("course_id, profile_id, role")
+        .eq("course_id", courseId)
+        .eq("profile_id", profileId)
+        .maybeSingle();
+
+      if (error) {
+        throw new Error(`getCourseAssignment: ${error.message}`);
+      }
+
+      if (!data) return null;
+
+      return {
+        courseId: data.course_id,
+        profileId: data.profile_id,
+        role: data.role as AssignmentRole,
+      } satisfies CourseAssignmentRecord;
     },
 
     async hasAssignment(courseId, profileId, role) {
@@ -205,7 +233,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(`
-          id, source_course_id, target_course_id, title, term, department, status, updated_at,
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -217,42 +245,78 @@ export function createSupabaseCourseRepository(): CourseRepository {
         throw new Error(`getAdminCourses: ${error.message}`);
       }
 
-      return (data ?? []).map((row) => {
-        const course = row as unknown as {
-          id: string;
-          source_course_id: string | null;
-          target_course_id: string | null;
-          title: string;
-          term: string | null;
-          department: string | null;
-          status: string;
-          updated_at: string;
-          course_assignments?: Array<{
-            role: string;
-            profiles?: AssignmentProfile | AssignmentProfile[] | null;
-          }>;
-        };
-        const taAssignment = course.course_assignments?.find((assignment) => assignment.role === "ta");
-        const taProfile = firstRelation(taAssignment?.profiles);
+      return mapAdminCourseRows(data ?? []);
+    },
 
-        return {
-          id: course.id,
-          sourceCourseId: course.source_course_id,
-          targetCourseId: course.target_course_id,
-          title: course.title,
-          term: course.term,
-          department: course.department,
-          status: toCourseStatus(course.status),
-          updatedAt: course.updated_at,
-          ta: taProfile
-            ? {
-                id: taProfile.id,
-                name: taProfile.full_name,
-                email: taProfile.email,
-              }
-            : null,
-        } satisfies AdminCourseRow;
-      });
+    async listAdminCoursesPage(page = 1, pageSize = 50, filters: AdminCourseListFilters = {}) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+      const safePageSize = Number.isFinite(pageSize) ? Math.max(1, Math.floor(pageSize)) : 50;
+      const from = (safePage - 1) * safePageSize;
+      const to = from + safePageSize - 1;
+      const normalizedSearch = normalizeSearchTerm(filters.search);
+      const status = filters.status;
+      const taProfileId = filters.taProfileId?.trim() || undefined;
+      const assignedOnly = filters.assignedOnly === true;
+      const requireStaffJoin = assignedOnly || Boolean(taProfileId);
+
+      let query = admin
+        .from("courses")
+        .select(
+          `
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
+          course_assignments${requireStaffJoin ? "!inner" : ""} (
+            role,
+            profile_id,
+            profiles!course_assignments_profile_id_fkey ( id, full_name, email )
+          )
+        `,
+          { count: "exact" },
+        );
+
+      if (status) {
+        query = query.eq("status", status);
+      }
+
+      if (requireStaffJoin) {
+        query = query.eq("course_assignments.role", "staff");
+      }
+
+      if (taProfileId) {
+        query = query.eq("course_assignments.profile_id", taProfileId);
+      }
+
+      if (normalizedSearch) {
+        const term = `%${normalizedSearch}%`;
+        query = query.or(
+          [
+            `title.ilike.${term}`,
+            `source_course_id.ilike.${term}`,
+            `target_course_id.ilike.${term}`,
+            `term.ilike.${term}`,
+            `department.ilike.${term}`,
+          ].join(","),
+        );
+      }
+
+      const { data, error, count } = await query
+        .order("updated_at", { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        throw new Error(`listAdminCoursesPage: ${error.message}`);
+      }
+
+      const rows = mapAdminCourseRows(data ?? []);
+      const total = count ?? 0;
+
+      return {
+        data: rows,
+        total,
+        page: safePage,
+        pageSize: safePageSize,
+        totalPages: Math.ceil(total / safePageSize),
+      } satisfies PaginatedResult<AdminCourseRow>;
     },
 
     async getAdminCourse(courseId) {
@@ -260,7 +324,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(`
-          id, source_course_id, target_course_id, title, term, department, status, updated_at,
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -280,6 +344,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         title: string;
         term: string | null;
         department: string | null;
+        org_unit_id: string | null;
         status: string;
         updated_at: string;
         course_assignments?: Array<{
@@ -287,8 +352,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
           profiles?: AssignmentProfile | AssignmentProfile[] | null;
         }>;
       };
-      const taAssignment = course.course_assignments?.find((assignment) => assignment.role === "ta");
-      const taProfile = firstRelation(taAssignment?.profiles);
+      const staffAssignment = course.course_assignments?.find((assignment) => assignment.role === "staff");
+      const staffProfile = firstRelation(staffAssignment?.profiles);
 
       return {
         id: course.id,
@@ -299,40 +364,52 @@ export function createSupabaseCourseRepository(): CourseRepository {
         department: course.department,
         status: toCourseStatus(course.status),
         updatedAt: course.updated_at,
-        ta: taProfile
+        ta: staffProfile
           ? {
-              id: taProfile.id,
-              name: taProfile.full_name,
-              email: taProfile.email,
+              id: staffProfile.id,
+              name: staffProfile.full_name,
+              email: staffProfile.email,
             }
           : null,
       } satisfies AdminCourseRow;
     },
 
-    async listSuperAdminCourses() {
+    async listSuperAdminCourses(page = 1, pageSize = 20, search = "") {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin
+      
+      let query = admin
         .from("courses")
         .select(`
-          id, title, status, term, department, created_at, updated_at,
+          id, title, status, term, department, org_unit_id, created_at, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( full_name, email )
           )
-        `)
-        .order("updated_at", { ascending: false });
+        `, { count: "exact" });
+
+      if (search) {
+        query = query.or(`title.ilike.%${search}%,status.ilike.%${search}%`);
+      }
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await query
+        .order("updated_at", { ascending: false })
+        .range(from, to);
 
       if (error) {
         throw new Error(`courses: ${error.message}`);
       }
 
-      return (data ?? []).map((row) => {
+      const rows = (data ?? []).map((row) => {
         const course = row as unknown as {
           id: string;
           title: string;
           status: string;
           term: string | null;
           department: string | null;
+          org_unit_id: string | null;
           created_at: string;
           updated_at: string;
           course_assignments?: Array<{
@@ -340,11 +417,11 @@ export function createSupabaseCourseRepository(): CourseRepository {
             profiles?: NamedProfile | NamedProfile[] | null;
           }>;
         };
-        const ta = course.course_assignments?.find((assignment) => assignment.role === "ta");
+        const staff = course.course_assignments?.find((assignment) => assignment.role === "staff");
         const instructor = course.course_assignments?.find(
           (assignment) => assignment.role === "instructor",
         );
-        const taProfile = firstRelation(ta?.profiles);
+        const staffProfile = firstRelation(staff?.profiles);
         const instructorProfile = firstRelation(instructor?.profiles);
 
         return {
@@ -355,12 +432,21 @@ export function createSupabaseCourseRepository(): CourseRepository {
           department: course.department,
           created_at: course.created_at,
           updated_at: course.updated_at,
-          ta: taProfile ? { name: taProfile.full_name, email: taProfile.email } : null,
+          ta: staffProfile ? { name: staffProfile.full_name, email: staffProfile.email } : null,
           instructor: instructorProfile
             ? { name: instructorProfile.full_name, email: instructorProfile.email }
             : null,
         } satisfies SuperAdminCourseRow;
       });
+
+      const total = count ?? 0;
+      return {
+        data: rows,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
     },
 
     async listStatusCounts() {
@@ -406,39 +492,39 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
     async listTAWorkload() {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data: tas, error: tasError } = await admin
+      const { data: staff, error: staffError } = await admin
         .from("profiles")
         .select("id, email, full_name")
-        .eq("role", "ta");
+        .eq("role", "standard_user");
 
-      if (tasError) {
-        throw new Error(`ta list: ${tasError.message}`);
+      if (staffError) {
+        throw new Error(`staff list: ${staffError.message}`);
       }
 
       const { data: assignments, error: assignError } = await admin
         .from("course_assignments")
         .select("profile_id, courses(status)")
-        .eq("role", "ta");
+        .eq("role", "staff");
 
       if (assignError) {
         throw new Error(`assignments: ${assignError.message}`);
       }
 
-      return (tas ?? []).map((ta) => {
-        const taAssignments = (assignments ?? []).filter((assignment) => assignment.profile_id === ta.id);
-        const active = taAssignments.filter(
+      return (staff ?? []).map((member) => {
+        const memberAssignments = (assignments ?? []).filter((assignment) => assignment.profile_id === member.id);
+        const active = memberAssignments.filter(
           (assignment) =>
             firstRelation(assignment.courses)?.status !== "final_approved" &&
             firstRelation(assignment.courses)?.status !== "submitted_to_admin",
         );
-        const needsFixes = taAssignments.filter(
+        const needsFixes = memberAssignments.filter(
           (assignment) => firstRelation(assignment.courses)?.status === "admin_changes_requested",
         );
 
         return {
-          id: ta.id,
-          full_name: ta.full_name,
-          email: ta.email,
+          id: member.id,
+          full_name: member.full_name,
+          email: member.email,
           active_courses: active.length,
           needs_fixes: needsFixes.length,
         } satisfies TAWorkload;
@@ -492,6 +578,30 @@ export function createSupabaseCourseRepository(): CourseRepository {
         } satisfies AuditEvent;
       });
     },
+
+    async listCoursesByUnitAncestry(unitIds) {
+      const admin = getSupabaseAdminClientOrThrow();
+      
+      // We join through the org_unit_hierarchy_paths view
+      const { data, error } = await admin
+        .from("courses")
+        .select(`
+          id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,
+          organizational_units!courses_org_unit_id_fkey!inner (
+            org_unit_hierarchy_paths!org_unit_hierarchy_paths_descendant_id_fkey!inner (
+              ancestor_id
+            )
+          )
+        `)
+        .in("organizational_units.org_unit_hierarchy_paths.ancestor_id", unitIds)
+        .order("updated_at", { ascending: false });
+
+      if (error) {
+        throw new Error(`listCoursesByUnitAncestry: ${error.message}`);
+      }
+
+      return (data ?? []).map((row) => toCourseSummary(row as unknown as CourseRow));
+    },
   };
 }
 
@@ -503,9 +613,61 @@ function toCourseSummary(row: CourseRow): CourseSummary {
     title: row.title,
     term: row.term,
     department: row.department,
+    orgUnitId: row.org_unit_id,
     status: toCourseStatus(row.status),
     createdBy: row.created_by,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function normalizeSearchTerm(value: string | undefined) {
+  if (!value) {
+    return "";
+  }
+
+  return value
+    .replace(/[%]/g, "")
+    .replace(/[.,:()]/g, " ")
+    .trim();
+}
+
+function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
+  return data.map((row) => {
+    const course = row as {
+      id: string;
+      source_course_id: string | null;
+      target_course_id: string | null;
+      title: string;
+      term: string | null;
+      department: string | null;
+      org_unit_id: string | null;
+      status: string;
+      updated_at: string;
+      course_assignments?: Array<{
+        role: string;
+        profiles?: AssignmentProfile | AssignmentProfile[] | null;
+      }>;
+    };
+    const staffAssignment = course.course_assignments?.find((assignment) => assignment.role === "staff");
+    const staffProfile = firstRelation(staffAssignment?.profiles);
+
+    return {
+      id: course.id,
+      sourceCourseId: course.source_course_id,
+      targetCourseId: course.target_course_id,
+      title: course.title,
+      term: course.term,
+      department: course.department,
+      status: toCourseStatus(course.status),
+      updatedAt: course.updated_at,
+      ta: staffProfile
+        ? {
+            id: staffProfile.id,
+            name: staffProfile.full_name,
+            email: staffProfile.email,
+          }
+        : null,
+    } satisfies AdminCourseRow;
+  });
 }
