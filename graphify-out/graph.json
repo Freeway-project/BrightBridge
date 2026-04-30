@@ -9,7 +9,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_design_handoff_design_canvas_jsx",
-      "community": 8,
+      "community": 10,
       "norm_label": "design-canvas.jsx"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L71",
       "id": "design_handoff_design_canvas_designcanvas",
-      "community": 8,
+      "community": 10,
       "norm_label": "designcanvas()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L182",
       "id": "design_handoff_design_canvas_dcviewport",
-      "community": 8,
+      "community": 10,
       "norm_label": "dcviewport()"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L333",
       "id": "design_handoff_design_canvas_dcsection",
-      "community": 8,
+      "community": 10,
       "norm_label": "dcsection()"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L372",
       "id": "design_handoff_design_canvas_dcartboard",
-      "community": 8,
+      "community": 10,
       "norm_label": "dcartboard()"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L374",
       "id": "design_handoff_design_canvas_dcartboardframe",
-      "community": 8,
+      "community": 10,
       "norm_label": "dcartboardframe()"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L464",
       "id": "design_handoff_design_canvas_dceditable",
-      "community": 8,
+      "community": 10,
       "norm_label": "dceditable()"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L480",
       "id": "design_handoff_design_canvas_dcfocusoverlay",
-      "community": 8,
+      "community": 10,
       "norm_label": "dcfocusoverlay()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/design-canvas.jsx",
       "source_location": "L607",
       "id": "design_handoff_design_canvas_dcpostit",
-      "community": 8,
+      "community": 10,
       "norm_label": "dcpostit()"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_design_handoff_tweaks_panel_jsx",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweaks-panel.jsx"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L139",
       "id": "design_handoff_tweaks_panel_usetweaks",
-      "community": 6,
+      "community": 8,
       "norm_label": "usetweaks()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L160",
       "id": "design_handoff_tweaks_panel_tweakspanel",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweakspanel()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L250",
       "id": "design_handoff_tweaks_panel_tweaksection",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweaksection()"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L259",
       "id": "design_handoff_tweaks_panel_tweakrow",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweakrow()"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L273",
       "id": "design_handoff_tweaks_panel_tweakslider",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweakslider()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L282",
       "id": "design_handoff_tweaks_panel_tweaktoggle",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweaktoggle()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L293",
       "id": "design_handoff_tweaks_panel_tweakradio",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweakradio()"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L347",
       "id": "design_handoff_tweaks_panel_tweakselect",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweakselect()"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L361",
       "id": "design_handoff_tweaks_panel_tweaktext",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweaktext()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L370",
       "id": "design_handoff_tweaks_panel_tweaknumber",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweaknumber()"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L404",
       "id": "design_handoff_tweaks_panel_tweakcolor",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweakcolor()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/design_handoff/tweaks-panel.jsx",
       "source_location": "L414",
       "id": "design_handoff_tweaks_panel_tweakbutton",
-      "community": 6,
+      "community": 8,
       "norm_label": "tweakbutton()"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "packages/workflow/src/roles.ts",
       "source_location": "L1",
       "id": "packages_workflow_src_roles_ts",
-      "community": 28,
+      "community": 29,
       "norm_label": "roles.ts"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "packages/workflow/src/roles.ts",
       "source_location": "L19",
       "id": "src_roles_getrolelabel",
-      "community": 28,
+      "community": 29,
       "norm_label": "getrolelabel()"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L1",
       "id": "packages_workflow_src_transitions_ts",
-      "community": 11,
+      "community": 3,
       "norm_label": "transitions.ts"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L81",
       "id": "src_transitions_cantransition",
-      "community": 11,
+      "community": 3,
       "norm_label": "cantransition()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L90",
       "id": "src_transitions_getallowedtransitions",
-      "community": 11,
+      "community": 3,
       "norm_label": "getallowedtransitions()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L96",
       "id": "src_transitions_assertcantransition",
-      "community": 11,
+      "community": 3,
       "norm_label": "assertcantransition()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L104",
       "id": "src_transitions_transitionallowsrole",
-      "community": 11,
+      "community": 3,
       "norm_label": "transitionallowsrole()"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/workflow/src/statuses.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_packages_workflow_src_statuses_ts",
-      "community": 16,
+      "community": 17,
       "norm_label": "statuses.ts"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/workflow/src/statuses.ts",
       "source_location": "L29",
       "id": "src_statuses_getcoursestatuslabel",
-      "community": 16,
+      "community": 17,
       "norm_label": "getcoursestatuslabel()"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/workflow/src/statuses.ts",
       "source_location": "L33",
       "id": "src_statuses_isfinalstatus",
-      "community": 16,
+      "community": 17,
       "norm_label": "isfinalstatus()"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/workflow/src/statuses.ts",
       "source_location": "L37",
       "id": "src_statuses_isinstructorvisiblestatus",
-      "community": 16,
+      "community": 17,
       "norm_label": "isinstructorvisiblestatus()"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "packages/workflow/src/index.ts",
       "source_location": "L1",
       "id": "packages_workflow_src_index_ts",
-      "community": 56,
+      "community": 57,
       "norm_label": "index.ts"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/auth/src/index.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_packages_auth_src_index_ts",
-      "community": 57,
+      "community": 58,
       "norm_label": "index.ts"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/validation/src/index.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_packages_validation_src_index_ts",
-      "community": 58,
+      "community": 59,
       "norm_label": "index.ts"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/ui/src/index.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_packages_ui_src_index_tsx",
-      "community": 29,
+      "community": 30,
       "norm_label": "index.tsx"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/ui/src/index.tsx",
       "source_location": "L3",
       "id": "src_index_badge",
-      "community": 29,
+      "community": 30,
       "norm_label": "badge()"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/storage/src/index.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_packages_storage_src_index_ts",
-      "community": 59,
+      "community": 60,
       "norm_label": "index.ts"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/packages/config/src/index.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_packages_config_src_index_ts",
-      "community": 60,
+      "community": 61,
       "norm_label": "index.ts"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_scripts_seed_dev_mjs",
-      "community": 7,
+      "community": 9,
       "norm_label": "seed-dev.mjs"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L85",
       "id": "scripts_seed_dev_ensureauthuser",
-      "community": 7,
+      "community": 9,
       "norm_label": "ensureauthuser()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L109",
       "id": "scripts_seed_dev_finduserbyemail",
-      "community": 7,
+      "community": 9,
       "norm_label": "finduserbyemail()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L138",
       "id": "scripts_seed_dev_upsertprofiles",
-      "community": 7,
+      "community": 9,
       "norm_label": "upsertprofiles()"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L150",
       "id": "scripts_seed_dev_seedcourses",
-      "community": 7,
+      "community": 9,
       "norm_label": "seedcourses()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L206",
       "id": "scripts_seed_dev_upsertcourse",
-      "community": 7,
+      "community": 9,
       "norm_label": "upsertcourse()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L261",
       "id": "scripts_seed_dev_upsertassignments",
-      "community": 7,
+      "community": 9,
       "norm_label": "upsertassignments()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L278",
       "id": "scripts_seed_dev_ensurestatusevent",
-      "community": 7,
+      "community": 9,
       "norm_label": "ensurestatusevent()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L308",
       "id": "scripts_seed_dev_seedreviewresponses",
-      "community": 7,
+      "community": 9,
       "norm_label": "seedreviewresponses()"
     },
     {
@@ -450,8 +450,134 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/seed-dev.mjs",
       "source_location": "L342",
       "id": "scripts_seed_dev_loadenvfiles",
+      "community": 9,
+      "norm_label": "loadenvfiles()"
+    },
+    {
+      "label": "import-course-instructors-dry-run.mjs",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L1",
+      "id": "scripts_import_course_instructors_dry_run_mjs",
+      "community": 7,
+      "norm_label": "import-course-instructors-dry-run.mjs"
+    },
+    {
+      "label": "buildStats()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L76",
+      "id": "scripts_import_course_instructors_dry_run_buildstats",
+      "community": 7,
+      "norm_label": "buildstats()"
+    },
+    {
+      "label": "buildDbDryRunSummary()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L157",
+      "id": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
+      "community": 7,
+      "norm_label": "builddbdryrunsummary()"
+    },
+    {
+      "label": "fetchExistingValues()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L198",
+      "id": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "community": 7,
+      "norm_label": "fetchexistingvalues()"
+    },
+    {
+      "label": "fetchExistingCourseInstructorPairs()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L219",
+      "id": "scripts_import_course_instructors_dry_run_fetchexistingcourseinstructorpairs",
+      "community": 7,
+      "norm_label": "fetchexistingcourseinstructorpairs()"
+    },
+    {
+      "label": "parseCsv()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L239",
+      "id": "scripts_import_course_instructors_dry_run_parsecsv",
+      "community": 7,
+      "norm_label": "parsecsv()"
+    },
+    {
+      "label": "parseCsvLine()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L266",
+      "id": "scripts_import_course_instructors_dry_run_parsecsvline",
+      "community": 7,
+      "norm_label": "parsecsvline()"
+    },
+    {
+      "label": "normalizeText()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L299",
+      "id": "scripts_import_course_instructors_dry_run_normalizetext",
+      "community": 7,
+      "norm_label": "normalizetext()"
+    },
+    {
+      "label": "normalizeEmail()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L303",
+      "id": "scripts_import_course_instructors_dry_run_normalizeemail",
+      "community": 7,
+      "norm_label": "normalizeemail()"
+    },
+    {
+      "label": "isSimpleValidEmail()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L307",
+      "id": "scripts_import_course_instructors_dry_run_issimplevalidemail",
+      "community": 7,
+      "norm_label": "issimplevalidemail()"
+    },
+    {
+      "label": "chunkArray()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L311",
+      "id": "scripts_import_course_instructors_dry_run_chunkarray",
+      "community": 7,
+      "norm_label": "chunkarray()"
+    },
+    {
+      "label": "loadEnvFiles()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L319",
+      "id": "scripts_import_course_instructors_dry_run_loadenvfiles",
       "community": 7,
       "norm_label": "loadenvfiles()"
+    },
+    {
+      "label": "parseDatabaseUrl()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L350",
+      "id": "scripts_import_course_instructors_dry_run_parsedatabaseurl",
+      "community": 7,
+      "norm_label": "parsedatabaseurl()"
+    },
+    {
+      "label": "parseSupabaseDatabaseUrl()",
+      "file_type": "code",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L361",
+      "id": "scripts_import_course_instructors_dry_run_parsesupabasedatabaseurl",
+      "community": 7,
+      "norm_label": "parsesupabasedatabaseurl()"
     },
     {
       "label": "db-migrate-all.mjs",
@@ -459,7 +585,7 @@
       "source_file": "scripts/db-migrate-all.mjs",
       "source_location": "L1",
       "id": "scripts_db_migrate_all_mjs",
-      "community": 17,
+      "community": 18,
       "norm_label": "db-migrate-all.mjs"
     },
     {
@@ -468,7 +594,7 @@
       "source_file": "scripts/db-migrate-all.mjs",
       "source_location": "L60",
       "id": "scripts_db_migrate_all_loadenvfiles",
-      "community": 17,
+      "community": 18,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -477,7 +603,7 @@
       "source_file": "scripts/db-migrate-all.mjs",
       "source_location": "L91",
       "id": "scripts_db_migrate_all_parsedatabaseurl",
-      "community": 17,
+      "community": 18,
       "norm_label": "parsedatabaseurl()"
     },
     {
@@ -486,7 +612,7 @@
       "source_file": "scripts/db-migrate-all.mjs",
       "source_location": "L102",
       "id": "scripts_db_migrate_all_parsesupabasedatabaseurl",
-      "community": 17,
+      "community": 18,
       "norm_label": "parsesupabasedatabaseurl()"
     },
     {
@@ -495,7 +621,7 @@
       "source_file": "scripts/db-inspect.mjs",
       "source_location": "L1",
       "id": "scripts_db_inspect_mjs",
-      "community": 18,
+      "community": 19,
       "norm_label": "db-inspect.mjs"
     },
     {
@@ -504,7 +630,7 @@
       "source_file": "scripts/db-inspect.mjs",
       "source_location": "L80",
       "id": "scripts_db_inspect_loadenvfiles",
-      "community": 18,
+      "community": 19,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -513,7 +639,7 @@
       "source_file": "scripts/db-inspect.mjs",
       "source_location": "L111",
       "id": "scripts_db_inspect_parsedatabaseurl",
-      "community": 18,
+      "community": 19,
       "norm_label": "parsedatabaseurl()"
     },
     {
@@ -522,7 +648,7 @@
       "source_file": "scripts/db-inspect.mjs",
       "source_location": "L122",
       "id": "scripts_db_inspect_parsesupabasedatabaseurl",
-      "community": 18,
+      "community": 19,
       "norm_label": "parsesupabasedatabaseurl()"
     },
     {
@@ -531,7 +657,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/apply-migration.mjs",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_scripts_apply_migration_mjs",
-      "community": 19,
+      "community": 20,
       "norm_label": "apply-migration.mjs"
     },
     {
@@ -540,7 +666,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/apply-migration.mjs",
       "source_location": "L47",
       "id": "scripts_apply_migration_loadenvfiles",
-      "community": 19,
+      "community": 20,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -549,7 +675,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/apply-migration.mjs",
       "source_location": "L78",
       "id": "scripts_apply_migration_parsedatabaseurl",
-      "community": 19,
+      "community": 20,
       "norm_label": "parsedatabaseurl()"
     },
     {
@@ -558,7 +684,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/apply-migration.mjs",
       "source_location": "L89",
       "id": "scripts_apply_migration_parsesupabasedatabaseurl",
-      "community": 19,
+      "community": 20,
       "norm_label": "parsesupabasedatabaseurl()"
     },
     {
@@ -567,7 +693,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_scripts_check_core_rls_mjs",
-      "community": 3,
+      "community": 4,
       "norm_label": "check-core-rls.mjs"
     },
     {
@@ -576,7 +702,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L75",
       "id": "scripts_check_core_rls_checkadminaccess",
-      "community": 3,
+      "community": 4,
       "norm_label": "checkadminaccess()"
     },
     {
@@ -585,7 +711,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L85",
       "id": "scripts_check_core_rls_checktaaccess",
-      "community": 3,
+      "community": 4,
       "norm_label": "checktaaccess()"
     },
     {
@@ -594,7 +720,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L97",
       "id": "scripts_check_core_rls_checkinstructoraccess",
-      "community": 3,
+      "community": 4,
       "norm_label": "checkinstructoraccess()"
     },
     {
@@ -603,7 +729,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L105",
       "id": "scripts_check_core_rls_checkcommunicationsaccess",
-      "community": 3,
+      "community": 4,
       "norm_label": "checkcommunicationsaccess()"
     },
     {
@@ -612,7 +738,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L115",
       "id": "scripts_check_core_rls_checkmissingprofileaccess",
-      "community": 3,
+      "community": 4,
       "norm_label": "checkmissingprofileaccess()"
     },
     {
@@ -621,7 +747,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L144",
       "id": "scripts_check_core_rls_createtempcourse",
-      "community": 3,
+      "community": 4,
       "norm_label": "createtempcourse()"
     },
     {
@@ -630,7 +756,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L181",
       "id": "scripts_check_core_rls_getprofilebyemail",
-      "community": 3,
+      "community": 4,
       "norm_label": "getprofilebyemail()"
     },
     {
@@ -639,7 +765,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L195",
       "id": "scripts_check_core_rls_signin",
-      "community": 3,
+      "community": 4,
       "norm_label": "signin()"
     },
     {
@@ -648,7 +774,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L215",
       "id": "scripts_check_core_rls_visiblecourses",
-      "community": 3,
+      "community": 4,
       "norm_label": "visiblecourses()"
     },
     {
@@ -657,7 +783,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L228",
       "id": "scripts_check_core_rls_visiblestatusevents",
-      "community": 3,
+      "community": 4,
       "norm_label": "visiblestatusevents()"
     },
     {
@@ -666,7 +792,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L241",
       "id": "scripts_check_core_rls_asserthassource",
-      "community": 3,
+      "community": 4,
       "norm_label": "asserthassource()"
     },
     {
@@ -675,7 +801,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L247",
       "id": "scripts_check_core_rls_assertmissingsource",
-      "community": 3,
+      "community": 4,
       "norm_label": "assertmissingsource()"
     },
     {
@@ -684,7 +810,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L253",
       "id": "scripts_check_core_rls_assertequal",
-      "community": 3,
+      "community": 4,
       "norm_label": "assertequal()"
     },
     {
@@ -693,7 +819,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L259",
       "id": "scripts_check_core_rls_cleanup",
-      "community": 3,
+      "community": 4,
       "norm_label": "cleanup()"
     },
     {
@@ -702,7 +828,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs",
       "source_location": "L277",
       "id": "scripts_check_core_rls_loadenvfiles",
-      "community": 3,
+      "community": 4,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -711,7 +837,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/sentry.client.config.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_sentry_client_config_ts",
-      "community": 61,
+      "community": 62,
       "norm_label": "sentry.client.config.ts"
     },
     {
@@ -720,7 +846,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/proxy.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_proxy_ts",
-      "community": 20,
+      "community": 21,
       "norm_label": "proxy.ts"
     },
     {
@@ -729,7 +855,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/proxy.ts",
       "source_location": "L4",
       "id": "web_proxy_proxy",
-      "community": 20,
+      "community": 21,
       "norm_label": "proxy()"
     },
     {
@@ -738,7 +864,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/instrumentation.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_instrumentation_ts",
-      "community": 30,
+      "community": 31,
       "norm_label": "instrumentation.ts"
     },
     {
@@ -747,7 +873,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/instrumentation.ts",
       "source_location": "L1",
       "id": "web_instrumentation_register",
-      "community": 30,
+      "community": 31,
       "norm_label": "register()"
     },
     {
@@ -756,7 +882,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/sentry.edge.config.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_sentry_edge_config_ts",
-      "community": 62,
+      "community": 63,
       "norm_label": "sentry.edge.config.ts"
     },
     {
@@ -765,7 +891,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/next.config.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_next_config_ts",
-      "community": 63,
+      "community": 64,
       "norm_label": "next.config.ts"
     },
     {
@@ -774,7 +900,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/next-env.d.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_next_env_d_ts",
-      "community": 64,
+      "community": 65,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -783,7 +909,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/sentry.server.config.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_sentry_server_config_ts",
-      "community": 65,
+      "community": 66,
       "norm_label": "sentry.server.config.ts"
     },
     {
@@ -792,7 +918,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/postcss.config.mjs",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_postcss_config_mjs",
-      "community": 66,
+      "community": 67,
       "norm_label": "postcss.config.mjs"
     },
     {
@@ -801,7 +927,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/utils.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_utils_ts",
-      "community": 31,
+      "community": 32,
       "norm_label": "utils.ts"
     },
     {
@@ -810,7 +936,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/utils.ts",
       "source_location": "L4",
       "id": "lib_utils_cn",
-      "community": 31,
+      "community": 32,
       "norm_label": "cn()"
     },
     {
@@ -819,7 +945,7 @@
       "source_file": "apps/web/lib/constants/nav.ts",
       "source_location": "L1",
       "id": "apps_web_lib_constants_nav_ts",
-      "community": 67,
+      "community": 68,
       "norm_label": "nav.ts"
     },
     {
@@ -828,7 +954,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/constants/status.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_constants_status_ts",
-      "community": 68,
+      "community": 69,
       "norm_label": "status.ts"
     },
     {
@@ -981,7 +1107,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L62",
       "id": "auth_context_requireanyrole",
-      "community": 1,
+      "community": 3,
       "norm_label": "requireanyrole()"
     },
     {
@@ -999,7 +1125,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/workspace/constants.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_workspace_constants_ts",
-      "community": 69,
+      "community": 70,
       "norm_label": "constants.ts"
     },
     {
@@ -1008,7 +1134,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/workspace/actions.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_workspace_actions_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "actions.ts"
     },
     {
@@ -1026,7 +1152,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/workspace/actions.ts",
       "source_location": "L39",
       "id": "workspace_actions_submitreview",
-      "community": 1,
+      "community": 3,
       "norm_label": "submitreview()"
     },
     {
@@ -1035,7 +1161,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/workspace/types.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_workspace_types_ts",
-      "community": 70,
+      "community": 71,
       "norm_label": "types.ts"
     },
     {
@@ -1044,7 +1170,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/workspace/schemas.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_workspace_schemas_ts",
-      "community": 4,
+      "community": 5,
       "norm_label": "schemas.ts"
     },
     {
@@ -1089,7 +1215,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/supabase/client.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_client_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "client.ts"
     },
     {
@@ -1098,7 +1224,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/supabase/client.ts",
       "source_location": "L3",
       "id": "supabase_client_createclient",
-      "community": 3,
+      "community": 4,
       "norm_label": "createclient()"
     },
     {
@@ -1107,7 +1233,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/supabase/middleware.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_supabase_middleware_ts",
-      "community": 20,
+      "community": 21,
       "norm_label": "middleware.ts"
     },
     {
@@ -1116,7 +1242,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/supabase/middleware.ts",
       "source_location": "L4",
       "id": "supabase_middleware_updatesession",
-      "community": 20,
+      "community": 21,
       "norm_label": "updatesession()"
     },
     {
@@ -1215,7 +1341,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/services/comments.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_services_comments_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "comments.ts"
     },
     {
@@ -1224,7 +1350,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/services/comments.ts",
       "source_location": "L5",
       "id": "services_comments_getcoursecomments",
-      "community": 0,
+      "community": 1,
       "norm_label": "getcoursecomments()"
     },
     {
@@ -1233,7 +1359,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/services/comments.ts",
       "source_location": "L9",
       "id": "services_comments_postcoursecomment",
-      "community": 0,
+      "community": 1,
       "norm_label": "postcoursecomment()"
     },
     {
@@ -1242,7 +1368,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_courses_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "courses.ts"
     },
     {
@@ -1251,7 +1377,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L15",
       "id": "services_courses_getassignedcourses",
-      "community": 1,
+      "community": 3,
       "norm_label": "getassignedcourses()"
     },
     {
@@ -1269,7 +1395,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L26",
       "id": "services_courses_transitioncoursestatus",
-      "community": 1,
+      "community": 3,
       "norm_label": "transitioncoursestatus()"
     },
     {
@@ -1278,7 +1404,7 @@
       "source_file": "apps/web/lib/repositories/contracts.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_contracts_ts",
-      "community": 71,
+      "community": 72,
       "norm_label": "contracts.ts"
     },
     {
@@ -1296,7 +1422,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L22",
       "id": "repositories_index_getcourserepository",
-      "community": 1,
+      "community": 3,
       "norm_label": "getcourserepository()"
     },
     {
@@ -1323,7 +1449,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L37",
       "id": "repositories_index_getcommentrepository",
-      "community": 0,
+      "community": 1,
       "norm_label": "getcommentrepository()"
     },
     {
@@ -1359,7 +1485,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_course_repository_ts",
-      "community": 9,
+      "community": 11,
       "norm_label": "course-repository.ts"
     },
     {
@@ -1368,7 +1494,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L37",
       "id": "supabase_course_repository_firstrelation",
-      "community": 9,
+      "community": 11,
       "norm_label": "firstrelation()"
     },
     {
@@ -1377,7 +1503,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L45",
       "id": "supabase_course_repository_createsupabasecourserepository",
-      "community": 9,
+      "community": 11,
       "norm_label": "createsupabasecourserepository()"
     },
     {
@@ -1386,7 +1512,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L551",
       "id": "supabase_course_repository_tocoursesummary",
-      "community": 9,
+      "community": 11,
       "norm_label": "tocoursesummary()"
     },
     {
@@ -1395,7 +1521,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/comment-repository.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_repositories_supabase_comment_repository_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "comment-repository.ts"
     },
     {
@@ -1404,7 +1530,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/comment-repository.ts",
       "source_location": "L6",
       "id": "supabase_comment_repository_createsupabasecommentrepository",
-      "community": 0,
+      "community": 1,
       "norm_label": "createsupabasecommentrepository()"
     },
     {
@@ -1431,7 +1557,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_lib_repositories_supabase_shared_ts",
-      "community": 9,
+      "community": 11,
       "norm_label": "shared.ts"
     },
     {
@@ -1440,7 +1566,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L6",
       "id": "supabase_shared_getsupabaseadminclientorthrow",
-      "community": 9,
+      "community": 11,
       "norm_label": "getsupabaseadminclientorthrow()"
     },
     {
@@ -1449,7 +1575,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L16",
       "id": "supabase_shared_cleanoptionaltext",
-      "community": 9,
+      "community": 11,
       "norm_label": "cleanoptionaltext()"
     },
     {
@@ -1458,7 +1584,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L21",
       "id": "supabase_shared_tocoursestatus",
-      "community": 9,
+      "community": 11,
       "norm_label": "tocoursestatus()"
     },
     {
@@ -1485,7 +1611,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L1",
       "id": "apps_web_lib_courses_service_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "service.ts"
     },
     {
@@ -1494,7 +1620,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L41",
       "id": "courses_service_getaccessiblecourses",
-      "community": 1,
+      "community": 3,
       "norm_label": "getaccessiblecourses()"
     },
     {
@@ -1512,7 +1638,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L66",
       "id": "courses_service_createcourse",
-      "community": 1,
+      "community": 3,
       "norm_label": "createcourse()"
     },
     {
@@ -1521,7 +1647,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L94",
       "id": "courses_service_assignusertocourse",
-      "community": 1,
+      "community": 3,
       "norm_label": "assignusertocourse()"
     },
     {
@@ -1530,7 +1656,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L116",
       "id": "courses_service_transitioncoursestatus",
-      "community": 1,
+      "community": 3,
       "norm_label": "transitioncoursestatus()"
     },
     {
@@ -1539,7 +1665,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L161",
       "id": "courses_service_assertcanactoncourse",
-      "community": 1,
+      "community": 3,
       "norm_label": "assertcanactoncourse()"
     },
     {
@@ -1548,7 +1674,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L179",
       "id": "courses_service_insertstatusevent",
-      "community": 1,
+      "community": 3,
       "norm_label": "insertstatusevent()"
     },
     {
@@ -1557,7 +1683,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L202",
       "id": "courses_service_cleanoptionaltext",
-      "community": 1,
+      "community": 3,
       "norm_label": "cleanoptionaltext()"
     },
     {
@@ -1566,7 +1692,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/page.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_page_tsx",
-      "community": 32,
+      "community": 33,
       "norm_label": "page.tsx"
     },
     {
@@ -1575,7 +1701,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/page.tsx",
       "source_location": "L3",
       "id": "app_page_home",
-      "community": 32,
+      "community": 33,
       "norm_label": "home()"
     },
     {
@@ -1584,7 +1710,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/layout.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_layout_tsx",
-      "community": 33,
+      "community": 34,
       "norm_label": "layout.tsx"
     },
     {
@@ -1593,7 +1719,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/layout.tsx",
       "source_location": "L16",
       "id": "app_layout_rootlayout",
-      "community": 33,
+      "community": 34,
       "norm_label": "rootlayout()"
     },
     {
@@ -1602,7 +1728,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/global-error.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_global_error_tsx",
-      "community": 72,
+      "community": 73,
       "norm_label": "global-error.tsx"
     },
     {
@@ -1665,7 +1791,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/error.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_error_tsx",
-      "community": 34,
+      "community": 35,
       "norm_label": "error.tsx"
     },
     {
@@ -1674,7 +1800,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/error.tsx",
       "source_location": "L7",
       "id": "dashboard_error_dashboarderror",
-      "community": 34,
+      "community": 35,
       "norm_label": "dashboarderror()"
     },
     {
@@ -1701,7 +1827,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_page_tsx",
-      "community": 73,
+      "community": 74,
       "norm_label": "page.tsx"
     },
     {
@@ -1710,7 +1836,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_actions_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "actions.ts"
     },
     {
@@ -1719,7 +1845,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/actions.ts",
       "source_location": "L16",
       "id": "admin_actions_assigntatocourseaction",
-      "community": 1,
+      "community": 3,
       "norm_label": "assigntatocourseaction()"
     },
     {
@@ -1728,7 +1854,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/actions.ts",
       "source_location": "L71",
       "id": "admin_actions_approvereviewaction",
-      "community": 1,
+      "community": 3,
       "norm_label": "approvereviewaction()"
     },
     {
@@ -1737,7 +1863,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/actions.ts",
       "source_location": "L82",
       "id": "admin_actions_requestfixesaction",
-      "community": 1,
+      "community": 3,
       "norm_label": "requestfixesaction()"
     },
     {
@@ -1746,7 +1872,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/admin-assignment-panel.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_admin_components_admin_assignment_panel_tsx",
-      "community": 74,
+      "community": 75,
       "norm_label": "admin-assignment-panel.tsx"
     },
     {
@@ -1755,7 +1881,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_admin_components_assigned_courses_table_tsx",
-      "community": 12,
+      "community": 13,
       "norm_label": "assigned-courses-table.tsx"
     },
     {
@@ -1764,7 +1890,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L86",
       "id": "components_assigned_courses_table_clearfilters",
-      "community": 12,
+      "community": 13,
       "norm_label": "clearfilters()"
     },
     {
@@ -1773,7 +1899,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L330",
       "id": "components_assigned_courses_table_infochip",
-      "community": 12,
+      "community": 13,
       "norm_label": "infochip()"
     },
     {
@@ -1782,7 +1908,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L344",
       "id": "components_assigned_courses_table_getinitials",
-      "community": 12,
+      "community": 13,
       "norm_label": "getinitials()"
     },
     {
@@ -1791,7 +1917,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L353",
       "id": "components_assigned_courses_table_getstatushint",
-      "community": 12,
+      "community": 13,
       "norm_label": "getstatushint()"
     },
     {
@@ -1800,7 +1926,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/review-queue-table.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_admin_components_review_queue_table_tsx",
-      "community": 21,
+      "community": 22,
       "norm_label": "review-queue-table.tsx"
     },
     {
@@ -1809,7 +1935,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/review-queue-table.tsx",
       "source_location": "L71",
       "id": "components_review_queue_table_handleapprove",
-      "community": 21,
+      "community": 22,
       "norm_label": "handleapprove()"
     },
     {
@@ -1818,7 +1944,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/_components/review-queue-table.tsx",
       "source_location": "L76",
       "id": "components_review_queue_table_handlerequestfixes",
-      "community": 21,
+      "community": 22,
       "norm_label": "handlerequestfixes()"
     },
     {
@@ -1845,7 +1971,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/actions.ts",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_admin_courses_id_actions_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -1854,7 +1980,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/actions.ts",
       "source_location": "L7",
       "id": "id_actions_postcommentaction",
-      "community": 0,
+      "community": 1,
       "norm_label": "postcommentaction()"
     },
     {
@@ -1863,7 +1989,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/admin-course-sidebar.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_admin_courses_id_components_admin_course_sidebar_tsx",
-      "community": 22,
+      "community": 23,
       "norm_label": "admin-course-sidebar.tsx"
     },
     {
@@ -1872,7 +1998,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/admin-course-sidebar.tsx",
       "source_location": "L26",
       "id": "components_admin_course_sidebar_handleapprove",
-      "community": 22,
+      "community": 23,
       "norm_label": "handleapprove()"
     },
     {
@@ -1881,7 +2007,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/admin-course-sidebar.tsx",
       "source_location": "L33",
       "id": "components_admin_course_sidebar_handlesendfixes",
-      "community": 22,
+      "community": 23,
       "norm_label": "handlesendfixes()"
     },
     {
@@ -1890,7 +2016,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-chat.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_admin_courses_id_components_course_chat_tsx",
-      "community": 23,
+      "community": 24,
       "norm_label": "course-chat.tsx"
     },
     {
@@ -1899,7 +2025,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-chat.tsx",
       "source_location": "L34",
       "id": "components_course_chat_handlesubmit",
-      "community": 23,
+      "community": 24,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1908,7 +2034,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-chat.tsx",
       "source_location": "L43",
       "id": "components_course_chat_getinitials",
-      "community": 23,
+      "community": 24,
       "norm_label": "getinitials()"
     },
     {
@@ -1917,7 +2043,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-review-detail.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_admin_courses_id_components_course_review_detail_tsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "course-review-detail.tsx"
     },
     {
@@ -1926,7 +2052,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-review-detail.tsx",
       "source_location": "L25",
       "id": "components_course_review_detail_coursereviewdetail",
-      "community": 13,
+      "community": 14,
       "norm_label": "coursereviewdetail()"
     },
     {
@@ -1935,7 +2061,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-review-detail.tsx",
       "source_location": "L53",
       "id": "components_course_review_detail_sectionstatuschip",
-      "community": 13,
+      "community": 14,
       "norm_label": "sectionstatuschip()"
     },
     {
@@ -1944,7 +2070,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-review-detail.tsx",
       "source_location": "L226",
       "id": "components_course_review_detail_cn",
-      "community": 13,
+      "community": 14,
       "norm_label": "cn()"
     },
     {
@@ -1953,7 +2079,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/admin/courses/[id]/_components/course-review-detail.tsx",
       "source_location": "L464",
       "id": "components_course_review_detail_byseverity",
-      "community": 13,
+      "community": 14,
       "norm_label": "byseverity()"
     },
     {
@@ -1962,7 +2088,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/ta/page.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_ta_page_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1971,7 +2097,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/ta/page.tsx",
       "source_location": "L4",
       "id": "ta_page_tadashboardpage",
-      "community": 1,
+      "community": 3,
       "norm_label": "tadashboardpage()"
     },
     {
@@ -2061,7 +2187,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/communications/page.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_communications_page_tsx",
-      "community": 35,
+      "community": 36,
       "norm_label": "page.tsx"
     },
     {
@@ -2070,7 +2196,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/communications/page.tsx",
       "source_location": "L4",
       "id": "communications_page_communicationsdashboardpage",
-      "community": 35,
+      "community": 36,
       "norm_label": "communicationsdashboardpage()"
     },
     {
@@ -2079,7 +2205,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/page.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_page_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -2088,7 +2214,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/page.tsx",
       "source_location": "L4",
       "id": "courses_page_coursespage",
-      "community": 1,
+      "community": 3,
       "norm_label": "coursespage()"
     },
     {
@@ -2097,7 +2223,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/page.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_page_tsx",
-      "community": 36,
+      "community": 37,
       "norm_label": "page.tsx"
     },
     {
@@ -2106,7 +2232,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/page.tsx",
       "source_location": "L7",
       "id": "id_page_courseworkspaceindexpage",
-      "community": 36,
+      "community": 37,
       "norm_label": "courseworkspaceindexpage()"
     },
     {
@@ -2133,7 +2259,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/issue-log-table.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_issue_log_table_tsx",
-      "community": 24,
+      "community": 25,
       "norm_label": "issue-log-table.tsx"
     },
     {
@@ -2142,7 +2268,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/issue-log-table.tsx",
       "source_location": "L35",
       "id": "components_issue_log_table_issuelogtable",
-      "community": 24,
+      "community": 25,
       "norm_label": "issuelogtable()"
     },
     {
@@ -2151,7 +2277,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/issue-log-table.tsx",
       "source_location": "L186",
       "id": "components_issue_log_table_savestate",
-      "community": 24,
+      "community": 25,
       "norm_label": "savestate()"
     },
     {
@@ -2160,7 +2286,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/submit-panel.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_submit_panel_tsx",
-      "community": 75,
+      "community": 76,
       "norm_label": "submit-panel.tsx"
     },
     {
@@ -2169,7 +2295,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_review_matrix_form_tsx",
-      "community": 4,
+      "community": 5,
       "norm_label": "review-matrix-form.tsx"
     },
     {
@@ -2178,7 +2304,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
       "source_location": "L85",
       "id": "components_review_matrix_form_ontick",
-      "community": 4,
+      "community": 5,
       "norm_label": "ontick()"
     },
     {
@@ -2187,7 +2313,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
       "source_location": "L93",
       "id": "components_review_matrix_form_handlesave",
-      "community": 4,
+      "community": 5,
       "norm_label": "handlesave()"
     },
     {
@@ -2196,7 +2322,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/review-matrix-form.tsx",
       "source_location": "L115",
       "id": "components_review_matrix_form_addissue",
-      "community": 4,
+      "community": 5,
       "norm_label": "addissue()"
     },
     {
@@ -2205,7 +2331,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/review-timer.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_review_timer_tsx",
-      "community": 37,
+      "community": 38,
       "norm_label": "review-timer.tsx"
     },
     {
@@ -2214,7 +2340,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/review-timer.tsx",
       "source_location": "L119",
       "id": "components_review_timer_ontick",
-      "community": 37,
+      "community": 38,
       "norm_label": "ontick()"
     },
     {
@@ -2223,7 +2349,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/metadata-form.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_metadata_form_tsx",
-      "community": 4,
+      "community": 5,
       "norm_label": "metadata-form.tsx"
     },
     {
@@ -2232,7 +2358,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/metadata-form.tsx",
       "source_location": "L44",
       "id": "components_metadata_form_handlesave",
-      "community": 4,
+      "community": 5,
       "norm_label": "handlesave()"
     },
     {
@@ -2241,7 +2367,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_syllabus_gradebook_form_tsx",
-      "community": 4,
+      "community": 5,
       "norm_label": "syllabus-gradebook-form.tsx"
     },
     {
@@ -2250,7 +2376,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
       "source_location": "L74",
       "id": "components_syllabus_gradebook_form_ontick",
-      "community": 4,
+      "community": 5,
       "norm_label": "ontick()"
     },
     {
@@ -2259,7 +2385,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/syllabus-gradebook-form.tsx",
       "source_location": "L82",
       "id": "components_syllabus_gradebook_form_handlesave",
-      "community": 4,
+      "community": 5,
       "norm_label": "handlesave()"
     },
     {
@@ -2268,7 +2394,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/info-panel.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_info_panel_tsx",
-      "community": 38,
+      "community": 39,
       "norm_label": "info-panel.tsx"
     },
     {
@@ -2277,7 +2403,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/info-panel.tsx",
       "source_location": "L20",
       "id": "components_info_panel_infopanel",
-      "community": 38,
+      "community": 39,
       "norm_label": "infopanel()"
     },
     {
@@ -2286,7 +2412,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/issue-drawer.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_issue_drawer_tsx",
-      "community": 4,
+      "community": 5,
       "norm_label": "issue-drawer.tsx"
     },
     {
@@ -2295,7 +2421,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/issue-drawer.tsx",
       "source_location": "L45",
       "id": "components_issue_drawer_handlesubmit",
-      "community": 4,
+      "community": 5,
       "norm_label": "handlesubmit()"
     },
     {
@@ -2304,7 +2430,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/courses/[id]/_components/workspace-nav.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_courses_id_components_workspace_nav_tsx",
-      "community": 76,
+      "community": 77,
       "norm_label": "workspace-nav.tsx"
     },
     {
@@ -2403,7 +2529,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/instructor/page.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_dashboard_instructor_page_tsx",
-      "community": 39,
+      "community": 40,
       "norm_label": "page.tsx"
     },
     {
@@ -2412,7 +2538,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/instructor/page.tsx",
       "source_location": "L4",
       "id": "instructor_page_instructordashboardpage",
-      "community": 39,
+      "community": 40,
       "norm_label": "instructordashboardpage()"
     },
     {
@@ -2439,7 +2565,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/app/auth/login/page.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_app_auth_login_page_tsx",
-      "community": 77,
+      "community": 78,
       "norm_label": "page.tsx"
     },
     {
@@ -2511,7 +2637,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/shared/error-display.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_shared_error_display_tsx",
-      "community": 78,
+      "community": 79,
       "norm_label": "error-display.tsx"
     },
     {
@@ -2520,7 +2646,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/shared/tweak-provider.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_shared_tweak_provider_tsx",
-      "community": 40,
+      "community": 41,
       "norm_label": "tweak-provider.tsx"
     },
     {
@@ -2529,7 +2655,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/shared/tweak-provider.tsx",
       "source_location": "L43",
       "id": "shared_tweak_provider_setsettings",
-      "community": 40,
+      "community": 41,
       "norm_label": "setsettings()"
     },
     {
@@ -2538,7 +2664,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/shared/stat-card.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_shared_stat_card_tsx",
-      "community": 41,
+      "community": 42,
       "norm_label": "stat-card.tsx"
     },
     {
@@ -2547,7 +2673,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/shared/stat-card.tsx",
       "source_location": "L21",
       "id": "shared_stat_card_statcard",
-      "community": 41,
+      "community": 42,
       "norm_label": "statcard()"
     },
     {
@@ -2556,7 +2682,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/layout/topbar.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_layout_topbar_tsx",
-      "community": 79,
+      "community": 80,
       "norm_label": "topbar.tsx"
     },
     {
@@ -2565,7 +2691,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/layout/sidebar.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_layout_sidebar_tsx",
-      "community": 42,
+      "community": 43,
       "norm_label": "sidebar.tsx"
     },
     {
@@ -2574,7 +2700,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/layout/sidebar.tsx",
       "source_location": "L16",
       "id": "layout_sidebar_sidebar",
-      "community": 42,
+      "community": 43,
       "norm_label": "sidebar()"
     },
     {
@@ -2583,7 +2709,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/avatar.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_avatar_tsx",
-      "community": 25,
+      "community": 26,
       "norm_label": "avatar.tsx"
     },
     {
@@ -2592,7 +2718,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/avatar.tsx",
       "source_location": "L35",
       "id": "ui_avatar_cn",
-      "community": 25,
+      "community": 26,
       "norm_label": "cn()"
     },
     {
@@ -2601,7 +2727,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/avatar.tsx",
       "source_location": "L60",
       "id": "ui_avatar_avatarbadge",
-      "community": 25,
+      "community": 26,
       "norm_label": "avatarbadge()"
     },
     {
@@ -2610,7 +2736,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/textarea.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_textarea_tsx",
-      "community": 43,
+      "community": 44,
       "norm_label": "textarea.tsx"
     },
     {
@@ -2619,7 +2745,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/textarea.tsx",
       "source_location": "L9",
       "id": "ui_textarea_cn",
-      "community": 43,
+      "community": 44,
       "norm_label": "cn()"
     },
     {
@@ -2628,7 +2754,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/badge.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_badge_tsx",
-      "community": 44,
+      "community": 45,
       "norm_label": "badge.tsx"
     },
     {
@@ -2637,7 +2763,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/badge.tsx",
       "source_location": "L30",
       "id": "ui_badge_badge",
-      "community": 44,
+      "community": 45,
       "norm_label": "badge()"
     },
     {
@@ -2646,7 +2772,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/tabs.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_tabs_tsx",
-      "community": 45,
+      "community": 46,
       "norm_label": "tabs.tsx"
     },
     {
@@ -2655,7 +2781,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/tabs.tsx",
       "source_location": "L65",
       "id": "ui_tabs_cn",
-      "community": 45,
+      "community": 46,
       "norm_label": "cn()"
     },
     {
@@ -2664,7 +2790,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/scroll-area.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_scroll_area_tsx",
-      "community": 26,
+      "community": 27,
       "norm_label": "scroll-area.tsx"
     },
     {
@@ -2673,7 +2799,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/scroll-area.tsx",
       "source_location": "L8",
       "id": "ui_scroll_area_scrollarea",
-      "community": 26,
+      "community": 27,
       "norm_label": "scrollarea()"
     },
     {
@@ -2682,7 +2808,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/scroll-area.tsx",
       "source_location": "L31",
       "id": "ui_scroll_area_scrollbar",
-      "community": 26,
+      "community": 27,
       "norm_label": "scrollbar()"
     },
     {
@@ -2691,7 +2817,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/separator.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_separator_tsx",
-      "community": 46,
+      "community": 47,
       "norm_label": "separator.tsx"
     },
     {
@@ -2700,7 +2826,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/separator.tsx",
       "source_location": "L8",
       "id": "ui_separator_separator",
-      "community": 46,
+      "community": 47,
       "norm_label": "separator()"
     },
     {
@@ -2709,7 +2835,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/button.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_button_tsx",
-      "community": 47,
+      "community": 48,
       "norm_label": "button.tsx"
     },
     {
@@ -2718,7 +2844,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/button.tsx",
       "source_location": "L61",
       "id": "ui_button_cn",
-      "community": 47,
+      "community": 48,
       "norm_label": "cn()"
     },
     {
@@ -2727,7 +2853,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/sheet.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_sheet_tsx",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheet.tsx"
     },
     {
@@ -2736,7 +2862,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/sheet.tsx",
       "source_location": "L10",
       "id": "ui_sheet_sheet",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheet()"
     },
     {
@@ -2745,7 +2871,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/sheet.tsx",
       "source_location": "L14",
       "id": "ui_sheet_sheettrigger",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheettrigger()"
     },
     {
@@ -2754,7 +2880,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/sheet.tsx",
       "source_location": "L20",
       "id": "ui_sheet_sheetclose",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheetclose()"
     },
     {
@@ -2763,7 +2889,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/sheet.tsx",
       "source_location": "L26",
       "id": "ui_sheet_sheetportal",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheetportal()"
     },
     {
@@ -2772,7 +2898,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/sheet.tsx",
       "source_location": "L64",
       "id": "ui_sheet_cn",
-      "community": 10,
+      "community": 12,
       "norm_label": "cn()"
     },
     {
@@ -2781,7 +2907,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/sheet.tsx",
       "source_location": "L125",
       "id": "ui_sheet_sheetdescription",
-      "community": 10,
+      "community": 12,
       "norm_label": "sheetdescription()"
     },
     {
@@ -2790,7 +2916,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/card.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_card_tsx",
-      "community": 27,
+      "community": 28,
       "norm_label": "card.tsx"
     },
     {
@@ -2799,7 +2925,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/card.tsx",
       "source_location": "L14",
       "id": "ui_card_cn",
-      "community": 27,
+      "community": 28,
       "norm_label": "cn()"
     },
     {
@@ -2808,7 +2934,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/card.tsx",
       "source_location": "L59",
       "id": "ui_card_cardaction",
-      "community": 27,
+      "community": 28,
       "norm_label": "cardaction()"
     },
     {
@@ -2817,7 +2943,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/input.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_input_tsx",
-      "community": 48,
+      "community": 49,
       "norm_label": "input.tsx"
     },
     {
@@ -2826,7 +2952,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/input.tsx",
       "source_location": "L5",
       "id": "ui_input_input",
-      "community": 48,
+      "community": 49,
       "norm_label": "input()"
     },
     {
@@ -2835,7 +2961,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/progress.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_progress_tsx",
-      "community": 80,
+      "community": 81,
       "norm_label": "progress.tsx"
     },
     {
@@ -2844,7 +2970,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/collapsible.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_collapsible_tsx",
-      "community": 49,
+      "community": 50,
       "norm_label": "collapsible.tsx"
     },
     {
@@ -2853,7 +2979,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/collapsible.tsx",
       "source_location": "L5",
       "id": "ui_collapsible_collapsible",
-      "community": 49,
+      "community": 50,
       "norm_label": "collapsible()"
     },
     {
@@ -2862,7 +2988,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/table.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_table_tsx",
-      "community": 14,
+      "community": 15,
       "norm_label": "table.tsx"
     },
     {
@@ -2871,7 +2997,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/table.tsx",
       "source_location": "L7",
       "id": "ui_table_table",
-      "community": 14,
+      "community": 15,
       "norm_label": "table()"
     },
     {
@@ -2880,7 +3006,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/table.tsx",
       "source_location": "L22",
       "id": "ui_table_tableheader",
-      "community": 14,
+      "community": 15,
       "norm_label": "tableheader()"
     },
     {
@@ -2889,7 +3015,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/table.tsx",
       "source_location": "L32",
       "id": "ui_table_tablebody",
-      "community": 14,
+      "community": 15,
       "norm_label": "tablebody()"
     },
     {
@@ -2898,7 +3024,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/table.tsx",
       "source_location": "L46",
       "id": "ui_table_cn",
-      "community": 14,
+      "community": 15,
       "norm_label": "cn()"
     },
     {
@@ -2907,7 +3033,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_ui_select_tsx",
-      "community": 15,
+      "community": 16,
       "norm_label": "select.tsx"
     },
     {
@@ -2925,7 +3051,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx",
       "source_location": "L15",
       "id": "ui_select_selectgroup",
-      "community": 15,
+      "community": 16,
       "norm_label": "selectgroup()"
     },
     {
@@ -2934,7 +3060,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx",
       "source_location": "L28",
       "id": "ui_select_selectvalue",
-      "community": 15,
+      "community": 16,
       "norm_label": "selectvalue()"
     },
     {
@@ -2943,7 +3069,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx",
       "source_location": "L34",
       "id": "ui_select_selecttrigger",
-      "community": 15,
+      "community": 16,
       "norm_label": "selecttrigger()"
     },
     {
@@ -2952,7 +3078,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx",
       "source_location": "L60",
       "id": "ui_select_selectcontent",
-      "community": 15,
+      "community": 16,
       "norm_label": "selectcontent()"
     },
     {
@@ -2961,16 +3087,16 @@
       "source_file": "apps/web/components/super-admin/super-admin-shell.tsx",
       "source_location": "L1",
       "id": "apps_web_components_super_admin_super_admin_shell_tsx",
-      "community": 50,
+      "community": 51,
       "norm_label": "super-admin-shell.tsx"
     },
     {
       "label": "fmt()",
       "file_type": "code",
       "source_file": "apps/web/components/super-admin/super-admin-shell.tsx",
-      "source_location": "L62",
+      "source_location": "L71",
       "id": "super_admin_super_admin_shell_fmt",
-      "community": 50,
+      "community": 51,
       "norm_label": "fmt()"
     },
     {
@@ -2979,7 +3105,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-action-button.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_courses_course_action_button_tsx",
-      "community": 51,
+      "community": 52,
       "norm_label": "course-action-button.tsx"
     },
     {
@@ -2988,7 +3114,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-action-button.tsx",
       "source_location": "L11",
       "id": "courses_course_action_button_courseactionbutton",
-      "community": 51,
+      "community": 52,
       "norm_label": "courseactionbutton()"
     },
     {
@@ -2997,7 +3123,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-sidebar-filters.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_courses_course_sidebar_filters_tsx",
-      "community": 81,
+      "community": 82,
       "norm_label": "course-sidebar-filters.tsx"
     },
     {
@@ -3006,7 +3132,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-filter-bar.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_courses_course_filter_bar_tsx",
-      "community": 52,
+      "community": 53,
       "norm_label": "course-filter-bar.tsx"
     },
     {
@@ -3015,7 +3141,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-filter-bar.tsx",
       "source_location": "L10",
       "id": "courses_course_filter_bar_coursefilterbar",
-      "community": 52,
+      "community": 53,
       "norm_label": "coursefilterbar()"
     },
     {
@@ -3024,7 +3150,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/status-badge.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_courses_status_badge_tsx",
-      "community": 53,
+      "community": 54,
       "norm_label": "status-badge.tsx"
     },
     {
@@ -3033,7 +3159,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/status-badge.tsx",
       "source_location": "L11",
       "id": "courses_status_badge_statusbadge",
-      "community": 53,
+      "community": 54,
       "norm_label": "statusbadge()"
     },
     {
@@ -3042,7 +3168,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-table.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_courses_course_table_tsx",
-      "community": 82,
+      "community": 83,
       "norm_label": "course-table.tsx"
     },
     {
@@ -3051,7 +3177,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-card.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_courses_course_card_tsx",
-      "community": 83,
+      "community": 84,
       "norm_label": "course-card.tsx"
     },
     {
@@ -3060,7 +3186,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-list-view.tsx",
       "source_location": "L1",
       "id": "users_harshsaw_github_brightbridge_apps_web_components_courses_course_list_view_tsx",
-      "community": 54,
+      "community": 55,
       "norm_label": "course-list-view.tsx"
     },
     {
@@ -3069,7 +3195,7 @@
       "source_file": "/Users/harshsaw/Github/BrightBridge/apps/web/components/courses/course-list-view.tsx",
       "source_location": "L42",
       "id": "courses_course_list_view_clearfilters",
-      "community": 54,
+      "community": 55,
       "norm_label": "clearfilters()"
     },
     {
@@ -3081,7 +3207,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 84,
+      "community": 85,
       "norm_label": "coursebridge readme",
       "id": "coursebridge_readme"
     },
@@ -3146,7 +3272,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 85,
+      "community": 86,
       "norm_label": "tech stack doc",
       "id": "tech_stack_doc"
     },
@@ -3159,7 +3285,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 86,
+      "community": 87,
       "norm_label": "coursebridge project brief",
       "id": "project_brief"
     },
@@ -3198,7 +3324,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 55,
+      "community": 56,
       "norm_label": "@coursebridge/ui readme",
       "id": "pkg_ui_readme"
     },
@@ -3211,7 +3337,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 87,
+      "community": 88,
       "norm_label": "@coursebridge/config readme",
       "id": "pkg_config_readme"
     },
@@ -3263,7 +3389,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "@coursebridge/validation readme",
       "id": "pkg_validation_readme"
     },
@@ -3276,7 +3402,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "role: ta",
       "id": "role_ta"
     },
@@ -3289,7 +3415,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "role: admin",
       "id": "role_admin"
     },
@@ -3302,7 +3428,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "role: communications department",
       "id": "role_communications"
     },
@@ -3315,7 +3441,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "role: instructor",
       "id": "role_instructor"
     },
@@ -3328,7 +3454,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 88,
+      "community": 89,
       "norm_label": "role: super admin",
       "id": "role_super_admin"
     },
@@ -3341,7 +3467,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: course_created",
       "id": "status_course_created"
     },
@@ -3354,7 +3480,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: assigned_to_ta",
       "id": "status_assigned_to_ta"
     },
@@ -3367,7 +3493,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: ta_review_in_progress",
       "id": "status_ta_review_in_progress"
     },
@@ -3380,7 +3506,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: submitted_to_admin",
       "id": "status_submitted_to_admin"
     },
@@ -3393,7 +3519,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: admin_changes_requested",
       "id": "status_admin_changes_requested"
     },
@@ -3406,7 +3532,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: ready_for_instructor",
       "id": "status_ready_for_instructor"
     },
@@ -3419,7 +3545,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: sent_to_instructor",
       "id": "status_sent_to_instructor"
     },
@@ -3432,7 +3558,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: instructor_questions",
       "id": "status_instructor_questions"
     },
@@ -3445,7 +3571,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: instructor_approved",
       "id": "status_instructor_approved"
     },
@@ -3458,7 +3584,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "status: final_approved",
       "id": "status_final_approved"
     },
@@ -3575,7 +3701,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 5,
+      "community": 6,
       "norm_label": "cantransition() helper",
       "id": "can_transition_fn"
     },
@@ -3653,7 +3779,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 89,
+      "community": 90,
       "norm_label": "supabase realtime",
       "id": "supabase_realtime"
     },
@@ -3705,7 +3831,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 55,
+      "community": 56,
       "norm_label": "shadcn/ui",
       "id": "shadcn_ui"
     },
@@ -3718,7 +3844,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 90,
+      "community": 91,
       "norm_label": "tailwind css",
       "id": "tailwind_css"
     },
@@ -3731,7 +3857,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "react hook form",
       "id": "react_hook_form"
     },
@@ -3744,7 +3870,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 5,
       "norm_label": "zod",
       "id": "zod"
     },
@@ -3757,7 +3883,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 91,
+      "community": 92,
       "norm_label": "tanstack table",
       "id": "tanstack_table"
     },
@@ -3770,7 +3896,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 92,
+      "community": 93,
       "norm_label": "vercel hosting",
       "id": "vercel_hosting"
     },
@@ -4505,6 +4631,282 @@
       "_tgt": "ui_select_select",
       "source": "scripts_seed_dev_seedreviewresponses",
       "target": "ui_select_select"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_buildstats",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_buildstats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L198",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L219",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_fetchexistingcourseinstructorpairs",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_fetchexistingcourseinstructorpairs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L239",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_parsecsv",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_parsecsv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L266",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_parsecsvline",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_parsecsvline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L299",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_normalizetext",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_normalizetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L303",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_normalizeemail",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_normalizeemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L307",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_issimplevalidemail",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_issimplevalidemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L311",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_chunkarray",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_chunkarray",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L319",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_loadenvfiles",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_loadenvfiles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L350",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_parsedatabaseurl",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_parsedatabaseurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L361",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_mjs",
+      "_tgt": "scripts_import_course_instructors_dry_run_parsesupabasedatabaseurl",
+      "source": "scripts_import_course_instructors_dry_run_mjs",
+      "target": "scripts_import_course_instructors_dry_run_parsesupabasedatabaseurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_buildstats",
+      "_tgt": "scripts_import_course_instructors_dry_run_normalizetext",
+      "source": "scripts_import_course_instructors_dry_run_buildstats",
+      "target": "scripts_import_course_instructors_dry_run_normalizetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_buildstats",
+      "_tgt": "scripts_import_course_instructors_dry_run_normalizeemail",
+      "source": "scripts_import_course_instructors_dry_run_buildstats",
+      "target": "scripts_import_course_instructors_dry_run_normalizeemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L108",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_buildstats",
+      "_tgt": "scripts_import_course_instructors_dry_run_issimplevalidemail",
+      "source": "scripts_import_course_instructors_dry_run_buildstats",
+      "target": "scripts_import_course_instructors_dry_run_issimplevalidemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L158",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
+      "_tgt": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "source": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
+      "target": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L165",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
+      "_tgt": "scripts_import_course_instructors_dry_run_fetchexistingcourseinstructorpairs",
+      "source": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
+      "target": "scripts_import_course_instructors_dry_run_fetchexistingcourseinstructorpairs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L201",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "_tgt": "scripts_import_course_instructors_dry_run_chunkarray",
+      "source": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "target": "scripts_import_course_instructors_dry_run_chunkarray",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L212",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "_tgt": "scripts_import_course_instructors_dry_run_normalizetext",
+      "source": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
+      "target": "scripts_import_course_instructors_dry_run_normalizetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L248",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_parsecsv",
+      "_tgt": "scripts_import_course_instructors_dry_run_parsecsvline",
+      "source": "scripts_import_course_instructors_dry_run_parsecsv",
+      "target": "scripts_import_course_instructors_dry_run_parsecsvline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L304",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_normalizeemail",
+      "_tgt": "scripts_import_course_instructors_dry_run_normalizetext",
+      "source": "scripts_import_course_instructors_dry_run_normalizetext",
+      "target": "scripts_import_course_instructors_dry_run_normalizeemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-course-instructors-dry-run.mjs",
+      "source_location": "L357",
+      "weight": 1.0,
+      "_src": "scripts_import_course_instructors_dry_run_parsedatabaseurl",
+      "_tgt": "scripts_import_course_instructors_dry_run_parsesupabasedatabaseurl",
+      "source": "scripts_import_course_instructors_dry_run_parsedatabaseurl",
+      "target": "scripts_import_course_instructors_dry_run_parsesupabasedatabaseurl",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -7453,8 +7855,8 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L123",
       "weight": 1.0,
-      "_src": "super_admin_actions_createunitaction",
-      "_tgt": "repositories_index_gethierarchyrepository",
+      "_src": "repositories_index_gethierarchyrepository",
+      "_tgt": "super_admin_actions_createunitaction",
       "source": "repositories_index_gethierarchyrepository",
       "target": "super_admin_actions_createunitaction"
     },
@@ -7465,8 +7867,8 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L150",
       "weight": 1.0,
-      "_src": "super_admin_actions_addunitmemberaction",
-      "_tgt": "repositories_index_gethierarchyrepository",
+      "_src": "repositories_index_gethierarchyrepository",
+      "_tgt": "super_admin_actions_addunitmemberaction",
       "source": "repositories_index_gethierarchyrepository",
       "target": "super_admin_actions_addunitmemberaction"
     },
@@ -7477,8 +7879,8 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L164",
       "weight": 1.0,
-      "_src": "super_admin_actions_removeunitmemberaction",
-      "_tgt": "repositories_index_gethierarchyrepository",
+      "_src": "repositories_index_gethierarchyrepository",
+      "_tgt": "super_admin_actions_removeunitmemberaction",
       "source": "repositories_index_gethierarchyrepository",
       "target": "super_admin_actions_removeunitmemberaction"
     },
@@ -9382,7 +9784,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/components/super-admin/super-admin-shell.tsx",
-      "source_location": "L62",
+      "source_location": "L71",
       "weight": 1.0,
       "_src": "apps_web_components_super_admin_super_admin_shell_tsx",
       "_tgt": "super_admin_super_admin_shell_fmt",

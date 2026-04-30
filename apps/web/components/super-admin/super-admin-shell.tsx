@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  AlertTriangle, Search, ShieldPlus, UserCog, Building2, Users, Trash2, Plus
+  AlertTriangle, Search, ShieldPlus, UserCog, Building2, Users, Trash2, Plus,
+  LayoutDashboard, BookOpen, FileText
 } from "lucide-react"
 import { COURSE_STATUS_LABELS, ROLES, type CourseStatus, type Role } from "@coursebridge/workflow"
 import type { SuperAdminData } from "@/lib/super-admin/queries"
@@ -36,6 +37,14 @@ const initialManageUserState = {
   kind: "idle" as const,
   message: null,
 }
+
+const TABS = [
+  { value: "overview", label: "Overview", icon: LayoutDashboard },
+  { value: "courses", label: "Courses", icon: BookOpen },
+  { value: "users", label: "Users", icon: Users },
+  { value: "organization", label: "Organization", icon: Building2 },
+  { value: "audit", label: "Audit Trail", icon: FileText },
+]
 
 const ROLE_BADGE_CLASS: Record<string, string> = {
   standard_user: "bg-blue-500/15 text-blue-400 border-blue-500/20",
@@ -113,98 +122,103 @@ export function SuperAdminShell({ data }: Props) {
   const selectedUnitMembers = members.filter(m => m.orgUnitId === selectedUnitId)
 
   return (
-    <Tabs defaultValue="overview" className="flex flex-col flex-1 min-h-0">
-      <div className="border-b border-border px-6 pt-2">
-        <TabsList className="h-9 bg-transparent p-0 gap-1">
-          {["overview", "courses", "users", "organization", "audit"].map((tab) => (
+    <Tabs defaultValue="overview" orientation="vertical" className="flex flex-row flex-1 min-h-0">
+      <aside className="w-64 border-r border-border bg-muted/5 flex flex-col shrink-0">
+        <div className="p-4 border-b border-border bg-muted/10">
+          <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Admin Control</h2>
+        </div>
+        <TabsList className="flex flex-col h-auto bg-transparent p-2 gap-1 items-stretch">
+          {TABS.map((tab) => (
             <TabsTrigger
-              key={tab}
-              value={tab}
-              className="rounded-none border-b-2 border-transparent px-3 pb-2 pt-1 text-sm capitalize data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              key={tab.value}
+              value={tab.value}
+              className="justify-start gap-2.5 rounded-md px-3 py-2 text-sm transition-all data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:font-medium hover:bg-muted/50"
             >
-              {tab === "audit" ? "Audit Trail" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              <tab.icon className="size-4 shrink-0" />
+              {tab.label}
             </TabsTrigger>
           ))}
         </TabsList>
-      </div>
+      </aside>
 
-      {/* ─── Overview ─────────────────────────────────────────────────────── */}
-      <TabsContent value="overview" className="flex-1 overflow-y-auto p-6 space-y-6 mt-0">
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-          <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
-          <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
-          <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
-          <StatCard label="With Instructor"  value={withInstructor}  icon="book-open" />
-          <StatCard label="Completed"        value={completed}       icon="check-square" />
-        </div>
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
+        {/* ─── Overview ─────────────────────────────────────────────────────── */}
+        <TabsContent value="overview" className="flex-1 overflow-y-auto p-6 space-y-6 mt-0">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+            <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
+            <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
+            <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
+            <StatCard label="With Instructor"  value={withInstructor}  icon="book-open" />
+            <StatCard label="Completed"        value={completed}       icon="check-square" />
+          </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Courses by Status</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2.5">
-              {STATUS_ORDER.map((status) => {
-                const count = countByStatus[status] ?? 0
-                if (count === 0) return null
-                return (
-                  <div key={status} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">{COURSE_STATUS_LABELS[status]}</span>
-                      <span className="font-medium tabular-nums">{count}</span>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Courses by Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                {STATUS_ORDER.map((status) => {
+                  const count = countByStatus[status] ?? 0
+                  if (count === 0) return null
+                  return (
+                    <div key={status} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{COURSE_STATUS_LABELS[status]}</span>
+                        <span className="font-medium tabular-nums">{count}</span>
+                      </div>
+                      <Progress value={(count / maxCount) * 100} className="h-1.5" />
                     </div>
-                    <Progress value={(count / maxCount) * 100} className="h-1.5" />
-                  </div>
-                )
-              })}
-            </CardContent>
-          </Card>
+                  )
+                })}
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Staff Workload</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent border-border">
-                    <TableHead className="text-xs pl-6">Staff</TableHead>
-                    <TableHead className="text-xs text-center">Active</TableHead>
-                    <TableHead className="text-xs text-center">Needs Fixes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {taWorkload.length === 0 ? (
-                    <TableRow><TableCell colSpan={3} className="text-center text-xs py-4">No staff assigned.</TableCell></TableRow>
-                  ) : (
-                    taWorkload.map((ta) => (
-                      <TableRow key={ta.id} className="border-border">
-                        <TableCell className="pl-6">
-                          <p className="text-sm font-medium">{ta.full_name ?? ta.email}</p>
-                          {ta.full_name && <p className="text-xs text-muted-foreground">{ta.email}</p>}
-                        </TableCell>
-                        <TableCell className="text-center text-sm">{ta.active_courses}</TableCell>
-                        <TableCell className="text-center">
-                          {ta.needs_fixes > 0 ? (
-                            <span className="inline-flex items-center gap-1 text-xs text-destructive">
-                              <AlertTriangle className="size-3" />{ta.needs_fixes}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-      </TabsContent>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Staff Workload</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent border-border">
+                      <TableHead className="text-xs pl-6">Staff</TableHead>
+                      <TableHead className="text-xs text-center">Active</TableHead>
+                      <TableHead className="text-xs text-center">Needs Fixes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {taWorkload.length === 0 ? (
+                      <TableRow><TableCell colSpan={3} className="text-center text-xs py-4">No staff assigned.</TableCell></TableRow>
+                    ) : (
+                      taWorkload.map((ta) => (
+                        <TableRow key={ta.id} className="border-border">
+                          <TableCell className="pl-6">
+                            <p className="text-sm font-medium">{ta.full_name ?? ta.email}</p>
+                            {ta.full_name && <p className="text-xs text-muted-foreground">{ta.email}</p>}
+                          </TableCell>
+                          <TableCell className="text-center text-sm">{ta.active_courses}</TableCell>
+                          <TableCell className="text-center">
+                            {ta.needs_fixes > 0 ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-destructive">
+                                <AlertTriangle className="size-3" />{ta.needs_fixes}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-      {/* ─── All Courses ──────────────────────────────────────────────────── */}
-      <TabsContent value="courses" className="flex-1 overflow-y-auto p-6 space-y-4 mt-0">
+        {/* ─── All Courses ──────────────────────────────────────────────────── */}
+        <TabsContent value="courses" className="flex-1 overflow-y-auto p-6 space-y-4 mt-0">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{filteredCourses.length} courses</p>
           <div className="relative w-64">
