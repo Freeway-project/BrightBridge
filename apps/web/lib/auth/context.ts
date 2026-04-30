@@ -2,8 +2,8 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 import { ROLES, type Role } from "@coursebridge/workflow";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getProfileRepository } from "@/lib/repositories";
+import { getAuthService } from "./service";
 
 export type AppProfile = {
   id: string;
@@ -18,33 +18,18 @@ export type AuthContext =
   | { kind: "profile"; userId: string; email: string | null; profile: AppProfile };
 
 export async function getAuthContext(): Promise<AuthContext> {
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const user = await getAuthService().getCurrentSessionUser();
 
   if (!user) {
     return { kind: "anonymous" };
   }
 
-  const admin = createAdminClient();
-  if (!admin) throw new Error("Admin client unavailable — check SUPABASE_SERVICE_ROLE_KEY.");
-
-  const { data: profile, error } = await admin
-    .from("profiles")
-    .select("id,email,full_name,role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(`Could not load profile: ${error.message}`);
-  }
-
+  const profile = await getProfileRepository().getProfileById(user.id);
   if (!profile) {
     return {
       kind: "missing_profile",
       userId: user.id,
-      email: user.email ?? null
+      email: user.email
     };
   }
 
@@ -55,11 +40,11 @@ export async function getAuthContext(): Promise<AuthContext> {
   return {
     kind: "profile",
     userId: user.id,
-    email: user.email ?? null,
+    email: user.email,
     profile: {
       id: profile.id,
       email: profile.email,
-      fullName: profile.full_name,
+      fullName: profile.fullName,
       role: profile.role
     }
   };

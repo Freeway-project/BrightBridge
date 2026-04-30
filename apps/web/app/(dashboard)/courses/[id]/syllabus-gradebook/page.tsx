@@ -39,6 +39,7 @@ export default async function SyllabusGradebookPage({ params }: Props) {
       return { item_id, status: found?.status ?? "na", notes: found?.notes ?? "", direct_link: found?.direct_link ?? "" };
     }),
     time_spent_seconds: saved.time_spent_seconds ?? 0,
+    overall_time_spent_seconds: saved.overall_time_spent_seconds ?? 0,
   };
 
   return (
