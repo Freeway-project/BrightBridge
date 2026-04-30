@@ -112,7 +112,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           <div>
             <CardTitle className="text-base">
           Assigned Courses
-              <span className="ml-2 text-sm font-normal text-muted-foreground">({courses.length})</span>
+              <span className="ml-2 text-sm font-normal text-muted-foreground">({page.total})</span>
             </CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
               Track course ownership, review progress, and who is actively carrying each course.
