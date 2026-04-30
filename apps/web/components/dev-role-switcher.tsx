@@ -8,18 +8,16 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import { getAuthService } from "@/lib/auth/service";
+import { getProfileRepository } from "@/lib/repositories";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
 export async function DevRoleSwitcher() {
   if (process.env.NODE_ENV !== "development") {
     return null;
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const user = await getAuthService().getCurrentSessionUser();
 
   if (!user) {
     return null;
@@ -41,12 +39,7 @@ export async function DevRoleSwitcher() {
     );
   }
 
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
+  const profile = await getProfileRepository().getProfileById(user.id);
   const currentRole = profile?.role as Role | undefined;
 
   return (
