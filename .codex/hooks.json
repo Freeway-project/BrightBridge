@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/prehook.sh || true"
+            "command": ".codex/prehook.sh >/dev/null 2>&1 || true"
           }
         ]
       }
