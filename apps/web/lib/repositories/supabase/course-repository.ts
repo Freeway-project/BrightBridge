@@ -1,9 +1,11 @@
 import "server-only";
 
+import type { AssignmentRole } from "@coursebridge/workflow";
 import type {
   AdminCourseRow,
   AssignedCourse,
   AuditEvent,
+  CourseAssignmentRecord,
   CourseRepository,
   CourseSummary,
   CreateCourseRecordInput,
@@ -148,6 +150,28 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return toCourseSummary(data as CourseRow);
     },
 
+    async getCourseAssignment(courseId, profileId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("course_assignments")
+        .select("course_id, profile_id, role")
+        .eq("course_id", courseId)
+        .eq("profile_id", profileId)
+        .maybeSingle();
+
+      if (error) {
+        throw new Error(`getCourseAssignment: ${error.message}`);
+      }
+
+      if (!data) return null;
+
+      return {
+        courseId: data.course_id,
+        profileId: data.profile_id,
+        role: data.role as AssignmentRole,
+      } satisfies CourseAssignmentRecord;
+    },
+
     async hasAssignment(courseId, profileId, role) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
@@ -232,8 +256,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
             profiles?: AssignmentProfile | AssignmentProfile[] | null;
           }>;
         };
-        const taAssignment = course.course_assignments?.find((assignment) => assignment.role === "ta");
-        const taProfile = firstRelation(taAssignment?.profiles);
+        const staffAssignment = course.course_assignments?.find((assignment) => assignment.role === "staff");
+        const staffProfile = firstRelation(staffAssignment?.profiles);
 
         return {
           id: course.id,
@@ -244,11 +268,11 @@ export function createSupabaseCourseRepository(): CourseRepository {
           department: course.department,
           status: toCourseStatus(course.status),
           updatedAt: course.updated_at,
-          ta: taProfile
+          ta: staffProfile
             ? {
-                id: taProfile.id,
-                name: taProfile.full_name,
-                email: taProfile.email,
+                id: staffProfile.id,
+                name: staffProfile.full_name,
+                email: staffProfile.email,
               }
             : null,
         } satisfies AdminCourseRow;
@@ -287,8 +311,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
           profiles?: AssignmentProfile | AssignmentProfile[] | null;
         }>;
       };
-      const taAssignment = course.course_assignments?.find((assignment) => assignment.role === "ta");
-      const taProfile = firstRelation(taAssignment?.profiles);
+      const staffAssignment = course.course_assignments?.find((assignment) => assignment.role === "staff");
+      const staffProfile = firstRelation(staffAssignment?.profiles);
 
       return {
         id: course.id,
@@ -299,11 +323,11 @@ export function createSupabaseCourseRepository(): CourseRepository {
         department: course.department,
         status: toCourseStatus(course.status),
         updatedAt: course.updated_at,
-        ta: taProfile
+        ta: staffProfile
           ? {
-              id: taProfile.id,
-              name: taProfile.full_name,
-              email: taProfile.email,
+              id: staffProfile.id,
+              name: staffProfile.full_name,
+              email: staffProfile.email,
             }
           : null,
       } satisfies AdminCourseRow;
@@ -340,11 +364,11 @@ export function createSupabaseCourseRepository(): CourseRepository {
             profiles?: NamedProfile | NamedProfile[] | null;
           }>;
         };
-        const ta = course.course_assignments?.find((assignment) => assignment.role === "ta");
+        const staff = course.course_assignments?.find((assignment) => assignment.role === "staff");
         const instructor = course.course_assignments?.find(
           (assignment) => assignment.role === "instructor",
         );
-        const taProfile = firstRelation(ta?.profiles);
+        const staffProfile = firstRelation(staff?.profiles);
         const instructorProfile = firstRelation(instructor?.profiles);
 
         return {
@@ -355,7 +379,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
           department: course.department,
           created_at: course.created_at,
           updated_at: course.updated_at,
-          ta: taProfile ? { name: taProfile.full_name, email: taProfile.email } : null,
+          ta: staffProfile ? { name: staffProfile.full_name, email: staffProfile.email } : null,
           instructor: instructorProfile
             ? { name: instructorProfile.full_name, email: instructorProfile.email }
             : null,
@@ -406,39 +430,39 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
     async listTAWorkload() {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data: tas, error: tasError } = await admin
+      const { data: staff, error: staffError } = await admin
         .from("profiles")
         .select("id, email, full_name")
-        .eq("role", "ta");
+        .eq("role", "standard_user");
 
-      if (tasError) {
-        throw new Error(`ta list: ${tasError.message}`);
+      if (staffError) {
+        throw new Error(`staff list: ${staffError.message}`);
       }
 
       const { data: assignments, error: assignError } = await admin
         .from("course_assignments")
         .select("profile_id, courses(status)")
-        .eq("role", "ta");
+        .eq("role", "staff");
 
       if (assignError) {
         throw new Error(`assignments: ${assignError.message}`);
       }
 
-      return (tas ?? []).map((ta) => {
-        const taAssignments = (assignments ?? []).filter((assignment) => assignment.profile_id === ta.id);
-        const active = taAssignments.filter(
+      return (staff ?? []).map((member) => {
+        const memberAssignments = (assignments ?? []).filter((assignment) => assignment.profile_id === member.id);
+        const active = memberAssignments.filter(
           (assignment) =>
             firstRelation(assignment.courses)?.status !== "final_approved" &&
             firstRelation(assignment.courses)?.status !== "submitted_to_admin",
         );
-        const needsFixes = taAssignments.filter(
+        const needsFixes = memberAssignments.filter(
           (assignment) => firstRelation(assignment.courses)?.status === "admin_changes_requested",
         );
 
         return {
-          id: ta.id,
-          full_name: ta.full_name,
-          email: ta.email,
+          id: member.id,
+          full_name: member.full_name,
+          email: member.email,
           active_courses: active.length,
           needs_fixes: needsFixes.length,
         } satisfies TAWorkload;

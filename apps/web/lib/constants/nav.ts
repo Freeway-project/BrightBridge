@@ -15,13 +15,13 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
-  ta: [
+  standard_user: [
     { label: "My Courses",  href: "/ta",        icon: BookOpen },
   ],
-  admin: [
+  admin_full: [
     { label: "Review Queue", href: "/admin",     icon: ClipboardList },
   ],
-  communications: [
+  admin_viewer: [
     { label: "Handoff Queue", href: "/communications", icon: Send },
   ],
   instructor: [

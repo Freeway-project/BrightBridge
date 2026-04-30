@@ -1,4 +1,4 @@
-import type { CourseStatus, Role } from "@coursebridge/workflow";
+import type { AssignmentRole, CourseStatus, Role } from "@coursebridge/workflow";
 
 export type AppProfileRecord = {
   id: string;
@@ -156,6 +156,12 @@ export type CourseComment = {
   created_at: string;
 };
 
+export type CourseAssignmentRecord = {
+  profileId: string;
+  courseId: string;
+  role: AssignmentRole;
+};
+
 export type CreateCourseRecordInput = {
   sourceCourseId?: string | null;
   targetCourseId?: string | null;
@@ -169,7 +175,7 @@ export type CreateCourseRecordInput = {
 export type AssignUserToCourseRecordInput = {
   courseId: string;
   profileId: string;
-  role: Role;
+  role: AssignmentRole;
   assignedBy: string;
 };
 
@@ -205,7 +211,8 @@ export interface CourseRepository {
   createCourse(input: CreateCourseRecordInput): Promise<CourseSummary>;
   getCourseSummaryById(courseId: string): Promise<CourseSummary>;
   updateCourseStatus(courseId: string, status: CourseStatus): Promise<CourseSummary>;
-  hasAssignment(courseId: string, profileId: string, role: Role): Promise<boolean>;
+  getCourseAssignment(courseId: string, profileId: string): Promise<CourseAssignmentRecord | null>;
+  hasAssignment(courseId: string, profileId: string, role: AssignmentRole): Promise<boolean>;
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;
   insertStatusEvent(input: InsertStatusEventInput): Promise<void>;
   listAdminCourses(): Promise<AdminCourseRow[]>;

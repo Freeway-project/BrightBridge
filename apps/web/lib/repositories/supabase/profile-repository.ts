@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Role } from "@coursebridge/workflow";
 import type { ProfileRepository } from "@/lib/repositories/contracts";
 import { getSupabaseAdminClientOrThrow } from "./shared";
 
@@ -25,7 +26,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
         id: data.id,
         email: data.email,
         fullName: data.full_name,
-        role: data.role,
+        role: data.role as Role,
       };
     },
 
@@ -45,7 +46,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
         id: profile.id,
         email: profile.email,
         fullName: profile.full_name,
-        role: profile.role,
+        role: profile.role as Role,
       }));
     },
 
@@ -64,7 +65,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
         id: profile.id,
         email: profile.email,
         fullName: profile.full_name,
-        role: profile.role,
+        role: profile.role as Role,
         createdAt: profile.created_at,
       }));
     },

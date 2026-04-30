@@ -1,7 +1,6 @@
 import "server-only";
 
-import { assertCanTransition, type CourseStatus } from "@coursebridge/workflow";
-import type { Role } from "@coursebridge/workflow";
+import { assertCanTransition, type CourseStatus, type EffectiveRole, type Role } from "@coursebridge/workflow";
 import { getCourseRepository } from "@/lib/repositories";
 
 export type CourseRow = {
@@ -39,10 +38,18 @@ export async function transitionCourseStatus({
   actorRole: Role;
   note?: string;
 }) {
-  assertCanTransition({ role: actorRole, from, to });
-  const courses = getCourseRepository();
-  await courses.updateCourseStatus(courseId, to);
-  await courses.insertStatusEvent({
+  const repo = getCourseRepository();
+
+  const assignment = await repo.getCourseAssignment(courseId, actorId);
+  const effectiveRole: EffectiveRole =
+    actorRole === "standard_user"
+      ? (assignment?.role ?? "standard_user")
+      : actorRole;
+
+  assertCanTransition({ role: effectiveRole, from, to });
+
+  await repo.updateCourseStatus(courseId, to);
+  await repo.insertStatusEvent({
     courseId,
     fromStatus: from,
     toStatus: to,

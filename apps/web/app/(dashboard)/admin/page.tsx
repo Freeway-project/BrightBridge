@@ -10,11 +10,11 @@ import { ReviewQueueTable } from "./_components/review-queue-table"
 
 export default async function AdminDashboardPage() {
   const context = await requireProfile()
-  requireAnyRole(context, ["admin", "super_admin"])
+  requireAnyRole(context, ["admin_full", "super_admin"])
 
   const [courses, tas] = await Promise.all([
     getAdminCourses(),
-    getProfilesByRole("ta"),
+    getProfilesByRole("standard_user"),
   ])
 
   const unassigned = courses.filter((c) => c.status === "course_created")
@@ -23,7 +23,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <>
-      <Topbar title="Admin" subtitle="Manage TA assignments and review submissions" />
+      <Topbar title="Admin" subtitle="Manage staff assignments and review submissions" />
       <Tabs defaultValue="assignments" className="flex flex-col flex-1 min-h-0">
         <div className="border-b border-border px-6 pt-2">
           <TabsList className="h-9 bg-transparent p-0 gap-1">

@@ -35,16 +35,19 @@ const initialManageUserState = {
 }
 
 const ROLE_BADGE_CLASS: Record<string, string> = {
-  ta:             "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  admin:          "bg-purple-500/15 text-purple-400 border-purple-500/20",
-  communications: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
+  standard_user: "bg-blue-500/15 text-blue-400 border-blue-500/20",
+  admin_full:    "bg-purple-500/15 text-purple-400 border-purple-500/20",
+  admin_viewer:  "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
   instructor:     "bg-green-500/15 text-green-400 border-green-500/20",
   super_admin:    "bg-red-500/15 text-red-400 border-red-500/20",
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  ta: "TA", admin: "Admin", communications: "Comm Dept",
-  instructor: "Instructor", super_admin: "Super Admin",
+  standard_user: "Staff",
+  admin_full: "Admin",
+  admin_viewer: "Viewer",
+  instructor: "Instructor",
+  super_admin: "Super Admin",
 }
 
 const STATUS_ORDER: CourseStatus[] = [
@@ -65,7 +68,7 @@ export function SuperAdminShell({ data }: Props) {
   const { courses, users, statusCounts, stuckCourses, taWorkload, auditEvents } = data
   const [courseSearch, setCourseSearch] = useState("")
   const [userSearch, setUserSearch] = useState("")
-  const [newUserRole, setNewUserRole] = useState<Role>("ta")
+  const [newUserRole, setNewUserRole] = useState<Role>("standard_user")
   const [createState, createFormAction, createPending] = useActionState(
     createUserAction,
     initialManageUserState,
@@ -123,7 +126,7 @@ export function SuperAdminShell({ data }: Props) {
         {/* Stat cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
           <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
-          <StatCard label="TA In Progress"   value={inProgress}      icon="clock" />
+          <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
           <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
           <StatCard label="With Instructor"  value={withInstructor}  icon="book-open" />
           <StatCard label="Completed"        value={completed}       icon="check-square" />
@@ -158,13 +161,13 @@ export function SuperAdminShell({ data }: Props) {
           {/* TA Workload */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">TA Workload</CardTitle>
+              <CardTitle className="text-sm font-medium">Staff Workload</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-border">
-                    <TableHead className="text-xs pl-6">TA</TableHead>
+                    <TableHead className="text-xs pl-6">Staff</TableHead>
                     <TableHead className="text-xs text-center">Active</TableHead>
                     <TableHead className="text-xs text-center">Needs Fixes</TableHead>
                   </TableRow>
@@ -173,7 +176,7 @@ export function SuperAdminShell({ data }: Props) {
                   {taWorkload.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={3} className="text-center text-xs text-muted-foreground pl-6 py-4">
-                        No TAs assigned.
+                        No staff assigned.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -251,7 +254,7 @@ export function SuperAdminShell({ data }: Props) {
           <div className="relative w-64">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search by title, status, TA…"
+              placeholder="Search by title, status, staff…"
               className="pl-8 h-8 text-sm"
               value={courseSearch}
               onChange={(e) => setCourseSearch(e.target.value)}
@@ -265,7 +268,7 @@ export function SuperAdminShell({ data }: Props) {
                 <TableHead className="text-xs pl-4">Title</TableHead>
                 <TableHead className="text-xs w-[100px]">Term</TableHead>
                 <TableHead className="text-xs w-[200px]">Status</TableHead>
-                <TableHead className="text-xs">TA</TableHead>
+                <TableHead className="text-xs">Staff</TableHead>
                 <TableHead className="text-xs">Instructor</TableHead>
                 <TableHead className="text-xs w-[110px]">Last Updated</TableHead>
               </TableRow>
