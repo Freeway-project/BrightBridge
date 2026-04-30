@@ -63,7 +63,8 @@ returns boolean language sql stable security definer set search_path = public as
 $$;
 
 -- Monitoring: ta_workload view — update role filters
-create or replace view monitoring.ta_workload as
+drop view if exists monitoring.ta_workload;
+create view monitoring.ta_workload as
 select
   p.id, p.full_name, p.email,
   count(ca.id) as active_courses,

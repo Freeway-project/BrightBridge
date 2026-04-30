@@ -1,12 +1,12 @@
 # Graph Report - BrightBridge  (2026-04-30)
 
 ## Corpus Check
-- 121 files · ~55,880 words
+- 124 files · ~58,603 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 391 nodes · 518 edges · 22 communities detected
-- Extraction: 64% EXTRACTED · 36% INFERRED · 0% AMBIGUOUS · INFERRED: 188 edges (avg confidence: 0.8)
+- 405 nodes · 539 edges · 23 communities detected
+- Extraction: 64% EXTRACTED · 36% INFERRED · 0% AMBIGUOUS · INFERRED: 193 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -22,8 +22,8 @@
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
-- [[_COMMUNITY_Community 54|Community 54]]
-- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 55|Community 55]]
 - [[_COMMUNITY_Community 84|Community 84]]
 - [[_COMMUNITY_Community 85|Community 85]]
 - [[_COMMUNITY_Community 86|Community 86]]
@@ -32,6 +32,7 @@
 - [[_COMMUNITY_Community 89|Community 89]]
 - [[_COMMUNITY_Community 90|Community 90]]
 - [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Select()` - 29 edges
@@ -46,26 +47,26 @@
 10. `CourseBridge Data Model Draft` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Role: Instructor` --conceptually_related_to--> `DB Table: review_invites`  [INFERRED]
-  CLAUDE.md → docs/data-model.md
-- `createTempCourse()` --calls--> `Select()`  [INFERRED]
-  /Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs → /Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx
-- `getProfileByEmail()` --calls--> `Select()`  [INFERRED]
-  /Users/harshsaw/Github/BrightBridge/scripts/check-core-rls.mjs → /Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx
-- `createAdminClient()` --calls--> `getSupabaseAdminClientOrThrow()`  [INFERRED]
-  /Users/harshsaw/Github/BrightBridge/apps/web/lib/supabase/admin.ts → /Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/shared.ts
-- `getCourseRepository()` --calls--> `createSupabaseCourseRepository()`  [INFERRED]
-  /Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/index.ts → /Users/harshsaw/Github/BrightBridge/apps/web/lib/repositories/supabase/course-repository.ts
+- `assertCanTransition()` --calls--> `transitionCourseStatus()`  [INFERRED]
+  packages/workflow/src/transitions.ts → apps/web/lib/services/courses.ts
+- `assertCanTransition()` --calls--> `transitionCourseStatus()`  [INFERRED]
+  packages/workflow/src/transitions.ts → apps/web/lib/courses/service.ts
+- `getAuthContext()` --calls--> `DashboardPage()`  [INFERRED]
+  apps/web/lib/auth/context.ts → /Users/harshsaw/Github/BrightBridge/apps/web/app/dashboard/page.tsx
+- `getAuthContext()` --calls--> `DashboardLayout()`  [INFERRED]
+  apps/web/lib/auth/context.ts → /Users/harshsaw/Github/BrightBridge/apps/web/app/(dashboard)/layout.tsx
+- `getAuthContext()` --calls--> `Select()`  [INFERRED]
+  apps/web/lib/auth/context.ts → /Users/harshsaw/Github/BrightBridge/apps/web/components/ui/select.tsx
 
 ## Communities
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
-Nodes (37): getAdminCourseDetail(), getAdminCourses(), getAuthContext(), getAuthService(), SupabaseAuthService, GET(), switchDevRole(), DevRoleSwitcher() (+29 more)
+Nodes (31): getAuthContext(), isRole(), getAuthService(), SupabaseAuthService, GET(), switchDevRole(), DevRoleSwitcher(), signOut() (+23 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.11
-Nodes (27): approveReviewAction(), assignTaToCourseAction(), requestFixesAction(), NotFound(), isRole(), requireAnyRole(), requireProfile(), assertCanActOnCourse() (+19 more)
+Cohesion: 0.08
+Nodes (40): approveReviewAction(), assignTaToCourseAction(), requestFixesAction(), getAdminCourseDetail(), getAdminCourses(), NotFound(), requireAnyRole(), requireProfile() (+32 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.09
@@ -100,99 +101,105 @@ Cohesion: 0.67
 Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
 ### Community 18 - "Community 18"
-Cohesion: 0.5
-Nodes (2): SuperAdminDashboardPage(), getSuperAdminData()
+Cohesion: 0.67
+Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
 ### Community 19 - "Community 19"
+Cohesion: 0.67
+Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
+
+### Community 20 - "Community 20"
 Cohesion: 0.5
 Nodes (2): updateSession(), proxy()
 
-### Community 54 - "Community 54"
+### Community 55 - "Community 55"
 Cohesion: 1.0
 Nodes (2): @coursebridge/ui README, shadcn/ui
 
-### Community 83 - "Community 83"
+### Community 84 - "Community 84"
 Cohesion: 1.0
 Nodes (1): CourseBridge README
 
-### Community 84 - "Community 84"
+### Community 85 - "Community 85"
 Cohesion: 1.0
 Nodes (1): Tech Stack Doc
 
-### Community 85 - "Community 85"
+### Community 86 - "Community 86"
 Cohesion: 1.0
 Nodes (1): CourseBridge Project Brief
 
-### Community 86 - "Community 86"
+### Community 87 - "Community 87"
 Cohesion: 1.0
 Nodes (1): @coursebridge/config README
 
-### Community 87 - "Community 87"
+### Community 88 - "Community 88"
 Cohesion: 1.0
 Nodes (1): Role: Super Admin
 
-### Community 88 - "Community 88"
+### Community 89 - "Community 89"
 Cohesion: 1.0
 Nodes (1): Supabase Realtime
 
-### Community 89 - "Community 89"
+### Community 90 - "Community 90"
 Cohesion: 1.0
 Nodes (1): Tailwind CSS
 
-### Community 90 - "Community 90"
+### Community 91 - "Community 91"
 Cohesion: 1.0
 Nodes (1): TanStack Table
 
-### Community 91 - "Community 91"
+### Community 92 - "Community 92"
 Cohesion: 1.0
 Nodes (1): Vercel Hosting
 
 ## Knowledge Gaps
 - **30 isolated node(s):** `CourseBridge README`, `Workflow Overview Doc`, `Tech Stack Doc`, `CourseBridge Project Brief`, `@coursebridge/ui README` (+25 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 11`** (5 nodes): `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`, `transitions.ts`
+- **Thin community `Community 11`** (5 nodes): `transitions.ts`, `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (4 nodes): `loadEnvFiles()`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`, `apply-migration.mjs`
+- **Thin community `Community 17`** (4 nodes): `loadEnvFiles()`, `db-migrate-all.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (4 nodes): `SuperAdminDashboardPage()`, `getSuperAdminData()`, `page.tsx`, `queries.ts`
+- **Thin community `Community 18`** (4 nodes): `loadEnvFiles()`, `db-inspect.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 19`** (4 nodes): `updateSession()`, `middleware.ts`, `proxy.ts`, `proxy()`
+- **Thin community `Community 19`** (4 nodes): `loadEnvFiles()`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`, `apply-migration.mjs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 54`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
+- **Thin community `Community 20`** (4 nodes): `updateSession()`, `middleware.ts`, `proxy.ts`, `proxy()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 83`** (1 nodes): `CourseBridge README`
+- **Thin community `Community 55`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 84`** (1 nodes): `Tech Stack Doc`
+- **Thin community `Community 84`** (1 nodes): `CourseBridge README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 85`** (1 nodes): `CourseBridge Project Brief`
+- **Thin community `Community 85`** (1 nodes): `Tech Stack Doc`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 86`** (1 nodes): `@coursebridge/config README`
+- **Thin community `Community 86`** (1 nodes): `CourseBridge Project Brief`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 87`** (1 nodes): `Role: Super Admin`
+- **Thin community `Community 87`** (1 nodes): `@coursebridge/config README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 88`** (1 nodes): `Supabase Realtime`
+- **Thin community `Community 88`** (1 nodes): `Role: Super Admin`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 89`** (1 nodes): `Tailwind CSS`
+- **Thin community `Community 89`** (1 nodes): `Supabase Realtime`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 90`** (1 nodes): `TanStack Table`
+- **Thin community `Community 90`** (1 nodes): `Tailwind CSS`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 91`** (1 nodes): `Vercel Hosting`
+- **Thin community `Community 91`** (1 nodes): `TanStack Table`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 92`** (1 nodes): `Vercel Hosting`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Select()` connect `Community 0` to `Community 1`, `Community 3`, `Community 7`, `Community 15`?**
-  _High betweenness centrality (0.064) - this node is a cross-community bridge._
-- **Why does `getAuthContext()` connect `Community 0` to `Community 1`, `Community 18`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `Select()` connect `Community 1` to `Community 0`, `Community 3`, `Community 7`, `Community 15`?**
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
+- **Why does `getAuthContext()` connect `Community 0` to `Community 1`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **Why does `requireProfile()` connect `Community 1` to `Community 0`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Are the 28 inferred relationships involving `Select()` (e.g. with `upsertCourse()` and `ensureStatusEvent()`) actually correct?**
   _`Select()` has 28 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 15 inferred relationships involving `requireProfile()` (e.g. with `saveDraft()` and `submitReview()`) actually correct?**
   _`requireProfile()` has 15 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 13 inferred relationships involving `getCourseRepository()` (e.g. with `getAdminCourses()` and `getAdminCourseDetail()`) actually correct?**
   _`getCourseRepository()` has 13 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 10 inferred relationships involving `getAuthContext()` (e.g. with `.getCurrentSessionUser()` and `getAuthService()`) actually correct?**
+- **Are the 10 inferred relationships involving `getAuthContext()` (e.g. with `getAuthService()` and `getProfileRepository()`) actually correct?**
   _`getAuthContext()` has 10 INFERRED edges - model-reasoned connections that need verification._
