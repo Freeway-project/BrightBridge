@@ -20,13 +20,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  AlertTriangle, Search, ShieldPlus, UserCog,
+  AlertTriangle, Search, ShieldPlus, UserCog, Building2, Users, Trash2, Plus
 } from "lucide-react"
 import { COURSE_STATUS_LABELS, ROLES, type CourseStatus, type Role } from "@coursebridge/workflow"
 import type { SuperAdminData } from "@/lib/super-admin/queries"
 import {
   createUserAction,
   updateUserRoleAction,
+  createUnitAction,
+  addUnitMemberAction,
+  removeUnitMemberAction,
 } from "@/app/(dashboard)/super-admin/actions"
 
 const initialManageUserState = {
@@ -65,14 +68,15 @@ interface Props {
 }
 
 export function SuperAdminShell({ data }: Props) {
-  const { courses, users, statusCounts, stuckCourses, taWorkload, auditEvents } = data
+  const { courses, users, statusCounts, stuckCourses, taWorkload, auditEvents, units, members } = data
   const [courseSearch, setCourseSearch] = useState("")
   const [userSearch, setUserSearch] = useState("")
   const [newUserRole, setNewUserRole] = useState<Role>("standard_user")
-  const [createState, createFormAction, createPending] = useActionState(
-    createUserAction,
-    initialManageUserState,
-  )
+  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null)
+  
+  const [createState, createFormAction, createPending] = useActionState(createUserAction, initialManageUserState)
+  const [unitState, unitFormAction, unitPending] = useActionState(createUnitAction, initialManageUserState)
+  const [memberState, memberFormAction, memberPending] = useActionState(addUnitMemberAction, initialManageUserState)
 
   // Stats
   const totalCourses = courses.length
@@ -105,11 +109,14 @@ export function SuperAdminShell({ data }: Props) {
       u.role.toLowerCase().includes(userSearch.toLowerCase())
   )
 
+  const selectedUnit = units.find(u => u.id === selectedUnitId)
+  const selectedUnitMembers = members.filter(m => m.orgUnitId === selectedUnitId)
+
   return (
     <Tabs defaultValue="overview" className="flex flex-col flex-1 min-h-0">
       <div className="border-b border-border px-6 pt-2">
         <TabsList className="h-9 bg-transparent p-0 gap-1">
-          {["overview", "courses", "users", "audit"].map((tab) => (
+          {["overview", "courses", "users", "organization", "audit"].map((tab) => (
             <TabsTrigger
               key={tab}
               value={tab}
@@ -123,7 +130,6 @@ export function SuperAdminShell({ data }: Props) {
 
       {/* ─── Overview ─────────────────────────────────────────────────────── */}
       <TabsContent value="overview" className="flex-1 overflow-y-auto p-6 space-y-6 mt-0">
-        {/* Stat cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
           <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
           <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
@@ -133,7 +139,6 @@ export function SuperAdminShell({ data }: Props) {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Status distribution */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">Courses by Status</CardTitle>
@@ -152,13 +157,9 @@ export function SuperAdminShell({ data }: Props) {
                   </div>
                 )
               })}
-              {statusCounts.length === 0 && (
-                <p className="text-xs text-muted-foreground">No courses yet.</p>
-              )}
             </CardContent>
           </Card>
 
-          {/* TA Workload */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">Staff Workload</CardTitle>
@@ -174,11 +175,7 @@ export function SuperAdminShell({ data }: Props) {
                 </TableHeader>
                 <TableBody>
                   {taWorkload.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center text-xs text-muted-foreground pl-6 py-4">
-                        No staff assigned.
-                      </TableCell>
-                    </TableRow>
+                    <TableRow><TableCell colSpan={3} className="text-center text-xs py-4">No staff assigned.</TableCell></TableRow>
                   ) : (
                     taWorkload.map((ta) => (
                       <TableRow key={ta.id} className="border-border">
@@ -204,47 +201,6 @@ export function SuperAdminShell({ data }: Props) {
             </CardContent>
           </Card>
         </div>
-
-        {/* Stuck courses */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="size-4 text-destructive" />
-              Stuck Courses
-              <span className="text-xs font-normal text-muted-foreground">(no status change in &gt;5 days)</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {stuckCourses.length === 0 ? (
-              <p className="px-6 pb-4 text-xs text-muted-foreground">No stuck courses.</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent border-border">
-                    <TableHead className="text-xs pl-6">Course</TableHead>
-                    <TableHead className="text-xs">Status</TableHead>
-                    <TableHead className="text-xs">Last Updated</TableHead>
-                    <TableHead className="text-xs text-right pr-6">Days Stuck</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stuckCourses.map((c) => (
-                    <TableRow key={c.id} className="border-border">
-                      <TableCell className="pl-6 text-sm font-medium">{c.title}</TableCell>
-                      <TableCell><StatusBadge status={c.status} /></TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{fmt(c.updated_at)}</TableCell>
-                      <TableCell className="text-right pr-6">
-                        <span className={`text-sm font-semibold ${c.days_stuck >= 10 ? "text-destructive" : "text-orange-400"}`}>
-                          {c.days_stuck}d
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
       </TabsContent>
 
       {/* ─── All Courses ──────────────────────────────────────────────────── */}
@@ -266,7 +222,6 @@ export function SuperAdminShell({ data }: Props) {
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
                 <TableHead className="text-xs pl-4">Title</TableHead>
-                <TableHead className="text-xs w-[100px]">Term</TableHead>
                 <TableHead className="text-xs w-[200px]">Status</TableHead>
                 <TableHead className="text-xs">Staff</TableHead>
                 <TableHead className="text-xs">Instructor</TableHead>
@@ -274,24 +229,15 @@ export function SuperAdminShell({ data }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCourses.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
-                    No courses match your search.
-                  </TableCell>
+              {filteredCourses.map((c) => (
+                <TableRow key={c.id} className="border-border">
+                  <TableCell className="pl-4 text-sm font-medium truncate max-w-[300px]">{c.title}</TableCell>
+                  <TableCell><StatusBadge status={c.status} /></TableCell>
+                  <TableCell className="text-xs">{c.ta?.name ?? c.ta?.email ?? "—"}</TableCell>
+                  <TableCell className="text-xs">{c.instructor?.name ?? c.instructor?.email ?? "—"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{fmt(c.updated_at)}</TableCell>
                 </TableRow>
-              ) : (
-                filteredCourses.map((c) => (
-                  <TableRow key={c.id} className="border-border">
-                    <TableCell className="pl-4 text-sm font-medium max-w-[220px] truncate">{c.title}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{c.term ?? "—"}</TableCell>
-                    <TableCell><StatusBadge status={c.status} /></TableCell>
-                    <TableCell className="text-xs">{c.ta?.name ?? c.ta?.email ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>
-                    <TableCell className="text-xs">{c.instructor?.name ?? c.instructor?.email ?? <span className="text-muted-foreground">Unassigned</span>}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{fmt(c.updated_at)}</TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
         </div>
@@ -300,111 +246,194 @@ export function SuperAdminShell({ data }: Props) {
       {/* ─── All Users ────────────────────────────────────────────────────── */}
       <TabsContent value="users" className="flex-1 overflow-y-auto p-6 space-y-4 mt-0">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <ShieldPlus className="size-4" />
-              Create User
-            </CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="text-sm font-medium flex items-center gap-2"><ShieldPlus className="size-4" /> Create User</CardTitle></CardHeader>
           <CardContent>
             <form action={createFormAction} className="grid gap-4 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto]">
-              <label className="grid gap-1.5 text-sm font-medium">
-                Full name
-                <Input name="fullName" placeholder="Jane Doe" required />
-              </label>
-              <label className="grid gap-1.5 text-sm font-medium">
-                Email
-                <Input name="email" placeholder="jane@institution.edu" required type="email" />
-              </label>
-              <label className="grid gap-1.5 text-sm font-medium">
-                Password
-                <Input name="password" required type="password" />
-              </label>
-              <label className="grid gap-1.5 text-sm font-medium">
-                Role
-                <input name="role" type="hidden" value={newUserRole} />
-                <Select onValueChange={(value) => setNewUserRole(value as Role)} value={newUserRole}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROLES.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {ROLE_LABELS[role] ?? role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </label>
-              <div className="flex items-end">
-                <Button disabled={createPending} type="submit">
-                  {createPending ? "Creating..." : "Create User"}
-                </Button>
-              </div>
+              <Input name="fullName" placeholder="Full name" required />
+              <Input name="email" placeholder="Email" required type="email" />
+              <Input name="password" placeholder="Password" required type="password" />
+              <Select onValueChange={(v) => setNewUserRole(v as Role)} value={newUserRole}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>)}</SelectContent>
+              </Select>
+              <input type="hidden" name="role" value={newUserRole} />
+              <Button disabled={createPending}>{createPending ? "Creating..." : "Create User"}</Button>
             </form>
-            {createState.message ? (
-              <p className={createState.kind === "error" ? "mt-3 text-sm text-destructive" : "mt-3 text-sm text-green-600"}>
-                {createState.message}
-              </p>
-            ) : null}
+            {createState.message && <p className={`mt-2 text-sm ${createState.kind === "error" ? "text-destructive" : "text-green-600"}`}>{createState.message}</p>}
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">{filteredUsers.length} users</p>
-          <div className="relative w-64">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Search by name, email, role…"
-              className="pl-8 h-8 text-sm"
-              value={userSearch}
-              onChange={(e) => setUserSearch(e.target.value)}
-            />
-          </div>
-        </div>
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-border">
                 <TableHead className="text-xs pl-4">Name</TableHead>
                 <TableHead className="text-xs">Email</TableHead>
-                <TableHead className="text-xs w-[140px]">Role</TableHead>
-                <TableHead className="text-xs w-[180px]">Manage</TableHead>
-                <TableHead className="text-xs w-[120px]">Joined</TableHead>
+                <TableHead className="text-xs">Role</TableHead>
+                <TableHead className="text-xs">Joined</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">
-                    No users found.
-                  </TableCell>
+              {filteredUsers.map((u) => (
+                <TableRow key={u.id} className="border-border">
+                  <TableCell className="pl-4 text-sm font-medium">{u.full_name ?? "No name"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{u.email}</TableCell>
+                  <TableCell><Badge variant="outline" className={`text-xs ${ROLE_BADGE_CLASS[u.role]}`}>{ROLE_LABELS[u.role]}</Badge></TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{fmt(u.created_at)}</TableCell>
                 </TableRow>
-              ) : (
-                filteredUsers.map((u) => (
-                  <TableRow key={u.id} className="border-border">
-                    <TableCell className="pl-4 text-sm font-medium">{u.full_name ?? <span className="text-muted-foreground italic">No name</span>}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{u.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={`text-xs font-medium ${ROLE_BADGE_CLASS[u.role]}`}>
-                        {ROLE_LABELS[u.role] ?? u.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <RoleUpdateForm userId={u.id} currentRole={u.role} />
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{fmt(u.created_at)}</TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
         </div>
       </TabsContent>
 
+      {/* ─── Organization ─────────────────────────────────────────────────── */}
+      <TabsContent value="organization" className="flex-1 overflow-hidden flex flex-col p-6 space-y-6 mt-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0 overflow-hidden">
+          {/* Units Tree List */}
+          <div className="lg:col-span-4 flex flex-col space-y-4 h-full min-h-0">
+            <Card className="flex flex-col flex-1 min-h-0 overflow-hidden shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Building2 className="size-4 text-primary" />
+                  Organizational Units
+                </CardTitle>
+                <UnitCreateModal units={units} unitFormAction={unitFormAction} pending={unitPending} />
+              </CardHeader>
+              <CardContent className="p-0 overflow-y-auto flex-1 border-t border-border">
+                <div className="divide-y divide-border">
+                  {units.length === 0 ? (
+                    <p className="p-6 text-center text-sm text-muted-foreground">No units defined.</p>
+                  ) : (
+                    units.map((unit) => (
+                      <button
+                        key={unit.id}
+                        onClick={() => setSelectedUnitId(unit.id)}
+                        className={`w-full text-left p-4 hover:bg-muted/50 transition-colors flex flex-col gap-1 ${
+                          selectedUnitId === unit.id ? "bg-muted border-l-2 border-primary" : ""
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm">{unit.name}</span>
+                          <Badge variant="secondary" className="text-[10px] uppercase h-4 px-1">{unit.type}</Badge>
+                        </div>
+                        {unit.parentId && (
+                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            Under: {units.find(u => u.id === unit.parentId)?.name ?? "Unknown"}
+                          </span>
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Unit Details & Members */}
+          <div className="lg:col-span-8 flex flex-col space-y-4 h-full min-h-0">
+            {selectedUnit ? (
+              <>
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-3 border-b border-border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {selectedUnit.name}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1">Type: {selectedUnit.type.charAt(0).toUpperCase() + selectedUnit.type.slice(1)}</p>
+                      </div>
+                      <MemberAddModal 
+                        unit={selectedUnit} 
+                        users={users} 
+                        memberFormAction={memberFormAction} 
+                        pending={memberPending} 
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-muted/30">
+                            <TableHead className="pl-6 text-xs uppercase font-semibold">User</TableHead>
+                            <TableHead className="text-xs uppercase font-semibold">Title</TableHead>
+                            <TableHead className="w-[100px] text-right pr-6">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {selectedUnitMembers.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={3} className="text-center py-8 text-sm text-muted-foreground">
+                                No members assigned to this unit.
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            selectedUnitMembers.map((member) => {
+                              const user = users.find(u => u.id === member.profileId)
+                              return (
+                                <TableRow key={member.id} className="group border-border">
+                                  <TableCell className="pl-6">
+                                    <div className="flex flex-col">
+                                      <span className="text-sm font-medium">{user?.full_name ?? user?.email ?? "Unknown"}</span>
+                                      <span className="text-xs text-muted-foreground">{user?.email}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="outline" className="text-[10px] capitalize font-semibold bg-primary/5 text-primary border-primary/10">
+                                      {member.title.replace("_", " ")}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-right pr-6">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                      onClick={() => removeUnitMemberAction(member.id)}
+                                    >
+                                      <Trash2 className="size-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            })
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Implicit Hierarchy Insight */}
+                <Card className="bg-muted/20 border-dashed shadow-none">
+                  <CardContent className="p-4 flex items-start gap-3">
+                    <Users className="size-4 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Access Insight</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Members with titles like <strong>Dean</strong> or <strong>Dept Head</strong> in this unit automatically inherit view-only access to all courses tagged with this unit or its sub-departments.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <div className="flex-1 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-center p-12 space-y-3">
+                <div className="bg-muted p-4 rounded-full">
+                  <Building2 className="size-8 text-muted-foreground" />
+                </div>
+                <div className="max-w-xs">
+                  <h3 className="text-sm font-semibold">No Unit Selected</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Select an organizational unit from the list to manage its members and access hierarchy.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </TabsContent>
+
       {/* ─── Audit Trail ──────────────────────────────────────────────────── */}
       <TabsContent value="audit" className="flex-1 overflow-y-auto p-6 space-y-4 mt-0">
-        <p className="text-sm text-muted-foreground">Last 100 status transitions across all courses.</p>
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           <Table>
             <TableHeader>
@@ -412,42 +441,18 @@ export function SuperAdminShell({ data }: Props) {
                 <TableHead className="text-xs pl-4">Course</TableHead>
                 <TableHead className="text-xs">Transition</TableHead>
                 <TableHead className="text-xs">Actor</TableHead>
-                <TableHead className="text-xs w-[100px]">Role</TableHead>
-                <TableHead className="text-xs w-[130px]">Note</TableHead>
-                <TableHead className="text-xs w-[130px]">When</TableHead>
+                <TableHead className="text-xs">When</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {auditEvents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
-                    No transitions recorded yet.
-                  </TableCell>
+              {auditEvents.map((e) => (
+                <TableRow key={e.id} className="border-border">
+                  <TableCell className="pl-4 text-sm font-medium">{e.course_title}</TableCell>
+                  <TableCell className="text-xs">{e.from_status ?? "Initial"} → {e.to_status}</TableCell>
+                  <TableCell className="text-xs">{e.actor_name ?? e.actor_email}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{fmt(e.created_at)}</TableCell>
                 </TableRow>
-              ) : (
-                auditEvents.map((e) => (
-                  <TableRow key={e.id} className="border-border">
-                    <TableCell className="pl-4 text-sm font-medium max-w-[180px] truncate">{e.course_title}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <span className="text-muted-foreground">{e.from_status ? COURSE_STATUS_LABELS[e.from_status as CourseStatus] : "Created"}</span>
-                        <span className="text-muted-foreground">→</span>
-                        <StatusBadge status={e.to_status as CourseStatus} />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs">{e.actor_name ?? e.actor_email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={`text-xs font-medium ${ROLE_BADGE_CLASS[e.actor_role]}`}>
-                        {ROLE_LABELS[e.actor_role] ?? e.actor_role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground max-w-[130px] truncate">
-                      {e.note ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{fmt(e.created_at)}</TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
         </div>
@@ -456,35 +461,88 @@ export function SuperAdminShell({ data }: Props) {
   )
 }
 
-function RoleUpdateForm({ userId, currentRole }: { userId: string; currentRole: Role }) {
-  const [selectedRole, setSelectedRole] = useState<Role>(currentRole)
-  const [state, formAction, pending] = useActionState(
-    updateUserRoleAction,
-    initialManageUserState,
+function UnitCreateModal({ units, unitFormAction, pending }: { units: any[], unitFormAction: any, pending: boolean }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="flex items-center gap-2">
+      <Button size="icon" variant="outline" className="size-7" onClick={() => setOpen(!open)}>
+        <Plus className="size-4" />
+      </Button>
+      {open && (
+        <div className="absolute top-20 left-10 z-50 bg-card border border-border rounded-lg shadow-xl p-4 w-72 space-y-4">
+          <h4 className="text-xs font-bold uppercase">New Unit</h4>
+          <form action={unitFormAction} onSubmit={() => setOpen(false)} className="space-y-3">
+            <Input name="name" placeholder="Name (e.g. Math Dept)" required className="h-8 text-sm" />
+            <Select name="type" defaultValue="department">
+              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="college">College</SelectItem>
+                <SelectItem value="faculty">Faculty</SelectItem>
+                <SelectItem value="department">Department</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select name="parentId">
+              <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Parent Unit (Optional)" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">None (Top Level)</SelectItem>
+                {units.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button disabled={pending} className="w-full h-8 text-xs">{pending ? "Creating..." : "Create Unit"}</Button>
+          </form>
+          <Button variant="ghost" className="w-full h-8 text-xs" onClick={() => setOpen(false)}>Cancel</Button>
+        </div>
+      )}
+    </div>
   )
+}
+
+function MemberAddModal({ unit, users, memberFormAction, pending }: { unit: any, users: any[], memberFormAction: any, pending: boolean }) {
+  const [open, setOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState("")
+  const [title, setTitle] = useState("dept_head")
 
   return (
-    <form action={formAction} className="flex items-center gap-2">
-      <input name="userId" type="hidden" value={userId} />
-      <input name="role" type="hidden" value={selectedRole} />
-      <Select onValueChange={(value) => setSelectedRole(value as Role)} value={selectedRole}>
-        <SelectTrigger className="h-8 w-[130px] text-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {ROLES.map((role) => (
-            <SelectItem key={role} value={role}>
-              {ROLE_LABELS[role] ?? role}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button size="sm" type="submit" variant="outline">
-        <UserCog className="size-3.5" />
-        {pending ? "Saving..." : "Save"}
+    <div className="relative">
+      <Button size="sm" variant="outline" className="h-8 gap-2" onClick={() => setOpen(!open)}>
+        <Plus className="size-3.5" /> Add Member
       </Button>
-      {state.kind === "error" ? <span className="text-[11px] text-destructive">{state.message}</span> : null}
-      {state.kind === "success" ? <span className="text-[11px] text-green-600">Updated</span> : null}
-    </form>
+      {open && (
+        <div className="absolute top-10 right-0 z-50 bg-card border border-border rounded-lg shadow-xl p-4 w-80 space-y-4">
+          <h4 className="text-xs font-bold uppercase">Assign Member to {unit.name}</h4>
+          <form action={memberFormAction} onSubmit={() => setOpen(false)} className="space-y-3">
+            <input type="hidden" name="orgUnitId" value={unit.id} />
+            <Select onValueChange={setSelectedUser} value={selectedUser}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select User" /></SelectTrigger>
+              <SelectContent className="max-h-60">
+                {users.map(u => (
+                  <SelectItem key={u.id} value={u.id}>
+                    <div className="flex flex-col text-left">
+                      <span className="text-xs font-medium">{u.full_name ?? u.email}</span>
+                      <span className="text-[10px] text-muted-foreground">{u.email}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="profileId" value={selectedUser} />
+            
+            <Select onValueChange={setTitle} value={title}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dean">Dean</SelectItem>
+                <SelectItem value="assistant_dean">Assistant Dean</SelectItem>
+                <SelectItem value="dept_head">Dept Head</SelectItem>
+                <SelectItem value="educator">Educator</SelectItem>
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="title" value={title} />
+
+            <Button disabled={pending || !selectedUser} className="w-full h-9 text-xs">{pending ? "Adding..." : "Assign Member"}</Button>
+          </form>
+          <Button variant="ghost" className="w-full h-9 text-xs" onClick={() => setOpen(false)}>Cancel</Button>
+        </div>
+      )}
+    </div>
   )
 }

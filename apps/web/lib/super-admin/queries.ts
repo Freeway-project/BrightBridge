@@ -1,12 +1,14 @@
 import "server-only"
 
-import { getCourseRepository, getProfileRepository } from "@/lib/repositories"
+import { getCourseRepository, getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
 import type {
   AuditEvent,
   StatusCount,
   StuckCourse,
   SuperAdminCourseRow as CourseRow,
   TAWorkload,
+  OrgUnit,
+  OrgUnitMember,
 } from "@/lib/repositories/contracts"
 export type {
   AuditEvent,
@@ -32,20 +34,34 @@ export type SuperAdminData = {
   stuckCourses: StuckCourse[]
   taWorkload: TAWorkload[]
   auditEvents: AuditEvent[]
+  units: OrgUnit[]
+  members: OrgUnitMember[]
 }
 
 export async function getSuperAdminData(): Promise<SuperAdminData> {
   const courseRepository = getCourseRepository()
   const profileRepository = getProfileRepository()
+  const hierarchyRepository = getHierarchyRepository()
   const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [courseRows, users, statusCounts, stuckCourses, taWorkload, auditEvents] = await Promise.all([
+  const [
+    courseRows, 
+    users, 
+    statusCounts, 
+    stuckCourses, 
+    taWorkload, 
+    auditEvents,
+    units,
+    members
+  ] = await Promise.all([
     courseRepository.listSuperAdminCourses(),
     profileRepository.listUsers(),
     courseRepository.listStatusCounts(),
     courseRepository.listStuckCourses(cutoff),
     courseRepository.listTAWorkload(),
     courseRepository.listAuditEvents(100),
+    hierarchyRepository.listUnits(),
+    hierarchyRepository.listAllMembers(),
   ])
 
   return {
@@ -61,5 +77,7 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
     stuckCourses,
     taWorkload,
     auditEvents,
+    units,
+    members,
   }
 }

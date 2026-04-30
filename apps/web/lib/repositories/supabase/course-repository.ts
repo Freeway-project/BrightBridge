@@ -24,6 +24,7 @@ type CourseRow = {
   title: string;
   term: string | null;
   department: string | null;
+  org_unit_id: string | null;
   status: string;
   created_by: string;
   created_at: string;
@@ -48,7 +49,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .order("updated_at", { ascending: false });
 
@@ -100,11 +101,12 @@ export function createSupabaseCourseRepository(): CourseRepository {
           title: input.title,
           term: cleanOptionalText(input.term),
           department: cleanOptionalText(input.department),
+          org_unit_id: input.orgUnitId ?? null,
           status: input.status,
           created_by: input.createdBy,
         })
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .single();
 
@@ -120,7 +122,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .eq("id", courseId)
         .single();
@@ -139,7 +141,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         .update({ status })
         .eq("id", courseId)
         .select(
-          "id,source_course_id,target_course_id,title,term,department,status,created_by,created_at,updated_at",
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
         )
         .single();
 
@@ -229,7 +231,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(`
-          id, source_course_id, target_course_id, title, term, department, status, updated_at,
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -249,6 +251,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
           title: string;
           term: string | null;
           department: string | null;
+          org_unit_id: string | null;
           status: string;
           updated_at: string;
           course_assignments?: Array<{
@@ -284,7 +287,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(`
-          id, source_course_id, target_course_id, title, term, department, status, updated_at,
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -304,6 +307,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         title: string;
         term: string | null;
         department: string | null;
+        org_unit_id: string | null;
         status: string;
         updated_at: string;
         course_assignments?: Array<{
@@ -338,7 +342,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(`
-          id, title, status, term, department, created_at, updated_at,
+          id, title, status, term, department, org_unit_id, created_at, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( full_name, email )
@@ -357,6 +361,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
           status: string;
           term: string | null;
           department: string | null;
+          org_unit_id: string | null;
           created_at: string;
           updated_at: string;
           course_assignments?: Array<{
@@ -516,6 +521,30 @@ export function createSupabaseCourseRepository(): CourseRepository {
         } satisfies AuditEvent;
       });
     },
+
+    async listCoursesByUnitAncestry(unitIds) {
+      const admin = getSupabaseAdminClientOrThrow();
+      
+      // We join through the org_unit_hierarchy_paths view
+      const { data, error } = await admin
+        .from("courses")
+        .select(`
+          id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,
+          organizational_units!courses_org_unit_id_fkey!inner (
+            org_unit_hierarchy_paths!org_unit_hierarchy_paths_descendant_id_fkey!inner (
+              ancestor_id
+            )
+          )
+        `)
+        .in("organizational_units.org_unit_hierarchy_paths.ancestor_id", unitIds)
+        .order("updated_at", { ascending: false });
+
+      if (error) {
+        throw new Error(`listCoursesByUnitAncestry: ${error.message}`);
+      }
+
+      return (data ?? []).map((row) => toCourseSummary(row as unknown as CourseRow));
+    },
   };
 }
 
@@ -527,6 +556,7 @@ function toCourseSummary(row: CourseRow): CourseSummary {
     title: row.title,
     term: row.term,
     department: row.department,
+    orgUnitId: row.org_unit_id,
     status: toCourseStatus(row.status),
     createdBy: row.created_by,
     createdAt: row.created_at,
