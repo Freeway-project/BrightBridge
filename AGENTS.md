@@ -30,6 +30,7 @@ Do not build large features without explicit instruction. Work in small, focused
 - Do not store files or base64 data in Postgres.
 - Do not introduce new dependencies without reason.
 - Do not change unrelated files.
+- **SECURITY & ROLES:** When dealing with access control, roles, or database queries, you MUST consult `docs/rbac-architecture.md`. Enforce access at the application layer (PBAC) instead of relying solely on Supabase RLS.
 
 ## Initial Monorepo Direction
 
