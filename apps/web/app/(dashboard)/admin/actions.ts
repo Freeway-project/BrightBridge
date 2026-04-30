@@ -23,7 +23,7 @@ export async function assignTaToCourseAction(
   if (!courseId || !profileId) {
     return {
       kind: "error",
-      message: "Select both a course and a TA.",
+      message: "Select both a course and a staff member.",
     };
   }
 
@@ -41,14 +41,14 @@ export async function assignTaToCourseAction(
     await assignUserToCourse({
       courseId,
       profileId,
-      role: "ta",
+      role: "staff",
     });
 
     if (course.status === "course_created") {
       await transitionCourseStatus({
         courseId,
         toStatus: "assigned_to_ta",
-        note: "TA assigned by admin.",
+        note: "Staff assigned by admin.",
       });
     }
 
@@ -58,12 +58,12 @@ export async function assignTaToCourseAction(
 
     return {
       kind: "success",
-      message: "TA assigned to course.",
+      message: "Staff member assigned to course.",
     };
   } catch (error) {
     return {
       kind: "error",
-      message: error instanceof Error ? error.message : "Could not assign TA.",
+      message: error instanceof Error ? error.message : "Could not assign staff member.",
     };
   }
 }

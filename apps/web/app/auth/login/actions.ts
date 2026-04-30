@@ -5,9 +5,9 @@ import type { Role } from "@coursebridge/workflow"
 import { getAuthService } from "@/lib/auth/service"
 
 const devUsers: Record<Role, string> = {
-  ta: "ta@coursebridge.dev",
-  admin: "admin@coursebridge.dev",
-  communications: "communications@coursebridge.dev",
+  standard_user: "ta@coursebridge.dev",
+  admin_full: "admin@coursebridge.dev",
+  admin_viewer: "communications@coursebridge.dev",
   instructor: "instructor@coursebridge.dev",
   super_admin: "superadmin@coursebridge.dev",
 }

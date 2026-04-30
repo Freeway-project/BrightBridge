@@ -15,7 +15,7 @@ interface Props {
 export default async function AdminCourseDetailPage({ params }: Props) {
   const { id } = await params
   const context = await requireProfile()
-  requireAnyRole(context, ["admin", "super_admin"])
+  requireAnyRole(context, ["admin_full", "super_admin"])
 
   const [detail, comments] = await Promise.all([
     getAdminCourseDetail(id),
