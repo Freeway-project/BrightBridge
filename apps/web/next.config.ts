@@ -15,6 +15,10 @@ export default withSentryConfig(nextConfig, {
     disable: !process.env.CI,
   },
 
-  // Tree-shake Sentry debug code from the client bundle
-  disableLogger: true,
+  // Tree-shake Sentry debug code from the client bundle (webpack builds; Turbopack dev ignores this)
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 });

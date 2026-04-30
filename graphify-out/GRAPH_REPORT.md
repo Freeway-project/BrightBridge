@@ -1,11 +1,11 @@
 # Graph Report - BrightBridge  (2026-04-29)
 
 ## Corpus Check
-- 112 files · ~53,422 words
+- 113 files · ~53,753 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 374 nodes · 491 edges · 23 communities detected
+- 376 nodes · 492 edges · 23 communities detected
 - Extraction: 72% EXTRACTED · 28% INFERRED · 0% AMBIGUOUS · INFERRED: 139 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -23,8 +23,7 @@
 - [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 19|Community 19]]
-- [[_COMMUNITY_Community 54|Community 54]]
-- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 55|Community 55]]
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
 - [[_COMMUNITY_Community 85|Community 85]]
@@ -33,6 +32,7 @@
 - [[_COMMUNITY_Community 88|Community 88]]
 - [[_COMMUNITY_Community 89|Community 89]]
 - [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Select()` - 35 edges
@@ -112,43 +112,43 @@ Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 Cohesion: 0.5
 Nodes (2): updateSession(), proxy()
 
-### Community 54 - "Community 54"
+### Community 55 - "Community 55"
 Cohesion: 1.0
 Nodes (2): @coursebridge/ui README, shadcn/ui
 
-### Community 82 - "Community 82"
+### Community 83 - "Community 83"
 Cohesion: 1.0
 Nodes (1): CourseBridge README
 
-### Community 83 - "Community 83"
+### Community 84 - "Community 84"
 Cohesion: 1.0
 Nodes (1): Tech Stack Doc
 
-### Community 84 - "Community 84"
+### Community 85 - "Community 85"
 Cohesion: 1.0
 Nodes (1): CourseBridge Project Brief
 
-### Community 85 - "Community 85"
+### Community 86 - "Community 86"
 Cohesion: 1.0
 Nodes (1): @coursebridge/config README
 
-### Community 86 - "Community 86"
+### Community 87 - "Community 87"
 Cohesion: 1.0
 Nodes (1): Role: Super Admin
 
-### Community 87 - "Community 87"
+### Community 88 - "Community 88"
 Cohesion: 1.0
 Nodes (1): Supabase Realtime
 
-### Community 88 - "Community 88"
+### Community 89 - "Community 89"
 Cohesion: 1.0
 Nodes (1): Tailwind CSS
 
-### Community 89 - "Community 89"
+### Community 90 - "Community 90"
 Cohesion: 1.0
 Nodes (1): TanStack Table
 
-### Community 90 - "Community 90"
+### Community 91 - "Community 91"
 Cohesion: 1.0
 Nodes (1): Vercel Hosting
 
@@ -159,32 +159,32 @@ Nodes (1): Vercel Hosting
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 19`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 54`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
+- **Thin community `Community 55`** (2 nodes): `@coursebridge/ui README`, `shadcn/ui`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 82`** (1 nodes): `CourseBridge README`
+- **Thin community `Community 83`** (1 nodes): `CourseBridge README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 83`** (1 nodes): `Tech Stack Doc`
+- **Thin community `Community 84`** (1 nodes): `Tech Stack Doc`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 84`** (1 nodes): `CourseBridge Project Brief`
+- **Thin community `Community 85`** (1 nodes): `CourseBridge Project Brief`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 85`** (1 nodes): `@coursebridge/config README`
+- **Thin community `Community 86`** (1 nodes): `@coursebridge/config README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 86`** (1 nodes): `Role: Super Admin`
+- **Thin community `Community 87`** (1 nodes): `Role: Super Admin`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 87`** (1 nodes): `Supabase Realtime`
+- **Thin community `Community 88`** (1 nodes): `Supabase Realtime`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 88`** (1 nodes): `Tailwind CSS`
+- **Thin community `Community 89`** (1 nodes): `Tailwind CSS`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 89`** (1 nodes): `TanStack Table`
+- **Thin community `Community 90`** (1 nodes): `TanStack Table`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 90`** (1 nodes): `Vercel Hosting`
+- **Thin community `Community 91`** (1 nodes): `Vercel Hosting`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Select()` connect `Community 3` to `Community 1`, `Community 2`, `Community 4`, `Community 7`, `Community 9`, `Community 10`, `Community 12`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
 - **Why does `getAuthContext()` connect `Community 12` to `Community 1`, `Community 2`, `Community 3`, `Community 4`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **Why does `requireProfile()` connect `Community 2` to `Community 1`, `Community 12`, `Community 4`, `Community 9`?**
