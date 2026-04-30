@@ -51,6 +51,6 @@ select * from unit_path;
 create trigger set_organizational_units_updated_at
     before update on public.organizational_units
     for each row
-    execute function public.handle_updated_at();
+    execute function public.set_updated_at();
 
 commit;
