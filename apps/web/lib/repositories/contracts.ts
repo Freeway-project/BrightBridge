@@ -71,6 +71,12 @@ export type AdminCourseRow = {
   reviewProgress?: ReviewProgress;
 };
 
+export type AdminCourseListFilters = {
+  search?: string;
+  status?: CourseStatus;
+  taProfileId?: string;
+};
+
 export type SuperAdminCourseRow = {
   id: string;
   title: string;
@@ -241,6 +247,11 @@ export interface CourseRepository {
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;
   insertStatusEvent(input: InsertStatusEventInput): Promise<void>;
   listAdminCourses(): Promise<AdminCourseRow[]>;
+  listAdminCoursesPage(
+    page?: number,
+    pageSize?: number,
+    filters?: AdminCourseListFilters,
+  ): Promise<PaginatedResult<AdminCourseRow>>;
   getAdminCourse(courseId: string): Promise<AdminCourseRow | null>;
   listSuperAdminCourses(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<SuperAdminCourseRow>>;
   listStatusCounts(): Promise<StatusCount[]>;
