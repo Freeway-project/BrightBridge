@@ -3,11 +3,11 @@ import type { Role } from "@coursebridge/workflow";
 import { getAuthContext } from "@/lib/auth/context";
 
 const ROLE_ROUTES: Record<Role, string> = {
-  ta: "/ta",
-  admin: "/admin",
-  communications: "/communications",
+  standard_user: "/ta",
+  admin_full: "/admin",
+  admin_viewer: "/communications",
   instructor: "/instructor",
-  super_admin: "/super-admin"
+  super_admin: "/super-admin",
 };
 
 export default async function DashboardPage() {

@@ -389,9 +389,9 @@ function AddMemberSheet({
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="dean">Dean</SelectItem>
-                  <SelectItem value="assistant_dean">Assistant Dean</SelectItem>
+                  <SelectItem value="assistant_dean">Asst. Dean</SelectItem>
                   <SelectItem value="dept_head">Dept Head</SelectItem>
-                  <SelectItem value="educator">Educator</SelectItem>
+                  <SelectItem value="educator">Educator / Instructor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
