@@ -216,6 +216,17 @@ npx shadcn@latest add textarea
 
 ---
 
+## Architectural Decisions
+
+**RBAC & Organizational Hierarchy (New)**
+We are moving away from Supabase RLS towards Application-Layer Security (PBAC).
+See `docs/rbac-architecture.md` for the full 3-Layer Access Control Model:
+1. **Global Roles:** `super_admin`, `admin_full`, `admin_viewer`, `standard_user`
+2. **Hierarchy:** `organizational_units` (Implicit Read Access)
+3. **Case Team:** `course_assignments` (Explicit Write Access for `staff` and `instructor`)
+
+---
+
 ## Next Steps (in order)
 
 1. `git checkout ft-ta-review-capture`
