@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation"
 import type { Role } from "@coursebridge/workflow"
-import { createClient } from "@/lib/supabase/server"
+import { getAuthService } from "@/lib/auth/service"
 
 const devUsers: Record<Role, string> = {
   ta: "ta@coursebridge.dev",
@@ -29,14 +29,10 @@ export async function signInWithPasswordAction(
     return { error: "Email and password are required." }
   }
 
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  const { error } = await getAuthService().signInWithPassword(email, password)
 
   if (error) {
-    return { error: error.message }
+    return { error }
   }
 
   redirect("/dashboard")
@@ -54,11 +50,7 @@ export async function signInAsDevRole(formData: FormData) {
     redirect("/auth/login")
   }
 
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password: devPassword,
-  })
+  const { error } = await getAuthService().signInWithPassword(email, devPassword)
 
   if (error) {
     redirect("/auth/login")

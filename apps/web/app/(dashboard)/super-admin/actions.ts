@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { ROLES, type Role } from "@coursebridge/workflow"
+import { getAuthService } from "@/lib/auth/service"
 import { requireProfile } from "@/lib/auth/context"
-import { createAdminClient } from "@/lib/supabase/admin"
+import { getProfileRepository } from "@/lib/repositories"
 
 export type ManageUserState = {
   kind: "idle" | "success" | "error"
@@ -16,7 +17,6 @@ export async function createUserAction(
   formData: FormData,
 ): Promise<ManageUserState> {
   await requireSuperAdmin()
-  const admin = getAdminClientOrThrow()
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase()
   const fullName = String(formData.get("fullName") ?? "").trim()
@@ -31,38 +31,28 @@ export async function createUserAction(
     return { kind: "error", message: "Select a valid role." }
   }
 
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: {
-      full_name: fullName,
-      role,
-    },
-  })
+  try {
+    const user = await getAuthService().createUserWithPassword({
+      email,
+      password,
+      emailConfirm: true,
+      userMetadata: {
+        full_name: fullName,
+        role,
+      },
+    })
 
-  if (error) {
-    return { kind: "error", message: error.message }
-  }
-
-  const user = data.user
-
-  if (!user) {
-    return { kind: "error", message: "Supabase did not return the created user." }
-  }
-
-  const { error: profileError } = await admin.from("profiles").upsert(
-    {
+    await getProfileRepository().upsertProfile({
       id: user.id,
       email,
-      full_name: fullName,
+      fullName,
       role,
-    },
-    { onConflict: "id" },
-  )
-
-  if (profileError) {
-    return { kind: "error", message: profileError.message }
+    })
+  } catch (error) {
+    return {
+      kind: "error",
+      message: error instanceof Error ? error.message : "Could not create user.",
+    }
   }
 
   revalidatePath("/super-admin")
@@ -75,7 +65,6 @@ export async function updateUserRoleAction(
   formData: FormData,
 ): Promise<ManageUserState> {
   const context = await requireSuperAdmin()
-  const admin = getAdminClientOrThrow()
 
   const userId = String(formData.get("userId") ?? "")
   const role = String(formData.get("role") ?? "") as Role
@@ -92,31 +81,24 @@ export async function updateUserRoleAction(
     return { kind: "error", message: "You cannot remove your own super admin role." }
   }
 
-  const { data: profile, error: profileError } = await admin
-    .from("profiles")
-    .select("id, email, full_name")
-    .eq("id", userId)
-    .single()
+  const profile = await getProfileRepository().getProfileById(userId)
 
-  if (profileError) {
-    return { kind: "error", message: profileError.message }
+  if (!profile) {
+    return { kind: "error", message: "User profile not found." }
   }
 
-  const { error: updateError } = await admin
-    .from("profiles")
-    .update({ role })
-    .eq("id", userId)
-
-  if (updateError) {
-    return { kind: "error", message: updateError.message }
-  }
-
-  await admin.auth.admin.updateUserById(userId, {
-    user_metadata: {
-      full_name: profile.full_name,
+  try {
+    await getProfileRepository().updateProfileRole(userId, role)
+    await getAuthService().updateUserMetadata(userId, {
+      full_name: profile.fullName,
       role,
-    },
-  })
+    })
+  } catch (error) {
+    return {
+      kind: "error",
+      message: error instanceof Error ? error.message : "Could not update user role.",
+    }
+  }
 
   revalidatePath("/super-admin")
 
@@ -131,14 +113,4 @@ async function requireSuperAdmin() {
   }
 
   return context
-}
-
-function getAdminClientOrThrow() {
-  const admin = createAdminClient()
-
-  if (!admin) {
-    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY.")
-  }
-
-  return admin
 }
