@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
@@ -21,33 +22,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { ProfileOption } from "@/lib/services/profiles"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ReviewTimer, useStoredTimerValue } from "./review-timer"
+import { SYLLABUS_ITEMS_LIST as SYLLABUS_ITEMS, GRADEBOOK_ITEMS_LIST as GRADEBOOK_ITEMS } from "@/lib/workspace/constants"
+
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
   instructors: ProfileOption[]
 }
-
-const SYLLABUS_ITEMS = [
-  { id: "S1", label: "Instructor contact and office hours are current" },
-  { id: "S2", label: "Course schedule matches Brightspace modules" },
-  { id: "S3", label: "Assessment weights match gradebook categories" },
-  { id: "S4", label: "Academic integrity and accessibility statements are present" },
-]
-
-const GRADEBOOK_ITEMS = [
-  { id: "G1", label: "Grade categories match syllabus weighting" },
-  { id: "G2", label: "Calculated final grade is configured" },
-  { id: "G3", label: "Hidden columns are intentional" },
-  { id: "G4", label: "Release conditions and due dates are correct" },
-]
 
 const SYLLABUS_STATUS_OPTIONS: { value: SyllabusRowStatus; label: string }[] = [
   { value: "pending", label: "Pending" },
@@ -70,8 +53,13 @@ export function SyllabusGradebookForm({
 }: SyllabusGradebookFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
   const timerStorageKey = `coursebridge:${courseId}:timer:syllabus-gradebook`
   const elapsedRef = useRef(defaultValues.time_spent_seconds ?? 0)
+  const overallElapsed = useStoredTimerValue(
+    `coursebridge:${courseId}:timer:overall`,
+    defaultValues.overall_time_spent_seconds ?? 0,
+  )
   const form = useForm<SyllabusGradebookFormValues>({
     resolver: zodResolver(syllabusGradebookSchema),
     defaultValues,
@@ -91,7 +79,7 @@ export function SyllabusGradebookForm({
     return () => window.removeEventListener("coursebridge:review-timer", onTick)
   }, [timerStorageKey])
 
-  async function handleSave() {
+  async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
 
@@ -101,8 +89,12 @@ export function SyllabusGradebookForm({
         await saveDraft(courseId, "syllabus_review", {
           ...form.getValues(),
           time_spent_seconds: elapsedRef.current,
+          overall_time_spent_seconds: overallElapsed,
         })
         setStatus("saved")
+        if (advance) {
+          router.push(`/courses/${courseId}/issue-log`)
+        }
       } catch {
         setStatus("error")
       }
@@ -113,7 +105,10 @@ export function SyllabusGradebookForm({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
+          <div className="space-y-2">
+            <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
+            <ReviewTimer storageKey={timerStorageKey} label="Syllabus & Gradebook Time" compact />
+          </div>
           <SaveState isPending={isPending} status={status} />
         </div>
       </CardHeader>
@@ -263,7 +258,7 @@ export function SyllabusGradebookForm({
           </section>
 
           <div className="flex justify-end">
-            <Button disabled={isPending} onClick={() => void handleSave()} type="button">
+            <Button disabled={isPending} onClick={() => void handleSave(true)} type="button">
               Save draft
             </Button>
           </div>
@@ -295,6 +290,7 @@ export function buildSyllabusGradebookDefaults(
       direct_link: savedGradebook.get(item.id)?.direct_link ?? "",
     })),
     time_spent_seconds: saved?.time_spent_seconds ?? 0,
+    overall_time_spent_seconds: saved?.overall_time_spent_seconds ?? 0,
   }
 }
 

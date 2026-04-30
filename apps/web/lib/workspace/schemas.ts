@@ -9,6 +9,7 @@ export const metadataSchema = z.object({
   moodle_url: z.string().url("Must be a valid URL").or(z.literal("")),
   migration_notes: z.string().min(1, "Migration notes are required"),
   time_required_seconds: z.number().int().nonnegative(),
+  overall_time_spent_seconds: z.number().int().nonnegative(),
 });
 
 export type MetadataFormValues = z.infer<typeof metadataSchema>;
@@ -27,19 +28,7 @@ const reviewMatrixItemSchema = z.object({
 export const reviewMatrixSchema = z.object({
   items: z.array(reviewMatrixItemSchema),
   time_spent_seconds: z.number().int().nonnegative(),
-}).superRefine((data, ctx) => {
-  data.items.forEach((item, index) => {
-    if (
-      ["fix_needed", "missing", "escalate"].includes(item.status) &&
-      item.notes.trim().length === 0
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Notes are required for this status",
-        path: ["items", index, "notes"],
-      });
-    }
-  });
+  overall_time_spent_seconds: z.number().int().nonnegative(),
 });
 
 export type ReviewMatrixFormValues = z.infer<typeof reviewMatrixSchema>;
@@ -68,19 +57,7 @@ export const syllabusGradebookSchema = z.object({
   syllabus_items: z.array(syllabusItemSchema),
   gradebook_items: z.array(gradebookItemSchema),
   time_spent_seconds: z.number().int().nonnegative(),
-}).superRefine((data, ctx) => {
-  data.gradebook_items.forEach((item, index) => {
-    if (
-      ["fix_needed", "missing", "escalate"].includes(item.status) &&
-      item.notes.trim().length === 0
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Notes are required for this status",
-        path: ["gradebook_items", index, "notes"],
-      });
-    }
-  });
+  overall_time_spent_seconds: z.number().int().nonnegative(),
 });
 
 export type SyllabusGradebookFormValues = z.infer<typeof syllabusGradebookSchema>;

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import type { CourseRow } from "@/lib/services/courses"
@@ -17,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useStoredTimerValue } from "./review-timer"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -29,20 +31,31 @@ const TERMS = ["Fall 2025", "Winter 2026", "Spring 2026", "Summer 2026"]
 export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const overallElapsed = useStoredTimerValue(
+    `coursebridge:${course.id}:timer:overall`,
+    defaultValues.overall_time_spent_seconds ?? 0,
+  )
   const form = useForm<MetadataFormValues>({
     resolver: zodResolver(metadataSchema),
     defaultValues,
   })
 
-  async function handleSave() {
+  async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
 
     setStatus("saving")
     startTransition(async () => {
       try {
-        await saveDraft(course.id, "course_metadata", form.getValues())
+        await saveDraft(course.id, "course_metadata", {
+          ...form.getValues(),
+          overall_time_spent_seconds: overallElapsed,
+        })
         setStatus("saved")
+        if (advance) {
+          router.push(`/courses/${course.id}/review-matrix`)
+        }
       } catch {
         setStatus("error")
       }
@@ -131,7 +144,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           </label>
 
           <div className="flex justify-end">
-            <Button disabled={isPending} onClick={() => void handleSave()} type="button">
+            <Button disabled={isPending} onClick={() => void handleSave(true)} type="button">
               Save draft
             </Button>
           </div>

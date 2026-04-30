@@ -1,6 +1,5 @@
 import { getAccessibleCourses } from "@/lib/courses/service";
 import { CourseListView, type CourseStat } from "@/components/courses/course-list-view";
-import { BookOpen, Clock, CheckSquare, AlertTriangle } from "lucide-react";
 
 export default async function TADashboardPage() {
   const { courses } = await getAccessibleCourses();
@@ -9,22 +8,22 @@ export default async function TADashboardPage() {
     { 
       label: "Assigned", 
       value: courses.length, 
-      icon: BookOpen 
+      icon: "book-open",
     },
     { 
       label: "In Progress", 
       value: courses.filter(c => c.status === "ta_review_in_progress").length, 
-      icon: Clock 
+      icon: "clock",
     },
     { 
       label: "Submitted to Admin", 
       value: courses.filter(c => c.status === "submitted_to_admin").length, 
-      icon: CheckSquare 
+      icon: "check-square",
     },
     { 
       label: "Changes Requested", 
       value: courses.filter(c => c.status === "admin_changes_requested").length, 
-      icon: AlertTriangle 
+      icon: "alert-triangle",
     },
   ];
 
