@@ -1,8 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
-import type { AdminCourseRow } from "@/lib/admin/queries"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import type { AdminCourseRow, AdminCoursesPage } from "@/lib/admin/queries"
+import type { ProfileOption } from "@/lib/repositories/contracts"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,52 +29,34 @@ import {
 import { cn } from "@/lib/utils"
 import { Search, SlidersHorizontal } from "lucide-react"
 
-type Props = { courses: AdminCourseRow[] }
+type Props = {
+  page: AdminCoursesPage
+  tas: ProfileOption[]
+}
 
-export function AssignedCoursesTable({ courses }: Props) {
+export function AssignedCoursesTable({ page, tas }: Props) {
   const router = useRouter()
-  const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [taFilter, setTaFilter] = useState("all")
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
+
+  const search = searchParams.get("search") ?? ""
+  const statusFilter = searchParams.get("status") ?? "all"
+  const taFilter = searchParams.get("ta") ?? "all"
+  const currentPage = Math.max(page.page, 1)
 
   const taOptions = useMemo(
     () =>
-      Array.from(
-        new Map(
-          courses
-            .filter((course) => course.ta)
-            .map((course) => [
-              course.ta!.id,
-              {
-                id: course.ta!.id,
-                label: course.ta!.name ?? course.ta!.email,
-              },
-            ])
-        ).values()
-      ).sort((a, b) => a.label.localeCompare(b.label)),
-    [courses]
+      tas
+        .map((ta) => ({
+          id: ta.id,
+          label: ta.fullName ?? ta.email,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [tas]
   )
 
-  const filteredCourses = useMemo(() => {
-    const term = search.trim().toLowerCase()
-
-    return courses.filter((course) => {
-      const matchesSearch =
-        !term ||
-        course.title.toLowerCase().includes(term) ||
-        course.sourceCourseId?.toLowerCase().includes(term) ||
-        course.targetCourseId?.toLowerCase().includes(term) ||
-        course.term?.toLowerCase().includes(term) ||
-        course.department?.toLowerCase().includes(term) ||
-        course.ta?.name?.toLowerCase().includes(term) ||
-        course.ta?.email.toLowerCase().includes(term)
-
-      const matchesStatus = statusFilter === "all" || course.status === statusFilter
-      const matchesTa = taFilter === "all" || course.ta?.id === taFilter
-
-      return matchesSearch && matchesStatus && matchesTa
-    })
-  }, [courses, search, statusFilter, taFilter])
+  const filteredCourses = page.data
 
   const visibleTaCount = new Set(
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
@@ -82,11 +65,44 @@ export function AssignedCoursesTable({ courses }: Props) {
   const waitingForAdmin = filteredCourses.filter((course) => course.status === "submitted_to_admin").length
   const backWithTa = filteredCourses.filter((course) => course.status === "admin_changes_requested").length
   const readyForInstructor = filteredCourses.filter((course) => course.status === "ready_for_instructor").length
+  const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
+  const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
   function clearFilters() {
-    setSearch("")
-    setStatusFilter("all")
-    setTaFilter("all")
+    setSearchInput("")
+    setQuery({
+      page: "1",
+      search: null,
+      status: null,
+      ta: null,
+    })
+  }
+
+  function setQuery(updates: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams.toString())
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (!value || value === "all") {
+        params.delete(key)
+      } else {
+        params.set(key, value)
+      }
+    }
+
+    router.replace(params.size > 0 ? `${pathname}?${params.toString()}` : pathname)
+  }
+
+  function applySearch() {
+    setQuery({
+      page: "1",
+      search: searchInput.trim() || null,
+    })
+  }
+
+  function goToPage(nextPage: number) {
+    setQuery({
+      page: String(nextPage),
+    })
   }
 
   return (
@@ -104,7 +120,7 @@ export function AssignedCoursesTable({ courses }: Props) {
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <SlidersHorizontal className="size-3.5" />
-            Showing {filteredCourses.length} of {courses.length}
+            Showing {pageStart}-{pageEnd} of {page.total}
           </div>
         </div>
       </CardHeader>
@@ -113,14 +129,28 @@ export function AssignedCoursesTable({ courses }: Props) {
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault()
+                  applySearch()
+                }
+              }}
               placeholder="Search course, source ID, term, department, or TA..."
               className="pl-9"
             />
           </div>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) =>
+              setQuery({
+                page: "1",
+                status: value === "all" ? null : value,
+              })
+            }
+          >
             <SelectTrigger>
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
@@ -138,7 +168,15 @@ export function AssignedCoursesTable({ courses }: Props) {
             </SelectContent>
           </Select>
 
-          <Select value={taFilter} onValueChange={setTaFilter}>
+          <Select
+            value={taFilter}
+            onValueChange={(value) =>
+              setQuery({
+                page: "1",
+                ta: value === "all" ? null : value,
+              })
+            }
+          >
             <SelectTrigger>
               <SelectValue placeholder="Filter by TA" />
             </SelectTrigger>
@@ -151,6 +189,11 @@ export function AssignedCoursesTable({ courses }: Props) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={applySearch}>
+            Apply Search
+          </Button>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -257,6 +300,29 @@ export function AssignedCoursesTable({ courses }: Props) {
             </Table>
           </div>
         )}
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <p className="text-xs text-muted-foreground">
+            Page {currentPage} of {Math.max(page.totalPages, 1)}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => goToPage(currentPage - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= page.totalPages}
+              onClick={() => goToPage(currentPage + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

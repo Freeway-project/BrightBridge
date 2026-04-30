@@ -257,13 +257,15 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const normalizedSearch = normalizeSearchTerm(filters.search);
       const status = filters.status;
       const taProfileId = filters.taProfileId?.trim() || undefined;
+      const assignedOnly = filters.assignedOnly === true;
+      const requireStaffJoin = assignedOnly || Boolean(taProfileId);
 
       let query = admin
         .from("courses")
         .select(
           `
           id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
-          course_assignments${taProfileId ? "!inner" : ""} (
+          course_assignments${requireStaffJoin ? "!inner" : ""} (
             role,
             profile_id,
             profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -276,10 +278,12 @@ export function createSupabaseCourseRepository(): CourseRepository {
         query = query.eq("status", status);
       }
 
+      if (requireStaffJoin) {
+        query = query.eq("course_assignments.role", "staff");
+      }
+
       if (taProfileId) {
-        query = query
-          .eq("course_assignments.role", "staff")
-          .eq("course_assignments.profile_id", taProfileId);
+        query = query.eq("course_assignments.profile_id", taProfileId);
       }
 
       if (normalizedSearch) {

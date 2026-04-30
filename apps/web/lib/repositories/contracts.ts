@@ -75,6 +75,7 @@ export type AdminCourseListFilters = {
   search?: string;
   status?: CourseStatus;
   taProfileId?: string;
+  assignedOnly?: boolean;
 };
 
 export type SuperAdminCourseRow = {

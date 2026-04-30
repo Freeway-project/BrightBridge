@@ -20,6 +20,7 @@ export type AdminCoursesPageParams = {
   search?: string
   status?: CourseStatus
   taProfileId?: string
+  assignedOnly?: boolean
 }
 
 export async function getAdminCourses(): Promise<AdminCourseRow[]> {
@@ -35,6 +36,7 @@ export async function getAdminCoursesPage(
     search: params.search,
     status: params.status,
     taProfileId: params.taProfileId,
+    assignedOnly: params.assignedOnly,
   })
   const progressMap = await fetchReviewProgressForCourses(pageResult.data.map((row) => row.id))
 
