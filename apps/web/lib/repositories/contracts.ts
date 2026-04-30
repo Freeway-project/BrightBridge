@@ -41,6 +41,7 @@ export type CourseSummary = {
   title: string;
   term: string | null;
   department: string | null;
+  orgUnitId: string | null;
   status: CourseStatus;
   createdBy: string;
   createdAt: string;
@@ -162,12 +163,28 @@ export type CourseAssignmentRecord = {
   role: AssignmentRole;
 };
 
+export type OrgUnit = {
+  id: string;
+  parentId: string | null;
+  name: string;
+  type: string;
+};
+
+export type OrgUnitMember = {
+  id: string;
+  profileId: string;
+  orgUnitId: string;
+  title: string;
+  isPrimary: boolean;
+};
+
 export type CreateCourseRecordInput = {
   sourceCourseId?: string | null;
   targetCourseId?: string | null;
   title: string;
   term?: string | null;
   department?: string | null;
+  orgUnitId?: string | null;
   status: CourseStatus;
   createdBy: string;
 };
@@ -222,6 +239,7 @@ export interface CourseRepository {
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
+  listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
 }
 
 export interface ProfileRepository {
@@ -250,4 +268,15 @@ export interface ReviewRepository {
 export interface CommentRepository {
   listCourseComments(courseId: string): Promise<CourseComment[]>;
   postCourseComment(input: PostCourseCommentInput): Promise<CourseComment>;
+}
+
+export interface HierarchyRepository {
+  listUnits(): Promise<OrgUnit[]>;
+  getUnitById(id: string): Promise<OrgUnit | null>;
+  getUserUnits(profileId: string): Promise<OrgUnitMember[]>;
+  listAllMembers(): Promise<OrgUnitMember[]>;
+  hasHierarchyAccess(profileId: string, courseId: string): Promise<boolean>;
+  createUnit(input: { name: string; type: string; parentId?: string | null }): Promise<OrgUnit>;
+  addMember(input: { profileId: string; orgUnitId: string; title: string; isPrimary?: boolean }): Promise<void>;
+  removeMember(memberId: string): Promise<void>;
 }
