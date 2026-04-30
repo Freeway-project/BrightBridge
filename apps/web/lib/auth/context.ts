@@ -69,5 +69,5 @@ export function requireAnyRole(
 }
 
 export function isRole(value: string): value is Role {
-  return ROLES.includes(value as Role);
+  return (ROLES as readonly string[]).includes(value);
 }

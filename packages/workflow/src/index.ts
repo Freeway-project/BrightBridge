@@ -1,7 +1,9 @@
 export {
+  ASSIGNMENT_ROLES,
   getRoleLabel,
   ROLE_LABELS,
   ROLES,
+  type AssignmentRole,
   type Role
 } from "./roles";
 export {
@@ -19,5 +21,6 @@ export {
   getAllowedTransitions,
   type AllowedTransitionsInput,
   type CourseTransition,
+  type EffectiveRole,
   type TransitionInput
 } from "./transitions";

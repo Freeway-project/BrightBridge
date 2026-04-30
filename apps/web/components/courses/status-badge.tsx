@@ -1,20 +1,31 @@
-import { Badge } from "@/components/ui/badge"
-import { STATUS_BADGE_CLASS } from "@/lib/constants/status"
-import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow"
 import { cn } from "@/lib/utils"
+import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow"
 
 interface StatusBadgeProps {
   status: CourseStatus
   className?: string
 }
 
+const DOT_COLORS: Record<CourseStatus, string> = {
+  course_created:          "bg-slate-400",
+  assigned_to_ta:          "bg-slate-400",
+  ta_review_in_progress:   "bg-blue-500",
+  submitted_to_admin:      "bg-amber-500",
+  admin_changes_requested: "bg-orange-500",
+  ready_for_instructor:    "bg-indigo-500",
+  sent_to_instructor:      "bg-indigo-500",
+  instructor_questions:    "bg-orange-500",
+  instructor_approved:     "bg-emerald-500",
+  final_approved:          "bg-emerald-500",
+}
+
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
-    <Badge
-      variant="outline"
-      className={cn("text-xs font-medium", STATUS_BADGE_CLASS[status], className)}
-    >
-      {getCourseStatusLabel(status)}
-    </Badge>
+    <div className={cn("flex items-center gap-2", className)}>
+      <div className={cn("size-1.5 rounded-full", DOT_COLORS[status])} />
+      <span className="text-sm text-foreground/80">
+        {getCourseStatusLabel(status)}
+      </span>
+    </div>
   )
 }

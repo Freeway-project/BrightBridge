@@ -1,21 +1,25 @@
 export const ROLES = [
-  "ta",
-  "admin",
-  "communications",
+  "super_admin",
+  "admin_full",
+  "admin_viewer",
+  "standard_user",
   "instructor",
-  "super_admin"
 ] as const;
 
 export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
-  ta: "TA",
-  admin: "Admin",
-  communications: "Communications",
+  super_admin: "Super Admin",
+  admin_full: "Admin",
+  admin_viewer: "Viewer",
+  standard_user: "Staff",
   instructor: "Instructor",
-  super_admin: "Super Admin"
 };
 
 export function getRoleLabel(role: Role) {
   return ROLE_LABELS[role];
 }
+
+// Layer 3 assignment roles
+export const ASSIGNMENT_ROLES = ["staff", "instructor"] as const;
+export type AssignmentRole = (typeof ASSIGNMENT_ROLES)[number];

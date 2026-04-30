@@ -3,7 +3,6 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { DevRoleSwitcher } from "@/components/dev-role-switcher";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -22,7 +21,6 @@ export default function RootLayout({
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body>
         {children}
-        <DevRoleSwitcher />
         <Analytics />
         <SpeedInsights />
       </body>
