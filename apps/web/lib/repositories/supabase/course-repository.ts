@@ -337,9 +337,10 @@ export function createSupabaseCourseRepository(): CourseRepository {
       } satisfies AdminCourseRow;
     },
 
-    async listSuperAdminCourses() {
+    async listSuperAdminCourses(page = 1, pageSize = 20, search = "") {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin
+      
+      let query = admin
         .from("courses")
         .select(`
           id, title, status, term, department, org_unit_id, created_at, updated_at,
@@ -347,14 +348,24 @@ export function createSupabaseCourseRepository(): CourseRepository {
             role,
             profiles!course_assignments_profile_id_fkey ( full_name, email )
           )
-        `)
-        .order("updated_at", { ascending: false });
+        `, { count: "exact" });
+
+      if (search) {
+        query = query.or(`title.ilike.%${search}%,status.ilike.%${search}%`);
+      }
+
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await query
+        .order("updated_at", { ascending: false })
+        .range(from, to);
 
       if (error) {
         throw new Error(`courses: ${error.message}`);
       }
 
-      return (data ?? []).map((row) => {
+      const rows = (data ?? []).map((row) => {
         const course = row as unknown as {
           id: string;
           title: string;
@@ -390,6 +401,15 @@ export function createSupabaseCourseRepository(): CourseRepository {
             : null,
         } satisfies SuperAdminCourseRow;
       });
+
+      const total = count ?? 0;
+      return {
+        data: rows,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
     },
 
     async listStatusCounts() {
