@@ -28,3 +28,9 @@ npm run dev
 ```
 
 The web app lives at `apps/web`.
+
+## Codex Setup
+
+Project-specific Codex setup and preflight checks are documented in:
+
+- `docs/codex-setup.md`
