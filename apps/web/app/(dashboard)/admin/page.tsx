@@ -3,9 +3,12 @@ import { COURSE_STATUSES, type CourseStatus } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminCoursesPage } from "@/lib/admin/queries"
 import { getProfilesByRole } from "@/lib/services/profiles"
+import { getOpenEscalations } from "@/lib/services/escalations"
 import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
 import { AssignedCoursesTable } from "./_components/assigned-courses-table"
 import { AdminTabs } from "./_components/admin-tabs"
+import { EscalationsTable } from "./_components/escalations-table"
+import { CompletedCoursesTable } from "./_components/completed-courses-table"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -24,7 +27,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas] = await Promise.all([
+  const [coursesPage, unassignedPage, tas, openEscalations, completedPage] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
@@ -38,6 +41,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
       status: "course_created",
     }),
     getProfilesByRole("standard_user"),
+    getOpenEscalations(),
+    getAdminCoursesPage({ page: 1, pageSize: 200, status: "final_approved" }),
   ])
 
   return (
@@ -46,8 +51,11 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
       <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-6 bg-background">
         <AdminTabs
           unassignedCount={unassignedPage.total}
+          openEscalationsCount={openEscalations.length}
           coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
           assignPanel={<AdminAssignmentPanel courses={unassignedPage.data} tas={tas} />}
+          escalationsPanel={<EscalationsTable escalations={openEscalations} />}
+          completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
         />
       </div>
     </>

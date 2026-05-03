@@ -7,6 +7,8 @@ import {
   getAccessibleCourses,
   transitionCourseStatus,
 } from "@/lib/courses/service";
+import { requireProfile } from "@/lib/auth/context";
+import { resolveEscalation } from "@/lib/services/escalations";
 
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
@@ -88,4 +90,12 @@ export async function requestFixesAction(courseId: string, note: string): Promis
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   redirect("/admin");
+}
+
+export async function resolveEscalationAction(escalationId: string, courseId: string): Promise<void> {
+  const ctx = await requireProfile();
+  await resolveEscalation(escalationId, ctx.userId);
+  revalidatePath("/admin");
+  revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath(`/courses/${courseId}`);
 }
