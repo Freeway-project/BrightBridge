@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import type { CourseRow } from "@/lib/services/courses"
 import { saveDraft } from "@/lib/workspace/actions"
 import { metadataSchema, type MetadataFormValues } from "@/lib/workspace/schemas"
@@ -62,7 +62,8 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
     })
   }
 
-  const sectionText = form.watch("section_numbers").join(", ")
+  const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
+  const sectionText = sectionNumbers.join(", ")
 
   return (
     <Card className="max-w-3xl">
@@ -73,7 +74,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
         </div>
       </CardHeader>
       <CardContent>
-        <form className="space-y-5" onBlur={() => void handleSave()}>
+        <form className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <ReadOnlyField label="Course ID" value={course.id} />
             <ReadOnlyField label="Course Title" value={course.title} />
@@ -178,5 +179,5 @@ function SaveState({
   if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
   if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
   if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Auto-saves on blur</p>
+  return <p className="text-xs text-muted-foreground">Auto-saves while you type</p>
 }

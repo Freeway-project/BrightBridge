@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -27,7 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Search, SlidersHorizontal } from "lucide-react"
+import { Search, SlidersHorizontal, CheckCircle2, Circle, Loader2 } from "lucide-react"
+import type { CourseStatus } from "@coursebridge/workflow"
 
 type Props = {
   page: AdminCoursesPage
@@ -62,6 +62,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
+  const unassigned = filteredCourses.filter((course) => course.status === "course_created").length
   const waitingForAdmin = filteredCourses.filter((course) => course.status === "submitted_to_admin").length
   const backWithTa = filteredCourses.filter((course) => course.status === "admin_changes_requested").length
   const readyForInstructor = filteredCourses.filter((course) => course.status === "ready_for_instructor").length
@@ -111,11 +112,11 @@ export function AssignedCoursesTable({ page, tas }: Props) {
         <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
           <div>
             <CardTitle className="text-base">
-          Assigned Courses
-              <span className="ml-2 text-sm font-normal text-muted-foreground">({page.total})</span>
+              All Courses
+              <span className="ml-2 text-sm font-normal text-muted-foreground">({page.total.toLocaleString()})</span>
             </CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              Track course ownership, review progress, and who is actively carrying each course.
+              Track all courses, assignments, review progress, and workflow status.
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -125,8 +126,8 @@ export function AssignedCoursesTable({ page, tas }: Props) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_220px]">
-          <div className="relative">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex flex-1 items-center gap-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchInput}
@@ -137,69 +138,79 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                   applySearch()
                 }
               }}
-              placeholder="Search course, source ID, term, department, or TA..."
-              className="pl-9"
+              placeholder="Search by title, source ID, term, department, or TA..."
+              className="pl-9 pr-3"
             />
+            {searchInput && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-[84px] top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                onClick={() => { setSearchInput(""); setQuery({ page: "1", search: null }) }}
+              >
+                ×
+              </Button>
+            )}
+            <Button size="sm" onClick={applySearch} className="shrink-0">
+              Search
+            </Button>
           </div>
+          <div className="flex gap-2">
+            <Select
+              value={statusFilter}
+              onValueChange={(value) =>
+                setQuery({
+                  page: "1",
+                  status: value === "all" ? null : value,
+                })
+              }
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent className="max-h-64 overflow-y-auto">
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="course_created">Not yet assigned</SelectItem>
+                <SelectItem value="assigned_to_ta">Assigned to TA</SelectItem>
+                <SelectItem value="ta_review_in_progress">TA Review In Progress</SelectItem>
+                <SelectItem value="submitted_to_admin">Submitted to Admin</SelectItem>
+                <SelectItem value="admin_changes_requested">Admin Changes Requested</SelectItem>
+                <SelectItem value="ready_for_instructor">Ready for Instructor</SelectItem>
+                <SelectItem value="sent_to_instructor">Sent to Instructor</SelectItem>
+                <SelectItem value="instructor_questions">Instructor Questions</SelectItem>
+                <SelectItem value="instructor_approved">Instructor Approved</SelectItem>
+                <SelectItem value="final_approved">Final Approved</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select
-            value={statusFilter}
-            onValueChange={(value) =>
-              setQuery({
-                page: "1",
-                status: value === "all" ? null : value,
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="assigned_to_ta">Assigned to TA</SelectItem>
-              <SelectItem value="ta_review_in_progress">TA Review In Progress</SelectItem>
-              <SelectItem value="submitted_to_admin">Submitted to Admin</SelectItem>
-              <SelectItem value="admin_changes_requested">Admin Changes Requested</SelectItem>
-              <SelectItem value="ready_for_instructor">Ready for Instructor</SelectItem>
-              <SelectItem value="sent_to_instructor">Sent to Instructor</SelectItem>
-              <SelectItem value="instructor_questions">Instructor Questions</SelectItem>
-              <SelectItem value="instructor_approved">Instructor Approved</SelectItem>
-              <SelectItem value="final_approved">Final Approved</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={taFilter}
-            onValueChange={(value) =>
-              setQuery({
-                page: "1",
-                ta: value === "all" ? null : value,
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by TA" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All TAs</SelectItem>
-              {taOptions.map((ta) => (
-                <SelectItem key={ta.id} value={ta.id}>
-                  {ta.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={applySearch}>
-            Apply Search
-          </Button>
+            <Select
+              value={taFilter}
+              onValueChange={(value) =>
+                setQuery({
+                  page: "1",
+                  ta: value === "all" ? null : value,
+                })
+              }
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Filter by TA" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All TAs</SelectItem>
+                {taOptions.map((ta) => (
+                  <SelectItem key={ta.id} value={ta.id}>
+                    {ta.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Visible Courses" value={filteredCourses.length} tone="default" />
+          <SummaryStat label="Needs TA Assigned" value={unassigned} tone={unassigned > 0 ? "warn" : "default"} />
           <SummaryStat label="Active TAs" value={visibleTaCount} tone="default" />
-          <SummaryStat label="Waiting on Admin" value={waitingForAdmin} tone="warn" />
+          <SummaryStat label="Waiting on Admin" value={waitingForAdmin} tone={waitingForAdmin > 0 ? "warn" : "default"} />
           <SummaryStat
             label={backWithTa > 0 ? "Back With TA" : "Ready For Instructor"}
             value={backWithTa > 0 ? backWithTa : readyForInstructor}
@@ -209,9 +220,9 @@ export function AssignedCoursesTable({ page, tas }: Props) {
 
         {filteredCourses.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border px-6 py-12 text-center">
-            <p className="text-sm font-medium text-foreground">No assigned courses match these filters.</p>
+            <p className="text-sm font-medium text-foreground">No courses match these filters.</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Adjust search or filter settings to widen the queue.
+              Adjust the search or filter settings to widen the results.
             </p>
             <Button variant="ghost" className="mt-3" onClick={clearFilters}>
               Clear filters
@@ -224,7 +235,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="pl-4 text-xs">Course</TableHead>
                   <TableHead className="text-xs">Assigned TA</TableHead>
-                  <TableHead className="text-xs">Review Snapshot</TableHead>
+                  <TableHead className="text-xs">Pipeline</TableHead>
                   <TableHead className="text-xs">Workflow</TableHead>
                   <TableHead className="pr-4 text-right text-xs">Updated</TableHead>
                 </TableRow>
@@ -269,7 +280,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                       )}
                     </TableCell>
                     <TableCell className="align-top">
-                      <ReviewSnapshot progress={course.reviewProgress} />
+                      <WorkflowPipeline status={course.status} />
                     </TableCell>
                     <TableCell className="align-top">
                       <div className="space-y-2 py-1">
@@ -300,11 +311,21 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             </Table>
           </div>
         )}
-        <div className="flex items-center justify-between border-t border-border pt-4">
+        <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">
-            Page {currentPage} of {Math.max(page.totalPages, 1)}
+            {page.total === 0
+              ? "No courses"
+              : `Showing ${pageStart}–${pageEnd} of ${page.total.toLocaleString()} courses`}
           </p>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => goToPage(1)}
+            >
+              First
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -313,6 +334,9 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             >
               Previous
             </Button>
+            <span className="min-w-[80px] text-center text-xs text-muted-foreground">
+              Page {currentPage} of {Math.max(page.totalPages, 1)}
+            </span>
             <Button
               variant="outline"
               size="sm"
@@ -321,6 +345,14 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             >
               Next
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= page.totalPages}
+              onClick={() => goToPage(page.totalPages)}
+            >
+              Last
+            </Button>
           </div>
         </div>
       </CardContent>
@@ -328,43 +360,51 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   )
 }
 
-function ReviewSnapshot({ progress }: { progress: AdminCourseRow["reviewProgress"] }) {
-  const pills = [
-    { label: "Meta", section: progress?.courseMetadata },
-    { label: "Checklist", section: progress?.reviewMatrix },
-    { label: "Syllabus", section: progress?.syllabusReview },
+type PhaseState = "done" | "active" | "idle"
+
+const DONE_1 = new Set<CourseStatus>(["submitted_to_admin", "ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
+const ACTIVE_1 = new Set<CourseStatus>(["ta_review_in_progress", "admin_changes_requested"])
+const DONE_2 = new Set<CourseStatus>(["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
+const ACTIVE_2 = new Set<CourseStatus>(["ready_for_instructor"])
+const DONE_3 = new Set<CourseStatus>(["instructor_approved", "final_approved"])
+const ACTIVE_3 = new Set<CourseStatus>(["sent_to_instructor", "instructor_questions"])
+
+function phaseState(s: CourseStatus, done: Set<CourseStatus>, active: Set<CourseStatus>): PhaseState {
+  return done.has(s) ? "done" : active.has(s) ? "active" : "idle"
+}
+
+function WorkflowPipeline({ status }: { status: CourseStatus }) {
+  const phases: { label: string; state: PhaseState }[] = [
+    { label: "TA Forms", state: phaseState(status, DONE_1, ACTIVE_1) },
+    { label: "Staging",  state: phaseState(status, DONE_2, ACTIVE_2) },
+    { label: "Review",   state: phaseState(status, DONE_3, ACTIVE_3) },
   ]
-  const submittedCount = pills.filter((pill) => pill.section?.status === "submitted").length
-  const startedCount = pills.filter((pill) => pill.section?.exists).length
-  const percent = (submittedCount / pills.length) * 100
 
   return (
-    <div className="min-w-[220px] space-y-2 py-1">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-foreground">{submittedCount}/3 sections submitted</span>
-        <span className="text-muted-foreground">{startedCount > 0 ? `${startedCount} started` : "Not started"}</span>
-      </div>
-      <Progress value={percent} className="h-1.5" />
-      <div className="flex flex-wrap gap-1">
-        {pills.map(({ label, section }) => {
-          const color = !section?.exists
-            ? "bg-muted text-muted-foreground"
-            : section.status === "submitted"
-              ? "bg-green-500/15 text-green-700 dark:text-green-400"
-              : "bg-orange-500/15 text-orange-700 dark:text-orange-400"
+    <div className="flex items-center gap-1 py-1">
+      {phases.map((phase, i) => (
+        <div key={phase.label} className="flex items-center gap-1">
+          {i > 0 && <div className="h-px w-3 shrink-0 bg-border" />}
+          <PhasePill label={phase.label} state={phase.state} />
+        </div>
+      ))}
+    </div>
+  )
+}
 
-          const suffix = !section?.exists ? "not started" : section.status === "submitted" ? "submitted" : "draft"
+function PhasePill({ label, state }: { label: string; state: PhaseState }) {
+  const styles = {
+    done:   "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/20",
+    active: "bg-orange-500/15 text-orange-600 border-orange-400/30",
+    idle:   "bg-muted text-muted-foreground border-border",
+  }[state]
 
-          return (
-            <span
-              key={label}
-              className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", color)}
-            >
-              {label}: {suffix}
-            </span>
-          )
-        })}
-      </div>
+  const Icon = state === "done" ? CheckCircle2 : state === "active" ? Loader2 : Circle
+
+  return (
+    <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5", styles)}>
+      <Icon className={cn("size-2.5 shrink-0", state === "active" && "animate-spin")} />
+      <span className="text-[10px] font-medium whitespace-nowrap">{label}</span>
     </div>
   )
 }
@@ -418,6 +458,8 @@ function getInitials(value: string) {
 
 function getStatusHint(status: AdminCourseRow["status"]) {
   switch (status) {
+    case "course_created":
+      return "No TA assigned yet — needs assignment."
     case "assigned_to_ta":
       return "Assigned and waiting for TA work to begin."
     case "ta_review_in_progress":

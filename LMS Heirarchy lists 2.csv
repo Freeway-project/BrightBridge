@@ -1,0 +1,111 @@
+Chairpersons: Table 1
+Last Name,First Name,Department,Email,Reports to,Last Name,First Name,Email
+Wood,James,Animation,JWWood@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Wood,James,Animation,JWWood@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Mallory,Leanne,Anthropology,mallory@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Mallory,Leanne,Anthropology,mallory@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Korcok,Jasmine,Biology,jkorcok@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Martin,Morgan,Biology,MMartin@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Fontenla,Adrian,Business Administration,afontenla@okanagan.bc.ca,,Sjolander,Christine ,csjolander@okanagan.bc.ca
+Fontenla,Adrian,Business Administration,afontenla@okanagan.bc.ca,,Weighill,Agnes ,aweighill@okanagan.bc.ca
+Korcok,Jasmine,Chemistry,jkorcok@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Garrett,Jillian,Communications,JGarrett@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Garrett,Jillian,Communications,JGarrett@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Khmelevsky,Youry,Computer Science,YKhmelevsky@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Reed,Lozelle,Economics,LReed@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Reed,Lozelle,Economics,LReed@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Bradshaw,Kevin,Electronic Engineering Technology,KBradshaw@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Kennedy,Jake,English,JKennedy@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Kennedy,Jake,English,JKennedy@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Redding,Todd,Geography,tredding@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Redding,Todd,Geography,tredding@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Clarkson,Christopher,History,cclarkson@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Clarkson,Christopher,History,cclarkson@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Berg,Troy,Infrastructure & Computer Tech,TBerg@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Bowman,Norah,Interdisciplinary Studies,nbowman@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Bowman,Norah,Interdisciplinary Studies,nbowman@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Lind,Wendy,Kinesiology,wwheeler@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Lind,Wendy,Kinesiology,wwheeler@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Carter,Bryan,Mathematics and Statistics,BPenfound@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Penfound,Jonathan,Mech Engineering,JLaumer@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Laumer,Logan,Mechanical Engineering Technology,LMaley@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Maley,David,Philosophy,dboutillier@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Boutillier,Terry,Physics & Astronomy,TBridges@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Boutillier,Terry,Physics & Astronomy,TBridges@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Bridges,Ayla,Political Science,akilic@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Kilic,Leora,Psychology,LDahl@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Kilic,Leora,Psychology,LDahl@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Dahl,Priscillia,Sociology,PLefebvre@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Dahl,Priscillia,Sociology,PLefebvre@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Lefebvre,Ashley,Sustainable Building Technology,ALubyk@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Lefebvre,Ashley,Sustainable Building Technology,ALubyk@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Lubyk,Sydney,Water Engineering Technology,SActon@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Acton,Natasha,Adult Upgrading,NBefus@okanagan.bc.ca,,Crema,Steve,screma@okanagan.bc.ca
+Oudendag,Andrea,Early Childhood Education,KOudendag@okanagan.bc.ca,,Sjolander,Christine ,csjolander@okanagan.bc.ca
+Oudendag,Andrea,Early Childhood Education,AThiessen@okanagan.bc.ca,,Weighill,Agnes ,aweighill@okanagan.bc.ca
+Thiessen,Vivian,English as a Second Language,AThiessen@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Thiessen,Vivian,English as a Second Language,AThiessen@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Ridgeley-Ketchell,Melissa,Pharmacy Technician Department,bridgeley@okanagan.bc.ca,,Sjolander,Christine ,csjolander@okanagan.bc.ca
+Ridgeley-Ketchell,Melissa,Pharmacy Technician Department,MGardner@okanagan.bc.ca,,Weighill,Agnes ,aweighill@okanagan.bc.ca
+Becker,Terry,Paralegal,twalker@okanagan.bc.ca,,Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca
+Becker,Terry,Paralegal,tbecker@okanagan.bc.ca,,Newitt,Chris,cnewitt@okanagan.bc.ca
+Befus,Natasha,Adult Upgrading,NBefus@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Befus,Natasha,Adult Upgrading,NBefus@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Lesage,Nina,Certified Dental Assistant,NLesage@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Lesage,Nina,Certified Dental Assistant,NLesage@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Brochu,Clinton,Construction Trades,KBrochu@Okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Brochu,Clinton,Construction Trades,KBrochu@Okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Oudendag,Kelsey,Culinary & Pastry Arts,KOudendag@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Oudendag,Kelsey,Culinary & Pastry Arts,KOudendag@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Thiessen,Andrea,Early Childhood Education,AThiessen@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Thiessen,Andrea,Early Childhood Education,AThiessen@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Albrecht,Vivian,English as a Second Language,valbrecht@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Albrecht,Vivian,English as a Second Language,valbrecht@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Susheski,Dana,HSD- Practical Nursing,DSusheski@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Susheski,Dana,HSD- Practical Nursing,DSusheski@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Noble,Tracy,Health Care Assistant,TNoble@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Noble,Tracy,Health Care Assistant,TNoble@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Berg,Shelley,Human Service Work,SBerg@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Berg,Shelley,Human Service Work,SBerg@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Pals,Jevon,Mechanical Building Trades,JPals@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Pals,Jevon,Mechanical Building Trades,JPals@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Noble,Douglas,Motor Vehicle Trades,DNoble@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Noble,Douglas,Motor Vehicle Trades,DNoble@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Ridgeley-Ketchell,Brenda,Office Administration,bridgeley@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Ridgeley-Ketchell,Brenda,Office Administration,bridgeley@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Gardner,Melissa,Pharmacy Technician Department,MGardner@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Gardner,Melissa,Pharmacy Technician Department,MGardner@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Hall,Brian,Therapist Assistant,BHall@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Hall,Brian,Therapist Assistant,BHall@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+Walker,Curtis,Welding,CWalker@okanagan.bc.ca,,Marques,Danny ,dmarques@okanagan.bc.ca
+Walker,Curtis,Welding,CWalker@okanagan.bc.ca,,Tarlit,Tanya,ttarlit@okanagan.bc.ca
+
+ADs: Table 1
+Last Name,First Name,Email,Reports to,Last Name,First Name,Email,,,Department
+Crema,Steve,screma@okanagan.bc.ca,,Valladares Montemayor,Halia,hvalladares@okanagan.bc.ca,,,Science & Technology
+Sjolander,Christine ,csjolander@okanagan.bc.ca,,Baker,Joe,jbaker@okanagan.bc.ca,,,Hall School of Business and Entrepreneurship
+Weighill,Agnes ,aweighill@okanagan.bc.ca,,Baker,Joe,jbaker@okanagan.bc.ca,,,Hall School of Business and Entrepreneurship
+Marques,Danny ,dmarques@okanagan.bc.ca,,Hartigan,Caitlin,chartigan@okanagan.bc.ca,,,Trades & Apprenticeship
+Tarlit,Tanya,ttarlit@okanagan.bc.ca,,Hartigan,Caitlin,chartigan@okanagan.bc.ca,,,Trades & Apprenticeship
+Pulvermacher,Andrew ,apulvermacher@okanagan.bc.ca,,Anderson,Judith,janderson@okanagan.bc.ca,,,Arts & Foundational Programs
+Newitt,Chris,cnewitt@okanagan.bc.ca,,Anderson,Judith,janderson@okanagan.bc.ca,,,Arts & Foundational Programs
+
+
+Admin Edit: Table 1
+Last Name,First Name,Email,,
+Esson,Tom,tesson@okanagan.bc.ca,,
+White,Tricia,twhite@okanagan.bc.ca,,
+Martin,Paul,pmartin@okanagan.bc.ca,,
+Hartwell,Amber,ahartwell@okanagan.bc.ca,,
+Hutchinson,Chantale,chutchinson@okanagan.bc.ca,,
+Halsall,Ben,bhalsall@okanagan.bc.ca,,
+
+
+Admin View only: Table 1
+Last Name,First Name,Email,,
+Perry,Jordan,jperry@okanagan.bc.ca,,
+Fassina,Neil,nfassina@okanagan.bc.ca,,
+Lenci,Sam,slenci@okanagan.bc.ca,,
+Wilson,Dianna,dwilson@okanagan.bc.ca,,
+Weiss,Mike,mweiss@okanagan.bc.ca,,
+Tam,May,mtam@okanagan.bc.ca,,

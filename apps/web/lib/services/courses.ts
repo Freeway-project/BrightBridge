@@ -1,25 +1,19 @@
 import "server-only";
 
-import { assertCanTransition, type CourseStatus, type EffectiveRole, type Role } from "@coursebridge/workflow";
+import { assertCanTransition, type CourseStatus, type Role } from "@coursebridge/workflow";
 import { getCourseRepository } from "@/lib/repositories";
+import type { CourseSummary } from "@/lib/repositories/contracts";
 
-export type CourseRow = {
-  id: string;
-  title: string;
-  term: string | null;
-  department: string | null;
-  status: CourseStatus;
-  created_at: string;
-};
+export type { CourseSummary as CourseRow };
 
-export async function getAssignedCourses(userId: string): Promise<CourseRow[]> {
+export async function getAssignedCourses(userId: string): Promise<CourseSummary[]> {
   return getCourseRepository().listAssignedCourses(userId);
 }
 
 export async function getCourseById(
   courseId: string,
   userId: string,
-): Promise<CourseRow | null> {
+): Promise<CourseSummary | null> {
   return getCourseRepository().getAssignedCourseById(courseId, userId);
 }
 
@@ -40,13 +34,17 @@ export async function transitionCourseStatus({
 }) {
   const repo = getCourseRepository();
 
-  const assignment = await repo.getCourseAssignment(courseId, actorId);
-  const effectiveRole: EffectiveRole =
-    actorRole === "standard_user"
-      ? (assignment?.role ?? "standard_user")
-      : actorRole;
+  // TAs and instructors must be assigned to the course
+  if (actorRole === "standard_user" || actorRole === "instructor") {
+    const assignment = await repo.getCourseAssignment(courseId, actorId);
+    if (!assignment) {
+      throw new Error("You are not assigned to this course.");
+    }
+  }
 
-  assertCanTransition({ role: effectiveRole, from, to });
+  // Transition is checked against the profile role (not the assignment role —
+  // assignment role "staff" is not a workflow permission level)
+  assertCanTransition({ role: actorRole, from, to });
 
   await repo.updateCourseStatus(courseId, to);
   await repo.insertStatusEvent({

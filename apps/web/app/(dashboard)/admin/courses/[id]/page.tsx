@@ -31,6 +31,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
       <Topbar 
         title="Course Review" 
         subtitle={course.sourceCourseId ? `${course.sourceCourseId} — ${course.title}` : course.title} 
+        backHref="/admin"
       />
       <main className="flex-1 flex overflow-hidden bg-muted/10">
         {/* Main Content Area */}

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CheckCircle2, Circle } from "lucide-react"
+import { CheckCircle2, Circle, ChevronLeft } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
@@ -34,6 +34,14 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
   return (
     <aside className="hidden w-64 shrink-0 border-r border-border bg-sidebar/40 p-5 lg:block">
       <div className="flex flex-col h-full gap-6">
+        <Link 
+          href="/ta" 
+          className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <ChevronLeft className="size-3 transition-transform group-hover:-translate-x-0.5" />
+          Back to Dashboard
+        </Link>
+
         <div className="space-y-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
             Active Review

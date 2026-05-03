@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function CoursesLoading() {
   return (
     <>
-      <Topbar title="All Courses" subtitle="Super Admin" />
+      <Topbar title="All Courses" subtitle="Super Admin" backHref="/super-admin" />
       <div className="flex-1 p-6 space-y-4">
         <div className="flex justify-between mb-4">
           <Skeleton className="h-5 w-24" />

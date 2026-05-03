@@ -12,7 +12,7 @@ import type {
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronRight, ExternalLink, AlertTriangle, CheckCircle2, MinusCircle, HelpCircle, Clock } from "lucide-react"
+import { ChevronDown, ChevronRight, ExternalLink, AlertTriangle, CheckCircle2, MinusCircle, HelpCircle, Clock, Circle, FileText, ListChecks, BookOpen, Bug } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ITEM_LABELS, SYLLABUS_ITEM_LABELS, GRADEBOOK_ITEM_LABELS } from "@/lib/workspace/constants"
 
@@ -40,6 +40,7 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
 
   return (
     <div className="space-y-4">
+      <ReviewProgressSummary metaStatus={metaStatus} matrixStatus={matrixStatus} syllabusStatus={syllabusStatus} issueCount={(notes?.issues ?? []).length} />
       <MetadataCard data={meta} responseStatus={metaStatus} />
       <ReviewMatrixCard data={matrix} responseStatus={matrixStatus} />
       <SyllabusCard data={syllabus} responseStatus={syllabusStatus} />
@@ -50,12 +51,106 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
+function ReviewProgressSummary({
+  metaStatus, matrixStatus, syllabusStatus, issueCount,
+}: {
+  metaStatus: "draft" | "submitted" | null
+  matrixStatus: "draft" | "submitted" | null
+  syllabusStatus: "draft" | "submitted" | null
+  issueCount: number
+}) {
+  const tiles = [
+    { label: "Metadata", status: metaStatus, icon: FileText },
+    { label: "Review Matrix", status: matrixStatus, icon: ListChecks },
+    { label: "Syllabus & GB", status: syllabusStatus, icon: BookOpen },
+    { label: "Issue Log", status: null as "draft" | "submitted" | null, icon: Bug, extra: issueCount > 0 ? `${issueCount} logged` : "None logged" },
+  ]
+
+  const submittedCount = [metaStatus, matrixStatus, syllabusStatus].filter((s) => s === "submitted").length
+
+  return (
+    <Card className="border-border">
+      <CardHeader className="pb-3 pt-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold">TA Review Progress</CardTitle>
+          <span className={cn(
+            "text-xs font-semibold px-2 py-0.5 rounded-full",
+            submittedCount === 3
+              ? "bg-green-500/15 text-green-700 dark:text-green-400"
+              : submittedCount > 0
+                ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
+                : "bg-muted text-muted-foreground"
+          )}>
+            {submittedCount}/3 sections submitted
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent className="pb-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {tiles.map(({ label, status, icon: Icon, extra }) => {
+            const isSubmitted = status === "submitted"
+            const isDraft = status === "draft"
+            return (
+              <div
+                key={label}
+                className={cn(
+                  "flex flex-col gap-2 rounded-lg border p-3 transition-colors",
+                  isSubmitted
+                    ? "border-green-500/30 bg-green-500/10"
+                    : isDraft
+                      ? "border-orange-400/30 bg-orange-500/8"
+                      : "border-border bg-muted/20",
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <Icon className={cn("size-4", isSubmitted ? "text-green-600" : isDraft ? "text-orange-500" : "text-muted-foreground/50")} />
+                  {isSubmitted ? (
+                    <CheckCircle2 className="size-4 text-green-600" />
+                  ) : isDraft ? (
+                    <Clock className="size-4 text-orange-500" />
+                  ) : extra ? null : (
+                    <Circle className="size-4 text-muted-foreground/30" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-foreground leading-tight">{label}</p>
+                  <p className={cn(
+                    "text-[11px] font-medium mt-0.5",
+                    isSubmitted ? "text-green-700 dark:text-green-400" : isDraft ? "text-orange-600" : "text-muted-foreground",
+                  )}>
+                    {extra ?? (isSubmitted ? "Submitted" : isDraft ? "Draft saved" : "Not started")}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function SectionStatusChip({ responseStatus }: { responseStatus: "draft" | "submitted" | null }) {
   if (responseStatus === "submitted")
-    return <Badge className="bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/20">Submitted</Badge>
+    return (
+      <div className="flex items-center gap-1.5 rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-700 dark:text-green-400 border border-green-500/20">
+        <CheckCircle2 className="size-3.5" />
+        Submitted
+      </div>
+    )
   if (responseStatus === "draft")
-    return <Badge variant="outline" className="text-orange-600 border-orange-400/40">Draft</Badge>
-  return <Badge variant="outline" className="text-muted-foreground">Not started</Badge>
+    return (
+      <div className="flex items-center gap-1.5 rounded-full bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-600 border border-orange-400/30">
+        <Clock className="size-3.5" />
+        Draft saved
+      </div>
+    )
+  return (
+    <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground border border-border">
+      <Circle className="size-3.5" />
+      Not started
+    </div>
+  )
 }
 
 function CollapsibleCard({

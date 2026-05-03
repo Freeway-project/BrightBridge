@@ -19,7 +19,7 @@ export default async function SuperAdminCoursesPage(props: { searchParams: Promi
 
   return (
     <>
-      <Topbar title="All Courses" subtitle="Super Admin" />
+      <Topbar title="All Courses" subtitle="Super Admin" backHref="/super-admin" />
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
         <CoursesView result={paginatedResult} search={search} />
       </div>

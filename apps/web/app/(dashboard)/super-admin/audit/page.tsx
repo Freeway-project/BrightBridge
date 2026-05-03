@@ -15,7 +15,7 @@ export default async function SuperAdminAuditPage() {
 
   return (
     <>
-      <Topbar title="Audit Trail" subtitle="Super Admin" />
+      <Topbar title="Audit Trail" subtitle="Super Admin" backHref="/super-admin" />
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
         <AuditView data={data} />
       </div>

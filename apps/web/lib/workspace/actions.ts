@@ -31,7 +31,7 @@ export async function saveDraft(
     status: "draft",
   });
 
-  revalidatePath(`/courses/${courseId}`);
+  // No revalidatePath here — sidebar progress updates on navigation, not on every draft save
 
   return { ok: true, savedAt: new Date().toISOString() };
 }
