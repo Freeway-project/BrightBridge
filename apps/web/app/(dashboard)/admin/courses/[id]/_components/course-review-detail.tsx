@@ -39,7 +39,7 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
   const syllabusStatus = byKey["syllabus_review"]?.status ?? null
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-[var(--card-spacing,1rem)]">
       <ReviewProgressSummary metaStatus={metaStatus} matrixStatus={matrixStatus} syllabusStatus={syllabusStatus} issueCount={(notes?.issues ?? []).length} />
       <MetadataCard data={meta} responseStatus={metaStatus} />
       <ReviewMatrixCard data={matrix} responseStatus={matrixStatus} />

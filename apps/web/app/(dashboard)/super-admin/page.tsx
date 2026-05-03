@@ -3,6 +3,7 @@ import { OverviewView } from "@/components/super-admin/overview-view"
 import { getSuperAdminData } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
+import { TweakableContent } from "@/components/shared/tweakable-content"
 
 export default async function SuperAdminDashboardPage() {
   const context = await getAuthContext()
@@ -16,9 +17,9 @@ export default async function SuperAdminDashboardPage() {
   return (
     <>
       <Topbar title="System Overview" subtitle="Super Admin" />
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+      <TweakableContent className="flex-1 overflow-hidden">
         <OverviewView data={data} />
-      </div>
+      </TweakableContent>
     </>
   )
 }

@@ -11,10 +11,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Type, Layout, Send } from "lucide-react"
+import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send } from "lucide-react"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Separator } from "@/components/ui/separator"
-import { useTweaks } from "@/components/shared/tweak-provider"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
@@ -36,7 +35,6 @@ function getInitials(name?: string) {
 }
 
 export function AdminCourseSidebar({ course, escalations, currentUserId }: Props) {
-  const { settings, setSettings } = useTweaks()
   const [fixesOpen, setFixesOpen] = useState(false)
   const [note, setNote] = useState("")
   const [isPending, startTransition] = useTransition()
@@ -168,52 +166,6 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
           </section>
         </>
       )}
-
-      <Separator />
-
-      {/* Display Settings */}
-      <section className="space-y-4 pb-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Display Settings</h3>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-xs font-medium">
-                <Type className="size-3.5" />
-                Font Size
-              </label>
-              <span className="text-[10px] text-muted-foreground font-mono">{settings.fontSize}px</span>
-            </div>
-            <input
-              type="range"
-              className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-              value={settings.fontSize}
-              min={12}
-              max={24}
-              step={1}
-              onChange={(e) => setSettings({ fontSize: Number(e.target.value) })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-medium">
-              <Layout className="size-3.5" />
-              Card Density
-            </label>
-            <Tabs
-              value={settings.density}
-              onValueChange={(v: any) => setSettings({ density: v })}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-3 h-8 p-1 bg-muted">
-                <TabsTrigger value="compact" className="text-[10px] py-1">Small</TabsTrigger>
-                <TabsTrigger value="regular" className="text-[10px] py-1">Med</TabsTrigger>
-                <TabsTrigger value="comfy" className="text-[10px] py-1">Large</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

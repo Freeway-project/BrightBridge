@@ -7,6 +7,7 @@ import { NAV_ITEMS } from "@/lib/constants/nav"
 import type { Role } from "@coursebridge/workflow"
 import { signOut } from "@/app/dashboard/actions"
 import { LogOut } from "lucide-react"
+import { DisplaySettings } from "./display-settings"
 
 interface SidebarProps {
   role: Role
@@ -51,7 +52,8 @@ export function Sidebar({ role, userName }: SidebarProps) {
 
       {/* Footer */}
       <div className="border-t border-sidebar-border px-3 py-3 space-y-1">
-        <p className="px-2 text-[11px] text-sidebar-foreground/50 truncate">{userName}</p>
+        <p className="px-2 text-[11px] text-sidebar-foreground/50 truncate mb-1">{userName}</p>
+        <DisplaySettings />
         <form action={signOut}>
           <button
             type="submit"
