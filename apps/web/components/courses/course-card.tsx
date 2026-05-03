@@ -3,8 +3,9 @@ import { StatusBadge } from "./status-badge"
 import { type CourseStatus } from "@coursebridge/workflow"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, ArrowRight } from "lucide-react"
 import type { ReviewProgress } from "@/lib/courses/service"
+import { cn } from "@/lib/utils"
 
 interface CourseCardProps {
   course: {
@@ -30,6 +31,7 @@ export function CourseCard({ course }: CourseCardProps) {
               </h3>
               <span className="text-base text-muted-foreground">{course.title}</span>
               <StatusBadge status={course.status} />
+              <NextStepBadge status={course.status} progress={course.reviewProgress} />
             </div>
             <p className="text-xs text-muted-foreground">
               {course.term || "No Term"} • Last updated {new Date(course.updatedAt).toLocaleDateString()}
@@ -126,4 +128,32 @@ function StatusItem({
   )
 }
 
-import { cn } from "@/lib/utils"
+type NextStep = { label: string; style: string }
+
+function deriveNextStep(status: CourseStatus, progress: ReviewProgress | undefined): NextStep {
+  if (status === "admin_changes_requested")
+    return { label: "Fix Requested", style: "bg-red-500/15 text-red-600 border-red-400/30" }
+
+  const pastSubmit: CourseStatus[] = ["submitted_to_admin", "ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"]
+  if ((pastSubmit as string[]).includes(status))
+    return { label: "Waiting on Admin", style: "bg-muted text-muted-foreground border-border" }
+
+  if (!progress?.courseMetadata?.exists)
+    return { label: "Fill Metadata", style: "bg-blue-500/15 text-blue-600 border-blue-400/30" }
+  if (!progress?.reviewMatrix?.exists)
+    return { label: "Fill Checklist", style: "bg-blue-500/15 text-blue-600 border-blue-400/30" }
+  if (!progress?.syllabusReview?.exists)
+    return { label: "Fill Syllabus", style: "bg-blue-500/15 text-blue-600 border-blue-400/30" }
+
+  return { label: "Ready to Submit", style: "bg-green-500/15 text-green-700 border-green-500/20" }
+}
+
+function NextStepBadge({ status, progress }: { status: CourseStatus; progress: ReviewProgress | undefined }) {
+  const { label, style } = deriveNextStep(status, progress)
+  return (
+    <div className={cn("flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", style)}>
+      <ArrowRight className="size-3 shrink-0" />
+      {label}
+    </div>
+  )
+}

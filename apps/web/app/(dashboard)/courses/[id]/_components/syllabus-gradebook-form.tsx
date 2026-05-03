@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { saveDraft } from "@/lib/workspace/actions"
-import { useAutoSave } from "@/lib/workspace/use-auto-save"
 import {
   syllabusGradebookSchema,
   type SyllabusGradebookFormValues,
@@ -65,8 +64,6 @@ export function SyllabusGradebookForm({
     resolver: zodResolver(syllabusGradebookSchema),
     defaultValues,
   })
-
-  useAutoSave(form.control, () => void handleSave())
 
   useEffect(() => {
     const stored = window.localStorage.getItem(timerStorageKey)

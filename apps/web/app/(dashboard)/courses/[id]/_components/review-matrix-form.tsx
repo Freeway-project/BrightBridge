@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { useAutoSave } from "@/lib/workspace/use-auto-save"
 import { ChevronDown, Plus } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
@@ -77,8 +76,6 @@ export function ReviewMatrixForm({
 
   // Single subscription for the whole items array — replaces per-row form.watch() calls
   const watchedItems = useWatch({ control: form.control, name: "items" })
-
-  useAutoSave(form.control, () => void handleSave())
 
   useEffect(() => {
     // Restore elapsed from localStorage on mount
