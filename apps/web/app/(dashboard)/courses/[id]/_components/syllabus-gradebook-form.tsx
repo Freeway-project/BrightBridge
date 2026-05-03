@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { saveDraft } from "@/lib/workspace/actions"
+import { useAutoSave } from "@/lib/workspace/use-auto-save"
 import {
   syllabusGradebookSchema,
   type SyllabusGradebookFormValues,
@@ -65,6 +66,8 @@ export function SyllabusGradebookForm({
     defaultValues,
   })
 
+  useAutoSave(form.control, () => void handleSave())
+
   useEffect(() => {
     const stored = window.localStorage.getItem(timerStorageKey)
     if (stored) {
@@ -113,7 +116,7 @@ export function SyllabusGradebookForm({
         </div>
       </CardHeader>
       <CardContent>
-        <form className="space-y-6" onBlur={() => void handleSave()}>
+        <form className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-1.5 text-sm font-medium">
               Instructor
@@ -304,5 +307,5 @@ function SaveState({
   if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
   if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
   if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Auto-saves on blur</p>
+  return <p className="text-xs text-muted-foreground">Auto-saves while you type</p>
 }

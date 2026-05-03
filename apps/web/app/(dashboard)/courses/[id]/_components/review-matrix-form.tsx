@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { useAutoSave } from "@/lib/workspace/use-auto-save"
 import { ChevronDown, Plus } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
@@ -73,6 +74,11 @@ export function ReviewMatrixForm({
     resolver: zodResolver(reviewMatrixSchema),
     defaultValues,
   })
+
+  // Single subscription for the whole items array — replaces per-row form.watch() calls
+  const watchedItems = useWatch({ control: form.control, name: "items" })
+
+  useAutoSave(form.control, () => void handleSave())
 
   useEffect(() => {
     // Restore elapsed from localStorage on mount
@@ -147,7 +153,7 @@ export function ReviewMatrixForm({
         </div>
       </CardHeader>
       <CardContent>
-        <form className="space-y-3" onBlur={() => void handleSave()}>
+        <form className="space-y-3">
           {CHECKLIST.map((section) => (
             <Collapsible defaultOpen key={section.title}>
               <div className="rounded-lg border border-border">
@@ -169,7 +175,7 @@ export function ReviewMatrixForm({
                     <TableBody>
                       {section.items.map((item) => {
                         const index = defaultValues.items.findIndex((value) => value.item_id === item.id)
-                        const statusValue = form.watch(`items.${index}.status`)
+                        const statusValue = (watchedItems[index]?.status ?? "na") as ReviewMatrixStatus
                         const needsIssue = NEEDS_ISSUE.has(statusValue)
 
                         return (
@@ -271,5 +277,5 @@ function SaveState({
   if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
   if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
   if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Auto-saves on blur</p>
+  return <p className="text-xs text-muted-foreground">Auto-saves while you type</p>
 }

@@ -17,8 +17,8 @@ export default async function SubmitPage({ params }: Props) {
   if (!course) notFound()
 
   const sectionDefs = [
-    { key: "course_metadata", label: "Metadata", required: true },
-    { key: "review_matrix", label: "Review Matrix", required: true },
+    { key: "course_metadata", label: "Metadata", required: false },
+    { key: "review_matrix", label: "Review Matrix", required: false },
     { key: "syllabus_review", label: "Syllabus & Gradebook", required: false },
     { key: "general_notes", label: "Issue Log", required: false },
   ] as const
