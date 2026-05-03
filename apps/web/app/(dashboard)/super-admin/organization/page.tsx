@@ -15,7 +15,7 @@ export default async function SuperAdminOrganizationPage() {
 
   return (
     <>
-      <Topbar title="Organization" subtitle="Super Admin" />
+      <Topbar title="Organization" subtitle="Super Admin" backHref="/super-admin" />
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
         <OrganizationView data={data} />
       </div>

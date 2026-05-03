@@ -19,7 +19,7 @@ export default async function SuperAdminUsersPage(props: { searchParams: Promise
 
   return (
     <>
-      <Topbar title="User Management" subtitle="Super Admin" />
+      <Topbar title="User Management" subtitle="Super Admin" backHref="/super-admin" />
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
         <UsersView result={paginatedResult} search={search} />
       </div>
