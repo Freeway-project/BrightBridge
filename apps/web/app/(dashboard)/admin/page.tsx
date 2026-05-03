@@ -9,6 +9,7 @@ import { AssignedCoursesTable } from "./_components/assigned-courses-table"
 import { AdminTabs } from "./_components/admin-tabs"
 import { EscalationsTable } from "./_components/escalations-table"
 import { CompletedCoursesTable } from "./_components/completed-courses-table"
+import { TweakableContent } from "@/components/shared/tweakable-content"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -48,7 +49,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   return (
     <>
       <Topbar title="Admin" subtitle="Manage courses, assignments, and review progress" />
-      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-6 bg-background">
+      <TweakableContent className="flex-1 overflow-y-auto p-6 bg-background">
         <AdminTabs
           unassignedCount={unassignedPage.total}
           openEscalationsCount={openEscalations.length}
@@ -57,7 +58,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
           escalationsPanel={<EscalationsTable escalations={openEscalations} />}
           completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
         />
-      </div>
+      </TweakableContent>
     </>
   )
 }

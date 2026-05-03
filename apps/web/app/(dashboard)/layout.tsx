@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
 import { getAuthContext } from "@/lib/auth/context"
 import type { ReactNode } from "react"
+import { TweakProvider } from "@/components/shared/tweak-provider"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const context = await getAuthContext()
@@ -18,11 +19,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const userName = context.profile.fullName ?? context.email ?? ""
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar role={role} userName={userName} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {children}
+    <TweakProvider>
+      <div className="flex h-screen overflow-hidden bg-background">
+        <Sidebar role={role} userName={userName} />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {children}
+        </div>
       </div>
-    </div>
+    </TweakProvider>
   )
 }

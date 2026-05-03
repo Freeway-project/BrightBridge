@@ -1,5 +1,6 @@
 import { getAccessibleCourses } from "@/lib/courses/service";
 import { CourseListView, type CourseStat } from "@/components/courses/course-list-view";
+import { TweakableContent } from "@/components/shared/tweakable-content";
 
 export default async function TADashboardPage() {
   const { courses } = await getAccessibleCourses();
@@ -27,5 +28,9 @@ export default async function TADashboardPage() {
     },
   ];
 
-  return <CourseListView initialCourses={courses} stats={stats} />;
+  return (
+    <TweakableContent className="flex-1 overflow-hidden">
+      <CourseListView initialCourses={courses} stats={stats} />
+    </TweakableContent>
+  );
 }

@@ -125,7 +125,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-[var(--card-spacing,1rem)]">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex flex-1 items-center gap-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
