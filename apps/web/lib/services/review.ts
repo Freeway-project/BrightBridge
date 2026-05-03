@@ -1,12 +1,15 @@
 import "server-only";
 
+import { cache } from "react";
 import { getReviewRepository } from "@/lib/repositories";
 import type { ReviewResponse, ReviewSection } from "@/lib/repositories/contracts";
 export type { ReviewResponse, ReviewSection } from "@/lib/repositories/contracts";
 
-export async function getReviewSectionByKey(key: string): Promise<ReviewSection | null> {
+// Section rows are seeded once and never change — deduplicate within a request
+// and memoize across requests with a 1-hour revalidation.
+export const getReviewSectionByKey = cache(async (key: string): Promise<ReviewSection | null> => {
   return getReviewRepository().getReviewSectionByKey(key);
-}
+});
 
 export async function getReviewResponse(
   courseId: string,

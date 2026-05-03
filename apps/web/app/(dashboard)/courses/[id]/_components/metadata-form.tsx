@@ -4,7 +4,6 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { useAutoSave } from "@/lib/workspace/use-auto-save"
 import type { CourseRow } from "@/lib/services/courses"
 import { saveDraft } from "@/lib/workspace/actions"
 import { metadataSchema, type MetadataFormValues } from "@/lib/workspace/schemas"
@@ -62,8 +61,6 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
       }
     })
   }
-
-  useAutoSave(form.control, () => void handleSave())
 
   const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
   const sectionText = sectionNumbers.join(", ")
