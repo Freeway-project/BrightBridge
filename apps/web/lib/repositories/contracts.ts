@@ -300,6 +300,63 @@ export interface CommentRepository {
   postCourseComment(input: PostCourseCommentInput): Promise<CourseComment>;
 }
 
+// ── Escalations ──────────────────────────────────────────────────────────────
+
+export type EscalationSeverity = "minor" | "major" | "critical";
+export type EscalationStatus = "open" | "resolved";
+
+export type CourseEscalation = {
+  id: string;
+  course_id: string;
+  created_by: string;
+  severity: EscalationSeverity;
+  title: string;
+  status: EscalationStatus;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  created_at: string;
+  author_name?: string;
+  author_email?: string;
+};
+
+export type EscalationMessage = {
+  id: string;
+  escalation_id: string;
+  author_id: string;
+  author_name?: string;
+  author_email?: string;
+  body: string;
+  created_at: string;
+};
+
+export type EscalationWithMessages = CourseEscalation & {
+  messages: EscalationMessage[];
+};
+
+export type OpenEscalationRow = CourseEscalation & {
+  course_title: string;
+  course_source_id: string | null;
+  latest_message: string | null;
+  latest_message_at: string | null;
+};
+
+export type CreateEscalationInput = {
+  courseId: string;
+  createdBy: string;
+  severity: EscalationSeverity;
+  title: string;
+  firstMessage: string;
+};
+
+export interface EscalationRepository {
+  getEscalationsForCourse(courseId: string): Promise<EscalationWithMessages[]>;
+  getOpenEscalations(): Promise<OpenEscalationRow[]>;
+  createEscalation(input: CreateEscalationInput): Promise<EscalationWithMessages>;
+  addMessage(escalationId: string, authorId: string, body: string): Promise<EscalationMessage>;
+  resolveEscalation(escalationId: string, resolvedBy: string): Promise<void>;
+  countOpenEscalations(): Promise<number>;
+}
+
 export interface HierarchyRepository {
   listUnits(): Promise<OrgUnit[]>;
   getUnitById(id: string): Promise<OrgUnit | null>;

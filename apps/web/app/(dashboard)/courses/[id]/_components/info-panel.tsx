@@ -1,8 +1,9 @@
-import { CheckCircle2, Circle, Clock3, AlertCircle } from "lucide-react"
+import { CheckCircle2, Circle, Clock3, AlertTriangle } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
+import type { EscalationWithMessages } from "@/lib/services/escalations"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { EscalationPanel } from "./escalation-panel"
 
 type SectionProgress = {
   key: string
@@ -11,17 +12,23 @@ type SectionProgress = {
 }
 
 type InfoPanelProps = {
+  courseId: string
   courseStatus: CourseStatus
   reviewerName: string
+  reviewerId: string
   progress: SectionProgress[]
   lastSavedAt: string | null
+  escalations: EscalationWithMessages[]
 }
 
 export function InfoPanel({
+  courseId,
   courseStatus,
   reviewerName,
+  reviewerId,
   progress,
   lastSavedAt,
+  escalations,
 }: InfoPanelProps) {
   return (
     <aside className="hidden w-72 shrink-0 border-l border-border bg-sidebar/5 p-6 xl:block">
@@ -102,10 +109,17 @@ export function InfoPanel({
             </div>
           </section>
 
-          <Button variant="destructive" size="sm" className="w-full h-9 text-xs font-bold gap-2">
-            <AlertCircle className="size-3.5" />
-            Report Major Issue
-          </Button>
+          <section className="space-y-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1.5">
+              <AlertTriangle className="size-3" />
+              Escalation
+            </p>
+            <EscalationPanel
+              courseId={courseId}
+              currentUserId={reviewerId}
+              initialEscalations={escalations}
+            />
+          </section>
         </div>
       </div>
     </aside>
