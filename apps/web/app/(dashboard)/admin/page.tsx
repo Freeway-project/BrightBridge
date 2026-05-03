@@ -5,6 +5,7 @@ import { getAdminCoursesPage } from "@/lib/admin/queries"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
 import { AssignedCoursesTable } from "./_components/assigned-courses-table"
+import { AdminTabs } from "./_components/admin-tabs"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -23,14 +24,13 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [assignedPage, unassignedPage, tas] = await Promise.all([
+  const [coursesPage, unassignedPage, tas] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
       search,
       status,
       taProfileId,
-      assignedOnly: true,
     }),
     getAdminCoursesPage({
       page: 1,
@@ -42,10 +42,13 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
 
   return (
     <>
-      <Topbar title="Assignments" subtitle="Manage staff assignments for new courses" />
-      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-6 space-y-6 bg-background">
-        <AdminAssignmentPanel courses={unassignedPage.data} tas={tas} />
-        <AssignedCoursesTable page={assignedPage} tas={tas} />
+      <Topbar title="Admin" subtitle="Manage courses, assignments, and review progress" />
+      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-6 bg-background">
+        <AdminTabs
+          unassignedCount={unassignedPage.total}
+          coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
+          assignPanel={<AdminAssignmentPanel courses={unassignedPage.data} tas={tas} />}
+        />
       </div>
     </>
   )

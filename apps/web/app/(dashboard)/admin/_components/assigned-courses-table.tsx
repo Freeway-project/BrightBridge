@@ -62,6 +62,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
+  const unassigned = filteredCourses.filter((course) => course.status === "course_created").length
   const waitingForAdmin = filteredCourses.filter((course) => course.status === "submitted_to_admin").length
   const backWithTa = filteredCourses.filter((course) => course.status === "admin_changes_requested").length
   const readyForInstructor = filteredCourses.filter((course) => course.status === "ready_for_instructor").length
@@ -111,11 +112,11 @@ export function AssignedCoursesTable({ page, tas }: Props) {
         <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
           <div>
             <CardTitle className="text-base">
-          Assigned Courses
-              <span className="ml-2 text-sm font-normal text-muted-foreground">({page.total})</span>
+              All Courses
+              <span className="ml-2 text-sm font-normal text-muted-foreground">({page.total.toLocaleString()})</span>
             </CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              Track course ownership, review progress, and who is actively carrying each course.
+              Track all courses, assignments, review progress, and workflow status.
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -125,8 +126,8 @@ export function AssignedCoursesTable({ page, tas }: Props) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_220px_220px]">
-          <div className="relative">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex flex-1 items-center gap-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchInput}
@@ -137,69 +138,79 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                   applySearch()
                 }
               }}
-              placeholder="Search course, source ID, term, department, or TA..."
-              className="pl-9"
+              placeholder="Search by title, source ID, term, department, or TA..."
+              className="pl-9 pr-3"
             />
+            {searchInput && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-[84px] top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                onClick={() => { setSearchInput(""); setQuery({ page: "1", search: null }) }}
+              >
+                ×
+              </Button>
+            )}
+            <Button size="sm" onClick={applySearch} className="shrink-0">
+              Search
+            </Button>
           </div>
+          <div className="flex gap-2">
+            <Select
+              value={statusFilter}
+              onValueChange={(value) =>
+                setQuery({
+                  page: "1",
+                  status: value === "all" ? null : value,
+                })
+              }
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent className="max-h-64 overflow-y-auto">
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="course_created">Not yet assigned</SelectItem>
+                <SelectItem value="assigned_to_ta">Assigned to TA</SelectItem>
+                <SelectItem value="ta_review_in_progress">TA Review In Progress</SelectItem>
+                <SelectItem value="submitted_to_admin">Submitted to Admin</SelectItem>
+                <SelectItem value="admin_changes_requested">Admin Changes Requested</SelectItem>
+                <SelectItem value="ready_for_instructor">Ready for Instructor</SelectItem>
+                <SelectItem value="sent_to_instructor">Sent to Instructor</SelectItem>
+                <SelectItem value="instructor_questions">Instructor Questions</SelectItem>
+                <SelectItem value="instructor_approved">Instructor Approved</SelectItem>
+                <SelectItem value="final_approved">Final Approved</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select
-            value={statusFilter}
-            onValueChange={(value) =>
-              setQuery({
-                page: "1",
-                status: value === "all" ? null : value,
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="assigned_to_ta">Assigned to TA</SelectItem>
-              <SelectItem value="ta_review_in_progress">TA Review In Progress</SelectItem>
-              <SelectItem value="submitted_to_admin">Submitted to Admin</SelectItem>
-              <SelectItem value="admin_changes_requested">Admin Changes Requested</SelectItem>
-              <SelectItem value="ready_for_instructor">Ready for Instructor</SelectItem>
-              <SelectItem value="sent_to_instructor">Sent to Instructor</SelectItem>
-              <SelectItem value="instructor_questions">Instructor Questions</SelectItem>
-              <SelectItem value="instructor_approved">Instructor Approved</SelectItem>
-              <SelectItem value="final_approved">Final Approved</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={taFilter}
-            onValueChange={(value) =>
-              setQuery({
-                page: "1",
-                ta: value === "all" ? null : value,
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by TA" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All TAs</SelectItem>
-              {taOptions.map((ta) => (
-                <SelectItem key={ta.id} value={ta.id}>
-                  {ta.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={applySearch}>
-            Apply Search
-          </Button>
+            <Select
+              value={taFilter}
+              onValueChange={(value) =>
+                setQuery({
+                  page: "1",
+                  ta: value === "all" ? null : value,
+                })
+              }
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Filter by TA" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All TAs</SelectItem>
+                {taOptions.map((ta) => (
+                  <SelectItem key={ta.id} value={ta.id}>
+                    {ta.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Visible Courses" value={filteredCourses.length} tone="default" />
+          <SummaryStat label="Needs TA Assigned" value={unassigned} tone={unassigned > 0 ? "warn" : "default"} />
           <SummaryStat label="Active TAs" value={visibleTaCount} tone="default" />
-          <SummaryStat label="Waiting on Admin" value={waitingForAdmin} tone="warn" />
+          <SummaryStat label="Waiting on Admin" value={waitingForAdmin} tone={waitingForAdmin > 0 ? "warn" : "default"} />
           <SummaryStat
             label={backWithTa > 0 ? "Back With TA" : "Ready For Instructor"}
             value={backWithTa > 0 ? backWithTa : readyForInstructor}
@@ -209,9 +220,9 @@ export function AssignedCoursesTable({ page, tas }: Props) {
 
         {filteredCourses.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border px-6 py-12 text-center">
-            <p className="text-sm font-medium text-foreground">No assigned courses match these filters.</p>
+            <p className="text-sm font-medium text-foreground">No courses match these filters.</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Adjust search or filter settings to widen the queue.
+              Adjust the search or filter settings to widen the results.
             </p>
             <Button variant="ghost" className="mt-3" onClick={clearFilters}>
               Clear filters
@@ -300,11 +311,21 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             </Table>
           </div>
         )}
-        <div className="flex items-center justify-between border-t border-border pt-4">
+        <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">
-            Page {currentPage} of {Math.max(page.totalPages, 1)}
+            {page.total === 0
+              ? "No courses"
+              : `Showing ${pageStart}–${pageEnd} of ${page.total.toLocaleString()} courses`}
           </p>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => goToPage(1)}
+            >
+              First
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -313,6 +334,9 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             >
               Previous
             </Button>
+            <span className="min-w-[80px] text-center text-xs text-muted-foreground">
+              Page {currentPage} of {Math.max(page.totalPages, 1)}
+            </span>
             <Button
               variant="outline"
               size="sm"
@@ -320,6 +344,14 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               onClick={() => goToPage(currentPage + 1)}
             >
               Next
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= page.totalPages}
+              onClick={() => goToPage(page.totalPages)}
+            >
+              Last
             </Button>
           </div>
         </div>
@@ -418,6 +450,8 @@ function getInitials(value: string) {
 
 function getStatusHint(status: AdminCourseRow["status"]) {
   switch (status) {
+    case "course_created":
+      return "No TA assigned yet — needs assignment."
     case "assigned_to_ta":
       return "Assigned and waiting for TA work to begin."
     case "ta_review_in_progress":
