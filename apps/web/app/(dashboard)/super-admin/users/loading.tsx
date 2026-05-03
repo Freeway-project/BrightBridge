@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function UsersLoading() {
   return (
     <>
-      <Topbar title="User Management" subtitle="Super Admin" />
+      <Topbar title="User Management" subtitle="Super Admin" backHref="/super-admin" />
       <div className="flex-1 p-6 flex flex-col gap-6">
         <Skeleton className="h-48 w-full shrink-0 rounded-lg" />
         
