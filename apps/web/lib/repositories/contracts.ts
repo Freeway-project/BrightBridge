@@ -58,6 +58,15 @@ export type AssignedCourse = {
   created_at: string;
 };
 
+export type InstructorCourse = {
+  id: string;
+  title: string;
+  term: string | null;
+  department: string | null;
+  status: CourseStatus;
+  updatedAt: string;
+};
+
 export type AdminCourseRow = {
   id: string;
   sourceCourseId: string | null;
@@ -260,6 +269,7 @@ export interface CourseRepository {
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
   listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
+  listInstructorCourses(profileId: string): Promise<InstructorCourse[]>;
 }
 
 export interface ProfileRepository {
