@@ -11,6 +11,7 @@ import type {
   CourseSummary,
   CreateCourseRecordInput,
   InsertStatusEventInput,
+  InstructorCourse,
   PaginatedResult,
   StatusCount,
   StuckCourse,
@@ -577,6 +578,30 @@ export function createSupabaseCourseRepository(): CourseRepository {
           created_at: event.created_at,
         } satisfies AuditEvent;
       });
+    },
+
+    async listInstructorCourses(profileId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("courses")
+        .select("id, title, term, department, status, updated_at, course_assignments!inner(profile_id, role)")
+        .eq("course_assignments.profile_id", profileId)
+        .eq("course_assignments.role", "instructor")
+        .in("status", ["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
+        .order("updated_at", { ascending: false });
+
+      if (error) {
+        throw new Error(`listInstructorCourses: ${error.message}`);
+      }
+
+      return (data ?? []).map((row) => ({
+        id: row.id,
+        title: row.title,
+        term: row.term,
+        department: row.department,
+        status: toCourseStatus(row.status),
+        updatedAt: row.updated_at,
+      })) satisfies InstructorCourse[];
     },
 
     async listCoursesByUnitAncestry(unitIds) {

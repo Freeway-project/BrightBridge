@@ -1,19 +1,17 @@
 import { Topbar } from "@/components/layout/topbar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getInstructorDashboardData } from "@/lib/courses/service"
+import { InstructorCourseList } from "./_components/instructor-course-list"
+import { DepartmentMonitor } from "./_components/department-monitor"
 
-export default function InstructorDashboardPage() {
+export default async function InstructorDashboardPage() {
+  const { myCourses, departmentCourses, isDeptHead } = await getInstructorDashboardData()
+
   return (
     <>
       <Topbar title="My Course Reviews" />
-      <main className="flex-1 overflow-y-auto p-6">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-base">Instructor — My Course Reviews</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Coming soon.</p>
-          </CardContent>
-        </Card>
+      <main className="flex-1 overflow-y-auto p-6 space-y-8">
+        <InstructorCourseList courses={myCourses} />
+        {isDeptHead && <DepartmentMonitor courses={departmentCourses} />}
       </main>
     </>
   )

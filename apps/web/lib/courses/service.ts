@@ -10,13 +10,15 @@ import {
   type EffectiveRole
 } from "@coursebridge/workflow";
 import { getAuthContext, requireAnyRole, requireProfile, type AppProfile } from "@/lib/auth/context";
-import { getCourseRepository, getProfileRepository, getReviewRepository } from "@/lib/repositories";
-import type { CourseSummary, ReviewProgress, SectionProgress, CourseAssignmentRecord } from "@/lib/repositories/contracts";
+import { getCourseRepository, getProfileRepository, getReviewRepository, getHierarchyRepository } from "@/lib/repositories";
+import type { CourseSummary, ReviewProgress, SectionProgress, CourseAssignmentRecord, InstructorCourse } from "@/lib/repositories/contracts";
 
 const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
 const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
 
-export type { CourseSummary, ReviewProgress, SectionProgress } from "@/lib/repositories/contracts";
+export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse } from "@/lib/repositories/contracts";
+
+const LEADERSHIP_TITLES = new Set(["dean", "assistant_dean", "dept_head", "chair"]);
 
 export type CreateCourseInput = {
   sourceCourseId?: string | null;
@@ -202,4 +204,35 @@ async function insertStatusEvent({
 function cleanOptionalText(value: string | null | undefined) {
   const cleaned = value?.trim();
   return cleaned ? cleaned : null;
+}
+
+export type InstructorDashboardData = {
+  myCourses: InstructorCourse[];
+  departmentCourses: CourseSummary[];
+  isDeptHead: boolean;
+};
+
+export async function getInstructorDashboardData(): Promise<InstructorDashboardData> {
+  const context = await requireProfile();
+  if (context.kind !== "profile") {
+    return { myCourses: [], departmentCourses: [], isDeptHead: false };
+  }
+
+  const profileId = context.profile.id;
+
+  const [myCourses, userUnits] = await Promise.all([
+    getCourseRepository().listInstructorCourses(profileId),
+    getHierarchyRepository().getUserUnits(profileId),
+  ]);
+
+  const leadershipUnits = userUnits.filter((u) => LEADERSHIP_TITLES.has(u.title));
+
+  if (leadershipUnits.length === 0) {
+    return { myCourses, departmentCourses: [], isDeptHead: false };
+  }
+
+  const unitIds = leadershipUnits.map((u) => u.orgUnitId);
+  const departmentCourses = await getCourseRepository().listCoursesByUnitAncestry(unitIds);
+
+  return { myCourses, departmentCourses, isDeptHead: true };
 }
