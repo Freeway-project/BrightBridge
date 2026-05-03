@@ -27,15 +27,25 @@ export async function sendEscalationReplyAction(
 ) {
   const profile = await requireProfile()
   if (!body.trim()) return
-  await addEscalationMessage(escalationId, profile.userId, body.trim())
-  revalidatePath(`/admin/courses/${courseId}`)
-  revalidatePath(`/courses/${courseId}`)
+  try {
+    await addEscalationMessage(escalationId, profile.userId, body.trim())
+    revalidatePath(`/admin/courses/${courseId}`)
+    revalidatePath(`/courses/${courseId}`)
+  } catch (err) {
+    console.error("[escalation] sendEscalationReplyAction:", err)
+    throw new Error("Could not send reply. Please ensure the database migration has been applied.")
+  }
 }
 
 export async function resolveEscalationAction(escalationId: string, courseId: string) {
   const profile = await requireProfile()
-  await resolveEscalation(escalationId, profile.userId)
-  revalidatePath(`/admin/courses/${courseId}`)
-  revalidatePath(`/admin`)
-  revalidatePath(`/courses/${courseId}`)
+  try {
+    await resolveEscalation(escalationId, profile.userId)
+    revalidatePath(`/admin/courses/${courseId}`)
+    revalidatePath(`/admin`)
+    revalidatePath(`/courses/${courseId}`)
+  } catch (err) {
+    console.error("[escalation] resolveEscalationAction:", err)
+    throw new Error("Could not resolve escalation. Please ensure the database migration has been applied.")
+  }
 }

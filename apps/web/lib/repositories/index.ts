@@ -3,12 +3,14 @@ import "server-only";
 import type {
   CommentRepository,
   CourseRepository,
+  EscalationRepository,
   HierarchyRepository,
   ProfileRepository,
   ReviewRepository,
 } from "@/lib/repositories/contracts";
 import { createSupabaseCommentRepository } from "./supabase/comment-repository";
 import { createSupabaseCourseRepository } from "./supabase/course-repository";
+import { createSupabaseEscalationRepository } from "./supabase/escalation-repository";
 import { createSupabaseHierarchyRepository } from "./supabase/hierarchy-repository";
 import { createSupabaseProfileRepository } from "./supabase/profile-repository";
 import { createSupabaseReviewRepository } from "./supabase/review-repository";
@@ -18,6 +20,7 @@ let profileRepository: ProfileRepository | null = null;
 let reviewRepository: ReviewRepository | null = null;
 let commentRepository: CommentRepository | null = null;
 let hierarchyRepository: HierarchyRepository | null = null;
+let escalationRepository: EscalationRepository | null = null;
 
 export function getCourseRepository(): CourseRepository {
   courseRepository ??= createSupabaseCourseRepository();
@@ -42,4 +45,9 @@ export function getCommentRepository(): CommentRepository {
 export function getHierarchyRepository(): HierarchyRepository {
   hierarchyRepository ??= createSupabaseHierarchyRepository();
   return hierarchyRepository;
+}
+
+export function getEscalationRepository(): EscalationRepository {
+  escalationRepository ??= createSupabaseEscalationRepository();
+  return escalationRepository;
 }

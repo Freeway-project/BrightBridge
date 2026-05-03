@@ -2,11 +2,9 @@ import { notFound } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
-import { getCourseComments } from "@/lib/services/comments"
 import { getEscalationsForCourse } from "@/lib/services/escalations"
 import { CourseReviewDetail } from "./_components/course-review-detail"
 import { AdminCourseSidebar } from "./_components/admin-course-sidebar"
-import { CourseChat } from "./_components/course-chat"
 import { TweakProvider } from "@/components/shared/tweak-provider"
 
 interface Props {
@@ -18,9 +16,8 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, comments, escalations] = await Promise.all([
+  const [detail, escalations] = await Promise.all([
     getAdminCourseDetail(id),
-    getCourseComments(id),
     getEscalationsForCourse(id),
   ])
   
@@ -48,17 +45,8 @@ export default async function AdminCourseDetailPage({ params }: Props) {
         </div>
 
         {/* Sidebar Panel */}
-        <aside className="w-80 flex-shrink-0 border-l border-border bg-card flex flex-col shadow-sm">
-          <div className="flex-1 overflow-y-auto">
-            <AdminCourseSidebar course={course} escalations={escalations} currentUserId={context.userId} />
-          </div>
-          <div className="h-[400px] border-t border-border flex-shrink-0">
-            <CourseChat 
-              courseId={course.id} 
-              comments={comments} 
-              currentUserId={context.userId} 
-            />
-          </div>
+        <aside className="w-80 flex-shrink-0 border-l border-border bg-card overflow-y-auto shadow-sm">
+          <AdminCourseSidebar course={course} escalations={escalations} currentUserId={context.userId} />
         </aside>
       </main>
     </TweakProvider>
