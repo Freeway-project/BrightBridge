@@ -3,11 +3,11 @@ import { z } from "zod";
 // ── Step 1: Metadata ─────────────────────────────────────────────────────────
 
 export const metadataSchema = z.object({
-  term: z.string().min(1, "Term is required"),
+  term: z.string(),
   section_numbers: z.array(z.string()),
   brightspace_url: z.string().url("Must be a valid URL").or(z.literal("")),
   moodle_url: z.string().url("Must be a valid URL").or(z.literal("")),
-  migration_notes: z.string().min(1, "Migration notes are required"),
+  migration_notes: z.string(),
   time_required_seconds: z.number().int().nonnegative(),
   overall_time_spent_seconds: z.number().int().nonnegative(),
 });
@@ -66,8 +66,8 @@ export type SyllabusGradebookFormValues = z.infer<typeof syllabusGradebookSchema
 
 export const issueSchema = z.object({
   id: z.string(),
-  type: z.string().min(1, "Type is required"),
-  location: z.string().min(1, "Location is required"),
+  type: z.string(),
+  location: z.string(),
   severity: z.enum(["minor", "major", "critical"]),
   owner: z.string(),
   status: z.enum(["open", "fixed", "escalated", "resolved"]),
