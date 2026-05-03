@@ -50,7 +50,12 @@ export async function getAccessibleCourses() {
     };
   }
 
-  const summaries = await getCourseRepository().listAccessibleCourses();
+  // TAs and instructors only see courses assigned to them
+  const isScoped = context.profile.role === "standard_user" || context.profile.role === "instructor";
+  const summaries = isScoped
+    ? await getCourseRepository().listAssignedCourses(context.profile.id)
+    : await getCourseRepository().listAccessibleCourses();
+
   const progressMap = await fetchReviewProgressForCourses(summaries.map((course) => course.id));
 
   return {

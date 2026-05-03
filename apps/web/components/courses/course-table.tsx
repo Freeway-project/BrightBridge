@@ -45,7 +45,7 @@ export function CourseTable({ courses }: CourseTableProps) {
               <StatusBadge status={course.status} />
             </TableCell>
             <TableCell className="text-xs text-muted-foreground">
-              {new Date(course.created_at).toLocaleDateString("en-US", {
+              {new Date(course.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
               })}

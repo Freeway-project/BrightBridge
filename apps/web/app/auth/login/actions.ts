@@ -4,15 +4,9 @@ import { redirect } from "next/navigation"
 import type { Role } from "@coursebridge/workflow"
 import { getAuthService } from "@/lib/auth/service"
 
-const devUsers: Record<Role, string> = {
-  standard_user: "ta@coursebridge.dev",
-  admin_full: "admin@coursebridge.dev",
-  admin_viewer: "communications@coursebridge.dev",
-  instructor: "instructor@coursebridge.dev",
-  super_admin: "superadmin@coursebridge.dev",
-}
+import { DEV_ACCOUNTS } from "./dev-accounts"
 
-const devPassword = "CourseBridgeDev123!"
+const DEV_PASSWORD = "CourseBridgeDev123!"
 
 export type ActionState = {
   error?: string
@@ -38,19 +32,18 @@ export async function signInWithPasswordAction(
   redirect("/dashboard")
 }
 
-export async function signInAsDevRole(formData: FormData) {
+export async function signInAsDevEmail(formData: FormData) {
   if (process.env.NODE_ENV !== "development") {
     redirect("/auth/login")
   }
 
-  const role = String(formData.get("role") ?? "") as Role
-  const email = devUsers[role]
+  const email = String(formData.get("email") ?? "").trim().toLowerCase()
 
-  if (!email) {
+  if (!DEV_ACCOUNTS.some((a) => a.email === email)) {
     redirect("/auth/login")
   }
 
-  const { error } = await getAuthService().signInWithPassword(email, devPassword)
+  const { error } = await getAuthService().signInWithPassword(email, DEV_PASSWORD)
 
   if (error) {
     redirect("/auth/login")
