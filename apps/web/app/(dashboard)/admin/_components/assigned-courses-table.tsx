@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
 import {
   Select,
   SelectContent,
@@ -27,7 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Search, SlidersHorizontal } from "lucide-react"
+import { Search, SlidersHorizontal, CheckCircle2, Circle, Loader2 } from "lucide-react"
+import type { CourseStatus } from "@coursebridge/workflow"
 
 type Props = {
   page: AdminCoursesPage
@@ -235,7 +235,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="pl-4 text-xs">Course</TableHead>
                   <TableHead className="text-xs">Assigned TA</TableHead>
-                  <TableHead className="text-xs">Review Snapshot</TableHead>
+                  <TableHead className="text-xs">Pipeline</TableHead>
                   <TableHead className="text-xs">Workflow</TableHead>
                   <TableHead className="pr-4 text-right text-xs">Updated</TableHead>
                 </TableRow>
@@ -280,7 +280,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                       )}
                     </TableCell>
                     <TableCell className="align-top">
-                      <ReviewSnapshot progress={course.reviewProgress} />
+                      <WorkflowPipeline status={course.status} />
                     </TableCell>
                     <TableCell className="align-top">
                       <div className="space-y-2 py-1">
@@ -360,43 +360,51 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   )
 }
 
-function ReviewSnapshot({ progress }: { progress: AdminCourseRow["reviewProgress"] }) {
-  const pills = [
-    { label: "Meta", section: progress?.courseMetadata },
-    { label: "Checklist", section: progress?.reviewMatrix },
-    { label: "Syllabus", section: progress?.syllabusReview },
+type PhaseState = "done" | "active" | "idle"
+
+const DONE_1 = new Set<CourseStatus>(["submitted_to_admin", "ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
+const ACTIVE_1 = new Set<CourseStatus>(["ta_review_in_progress", "admin_changes_requested"])
+const DONE_2 = new Set<CourseStatus>(["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
+const ACTIVE_2 = new Set<CourseStatus>(["ready_for_instructor"])
+const DONE_3 = new Set<CourseStatus>(["instructor_approved", "final_approved"])
+const ACTIVE_3 = new Set<CourseStatus>(["sent_to_instructor", "instructor_questions"])
+
+function phaseState(s: CourseStatus, done: Set<CourseStatus>, active: Set<CourseStatus>): PhaseState {
+  return done.has(s) ? "done" : active.has(s) ? "active" : "idle"
+}
+
+function WorkflowPipeline({ status }: { status: CourseStatus }) {
+  const phases: { label: string; state: PhaseState }[] = [
+    { label: "TA Forms", state: phaseState(status, DONE_1, ACTIVE_1) },
+    { label: "Staging",  state: phaseState(status, DONE_2, ACTIVE_2) },
+    { label: "Review",   state: phaseState(status, DONE_3, ACTIVE_3) },
   ]
-  const submittedCount = pills.filter((pill) => pill.section?.status === "submitted").length
-  const startedCount = pills.filter((pill) => pill.section?.exists).length
-  const percent = (submittedCount / pills.length) * 100
 
   return (
-    <div className="min-w-[220px] space-y-2 py-1">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-foreground">{submittedCount}/3 sections submitted</span>
-        <span className="text-muted-foreground">{startedCount > 0 ? `${startedCount} started` : "Not started"}</span>
-      </div>
-      <Progress value={percent} className="h-1.5" />
-      <div className="flex flex-wrap gap-1">
-        {pills.map(({ label, section }) => {
-          const color = !section?.exists
-            ? "bg-muted text-muted-foreground"
-            : section.status === "submitted"
-              ? "bg-green-500/15 text-green-700 dark:text-green-400"
-              : "bg-orange-500/15 text-orange-700 dark:text-orange-400"
+    <div className="flex items-center gap-1 py-1">
+      {phases.map((phase, i) => (
+        <div key={phase.label} className="flex items-center gap-1">
+          {i > 0 && <div className="h-px w-3 shrink-0 bg-border" />}
+          <PhasePill label={phase.label} state={phase.state} />
+        </div>
+      ))}
+    </div>
+  )
+}
 
-          const suffix = !section?.exists ? "not started" : section.status === "submitted" ? "submitted" : "draft"
+function PhasePill({ label, state }: { label: string; state: PhaseState }) {
+  const styles = {
+    done:   "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/20",
+    active: "bg-orange-500/15 text-orange-600 border-orange-400/30",
+    idle:   "bg-muted text-muted-foreground border-border",
+  }[state]
 
-          return (
-            <span
-              key={label}
-              className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", color)}
-            >
-              {label}: {suffix}
-            </span>
-          )
-        })}
-      </div>
+  const Icon = state === "done" ? CheckCircle2 : state === "active" ? Loader2 : Circle
+
+  return (
+    <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5", styles)}>
+      <Icon className={cn("size-2.5 shrink-0", state === "active" && "animate-spin")} />
+      <span className="text-[10px] font-medium whitespace-nowrap">{label}</span>
     </div>
   )
 }

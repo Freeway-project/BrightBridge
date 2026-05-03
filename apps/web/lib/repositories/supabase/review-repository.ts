@@ -121,7 +121,7 @@ export function createSupabaseReviewRepository(): ReviewRepository {
         course_id: string;
         status: "draft" | "submitted";
         response_data: Record<string, unknown>;
-        review_sections: { key: string }[];
+        review_sections: { key: string } | { key: string }[];
       }>) {
         const progress = map.get(row.course_id);
 
@@ -134,7 +134,10 @@ export function createSupabaseReviewRepository(): ReviewRepository {
           status: row.status,
           responseData: row.response_data,
         };
-        const key = row.review_sections[0]?.key;
+        // Supabase returns a many-to-one join as a plain object, not an array
+        const key = Array.isArray(row.review_sections)
+          ? row.review_sections[0]?.key
+          : row.review_sections?.key;
 
         if (key === "course_metadata") progress.courseMetadata = section;
         if (key === "review_matrix") progress.reviewMatrix = section;
