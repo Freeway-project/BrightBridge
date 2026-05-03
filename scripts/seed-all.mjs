@@ -38,7 +38,7 @@ if (!supabaseUrl || !serviceRoleKey) {
 }
 
 const SUPERADMIN_EMAIL = (process.env.IMPORT_ADMIN_EMAIL ?? "superadmin@coursebridge.dev").toLowerCase();
-const DEFAULT_PASSWORD = "OkanaganDev2026!";
+const DEFAULT_PASSWORD = "CourseBridgeDev123!";
 
 const sb = createClient(supabaseUrl, serviceRoleKey, {
   auth: { autoRefreshToken: false, persistSession: false },

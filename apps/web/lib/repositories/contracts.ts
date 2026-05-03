@@ -247,8 +247,8 @@ export type PaginatedResult<T> = {
 
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
-  listAssignedCourses(userId: string): Promise<AssignedCourse[]>;
-  getAssignedCourseById(courseId: string, userId: string): Promise<AssignedCourse | null>;
+  listAssignedCourses(userId: string): Promise<CourseSummary[]>;
+  getAssignedCourseById(courseId: string, userId: string): Promise<CourseSummary | null>;
   createCourse(input: CreateCourseRecordInput): Promise<CourseSummary>;
   getCourseSummaryById(courseId: string): Promise<CourseSummary>;
   updateCourseStatus(courseId: string, status: CourseStatus): Promise<CourseSummary>;

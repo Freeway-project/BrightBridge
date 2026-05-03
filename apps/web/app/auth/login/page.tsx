@@ -1,8 +1,8 @@
 "use client"
 
 import { useActionState } from "react"
-import { getRoleLabel, ROLES } from "@coursebridge/workflow"
-import { signInAsDevRole, signInWithPasswordAction, type ActionState } from "./actions"
+import { DEV_ACCOUNTS } from "./dev-accounts"
+import { signInAsDevEmail, signInWithPasswordAction, type ActionState } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FileCheck, GitMerge, KeyRound, Lock, Mail, Users } from "lucide-react"
@@ -130,17 +130,20 @@ export default function LoginPage() {
           </div>
 
           {process.env.NODE_ENV === "development" && (
-            <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
+            <div className="rounded-lg border border-dashed border-amber-500/40 bg-amber-500/5 p-4 space-y-3">
               <div>
                 <p className="text-xs font-medium text-foreground">Dev quick login</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Uses seeded password accounts in development.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Password: <code className="font-mono">CourseBridgeDev123!</code>
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
-                {ROLES.map((role) => (
-                  <form action={signInAsDevRole} key={role}>
-                    <input name="role" type="hidden" value={role} />
-                    <Button className="w-full text-[11px] h-8" size="sm" type="submit" variant="outline">
-                      {getRoleLabel(role)}
+                {DEV_ACCOUNTS.map((acc) => (
+                  <form action={signInAsDevEmail} key={acc.email}>
+                    <input name="email" type="hidden" value={acc.email} />
+                    <Button className="w-full h-auto py-1.5 flex flex-col gap-0" size="sm" type="submit" variant="outline">
+                      <span className="text-[11px] font-medium">{acc.label}</span>
+                      <span className="text-[9px] text-muted-foreground font-normal">{acc.hint}</span>
                     </Button>
                   </form>
                 ))}

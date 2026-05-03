@@ -2,24 +2,18 @@ import "server-only";
 
 import { assertCanTransition, type CourseStatus, type EffectiveRole, type Role } from "@coursebridge/workflow";
 import { getCourseRepository } from "@/lib/repositories";
+import type { CourseSummary } from "@/lib/repositories/contracts";
 
-export type CourseRow = {
-  id: string;
-  title: string;
-  term: string | null;
-  department: string | null;
-  status: CourseStatus;
-  created_at: string;
-};
+export type { CourseSummary as CourseRow };
 
-export async function getAssignedCourses(userId: string): Promise<CourseRow[]> {
+export async function getAssignedCourses(userId: string): Promise<CourseSummary[]> {
   return getCourseRepository().listAssignedCourses(userId);
 }
 
 export async function getCourseById(
   courseId: string,
   userId: string,
-): Promise<CourseRow | null> {
+): Promise<CourseSummary | null> {
   return getCourseRepository().getAssignedCourseById(courseId, userId);
 }
 

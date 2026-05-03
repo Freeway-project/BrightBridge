@@ -4,7 +4,7 @@ import type { AssignmentRole } from "@coursebridge/workflow";
 import type {
   AdminCourseListFilters,
   AdminCourseRow,
-  AssignedCourse,
+
   AuditEvent,
   CourseAssignmentRecord,
   CourseRepository,
@@ -67,22 +67,26 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("courses")
-        .select("id, title, term, department, status, created_at, course_assignments!inner(profile_id)")
+        .select(
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,course_assignments!inner(profile_id,role)"
+        )
         .eq("course_assignments.profile_id", userId)
-        .order("created_at", { ascending: false });
+        .order("updated_at", { ascending: false });
 
       if (error) {
         throw new Error(`getAssignedCourses: ${error.message}`);
       }
 
-      return (data ?? []) as AssignedCourse[];
+      return (data ?? []).map((row) => toCourseSummary(row as unknown as CourseRow));
     },
 
     async getAssignedCourseById(courseId, userId) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("courses")
-        .select("id, title, term, department, status, created_at, course_assignments!inner(profile_id)")
+        .select(
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,course_assignments!inner(profile_id,role)"
+        )
         .eq("id", courseId)
         .eq("course_assignments.profile_id", userId)
         .maybeSingle();
@@ -91,7 +95,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         throw new Error(`getCourseById: ${error.message}`);
       }
 
-      return (data as AssignedCourse | null) ?? null;
+      return data ? toCourseSummary(data as unknown as CourseRow) : null;
     },
 
     async createCourse(input: CreateCourseRecordInput) {
