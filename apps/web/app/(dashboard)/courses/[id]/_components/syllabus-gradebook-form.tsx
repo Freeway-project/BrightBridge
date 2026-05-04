@@ -268,31 +268,6 @@ export function SyllabusGradebookForm({
   )
 }
 
-export function buildSyllabusGradebookDefaults(
-  saved?: Partial<SyllabusGradebookFormValues> | null,
-): SyllabusGradebookFormValues {
-  const savedSyllabus = new Map((saved?.syllabus_items ?? []).map((item) => [item.item_id, item]))
-  const savedGradebook = new Map((saved?.gradebook_items ?? []).map((item) => [item.item_id, item]))
-
-  return {
-    instructor_id: saved?.instructor_id ?? "",
-    instructor_email: saved?.instructor_email ?? "",
-    syllabus_items: SYLLABUS_ITEMS.map((item) => ({
-      item_id: item.id,
-      ta_status: savedSyllabus.get(item.id)?.ta_status ?? "pending",
-      notes: savedSyllabus.get(item.id)?.notes ?? "",
-      direct_link: savedSyllabus.get(item.id)?.direct_link ?? "",
-    })),
-    gradebook_items: GRADEBOOK_ITEMS.map((item) => ({
-      item_id: item.id,
-      status: savedGradebook.get(item.id)?.status ?? "na",
-      notes: savedGradebook.get(item.id)?.notes ?? "",
-      direct_link: savedGradebook.get(item.id)?.direct_link ?? "",
-    })),
-    time_spent_seconds: saved?.time_spent_seconds ?? 0,
-    overall_time_spent_seconds: saved?.overall_time_spent_seconds ?? 0,
-  }
-}
 
 function SaveState({
   isPending,

@@ -9,7 +9,6 @@ export type MetadataResponseData = {
   brightspace_url: string;
   moodle_url: string;
   migration_notes: string;
-  time_required_seconds: number;
   overall_time_spent_seconds: number;
 };
 

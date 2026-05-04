@@ -25,7 +25,6 @@ export default async function MetadataPage({ params }: Props) {
     brightspace_url: "",
     moodle_url: "",
     migration_notes: "",
-    time_required_seconds: 0,
     overall_time_spent_seconds: 0,
     ...((existing?.response_data ?? {}) as Partial<MetadataFormValues>),
   };
