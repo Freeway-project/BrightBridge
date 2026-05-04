@@ -42,7 +42,7 @@ export function AdminTabs({
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="completed">Completed</TabsTrigger>
+        <TabsTrigger value="completed">Provision</TabsTrigger>
       </TabsList>
 
       <TabsContent value="courses">{coursesPanel}</TabsContent>

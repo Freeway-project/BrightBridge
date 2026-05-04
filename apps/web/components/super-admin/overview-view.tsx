@@ -32,7 +32,7 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
         <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
         <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
         <StatCard label="With Instructor"  value={withInstructor}  icon="book-open" />
-        <StatCard label="Completed"        value={completed}       icon="check-square" />
+        <StatCard label="Provision"        value={completed}       icon="check-square" />
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">

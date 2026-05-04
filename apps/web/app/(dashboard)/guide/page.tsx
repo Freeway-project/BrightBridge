@@ -221,7 +221,7 @@ export default function GuidePage() {
                       </li>
                       <li className="flex items-start gap-2">
                         <ArrowRight className="size-4 mt-0.5 shrink-0 text-primary" />
-                        <span><strong>Completed:</strong> Archive of all courses that have reached final approval.</span>
+                        <span><strong>Provision:</strong> Archive of all courses that have reached final approval.</span>
                       </li>
                     </ul>
                   </CardContent>

@@ -12,8 +12,8 @@ export function CompletedCoursesTable({ courses }: Props) {
   if (courses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-        <p className="text-sm font-medium">No completed courses yet</p>
-        <p className="text-xs">Courses appear here once final approval is granted.</p>
+        <p className="text-sm font-medium">No provisioned courses yet</p>
+        <p className="text-xs">Courses appear here once provisioning is complete.</p>
       </div>
     )
   }

@@ -183,16 +183,16 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               </SelectTrigger>
               <SelectContent className="max-h-64 overflow-y-auto">
                 <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="course_created">Initiated — unassigned</SelectItem>
-                <SelectItem value="assigned_to_ta">Initiated — assigned to TA</SelectItem>
-                <SelectItem value="ta_review_in_progress">In Progress — TA reviewing</SelectItem>
-                <SelectItem value="submitted_to_admin">In Progress — waiting on admin</SelectItem>
-                <SelectItem value="admin_changes_requested">In Progress — fixes requested</SelectItem>
-                <SelectItem value="ready_for_instructor">In Progress — ready to send</SelectItem>
-                <SelectItem value="sent_to_instructor">In Progress — instructor reviewing</SelectItem>
-                <SelectItem value="instructor_questions">In Progress — instructor questions</SelectItem>
-                <SelectItem value="instructor_approved">In Progress — awaiting final sign-off</SelectItem>
-                <SelectItem value="final_approved">Completed</SelectItem>
+                <SelectItem value="course_created">Migration — unassigned</SelectItem>
+                <SelectItem value="assigned_to_ta">Migration — assigned to TA</SelectItem>
+                <SelectItem value="ta_review_in_progress">Migration — TA reviewing</SelectItem>
+                <SelectItem value="submitted_to_admin">Staging — waiting on admin</SelectItem>
+                <SelectItem value="admin_changes_requested">Staging — fixes requested</SelectItem>
+                <SelectItem value="ready_for_instructor">Staging — ready to send</SelectItem>
+                <SelectItem value="sent_to_instructor">Staging — instructor reviewing</SelectItem>
+                <SelectItem value="instructor_questions">Staging — instructor questions</SelectItem>
+                <SelectItem value="instructor_approved">Staging — awaiting final sign-off</SelectItem>
+                <SelectItem value="final_approved">Provision — final approved</SelectItem>
               </SelectContent>
             </Select>
 
@@ -489,26 +489,26 @@ function getInitials(value: string) {
 function getStatusHint(status: AdminCourseRow["status"]) {
   switch (status) {
     case "course_created":
-      return "Initiated — no TA assigned yet."
+      return "Migration — no TA assigned yet."
     case "assigned_to_ta":
-      return "Initiated — waiting for TA to begin."
+      return "Migration — waiting for TA to begin."
     case "ta_review_in_progress":
-      return "In progress — TA is actively reviewing."
+      return "Migration — TA is actively reviewing."
     case "submitted_to_admin":
-      return "In progress — awaiting admin review."
+      return "Staging — awaiting admin review."
     case "admin_changes_requested":
-      return "In progress — fixes sent back to TA."
+      return "Staging — fixes sent back to TA."
     case "ready_for_instructor":
-      return "In progress — ready to send to instructor."
+      return "Staging — ready to send to instructor."
     case "sent_to_instructor":
-      return "In progress — instructor is reviewing."
+      return "Staging — instructor is reviewing."
     case "instructor_questions":
-      return "In progress — instructor has questions."
+      return "Staging — instructor has questions."
     case "instructor_approved":
-      return "In progress — awaiting admin final sign-off."
+      return "Staging — awaiting admin final sign-off."
     case "final_approved":
-      return "Completed."
+      return "Provisioned."
     default:
-      return "In progress."
+      return "Staging."
   }
 }
