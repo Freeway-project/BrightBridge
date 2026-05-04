@@ -6,9 +6,10 @@ import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review"
 import { notFound } from "next/navigation";
 import { SyllabusGradebookForm } from "../_components/syllabus-gradebook-form";
 import type { SyllabusGradebookFormValues } from "@/lib/workspace/schemas";
+import { SYLLABUS_ITEMS_LIST, GRADEBOOK_ITEMS_LIST } from "@/lib/workspace/constants";
 
-const SYLLABUS_IDS = ["S1", "S2", "S3", "S4"];
-const GRADEBOOK_IDS = ["G1", "G2", "G3", "G4"];
+const SYLLABUS_IDS = SYLLABUS_ITEMS_LIST.map((i) => i.id);
+const GRADEBOOK_IDS = GRADEBOOK_ITEMS_LIST.map((i) => i.id);
 
 interface Props {
   params: Promise<{ id: string }>;

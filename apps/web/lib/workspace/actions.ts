@@ -10,6 +10,20 @@ import {
 } from "@/lib/services/review";
 import { transitionCourseStatus, getCourseById } from "@/lib/services/courses";
 import type { SectionKey } from "./types";
+import {
+  metadataSchema,
+  reviewMatrixSchema,
+  syllabusGradebookSchema,
+  issueLogSchema,
+} from "./schemas";
+import type { ZodTypeAny } from "zod";
+
+const SECTION_SCHEMAS: Partial<Record<SectionKey, ZodTypeAny>> = {
+  course_metadata: metadataSchema,
+  review_matrix: reviewMatrixSchema,
+  syllabus_review: syllabusGradebookSchema,
+  general_notes: issueLogSchema,
+};
 
 export async function saveDraft(
   courseId: string,
@@ -20,6 +34,12 @@ export async function saveDraft(
   const course = await getCourseById(courseId, ctx.userId);
   if (!course) throw new Error("Course not found or not accessible.");
 
+  const schema = SECTION_SCHEMAS[sectionKey];
+  const parsed = schema ? schema.safeParse(data) : { success: true, data };
+  if (!parsed.success) {
+    throw new Error(`Invalid data for section ${sectionKey}`);
+  }
+
   const section = await getReviewSectionByKey(sectionKey);
   if (!section) throw new Error(`Section not found: ${sectionKey}`);
 
@@ -27,11 +47,9 @@ export async function saveDraft(
     courseId,
     sectionId: section.id,
     userId: ctx.userId,
-    responseData: data as Record<string, unknown>,
+    responseData: (parsed as { success: true; data: Record<string, unknown> }).data,
     status: "draft",
   });
-
-  // No revalidatePath here — sidebar progress updates on navigation, not on every draft save
 
   return { ok: true, savedAt: new Date().toISOString() };
 }

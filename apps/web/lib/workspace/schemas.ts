@@ -8,7 +8,6 @@ export const metadataSchema = z.object({
   brightspace_url: z.string().url("Must be a valid URL").or(z.literal("")),
   moodle_url: z.string().url("Must be a valid URL").or(z.literal("")),
   migration_notes: z.string(),
-  time_required_seconds: z.number().int().nonnegative(),
   overall_time_spent_seconds: z.number().int().nonnegative(),
 });
 

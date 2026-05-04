@@ -159,6 +159,7 @@ export function ReviewMatrixForm({
                   <ChevronDown className="size-4 text-muted-foreground" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
+                  <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -230,6 +231,7 @@ export function ReviewMatrixForm({
                       })}
                     </TableBody>
                   </Table>
+                  </div>
                 </CollapsibleContent>
               </div>
           </Collapsible>
@@ -246,23 +248,6 @@ export function ReviewMatrixForm({
   )
 }
 
-export function buildReviewMatrixDefaults(
-  saved?: Partial<ReviewMatrixFormValues> | null,
-): ReviewMatrixFormValues {
-  const savedItems = new Map((saved?.items ?? []).map((item) => [item.item_id, item]))
-  return {
-    items: CHECKLIST.flatMap((section) =>
-      section.items.map((item) => ({
-        item_id: item.id,
-        status: savedItems.get(item.id)?.status ?? "na",
-        notes: savedItems.get(item.id)?.notes ?? "",
-        direct_link: savedItems.get(item.id)?.direct_link ?? "",
-      })),
-    ),
-    time_spent_seconds: saved?.time_spent_seconds ?? 0,
-    overall_time_spent_seconds: saved?.overall_time_spent_seconds ?? 0,
-  }
-}
 
 function SaveState({
   isPending,
