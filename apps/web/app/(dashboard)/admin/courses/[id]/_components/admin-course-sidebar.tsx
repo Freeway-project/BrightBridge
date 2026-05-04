@@ -16,6 +16,7 @@ import { StatusBadge } from "@/components/courses/status-badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface Props {
   course: AdminCourseRow
@@ -45,6 +46,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
   function handleApprove() {
     startTransition(async () => {
       await approveReviewAction(course.id)
+      toast.success("Course approved")
       router.push("/admin")
     })
   }
@@ -52,6 +54,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
   function handleSendFixes() {
     startTransition(async () => {
       await requestFixesAction(course.id, note)
+      toast.info("Fixes requested from TA")
       router.push("/admin")
     })
   }
@@ -193,6 +196,7 @@ function AdminEscalationThread({
     if (!body.trim() || isPending) return
     startTransition(async () => {
       await sendEscalationReplyAction(courseId, escalation.id, body)
+      toast.success("Reply sent")
       setBody("")
     })
   }
@@ -200,6 +204,7 @@ function AdminEscalationThread({
   function handleResolve() {
     startTransition(async () => {
       await resolveEscalationAction(escalation.id, courseId)
+      toast.success("Escalation resolved")
     })
   }
 
