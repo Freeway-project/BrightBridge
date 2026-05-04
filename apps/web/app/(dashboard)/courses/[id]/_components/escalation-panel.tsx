@@ -22,6 +22,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AlertTriangle, CheckCircle2, Send } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface Props {
   courseId: string
@@ -66,6 +67,7 @@ function EscalationCreateForm({ courseId }: { courseId: string }) {
     if (!title.trim() || !message.trim() || isPending) return
     startTransition(async () => {
       await createEscalationAction(courseId, severity, title.trim(), message.trim())
+      toast.success("Escalation submitted to admin")
     })
   }
 
@@ -133,6 +135,7 @@ function EscalationThread({
     if (!body.trim() || isPending) return
     startTransition(async () => {
       await sendEscalationMessageAction(courseId, escalation.id, body)
+      toast.success("Message sent")
       setBody("")
     })
   }
