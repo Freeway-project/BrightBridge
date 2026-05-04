@@ -159,6 +159,7 @@ export function ReviewMatrixForm({
                   <ChevronDown className="size-4 text-muted-foreground" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
+                  <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -230,6 +231,7 @@ export function ReviewMatrixForm({
                       })}
                     </TableBody>
                   </Table>
+                  </div>
                 </CollapsibleContent>
               </div>
           </Collapsible>
