@@ -5,14 +5,10 @@ import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { assignTaToCourseAction, type AssignTaState } from "../actions";
 
 type AssignableCourse = {
@@ -31,13 +27,30 @@ const initialState: AssignTaState = {
   message: null,
 };
 
+const MAX_VISIBLE_COURSES = 250;
+const MAX_VISIBLE_TAS = 150;
+
 export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps) {
   const [state, formAction, pending] = useActionState(assignTaToCourseAction, initialState);
+  const [coursePickerOpen, setCoursePickerOpen] = useState(false);
+  const [taPickerOpen, setTaPickerOpen] = useState(false);
   const [courseSearch, setCourseSearch] = useState("");
   const [taSearch, setTaSearch] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedTaId, setSelectedTaId] = useState<string>("");
   const canAssign = courses.length > 0 && tas.length > 0;
   const normalizedCourseSearch = courseSearch.trim().toLowerCase();
   const normalizedTaSearch = taSearch.trim().toLowerCase();
+
+  const selectedCourse = useMemo(
+    () => courses.find((course) => course.id === selectedCourseId) ?? null,
+    [courses, selectedCourseId]
+  );
+
+  const selectedTa = useMemo(
+    () => tas.find((ta) => ta.id === selectedTaId) ?? null,
+    [tas, selectedTaId]
+  );
 
   const filteredCourses = useMemo(
     () =>
@@ -51,6 +64,11 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     [courses, normalizedCourseSearch]
   );
 
+  const visibleCourses = useMemo(
+    () => filteredCourses.slice(0, MAX_VISIBLE_COURSES),
+    [filteredCourses]
+  );
+
   const filteredTas = useMemo(
     () =>
       tas.filter((ta) => {
@@ -61,6 +79,9 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
       }),
     [tas, normalizedTaSearch]
   );
+
+  const visibleTas = useMemo(() => filteredTas.slice(0, MAX_VISIBLE_TAS), [filteredTas]);
+  const canSubmit = canAssign && Boolean(selectedCourseId) && Boolean(selectedTaId) && !pending;
 
   return (
     <Card>
@@ -81,102 +102,187 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
       </CardHeader>
       <CardContent className="space-y-[var(--card-spacing,1rem)] pt-0">
         <form action={formAction}>
-          <div className="grid gap-4 sm:grid-cols-[1fr_auto] lg:grid-cols-[1fr_260px_auto]">
-            <div className="grid gap-1.5">
+          <input type="hidden" name="courseId" value={selectedCourseId} />
+          <input type="hidden" name="profileId" value={selectedTaId} />
+
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)_auto]">
+            <div className="grid gap-2">
               <label className="text-sm font-medium text-foreground">Course</label>
-              <Select disabled={!canAssign || pending} name="courseId" required>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={courses.length ? "Select a course to assign…" : "All courses are assigned"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <div className="sticky top-0 z-10 border-b bg-popover p-2">
+              <Popover open={coursePickerOpen} onOpenChange={setCoursePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!canAssign || pending}
+                    className="h-10 w-full justify-between px-3"
+                  >
+                    <span className="truncate text-left">
+                      {selectedCourse ? selectedCourse.title : "Select a course to assign..."}
+                    </span>
+                    <ChevronsUpDown className="size-4 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-[min(760px,calc(100vw-2rem))] p-0">
+                  <div className="border-b p-3">
                     <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                      <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Search by title or course ID…"
+                        autoFocus
                         value={courseSearch}
                         onChange={(e) => setCourseSearch(e.target.value)}
-                        onKeyDown={(e) => e.stopPropagation()}
-                        className="h-8 pl-7 pr-7 text-xs"
+                        placeholder="Search by title or source course ID..."
+                        className="h-10 pl-9 pr-8"
                       />
                       {courseSearch ? (
                         <button
                           type="button"
                           aria-label="Clear course search"
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
                           onClick={() => setCourseSearch("")}
                         >
                           ×
                         </button>
                       ) : null}
                     </div>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      {filteredCourses.length.toLocaleString()} result{filteredCourses.length === 1 ? "" : "s"}
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {filteredCourses.length.toLocaleString()} matching course
+                      {filteredCourses.length === 1 ? "" : "s"}
                     </p>
                   </div>
-                  {filteredCourses.length === 0 ? (
-                    <p className="px-3 py-4 text-xs text-center text-muted-foreground">No courses match your search.</p>
-                  ) : (
-                    filteredCourses.map((course) => (
-                      <SelectItem key={course.id} value={course.id} className="text-sm">
-                        <span className="font-medium">{course.title}</span>
-                        {course.sourceCourseId ? (
-                          <span className="ml-2 text-xs text-muted-foreground">({course.sourceCourseId})</span>
-                        ) : null}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                  <ScrollArea className="h-[360px]">
+                    {visibleCourses.length === 0 ? (
+                      <p className="px-4 py-6 text-sm text-center text-muted-foreground">
+                        No courses match your search.
+                      </p>
+                    ) : (
+                      <div className="p-2">
+                        {visibleCourses.map((course) => (
+                          <button
+                            key={course.id}
+                            type="button"
+                            className={cn(
+                              "flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-muted",
+                              course.id === selectedCourseId && "bg-muted"
+                            )}
+                            onClick={() => {
+                              setSelectedCourseId(course.id);
+                              setCoursePickerOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mt-0.5 size-4 shrink-0 text-primary",
+                                course.id === selectedCourseId ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-medium">{course.title}</span>
+                              <span className="block text-xs text-muted-foreground">
+                                {course.sourceCourseId ?? "No source course ID"}
+                              </span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                  {filteredCourses.length > MAX_VISIBLE_COURSES ? (
+                    <p className="border-t px-3 py-2 text-xs text-muted-foreground">
+                      Showing first {MAX_VISIBLE_COURSES.toLocaleString()} results. Keep typing to narrow down.
+                    </p>
+                  ) : null}
+                </PopoverContent>
+              </Popover>
             </div>
 
-            <div className="grid gap-1.5">
+            <div className="grid gap-2">
               <label className="text-sm font-medium text-foreground">Assign to TA</label>
-              <Select disabled={!canAssign || pending} name="profileId" required>
-                <SelectTrigger className="w-full lg:w-[260px]">
-                  <SelectValue placeholder={tas.length ? "Select a TA…" : "No TA profiles found"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <div className="sticky top-0 z-10 border-b bg-popover p-2">
+              <Popover open={taPickerOpen} onOpenChange={setTaPickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!canAssign || pending}
+                    className="h-10 w-full justify-between px-3"
+                  >
+                    <span className="truncate text-left">
+                      {selectedTa ? selectedTa.fullName ?? selectedTa.email : "Select a TA..."}
+                    </span>
+                    <ChevronsUpDown className="size-4 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-[min(460px,calc(100vw-2rem))] p-0">
+                  <div className="border-b p-3">
                     <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                      <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Search TA by name or email…"
+                        autoFocus
                         value={taSearch}
                         onChange={(e) => setTaSearch(e.target.value)}
-                        onKeyDown={(e) => e.stopPropagation()}
-                        className="h-8 pl-7 pr-7 text-xs"
+                        placeholder="Search TA by name or email..."
+                        className="h-10 pl-9 pr-8"
                       />
                       {taSearch ? (
                         <button
                           type="button"
                           aria-label="Clear TA search"
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
                           onClick={() => setTaSearch("")}
                         >
                           ×
                         </button>
                       ) : null}
                     </div>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      {filteredTas.length.toLocaleString()} TA{filteredTas.length === 1 ? "" : "s"}
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {filteredTas.length.toLocaleString()} matching TA{filteredTas.length === 1 ? "" : "s"}
                     </p>
                   </div>
-                  {filteredTas.length === 0 ? (
-                    <p className="px-3 py-4 text-xs text-center text-muted-foreground">No TAs match your search.</p>
-                  ) : (
-                    filteredTas.map((ta) => (
-                      <SelectItem key={ta.id} value={ta.id}>
-                        {ta.fullName ?? ta.email}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                  <ScrollArea className="h-[320px]">
+                    {visibleTas.length === 0 ? (
+                      <p className="px-4 py-6 text-sm text-center text-muted-foreground">
+                        No TAs match your search.
+                      </p>
+                    ) : (
+                      <div className="p-2">
+                        {visibleTas.map((ta) => (
+                          <button
+                            key={ta.id}
+                            type="button"
+                            className={cn(
+                              "flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left hover:bg-muted",
+                              ta.id === selectedTaId && "bg-muted"
+                            )}
+                            onClick={() => {
+                              setSelectedTaId(ta.id);
+                              setTaPickerOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mt-0.5 size-4 shrink-0 text-primary",
+                                ta.id === selectedTaId ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-medium">{ta.fullName ?? "Unnamed TA"}</span>
+                              <span className="block truncate text-xs text-muted-foreground">{ta.email}</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                  {filteredTas.length > MAX_VISIBLE_TAS ? (
+                    <p className="border-t px-3 py-2 text-xs text-muted-foreground">
+                      Showing first {MAX_VISIBLE_TAS.toLocaleString()} results. Keep typing to narrow down.
+                    </p>
+                  ) : null}
+                </PopoverContent>
+              </Popover>
             </div>
 
-            <div className="flex items-end">
-              <Button className="w-full sm:w-auto" disabled={!canAssign || pending} type="submit">
+            <div className="flex items-end lg:justify-end">
+              <Button className="h-10 w-full px-5 sm:w-auto" disabled={!canSubmit} type="submit">
                 {pending ? "Assigning…" : "Assign TA"}
               </Button>
             </div>

@@ -5,6 +5,8 @@ import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review"
 import { notFound } from "next/navigation";
 import { MetadataForm } from "../_components/metadata-form";
 import type { MetadataFormValues } from "@/lib/workspace/schemas";
+import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper";
+import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -33,11 +35,17 @@ export default async function MetadataPage({ params }: Props) {
     <>
       <Topbar title="Course Workspace" subtitle="Step 1 of 5 — Metadata" />
       <main className="flex-1 overflow-y-auto p-6">
-        <MetadataForm
-          course={course}
-          reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
-          defaultValues={defaultValues}
-        />
+        <CourseWorkspaceRefreshWrapper
+          courseId={id}
+          title="Metadata Review"
+          refreshCallback={() => refreshCourseWorkspace(id)}
+        >
+          <MetadataForm
+            course={course}
+            reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
+            defaultValues={defaultValues}
+          />
+        </CourseWorkspaceRefreshWrapper>
       </main>
     </>
   );

@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import { SyllabusGradebookForm } from "../_components/syllabus-gradebook-form";
 import type { SyllabusGradebookFormValues } from "@/lib/workspace/schemas";
 import { SYLLABUS_ITEMS_LIST, GRADEBOOK_ITEMS_LIST } from "@/lib/workspace/constants";
+import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper";
+import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 const SYLLABUS_IDS = SYLLABUS_ITEMS_LIST.map((i) => i.id);
 const GRADEBOOK_IDS = GRADEBOOK_ITEMS_LIST.map((i) => i.id);
@@ -47,11 +49,17 @@ export default async function SyllabusGradebookPage({ params }: Props) {
     <>
       <Topbar title="Course Workspace" subtitle="Step 3 of 5 — Syllabus & Gradebook" />
       <main className="flex-1 overflow-y-auto p-6">
-        <SyllabusGradebookForm
+        <CourseWorkspaceRefreshWrapper
           courseId={id}
-          defaultValues={defaultValues}
-          instructors={instructors}
-        />
+          title="Syllabus & Gradebook Review"
+          refreshCallback={() => refreshCourseWorkspace(id)}
+        >
+          <SyllabusGradebookForm
+            courseId={id}
+            defaultValues={defaultValues}
+            instructors={instructors}
+          />
+        </CourseWorkspaceRefreshWrapper>
       </main>
     </>
   );

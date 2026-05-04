@@ -5,6 +5,8 @@ import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review"
 import { notFound } from "next/navigation";
 import { IssueLogTable } from "../_components/issue-log-table";
 import type { IssueLogResponseData } from "@/lib/workspace/types";
+import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper";
+import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -24,7 +26,13 @@ export default async function IssueLogPage({ params }: Props) {
     <>
       <Topbar title="Course Workspace" subtitle="Step 4 of 5 — Issue Log" />
       <main className="flex-1 overflow-y-auto p-6">
-        <IssueLogTable courseId={id} defaultIssues={data.issues ?? []} />
+        <CourseWorkspaceRefreshWrapper
+          courseId={id}
+          title="Issue Log"
+          refreshCallback={() => refreshCourseWorkspace(id)}
+        >
+          <IssueLogTable courseId={id} defaultIssues={data.issues ?? []} />
+        </CourseWorkspaceRefreshWrapper>
       </main>
     </>
   );

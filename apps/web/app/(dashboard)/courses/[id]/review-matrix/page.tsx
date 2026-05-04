@@ -7,6 +7,8 @@ import { ReviewMatrixForm } from "../_components/review-matrix-form";
 import type { ReviewMatrixFormValues } from "@/lib/workspace/schemas";
 import type { IssueLogResponseData } from "@/lib/workspace/types";
 import { CHECKLIST } from "@/lib/workspace/constants";
+import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper";
+import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 const ALL_ITEM_IDS = CHECKLIST.flatMap((s) => s.items.map((i) => i.id));
 
@@ -50,11 +52,17 @@ export default async function ReviewMatrixPage({ params }: Props) {
     <>
       <Topbar title="Course Workspace" subtitle="Step 2 of 5 — Review Matrix" />
       <main className="flex-1 overflow-y-auto p-6">
-        <ReviewMatrixForm
+        <CourseWorkspaceRefreshWrapper
           courseId={id}
-          defaultValues={defaultValues}
-          initialIssues={initialIssues}
-        />
+          title="Review Matrix"
+          refreshCallback={() => refreshCourseWorkspace(id)}
+        >
+          <ReviewMatrixForm
+            courseId={id}
+            defaultValues={defaultValues}
+            initialIssues={initialIssues}
+          />
+        </CourseWorkspaceRefreshWrapper>
       </main>
     </>
   );
