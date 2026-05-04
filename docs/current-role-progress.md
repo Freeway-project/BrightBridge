@@ -1,6 +1,6 @@
 # BrightBridge Current Status By Role
 
-Last updated: 2026-04-29
+Last updated: 2026-05-04
 
 ## Overall System Status
 
@@ -55,9 +55,11 @@ Implemented:
 - Admin can sign in and access the Admin dashboard
 - Admin dashboard shows a real course queue
 - Admin can select a course and assign a TA
-- TA options come from real `profiles` rows with role `ta`
+- TA options come from real `profiles` rows with role `standard_user`
 - Assignment writes to `course_assignments`
 - If needed, assignment flow transitions a course from `course_created` to `assigned_to_ta`
+- Course search in the assignment panel now queries the full DB server-side (26k+ courses supported); previously only searched the first 200 pre-loaded results
+- Auto-refresh wrapper added to the admin dashboard
 
 Current limitations:
 
@@ -144,11 +146,10 @@ After that:
 - Build the Communications handoff queue and downstream workflow
 - Add user-facing comments/chat and attachment handling
 
-## Current Local WIP
+## Current Branch: ft-RelatimeUpdates
 
-There are local uncommitted workspace changes at the time of this summary:
+Active work in this branch:
 
-- TA dashboard is being refactored from the older table client to the newer shared course list view
-- `apps/web/lib/courses/service.ts` has a local type fix for review progress mapping
-
-These changes are in the working tree and may not yet be pushed or merged beyond the current local state.
+- Auto-refresh wrappers added to admin dashboard, queue, and TA pages
+- Admin assignment panel course search fixed: now calls `searchAssignableCoursesAction` server action on input (debounced 300ms), searching the full 26k-course DB instead of filtering a pre-loaded 200-course list
+- Workflow and role-progress docs updated to match actual code
