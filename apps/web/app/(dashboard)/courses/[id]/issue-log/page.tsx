@@ -29,7 +29,7 @@ export default async function IssueLogPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Issue Log"
-          refreshCallback={() => refreshCourseWorkspace(id)}
+          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <IssueLogTable courseId={id} defaultIssues={data.issues ?? []} />
         </CourseWorkspaceRefreshWrapper>

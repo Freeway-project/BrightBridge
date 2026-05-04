@@ -38,7 +38,7 @@ export default async function MetadataPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Metadata Review"
-          refreshCallback={() => refreshCourseWorkspace(id)}
+          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <MetadataForm
             course={course}

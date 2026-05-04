@@ -52,7 +52,7 @@ export default async function SyllabusGradebookPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Syllabus & Gradebook Review"
-          refreshCallback={() => refreshCourseWorkspace(id)}
+          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <SyllabusGradebookForm
             courseId={id}
