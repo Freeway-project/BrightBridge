@@ -22,13 +22,13 @@ export default async function SuperAdminUsersPage({ searchParams }: Props) {
   const page = Number(resolvedSearchParams?.page ?? 1)
   const search = typeof resolvedSearchParams?.search === "string" ? resolvedSearchParams.search : undefined
 
-  const paginatedResult = await getPaginatedUsers(page, 20, search)
+  const paginatedResult = await getPaginatedUsers(page, 20, search ?? "")
 
   return (
     <>
       <Topbar title="User Management" subtitle="Super Admin" backHref="/super-admin" />
       <TweakableContent className="flex-1 overflow-hidden">
-        <UsersView result={paginatedResult} search={search} />
+        <UsersView result={paginatedResult} search={search ?? ""} />
       </TweakableContent>
     </>
   )
