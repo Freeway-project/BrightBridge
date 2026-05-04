@@ -3,8 +3,10 @@ import type { ReactNode } from "react";
 import { requireProfile } from "@/lib/auth/context";
 import { getCourseById } from "@/lib/services/courses";
 import { getReviewResponses, getReviewSectionByKey } from "@/lib/services/review";
+import { getEscalationsForCourse } from "@/lib/services/escalations";
 import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
+import { TweakableContent } from "@/components/shared/tweakable-content";
 
 const SECTIONS = [
   { key: "course_metadata", label: "Metadata" },
@@ -28,7 +30,10 @@ export default async function CourseWorkspaceLayout({
 
   if (!course) notFound();
 
-  const responses = await getReviewResponses(id);
+  const [responses, escalations] = await Promise.all([
+    getReviewResponses(id),
+    getEscalationsForCourse(id),
+  ]);
   const respondedSectionIds = new Set(
     responses
       .filter((r) => r.response_data && Object.keys(r.response_data).length > 0)
@@ -55,12 +60,17 @@ export default async function CourseWorkspaceLayout({
         courseTitle={course.title}
         courseStatus={course.status}
       />
-      <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
+      <TweakableContent className="flex flex-1 flex-col overflow-hidden">
+        {children}
+      </TweakableContent>
       <InfoPanel
+        courseId={id}
         courseStatus={course.status}
         reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
+        reviewerId={ctx.userId}
         progress={sectionMeta}
         lastSavedAt={lastSavedAt}
+        escalations={escalations}
       />
     </div>
   );

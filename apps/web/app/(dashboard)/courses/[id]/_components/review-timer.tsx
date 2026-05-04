@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Clock3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -20,12 +20,14 @@ export function ReviewTimer({
   compact = false,
 }: ReviewTimerProps) {
   const [elapsed, setElapsed] = useState(0)
+  const elapsedRef = useRef(0)
 
   useEffect(() => {
     const stored = window.localStorage.getItem(storageKey)
     if (stored) {
       const parsed = Number.parseInt(stored, 10)
       if (Number.isFinite(parsed)) {
+        elapsedRef.current = parsed
         setElapsed(parsed)
         onTick?.(parsed)
       }
@@ -34,17 +36,16 @@ export function ReviewTimer({
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      setElapsed((current) => {
-        const next = current + 1
-        window.localStorage.setItem(storageKey, String(next))
-        window.dispatchEvent(
-          new CustomEvent(REVIEW_TIMER_EVENT, {
-            detail: { storageKey, elapsed: next },
-          }),
-        )
-        onTick?.(next)
-        return next
-      })
+      elapsedRef.current += 1
+      const next = elapsedRef.current
+      setElapsed(next)
+      window.localStorage.setItem(storageKey, String(next))
+      window.dispatchEvent(
+        new CustomEvent(REVIEW_TIMER_EVENT, {
+          detail: { storageKey, elapsed: next },
+        }),
+      )
+      onTick?.(next)
     }, 1000)
 
     return () => window.clearInterval(id)

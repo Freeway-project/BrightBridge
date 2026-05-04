@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 
 type TweakSettings = {
-  fontSize: number
+  fontSize: "small" | "medium" | "large"
   density: "compact" | "regular" | "comfy"
 }
 
@@ -24,7 +24,7 @@ const DENSITY_MAP = {
 
 export function TweakProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettingsState] = useState<TweakSettings>({
-    fontSize: 16,
+    fontSize: "medium",
     density: "regular",
   })
 
@@ -33,7 +33,8 @@ export function TweakProvider({ children }: { children: React.ReactNode }) {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
-        setSettingsState(JSON.parse(saved))
+        const parsed = JSON.parse(saved)
+        setSettingsState(parsed)
       } catch (e) {
         console.error("Failed to load tweak settings", e)
       }
@@ -50,17 +51,7 @@ export function TweakProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <TweakContext.Provider value={{ settings, setSettings }}>
-      <div 
-        style={{ 
-          // @ts-ignore - custom properties
-          "--base-font-size": `${settings.fontSize}px`,
-          "--card-spacing": DENSITY_MAP[settings.density],
-          fontSize: "var(--base-font-size)",
-        }}
-        className="contents"
-      >
-        {children}
-      </div>
+      {children}
     </TweakContext.Provider>
   )
 }

@@ -1,8 +1,9 @@
-import { CheckCircle2, Circle, Clock3, AlertCircle } from "lucide-react"
+import { CheckCircle2, Circle, Clock3, AlertTriangle } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
+import type { EscalationWithMessages } from "@/lib/services/escalations"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { EscalationPanel } from "./escalation-panel"
 
 type SectionProgress = {
   key: string
@@ -11,20 +12,26 @@ type SectionProgress = {
 }
 
 type InfoPanelProps = {
+  courseId: string
   courseStatus: CourseStatus
   reviewerName: string
+  reviewerId: string
   progress: SectionProgress[]
   lastSavedAt: string | null
+  escalations: EscalationWithMessages[]
 }
 
 export function InfoPanel({
+  courseId,
   courseStatus,
   reviewerName,
+  reviewerId,
   progress,
   lastSavedAt,
+  escalations,
 }: InfoPanelProps) {
   return (
-    <aside className="hidden w-72 shrink-0 border-l border-border bg-sidebar/5 p-6 xl:block">
+    <aside className="hidden w-[360px] shrink-0 border-l border-border bg-sidebar/5 p-6 xl:block">
       <div className="flex flex-col h-full gap-8">
         <section className="space-y-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
@@ -84,8 +91,8 @@ export function InfoPanel({
           </div>
         </section>
 
-        <div className="mt-auto pt-6 border-t border-border/50 space-y-4">
-          <section className="space-y-2">
+        <div className="flex-1 min-h-0 pt-6 border-t border-border/50 flex flex-col gap-6 overflow-hidden">
+          <section className="space-y-2 shrink-0">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
               Last Activity
             </p>
@@ -102,10 +109,21 @@ export function InfoPanel({
             </div>
           </section>
 
-          <Button variant="destructive" size="sm" className="w-full h-9 text-xs font-bold gap-2">
-            <AlertCircle className="size-3.5" />
-            Report Major Issue
-          </Button>
+          <section className="flex-1 min-h-0 flex flex-col gap-4 overflow-hidden">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 w-fit shrink-0">
+              <AlertTriangle className="size-3.5 text-red-500" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-red-600 dark:text-red-400">
+                Escalation
+              </p>
+            </div>
+            <div className="flex-1 min-h-0">
+              <EscalationPanel
+                courseId={courseId}
+                currentUserId={reviewerId}
+                initialEscalations={escalations}
+              />
+            </div>
+          </section>
         </div>
       </div>
     </aside>

@@ -7,15 +7,18 @@ interface StatusBadgeProps {
 }
 
 const DOT_COLORS: Record<CourseStatus, string> = {
+  // Initiated
   course_created:          "bg-slate-400",
   assigned_to_ta:          "bg-slate-400",
+  // In Progress (blue; orange where admin action is blocked on someone)
   ta_review_in_progress:   "bg-blue-500",
-  submitted_to_admin:      "bg-amber-500",
+  submitted_to_admin:      "bg-blue-500",
   admin_changes_requested: "bg-orange-500",
-  ready_for_instructor:    "bg-indigo-500",
-  sent_to_instructor:      "bg-indigo-500",
+  ready_for_instructor:    "bg-blue-500",
+  sent_to_instructor:      "bg-blue-500",
   instructor_questions:    "bg-orange-500",
-  instructor_approved:     "bg-emerald-500",
+  instructor_approved:     "bg-blue-500",
+  // Completed
   final_approved:          "bg-emerald-500",
 }
 

@@ -62,10 +62,14 @@ export function AssignedCoursesTable({ page, tas }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
-  const unassigned = filteredCourses.filter((course) => course.status === "course_created").length
-  const waitingForAdmin = filteredCourses.filter((course) => course.status === "submitted_to_admin").length
-  const backWithTa = filteredCourses.filter((course) => course.status === "admin_changes_requested").length
-  const readyForInstructor = filteredCourses.filter((course) => course.status === "ready_for_instructor").length
+  const initiated = filteredCourses.filter((c) => c.status === "course_created" || c.status === "assigned_to_ta").length
+  const inProgress = filteredCourses.filter((c) => {
+    const s = c.status
+    return s === "ta_review_in_progress" || s === "submitted_to_admin" || s === "admin_changes_requested" ||
+           s === "ready_for_instructor" || s === "sent_to_instructor" || s === "instructor_questions" || s === "instructor_approved"
+  }).length
+  const needsAction = filteredCourses.filter((c) => c.status === "submitted_to_admin" || c.status === "instructor_approved").length
+  const completed = filteredCourses.filter((c) => c.status === "final_approved").length
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
@@ -125,7 +129,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-[var(--card-spacing,1rem)]">
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex flex-1 items-center gap-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -170,16 +174,16 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               </SelectTrigger>
               <SelectContent className="max-h-64 overflow-y-auto">
                 <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="course_created">Not yet assigned</SelectItem>
-                <SelectItem value="assigned_to_ta">Assigned to TA</SelectItem>
-                <SelectItem value="ta_review_in_progress">TA Review In Progress</SelectItem>
-                <SelectItem value="submitted_to_admin">Submitted to Admin</SelectItem>
-                <SelectItem value="admin_changes_requested">Admin Changes Requested</SelectItem>
-                <SelectItem value="ready_for_instructor">Ready for Instructor</SelectItem>
-                <SelectItem value="sent_to_instructor">Sent to Instructor</SelectItem>
-                <SelectItem value="instructor_questions">Instructor Questions</SelectItem>
-                <SelectItem value="instructor_approved">Instructor Approved</SelectItem>
-                <SelectItem value="final_approved">Final Approved</SelectItem>
+                <SelectItem value="course_created">Initiated — unassigned</SelectItem>
+                <SelectItem value="assigned_to_ta">Initiated — assigned to TA</SelectItem>
+                <SelectItem value="ta_review_in_progress">In Progress — TA reviewing</SelectItem>
+                <SelectItem value="submitted_to_admin">In Progress — waiting on admin</SelectItem>
+                <SelectItem value="admin_changes_requested">In Progress — fixes requested</SelectItem>
+                <SelectItem value="ready_for_instructor">In Progress — ready to send</SelectItem>
+                <SelectItem value="sent_to_instructor">In Progress — instructor reviewing</SelectItem>
+                <SelectItem value="instructor_questions">In Progress — instructor questions</SelectItem>
+                <SelectItem value="instructor_approved">In Progress — awaiting final sign-off</SelectItem>
+                <SelectItem value="final_approved">Completed</SelectItem>
               </SelectContent>
             </Select>
 
@@ -208,14 +212,10 @@ export function AssignedCoursesTable({ page, tas }: Props) {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Needs TA Assigned" value={unassigned} tone={unassigned > 0 ? "warn" : "default"} />
-          <SummaryStat label="Active TAs" value={visibleTaCount} tone="default" />
-          <SummaryStat label="Waiting on Admin" value={waitingForAdmin} tone={waitingForAdmin > 0 ? "warn" : "default"} />
-          <SummaryStat
-            label={backWithTa > 0 ? "Back With TA" : "Ready For Instructor"}
-            value={backWithTa > 0 ? backWithTa : readyForInstructor}
-            tone={backWithTa > 0 ? "danger" : "success"}
-          />
+          <SummaryStat label="Initiated" value={initiated} tone={initiated > 0 ? "warn" : "default"} />
+          <SummaryStat label="In Progress" value={inProgress} tone={inProgress > 0 ? "default" : "default"} />
+          <SummaryStat label="Needs Admin Action" value={needsAction} tone={needsAction > 0 ? "danger" : "default"} />
+          <SummaryStat label="Completed" value={completed} tone={completed > 0 ? "success" : "default"} />
         </div>
 
         {filteredCourses.length === 0 ? (
@@ -294,12 +294,14 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                           {new Date(course.updatedAt).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
+                            timeZone: "UTC",
                           })}
                         </p>
                         <p>
                           {new Date(course.updatedAt).toLocaleTimeString("en-US", {
                             hour: "numeric",
                             minute: "2-digit",
+                            timeZone: "UTC",
                           })}
                         </p>
                         <p>Last activity</p>
@@ -362,12 +364,17 @@ export function AssignedCoursesTable({ page, tas }: Props) {
 
 type PhaseState = "done" | "active" | "idle"
 
-const DONE_1 = new Set<CourseStatus>(["submitted_to_admin", "ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
-const ACTIVE_1 = new Set<CourseStatus>(["ta_review_in_progress", "admin_changes_requested"])
-const DONE_2 = new Set<CourseStatus>(["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
-const ACTIVE_2 = new Set<CourseStatus>(["ready_for_instructor"])
-const DONE_3 = new Set<CourseStatus>(["instructor_approved", "final_approved"])
-const ACTIVE_3 = new Set<CourseStatus>(["sent_to_instructor", "instructor_questions"])
+const INITIATED_DONE = new Set<CourseStatus>([
+  "ta_review_in_progress","submitted_to_admin","admin_changes_requested",
+  "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved","final_approved"
+])
+const INITIATED_ACTIVE = new Set<CourseStatus>(["assigned_to_ta"])
+const IN_PROGRESS_DONE = new Set<CourseStatus>(["final_approved"])
+const IN_PROGRESS_ACTIVE = new Set<CourseStatus>([
+  "ta_review_in_progress","submitted_to_admin","admin_changes_requested",
+  "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved"
+])
+const COMPLETED_DONE = new Set<CourseStatus>(["final_approved"])
 
 function phaseState(s: CourseStatus, done: Set<CourseStatus>, active: Set<CourseStatus>): PhaseState {
   return done.has(s) ? "done" : active.has(s) ? "active" : "idle"
@@ -375,9 +382,9 @@ function phaseState(s: CourseStatus, done: Set<CourseStatus>, active: Set<Course
 
 function WorkflowPipeline({ status }: { status: CourseStatus }) {
   const phases: { label: string; state: PhaseState }[] = [
-    { label: "TA Forms", state: phaseState(status, DONE_1, ACTIVE_1) },
-    { label: "Staging",  state: phaseState(status, DONE_2, ACTIVE_2) },
-    { label: "Review",   state: phaseState(status, DONE_3, ACTIVE_3) },
+    { label: "Initiated",   state: phaseState(status, INITIATED_DONE, INITIATED_ACTIVE) },
+    { label: "In Progress", state: phaseState(status, IN_PROGRESS_DONE, IN_PROGRESS_ACTIVE) },
+    { label: "Completed",   state: phaseState(status, COMPLETED_DONE, new Set()) },
   ]
 
   return (
@@ -459,26 +466,26 @@ function getInitials(value: string) {
 function getStatusHint(status: AdminCourseRow["status"]) {
   switch (status) {
     case "course_created":
-      return "No TA assigned yet — needs assignment."
+      return "Initiated — no TA assigned yet."
     case "assigned_to_ta":
-      return "Assigned and waiting for TA work to begin."
+      return "Initiated — waiting for TA to begin."
     case "ta_review_in_progress":
-      return "TA is actively reviewing the course."
+      return "In progress — TA is actively reviewing."
     case "submitted_to_admin":
-      return "Admin decision needed now."
+      return "In progress — awaiting admin review."
     case "admin_changes_requested":
-      return "Returned to the TA for fixes."
+      return "In progress — fixes sent back to TA."
     case "ready_for_instructor":
-      return "Approved by admin and ready for handoff."
+      return "In progress — ready to send to instructor."
     case "sent_to_instructor":
-      return "Instructor review is in progress."
+      return "In progress — instructor is reviewing."
     case "instructor_questions":
-      return "Instructor sent questions back into the workflow."
+      return "In progress — instructor has questions."
     case "instructor_approved":
-      return "Waiting for final admin completion."
+      return "In progress — awaiting admin final sign-off."
     case "final_approved":
-      return "Course review is complete."
+      return "Completed."
     default:
-      return "Course is in the workflow."
+      return "In progress."
   }
 }

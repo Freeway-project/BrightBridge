@@ -61,7 +61,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
           )}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-[var(--card-spacing,1rem)] pt-0">
         <form action={formAction}>
           <div className="grid gap-4 sm:grid-cols-[1fr_auto] lg:grid-cols-[1fr_260px_auto]">
             <div className="grid gap-1.5">
