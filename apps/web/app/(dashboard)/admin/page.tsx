@@ -10,6 +10,7 @@ import { AdminTabs } from "./_components/admin-tabs"
 import { EscalationsTable } from "./_components/escalations-table"
 import { CompletedCoursesTable } from "./_components/completed-courses-table"
 import { TweakableContent } from "@/components/shared/tweakable-content"
+import { AdminRefreshWrapper } from "./_components/admin-refresh-wrapper"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -50,14 +51,16 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     <>
       <Topbar title="Admin" subtitle="Manage courses, assignments, and review progress" />
       <TweakableContent className="flex-1 overflow-y-auto p-6 bg-background">
-        <AdminTabs
-          unassignedCount={unassignedPage.total}
-          openEscalationsCount={openEscalations.length}
-          coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
-          assignPanel={<AdminAssignmentPanel courses={unassignedPage.data} tas={tas} />}
-          escalationsPanel={<EscalationsTable escalations={openEscalations} />}
-          completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
-        />
+        <AdminRefreshWrapper title="Admin Dashboard">
+          <AdminTabs
+            unassignedCount={unassignedPage.total}
+            openEscalationsCount={openEscalations.length}
+            coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
+            assignPanel={<AdminAssignmentPanel courses={unassignedPage.data} tas={tas} />}
+            escalationsPanel={<EscalationsTable escalations={openEscalations} />}
+            completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
+          />
+        </AdminRefreshWrapper>
       </TweakableContent>
     </>
   )

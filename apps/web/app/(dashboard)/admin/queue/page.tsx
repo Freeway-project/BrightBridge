@@ -2,6 +2,7 @@ import { Topbar } from "@/components/layout/topbar"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminCourses } from "@/lib/admin/queries"
 import { ReviewQueueTable } from "../_components/review-queue-table"
+import { QueueRefreshWrapper } from "./_components/queue-refresh-wrapper"
 
 export default async function AdminQueuePage() {
   const context = await requireProfile()
@@ -12,13 +13,15 @@ export default async function AdminQueuePage() {
 
   return (
     <>
-      <Topbar 
-        title="Review Queue" 
-        subtitle="Courses awaiting admin approval" 
+      <Topbar
+        title="Review Queue"
+        subtitle="Courses awaiting admin approval"
         backHref="/admin"
       />
       <div className="flex flex-col flex-1 min-h-0 overflow-y-auto p-6 bg-background">
-        <ReviewQueueTable courses={queue} />
+        <QueueRefreshWrapper>
+          <ReviewQueueTable courses={queue} />
+        </QueueRefreshWrapper>
       </div>
     </>
   )

@@ -4,6 +4,8 @@ import { requireProfile } from "@/lib/auth/context"
 import { getCourseById } from "@/lib/services/courses"
 import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review"
 import { SubmitPanel } from "../_components/submit-panel"
+import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper"
+import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -39,7 +41,13 @@ export default async function SubmitPage({ params }: Props) {
     <>
       <Topbar title="Course Workspace" subtitle="Step 5 of 5 — Submit" />
       <main className="flex-1 overflow-y-auto p-6">
-        <SubmitPanel courseId={course.id} courseStatus={course.status} sections={sections} />
+        <CourseWorkspaceRefreshWrapper
+          courseId={id}
+          title="Submit Review"
+          refreshCallback={() => refreshCourseWorkspace(id)}
+        >
+          <SubmitPanel courseId={course.id} courseStatus={course.status} sections={sections} />
+        </CourseWorkspaceRefreshWrapper>
       </main>
     </>
   )
