@@ -55,7 +55,7 @@ export default async function ReviewMatrixPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Review Matrix"
-          refreshCallback={() => refreshCourseWorkspace(id)}
+          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <ReviewMatrixForm
             courseId={id}

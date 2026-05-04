@@ -44,7 +44,7 @@ export default async function SubmitPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Submit Review"
-          refreshCallback={() => refreshCourseWorkspace(id)}
+          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <SubmitPanel courseId={course.id} courseStatus={course.status} sections={sections} />
         </CourseWorkspaceRefreshWrapper>
