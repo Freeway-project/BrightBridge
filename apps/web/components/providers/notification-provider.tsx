@@ -100,6 +100,35 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       )
       .subscribe()
 
+    // 3. Realtime: new course assignments → TAs
+    const assignmentChannel = supabase
+      .channel("public:course_assignments")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "course_assignments" },
+        async (payload) => {
+          if (payload.new.profile_id === userId && payload.new.role === "staff") {
+            const { data: course } = await supabase
+              .from("courses")
+              .select("title")
+              .eq("id", payload.new.course_id)
+              .single()
+
+            if (course) {
+              toast.success("New Course Assigned", {
+                description: course.title,
+                action: {
+                  label: "View",
+                  onClick: () => router.push(`/courses/${payload.new.course_id}`),
+                },
+                duration: 10000,
+              })
+            }
+          }
+        }
+      )
+      .subscribe()
+
     // 3. Polling fallback for admins — catches new escalations if realtime drops
     let pollTimer: ReturnType<typeof setInterval> | null = null
 
@@ -125,6 +154,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
     return () => {
       supabase.removeChannel(escalationChannel)
       supabase.removeChannel(messageChannel)
+      supabase.removeChannel(assignmentChannel)
       if (pollTimer) clearInterval(pollTimer)
     }
   }, [supabase, userId, role, router])

@@ -93,24 +93,34 @@ export function ReviewMatrixForm({
     return () => window.removeEventListener("coursebridge:review-timer", onTick)
   }, [timerStorageKey])
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
   async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
 
     setStatus("saving")
+    setErrorMsg(null)
     startTransition(async () => {
       try {
-        await saveDraft(courseId, "review_matrix", {
+        const res = await saveDraft(courseId, "review_matrix", {
           ...form.getValues(),
           time_spent_seconds: elapsedRef.current,
           overall_time_spent_seconds: overallElapsed,
         })
+        if (!res.ok) {
+          setErrorMsg(res.error || "Failed to save draft.")
+          setStatus("error")
+          setTimeout(() => window.location.reload(), 2000)
+          return
+        }
         setStatus("saved")
         if (advance) {
           router.push(`/courses/${courseId}/syllabus-gradebook`)
         }
-      } catch {
+      } catch (err) {
         setStatus("error")
+        setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
       }
     })
   }
@@ -131,9 +141,16 @@ export function ReviewMatrixForm({
     setIssues(nextIssues)
     startTransition(async () => {
       try {
-        await saveDraft(courseId, "general_notes", { issues: nextIssues } satisfies IssueLogResponseData)
-      } catch {
+        const res = await saveDraft(courseId, "general_notes", { issues: nextIssues } satisfies IssueLogResponseData)
+        if (!res.ok) {
+          setErrorMsg(res.error || "Failed to save draft.")
+          setStatus("error")
+          setTimeout(() => window.location.reload(), 2000)
+          return
+        }
+      } catch (err) {
         setStatus("error")
+        setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
       }
     })
   }
@@ -150,6 +167,11 @@ export function ReviewMatrixForm({
         </div>
       </CardHeader>
       <CardContent>
+        {errorMsg ? (
+          <p className="mb-5 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
+            {errorMsg}
+          </p>
+        ) : null}
         <form className="space-y-3">
           {CHECKLIST.map((section) => (
             <Collapsible defaultOpen key={section.title}>

@@ -29,10 +29,12 @@ export async function saveDraft(
   courseId: string,
   sectionKey: SectionKey,
   data: unknown,
-): Promise<{ ok: boolean; savedAt: string }> {
+): Promise<{ ok: boolean; savedAt: string; error?: string }> {
   const ctx = await requireProfile();
   const course = await getCourseById(courseId, ctx.userId);
-  if (!course) throw new Error("Course not found or not accessible.");
+  if (!course) {
+    return { ok: false, savedAt: "", error: "Course not found or assignment was revoked. Refreshing..." };
+  }
 
   const schema = SECTION_SCHEMAS[sectionKey];
   const parsed = schema ? schema.safeParse(data) : { success: true, data };
@@ -54,10 +56,12 @@ export async function saveDraft(
   return { ok: true, savedAt: new Date().toISOString() };
 }
 
-export async function submitReview(courseId: string): Promise<void> {
+export async function submitReview(courseId: string): Promise<{ ok: boolean; error?: string }> {
   const ctx = await requireProfile();
   const course = await getCourseById(courseId, ctx.userId);
-  if (!course) redirect("/ta?error=course_not_accessible");
+  if (!course) {
+    return { ok: false, error: "Course not found or assignment was revoked. Refreshing..." };
+  }
 
   const fromStatus =
     course.status === "assigned_to_ta" || course.status === "admin_changes_requested"
@@ -87,5 +91,5 @@ export async function submitReview(courseId: string): Promise<void> {
 
   revalidatePath("/ta");
   revalidatePath(`/courses/${courseId}`);
-  redirect("/ta");
+  return { ok: true };
 }
