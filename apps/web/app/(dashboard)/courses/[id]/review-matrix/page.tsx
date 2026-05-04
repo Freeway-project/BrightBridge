@@ -6,8 +6,9 @@ import { notFound } from "next/navigation";
 import { ReviewMatrixForm } from "../_components/review-matrix-form";
 import type { ReviewMatrixFormValues } from "@/lib/workspace/schemas";
 import type { IssueLogResponseData } from "@/lib/workspace/types";
+import { CHECKLIST } from "@/lib/workspace/constants";
 
-const ALL_ITEM_IDS = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3"];
+const ALL_ITEM_IDS = CHECKLIST.flatMap((s) => s.items.map((i) => i.id));
 
 interface Props {
   params: Promise<{ id: string }>;
