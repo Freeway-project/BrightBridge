@@ -43,10 +43,16 @@ export function isInstructorVisibleStatus(status: CourseStatus) {
   );
 }
 
-export type PipelineStage = "initiated" | "in_progress" | "completed"
+export type PipelineStage = "migration" | "staging" | "provision"
 
 export function getPipelineStage(status: CourseStatus): PipelineStage {
-  if (status === "final_approved") return "completed"
-  if (status === "course_created" || status === "assigned_to_ta") return "initiated"
-  return "in_progress"
+  if (status === "final_approved") return "provision"
+  if (
+    status === "course_created" ||
+    status === "assigned_to_ta" ||
+    status === "ta_review_in_progress"
+  ) {
+    return "migration"
+  }
+  return "staging"
 }

@@ -63,14 +63,14 @@ export function AssignedCoursesTable({ page, tas }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
-  const initiated = filteredCourses.filter((c) => c.status === "course_created" || c.status === "assigned_to_ta").length
-  const inProgress = filteredCourses.filter((c) => {
+  const migration = filteredCourses.filter((c) => c.status === "course_created" || c.status === "assigned_to_ta" || c.status === "ta_review_in_progress").length
+  const staging = filteredCourses.filter((c) => {
     const s = c.status
-    return s === "ta_review_in_progress" || s === "submitted_to_admin" || s === "admin_changes_requested" ||
+    return s === "submitted_to_admin" || s === "admin_changes_requested" ||
            s === "ready_for_instructor" || s === "sent_to_instructor" || s === "instructor_questions" || s === "instructor_approved"
   }).length
   const needsAction = filteredCourses.filter((c) => c.status === "submitted_to_admin" || c.status === "instructor_approved").length
-  const completed = filteredCourses.filter((c) => c.status === "final_approved").length
+  const provision = filteredCourses.filter((c) => c.status === "final_approved").length
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
@@ -235,10 +235,10 @@ export function AssignedCoursesTable({ page, tas }: Props) {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Initiated" value={initiated} tone={initiated > 0 ? "warn" : "default"} />
-          <SummaryStat label="In Progress" value={inProgress} tone={inProgress > 0 ? "default" : "default"} />
+          <SummaryStat label="Migration" value={migration} tone={migration > 0 ? "warn" : "default"} />
+          <SummaryStat label="Staging" value={staging} tone={staging > 0 ? "default" : "default"} />
           <SummaryStat label="Needs Admin Action" value={needsAction} tone={needsAction > 0 ? "danger" : "default"} />
-          <SummaryStat label="Completed" value={completed} tone={completed > 0 ? "success" : "default"} />
+          <SummaryStat label="Provision" value={provision} tone={provision > 0 ? "success" : "default"} />
         </div>
 
         {filteredCourses.length === 0 ? (
@@ -387,17 +387,17 @@ export function AssignedCoursesTable({ page, tas }: Props) {
 
 type PhaseState = "done" | "active" | "idle"
 
-const INITIATED_DONE = new Set<CourseStatus>([
-  "ta_review_in_progress","submitted_to_admin","admin_changes_requested",
+const MIGRATION_DONE = new Set<CourseStatus>([
+  "submitted_to_admin","admin_changes_requested",
   "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved","final_approved"
 ])
-const INITIATED_ACTIVE = new Set<CourseStatus>(["assigned_to_ta"])
-const IN_PROGRESS_DONE = new Set<CourseStatus>(["final_approved"])
-const IN_PROGRESS_ACTIVE = new Set<CourseStatus>([
-  "ta_review_in_progress","submitted_to_admin","admin_changes_requested",
+const MIGRATION_ACTIVE = new Set<CourseStatus>(["assigned_to_ta", "ta_review_in_progress"])
+const STAGING_DONE = new Set<CourseStatus>(["final_approved"])
+const STAGING_ACTIVE = new Set<CourseStatus>([
+  "submitted_to_admin","admin_changes_requested",
   "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved"
 ])
-const COMPLETED_DONE = new Set<CourseStatus>(["final_approved"])
+const PROVISION_DONE = new Set<CourseStatus>(["final_approved"])
 
 function phaseState(s: CourseStatus, done: Set<CourseStatus>, active: Set<CourseStatus>): PhaseState {
   return done.has(s) ? "done" : active.has(s) ? "active" : "idle"
@@ -405,9 +405,9 @@ function phaseState(s: CourseStatus, done: Set<CourseStatus>, active: Set<Course
 
 function WorkflowPipeline({ status }: { status: CourseStatus }) {
   const phases: { label: string; state: PhaseState }[] = [
-    { label: "Initiated",   state: phaseState(status, INITIATED_DONE, INITIATED_ACTIVE) },
-    { label: "In Progress", state: phaseState(status, IN_PROGRESS_DONE, IN_PROGRESS_ACTIVE) },
-    { label: "Completed",   state: phaseState(status, COMPLETED_DONE, new Set()) },
+    { label: "Migration",  state: phaseState(status, MIGRATION_DONE, MIGRATION_ACTIVE) },
+    { label: "Staging",    state: phaseState(status, STAGING_DONE, STAGING_ACTIVE) },
+    { label: "Provision",  state: phaseState(status, PROVISION_DONE, new Set()) },
   ]
 
   return (
