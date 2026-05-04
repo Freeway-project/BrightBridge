@@ -60,9 +60,9 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6 h-full">
+    <div className="flex flex-col gap-6 p-6 h-full overflow-hidden">
       {/* Course Summary */}
-      <section className="space-y-4">
+      <section className="space-y-4 shrink-0">
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Status</h3>
           <StatusBadge status={course.status} />
@@ -82,7 +82,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
             <Clock className="size-4 text-muted-foreground" />
             <span className="font-medium">Last Updated:</span>
             <span className="text-muted-foreground">
-              {new Date(course.updatedAt).toLocaleDateString()}
+              {new Date(course.updatedAt).toLocaleDateString("en-US", { timeZone: "UTC" })}
             </span>
           </div>
           {course.department && (
@@ -95,10 +95,10 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
         </div>
       </section>
 
-      <Separator />
+      <Separator className="shrink-0" />
 
       {/* Admin Actions */}
-      <section className="space-y-4">
+      <section className="space-y-4 shrink-0">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Review Actions</h3>
 
         {!fixesOpen ? (
@@ -150,21 +150,23 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
 
       {openEscalations.length > 0 && (
         <>
-          <Separator />
-          <section className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <Separator className="shrink-0" />
+          <section className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
               <AlertTriangle className="size-3.5 text-red-500" />
               Open Escalations
             </h3>
-            <div className="space-y-5">
-              {openEscalations.map((e) => (
-                <AdminEscalationThread
-                  key={e.id}
-                  courseId={course.id}
-                  currentUserId={currentUserId}
-                  escalation={e}
-                />
-              ))}
+            <div className="flex-1 min-h-0 overflow-y-auto pr-2 -mr-2">
+              <div className="space-y-5 h-full flex flex-col">
+                {openEscalations.map((e) => (
+                  <AdminEscalationThread
+                    key={e.id}
+                    courseId={course.id}
+                    currentUserId={currentUserId}
+                    escalation={e}
+                  />
+                ))}
+              </div>
             </div>
           </section>
         </>
@@ -188,7 +190,10 @@ function AdminEscalationThread({
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]')
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "smooth" })
+      }
     }
   }, [escalation.messages])
 
@@ -209,34 +214,36 @@ function AdminEscalationThread({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3 p-3 rounded-xl border border-border bg-muted/5 flex-1 min-h-0">
       <div className={cn(
-        "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-[11px] font-semibold",
+        "flex items-center justify-between rounded-lg border px-3 py-2 text-[11px] font-bold shadow-sm shrink-0",
         SEVERITY_STYLES[escalation.severity]
       )}>
-        <span className="flex items-center gap-1.5 truncate">
-          <AlertTriangle className="size-3 shrink-0" />
+        <span className="flex items-center gap-2 truncate text-[12px]">
+          <AlertTriangle className="size-4 shrink-0" />
           {escalation.title}
         </span>
-        <span className="capitalize opacity-70 ml-2 shrink-0">{escalation.severity}</span>
+        <span className="capitalize px-2 py-0.5 rounded-full bg-background/50 border border-current/20 ml-2 shrink-0">{escalation.severity}</span>
       </div>
 
-      <ScrollArea className="h-[140px] rounded-md border border-border bg-muted/10 p-2" ref={scrollRef}>
-        <div className="space-y-2">
+      <ScrollArea className="flex-1 min-h-[150px] rounded-lg border border-border bg-background p-3 shadow-inner" ref={scrollRef}>
+        <div className="space-y-4">
           {escalation.messages.map((msg) => {
             const isMe = msg.author_id === currentUserId
             return (
-              <div key={msg.id} className={cn("flex gap-1.5 max-w-[90%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
-                <Avatar className="size-5 shrink-0 mt-0.5">
-                  <AvatarFallback className="text-[9px]">{getInitials(msg.author_name)}</AvatarFallback>
+              <div key={msg.id} className={cn("flex gap-2.5 max-w-[90%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
+                <Avatar className="size-7 shrink-0 border border-border shadow-sm">
+                  <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground">{getInitials(msg.author_name)}</AvatarFallback>
                 </Avatar>
-                <div className={cn("space-y-0.5", isMe ? "items-end" : "items-start")}>
-                  <p className="text-[10px] text-muted-foreground">
-                    {msg.author_name ?? "Unknown"} · {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                <div className={cn("space-y-1", isMe ? "items-end text-right" : "items-start text-left")}>
+                  <p className="text-[10px] font-medium text-muted-foreground/80 px-1">
+                    {msg.author_name ?? "Unknown"} • {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
                   </p>
                   <div className={cn(
-                    "rounded-lg px-2.5 py-1.5 text-xs",
-                    isMe ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                    "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
+                    isMe 
+                      ? "bg-primary text-primary-foreground rounded-tr-none" 
+                      : "bg-muted/50 text-foreground border border-border/50 rounded-tl-none"
                   )}>
                     {msg.body}
                   </div>
@@ -247,10 +254,10 @@ function AdminEscalationThread({
         </div>
       </ScrollArea>
 
-      <div className="flex gap-1.5">
+      <div className="flex gap-2 shrink-0">
         <Textarea
-          placeholder="Reply..."
-          className="min-h-[48px] resize-none text-xs flex-1"
+          placeholder="Type a response..."
+          className="min-h-[56px] resize-none text-[13px] flex-1 bg-background border-border/60 focus:border-primary/40 transition-colors"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           onKeyDown={(e) => {
@@ -259,23 +266,23 @@ function AdminEscalationThread({
         />
         <Button
           size="icon"
-          className="size-8 shrink-0 self-end"
+          className="size-10 shrink-0 self-end rounded-full shadow-sm"
           disabled={!body.trim() || isPending}
           onClick={handleSend}
         >
-          <Send className="size-3.5" />
+          <Send className="size-4" />
         </Button>
       </div>
 
       <Button
         variant="outline"
         size="sm"
-        className="w-full h-8 text-xs gap-1.5 border-green-500/30 text-green-700 hover:bg-green-50/50 dark:hover:bg-green-950/20"
+        className="w-full h-9 text-[12px] font-bold gap-2 border-green-500/30 text-green-700 hover:bg-green-500 hover:text-white dark:hover:bg-green-500/20 transition-all rounded-lg shrink-0"
         disabled={isPending}
         onClick={handleResolve}
       >
-        <CheckCircle2 className="size-3.5" />
-        Mark Resolved
+        <CheckCircle2 className="size-4" />
+        Mark as Resolved
       </Button>
     </div>
   )

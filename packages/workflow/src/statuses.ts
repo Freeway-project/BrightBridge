@@ -42,3 +42,11 @@ export function isInstructorVisibleStatus(status: CourseStatus) {
     status === "final_approved"
   );
 }
+
+export type PipelineStage = "initiated" | "in_progress" | "completed"
+
+export function getPipelineStage(status: CourseStatus): PipelineStage {
+  if (status === "final_approved") return "completed"
+  if (status === "course_created" || status === "assigned_to_ta") return "initiated"
+  return "in_progress"
+}

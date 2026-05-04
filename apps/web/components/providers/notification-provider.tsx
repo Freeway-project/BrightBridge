@@ -1,10 +1,13 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import type { Role } from "@coursebridge/workflow"
+
+const POLL_INTERVAL_MS = 2 * 60 * 1000 // 2 minutes
+const IS_ADMIN = (role: Role) => role === "admin_full" || role === "super_admin"
 
 interface NotificationProviderProps {
   children: React.ReactNode
@@ -15,40 +18,49 @@ interface NotificationProviderProps {
 export function NotificationProvider({ children, userId, role }: NotificationProviderProps) {
   const supabase = createClient()
   const router = useRouter()
+  // Tracks IDs already surfaced (via realtime or polling) to prevent duplicate toasts
+  const seenEscalationIds = useRef(new Set<string>())
+  // Tracks the timestamp from which the next poll should look for new escalations
+  const lastPolledAt = useRef(new Date().toISOString())
 
   useEffect(() => {
     if (!userId) return
 
-    // 1. Listen for new or updated escalations (Notify Admins on Insert, TAs on Resolve)
+    function showEscalationToast(id: string, title: string, courseId: string) {
+      if (seenEscalationIds.current.has(id)) return
+      seenEscalationIds.current.add(id)
+      toast.error("New Escalation", {
+        description: title,
+        action: {
+          label: "View",
+          onClick: () => router.push(`/admin/courses/${courseId}`),
+        },
+      })
+    }
+
+    // 1. Realtime: new escalations → admins
     const escalationChannel = supabase
-      .channel('public:escalations')
+      .channel("public:course_escalations")
       .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'escalations' },
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "course_escalations" },
         (payload) => {
-          if (role === 'admin_full' || role === 'super_admin') {
-            toast.error("New Escalation", {
-              description: `${payload.new.title}`,
-              action: {
-                label: "View",
-                onClick: () => router.push(`/admin/courses/${payload.new.course_id}`)
-              },
-            })
+          if (IS_ADMIN(role)) {
+            showEscalationToast(payload.new.id, payload.new.title, payload.new.course_id)
           }
         }
       )
       .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'escalations' },
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "course_escalations" },
         (payload) => {
-          // If status changed to resolved, notify TA
-          if (payload.old.status !== 'resolved' && payload.new.status === 'resolved') {
-            if (role === 'standard_user') {
+          if (payload.old.status !== "resolved" && payload.new.status === "resolved") {
+            if (role === "standard_user") {
               toast.success("Escalation Resolved", {
                 description: `Admin resolved: ${payload.new.title}`,
                 action: {
                   label: "View",
-                  onClick: () => router.push(`/courses/${payload.new.course_id}/issue-log`)
+                  onClick: () => router.push(`/courses/${payload.new.course_id}/issue-log`),
                 },
               })
             }
@@ -57,54 +69,63 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       )
       .subscribe()
 
-    // 2. Listen for new escalation messages (Notify TAs or Admins)
+    // 2. Realtime: new messages in escalation threads
     const messageChannel = supabase
-      .channel('public:escalation_messages')
+      .channel("public:escalation_messages")
       .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'escalation_messages' },
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "escalation_messages" },
         async (payload) => {
-          // Don't notify if I'm the author
           if (payload.new.author_id === userId) return
 
-          // We need the escalation details to know which course this is for
           const { data: escalation } = await supabase
-            .from('escalations')
-            .select('course_id, title')
-            .eq('id', payload.new.escalation_id)
+            .from("course_escalations")
+            .select("course_id, title")
+            .eq("id", payload.new.escalation_id)
             .single()
 
-          if (escalation) {
-            const isTargetAdmin = role === 'admin_full' || role === 'super_admin'
-            const isTargetTA = role === 'standard_user'
+          if (!escalation) return
 
-            // For now, keep it simple: notify based on role
-            // In a more complex setup, we'd check if the user is assigned to the course
-            
-            const title = "New Reply"
-            const description = payload.new.body.length > 60 
-              ? `${payload.new.body.substring(0, 60)}...` 
-              : payload.new.body
+          const href = IS_ADMIN(role)
+            ? `/admin/courses/${escalation.course_id}`
+            : `/courses/${escalation.course_id}/issue-log`
 
-            const href = isTargetAdmin 
-              ? `/admin/courses/${escalation.course_id}`
-              : `/courses/${escalation.course_id}/issue-log`
-
-            toast.info(title, {
-              description: description,
-              action: {
-                label: "View",
-                onClick: () => router.push(href)
-              },
-            })
-          }
+          const body: string = payload.new.body
+          toast.info("New Reply", {
+            description: body.length > 60 ? `${body.substring(0, 60)}…` : body,
+            action: { label: "View", onClick: () => router.push(href) },
+            duration: 7000,
+          })
         }
       )
       .subscribe()
 
+    // 3. Polling fallback for admins — catches new escalations if realtime drops
+    let pollTimer: ReturnType<typeof setInterval> | null = null
+
+    if (IS_ADMIN(role)) {
+      pollTimer = setInterval(async () => {
+        const since = lastPolledAt.current
+        lastPolledAt.current = new Date().toISOString()
+
+        const { data } = await supabase
+          .from("course_escalations")
+          .select("id, title, course_id")
+          .eq("status", "open")
+          .gt("created_at", since)
+          .order("created_at", { ascending: true })
+
+        if (!data) return
+        for (const esc of data) {
+          showEscalationToast(esc.id, esc.title, esc.course_id)
+        }
+      }, POLL_INTERVAL_MS)
+    }
+
     return () => {
       supabase.removeChannel(escalationChannel)
       supabase.removeChannel(messageChannel)
+      if (pollTimer) clearInterval(pollTimer)
     }
   }, [supabase, userId, role, router])
 
