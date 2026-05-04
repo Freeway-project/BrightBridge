@@ -17,3 +17,8 @@ coverage/
 .DS_Store
 *.log
 *.tsbuildinfo
+
+# sensitive data
+*Educator*
+*Heirarchy*
+*.csv
