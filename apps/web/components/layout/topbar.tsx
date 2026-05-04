@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { Bell, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 interface TopbarProps {
   title: string
@@ -12,7 +13,8 @@ interface TopbarProps {
 
 export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
   return (
-    <header className="flex h-12 items-center gap-4 border-b border-sidebar-border bg-card px-6">
+    <header className="flex h-12 items-center gap-2 border-b border-sidebar-border bg-card px-4">
+      <SidebarTrigger className="-ml-1 shrink-0" />
       <div className="flex items-center gap-4 flex-1 min-w-0">
         {backHref && (
           <Button variant="ghost" size="icon" asChild className="-ml-2 h-8 w-8">

@@ -26,12 +26,26 @@ type MetadataFormProps = {
   defaultValues: MetadataFormValues
 }
 
-const TERMS = ["Fall 2025", "Winter 2026", "Spring 2026", "Summer 2026"]
+const SEASONS = ["Fall", "Winter", "Spring", "Summer"]
+const YEARS = Array.from({ length: new Date().getFullYear() - 2011 + 3 }, (_, i) =>
+  String(2011 + i)
+).reverse()
+
+function parseTerm(term: string): { season: string; year: string } {
+  const parts = term.trim().split(" ")
+  if (parts.length === 2 && SEASONS.includes(parts[0])) {
+    return { season: parts[0], year: parts[1] }
+  }
+  return { season: parts[0] ?? "", year: parts[1] ?? "" }
+}
 
 export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const parsed = parseTerm(defaultValues.term ?? "")
+  const [termSeason, setTermSeason] = useState(parsed.season)
+  const [termYear, setTermYear] = useState(parsed.year)
   const overallElapsed = useStoredTimerValue(
     `coursebridge:${course.id}:timer:overall`,
     defaultValues.overall_time_spent_seconds ?? 0,
@@ -85,24 +99,49 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-1.5 text-sm font-medium">
               Term
-              <Controller
-                control={form.control}
-                name="term"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select term" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TERMS.map((term) => (
-                        <SelectItem key={term} value={term}>
-                          {term}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <div className="flex gap-2">
+                <Controller
+                  control={form.control}
+                  name="term"
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(season) => {
+                        setTermSeason(season)
+                        field.onChange(`${season} ${termYear}`.trim())
+                      }}
+                      value={termSeason}
+                    >
+                      <SelectTrigger className="w-[130px]">
+                        <SelectValue placeholder="Season" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SEASONS.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Select
+                  onValueChange={(year) => {
+                    setTermYear(year)
+                    form.setValue("term", `${termSeason} ${year}`.trim(), {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }}
+                  value={termYear}
+                >
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {YEARS.map((y) => (
+                      <SelectItem key={y} value={y}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <FieldError message={form.formState.errors.term?.message} />
             </label>
 

@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation"
-import { Sidebar } from "@/components/layout/sidebar"
+import { AppSidebar } from "@/components/layout/sidebar"
 import { getAuthContext } from "@/lib/auth/context"
 import type { ReactNode } from "react"
 import { TweakProvider } from "@/components/shared/tweak-provider"
 import { NotificationProvider } from "@/components/providers/notification-provider"
+import { SidebarProvider } from "@/components/ui/sidebar"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const context = await getAuthContext()
@@ -22,12 +23,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <TweakProvider>
       <NotificationProvider userId={context.userId} role={role}>
-        <div className="flex h-screen overflow-hidden bg-background">
-          <Sidebar role={role} userName={userName} />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            {children}
+        <SidebarProvider>
+          <div className="flex h-screen w-full overflow-hidden bg-background">
+            <AppSidebar role={role} userName={userName} />
+            <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+              {children}
+            </div>
           </div>
-        </div>
+        </SidebarProvider>
       </NotificationProvider>
     </TweakProvider>
   )

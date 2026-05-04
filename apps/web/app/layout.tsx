@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "CourseBridge",
@@ -19,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", GeistSans.variable)}>
       <body>
-        {children}
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
         <Toaster closeButton position="top-right" richColors />
         <Analytics />
         <SpeedInsights />
