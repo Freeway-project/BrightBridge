@@ -22,13 +22,13 @@ export default async function SuperAdminCoursesPage({ searchParams }: Props) {
   const page = Number(resolvedSearchParams?.page ?? 1)
   const search = typeof resolvedSearchParams?.search === "string" ? resolvedSearchParams.search : undefined
 
-  const paginatedResult = await getPaginatedSuperAdminCourses(page, 20, search)
+  const paginatedResult = await getPaginatedSuperAdminCourses(page, 20, search ?? "")
 
   return (
     <>
       <Topbar title="All Courses" subtitle="Super Admin" backHref="/super-admin" />
       <TweakableContent className="flex-1 overflow-hidden">
-        <CoursesView result={paginatedResult} search={search} />
+        <CoursesView result={paginatedResult} search={search ?? ""} />
       </TweakableContent>
     </>
   )
