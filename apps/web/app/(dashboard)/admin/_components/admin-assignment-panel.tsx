@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,15 +34,33 @@ const initialState: AssignTaState = {
 export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps) {
   const [state, formAction, pending] = useActionState(assignTaToCourseAction, initialState);
   const [courseSearch, setCourseSearch] = useState("");
+  const [taSearch, setTaSearch] = useState("");
   const canAssign = courses.length > 0 && tas.length > 0;
+  const normalizedCourseSearch = courseSearch.trim().toLowerCase();
+  const normalizedTaSearch = taSearch.trim().toLowerCase();
 
-  const filteredCourses = courses.filter((course) => {
-    const term = courseSearch.toLowerCase();
-    return (
-      course.title.toLowerCase().includes(term) ||
-      course.sourceCourseId?.toLowerCase().includes(term)
-    );
-  });
+  const filteredCourses = useMemo(
+    () =>
+      courses.filter((course) => {
+        if (!normalizedCourseSearch) return true;
+        return (
+          course.title.toLowerCase().includes(normalizedCourseSearch) ||
+          course.sourceCourseId?.toLowerCase().includes(normalizedCourseSearch)
+        );
+      }),
+    [courses, normalizedCourseSearch]
+  );
+
+  const filteredTas = useMemo(
+    () =>
+      tas.filter((ta) => {
+        if (!normalizedTaSearch) return true;
+        const name = (ta.fullName ?? "").toLowerCase();
+        const email = ta.email.toLowerCase();
+        return name.includes(normalizedTaSearch) || email.includes(normalizedTaSearch);
+      }),
+    [tas, normalizedTaSearch]
+  );
 
   return (
     <Card>
@@ -71,7 +89,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                   <SelectValue placeholder={courses.length ? "Select a course to assign…" : "All courses are assigned"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="p-2 border-b sticky top-0 bg-popover z-10">
+                  <div className="sticky top-0 z-10 border-b bg-popover p-2">
                     <div className="relative">
                       <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                       <Input
@@ -79,9 +97,22 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                         value={courseSearch}
                         onChange={(e) => setCourseSearch(e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
-                        className="h-8 pl-7 text-xs"
+                        className="h-8 pl-7 pr-7 text-xs"
                       />
+                      {courseSearch ? (
+                        <button
+                          type="button"
+                          aria-label="Clear course search"
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+                          onClick={() => setCourseSearch("")}
+                        >
+                          ×
+                        </button>
+                      ) : null}
                     </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {filteredCourses.length.toLocaleString()} result{filteredCourses.length === 1 ? "" : "s"}
+                    </p>
                   </div>
                   {filteredCourses.length === 0 ? (
                     <p className="px-3 py-4 text-xs text-center text-muted-foreground">No courses match your search.</p>
@@ -106,11 +137,40 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                   <SelectValue placeholder={tas.length ? "Select a TA…" : "No TA profiles found"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {tas.map((ta) => (
-                    <SelectItem key={ta.id} value={ta.id}>
-                      {ta.fullName ?? ta.email}
-                    </SelectItem>
-                  ))}
+                  <div className="sticky top-0 z-10 border-b bg-popover p-2">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Search TA by name or email…"
+                        value={taSearch}
+                        onChange={(e) => setTaSearch(e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        className="h-8 pl-7 pr-7 text-xs"
+                      />
+                      {taSearch ? (
+                        <button
+                          type="button"
+                          aria-label="Clear TA search"
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+                          onClick={() => setTaSearch("")}
+                        >
+                          ×
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {filteredTas.length.toLocaleString()} TA{filteredTas.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  {filteredTas.length === 0 ? (
+                    <p className="px-3 py-4 text-xs text-center text-muted-foreground">No TAs match your search.</p>
+                  ) : (
+                    filteredTas.map((ta) => (
+                      <SelectItem key={ta.id} value={ta.id}>
+                        {ta.fullName ?? ta.email}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>

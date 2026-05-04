@@ -264,6 +264,9 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const taProfileId = filters.taProfileId?.trim() || undefined;
       const assignedOnly = filters.assignedOnly === true;
       const requireStaffJoin = assignedOnly || Boolean(taProfileId);
+      const searchMatchingStaffIds = normalizedSearch
+        ? await findMatchingStaffProfileIds(normalizedSearch)
+        : [];
 
       let query = admin
         .from("courses")
@@ -293,15 +296,19 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
       if (normalizedSearch) {
         const term = `%${normalizedSearch}%`;
-        query = query.or(
-          [
-            `title.ilike.${term}`,
-            `source_course_id.ilike.${term}`,
-            `target_course_id.ilike.${term}`,
-            `term.ilike.${term}`,
-            `department.ilike.${term}`,
-          ].join(","),
-        );
+        const searchPredicates = [
+          `title.ilike.${term}`,
+          `source_course_id.ilike.${term}`,
+          `target_course_id.ilike.${term}`,
+          `term.ilike.${term}`,
+          `department.ilike.${term}`,
+        ];
+
+        if (!taProfileId && searchMatchingStaffIds.length > 0) {
+          searchPredicates.push(`course_assignments.profile_id.in.(${searchMatchingStaffIds.join(",")})`);
+        }
+
+        query = query.or(searchPredicates.join(","));
       }
 
       const { data, error, count } = await query
@@ -657,8 +664,26 @@ function normalizeSearchTerm(value: string | undefined) {
 
   return value
     .replace(/[%]/g, "")
-    .replace(/[.,:()]/g, " ")
+    .replace(/[.,:()'"`]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
+}
+
+async function findMatchingStaffProfileIds(searchTerm: string): Promise<string[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  const term = `%${searchTerm}%`;
+  const { data, error } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("role", "standard_user")
+    .or(`full_name.ilike.${term},email.ilike.${term}`)
+    .limit(200);
+
+  if (error) {
+    throw new Error(`findMatchingStaffProfileIds: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => row.id);
 }
 
 function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {

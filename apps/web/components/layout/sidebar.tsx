@@ -18,13 +18,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useSidebar } from "@/components/ui/sidebar"
 
 interface AppSidebarProps {
   role: Role
@@ -35,15 +36,18 @@ function BrandLogo() {
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
   return (
-    <div className="flex h-12 items-center gap-2 px-4 border-b border-sidebar-border">
-      <div className="size-6 rounded bg-sidebar-primary flex items-center justify-center text-[10px] font-bold text-sidebar-primary-foreground shrink-0">
-        CB
+    <div className="flex h-12 items-center gap-1 border-b border-sidebar-border px-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2 px-1">
+        <div className="size-6 rounded bg-sidebar-primary flex items-center justify-center text-[10px] font-bold text-sidebar-primary-foreground shrink-0">
+          CB
+        </div>
+        {!collapsed && (
+          <span className="text-sm font-semibold text-sidebar-foreground truncate">
+            CourseBridge
+          </span>
+        )}
       </div>
-      {!collapsed && (
-        <span className="text-sm font-semibold text-sidebar-foreground truncate">
-          CourseBridge
-        </span>
-      )}
+      <SidebarTrigger className="hidden shrink-0 md:flex" />
     </div>
   )
 }
@@ -56,7 +60,7 @@ export function AppSidebar({ role, userName }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="p-0">
         <BrandLogo />
       </SidebarHeader>
 

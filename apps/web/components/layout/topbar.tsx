@@ -14,7 +14,7 @@ interface TopbarProps {
 export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
   return (
     <header className="flex h-12 items-center gap-2 border-b border-sidebar-border bg-card px-4">
-      <SidebarTrigger className="-ml-1 shrink-0" />
+      <SidebarTrigger className="-ml-1 shrink-0 md:hidden" />
       <div className="flex items-center gap-4 flex-1 min-w-0">
         {backHref && (
           <Button variant="ghost" size="icon" asChild className="-ml-2 h-8 w-8">

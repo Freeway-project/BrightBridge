@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import type { AdminCourseRow, AdminCoursesPage } from "@/lib/admin/queries"
 import type { ProfileOption } from "@/lib/repositories/contracts"
@@ -38,6 +38,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
 
   const search = searchParams.get("search") ?? ""
@@ -94,15 +95,32 @@ export function AssignedCoursesTable({ page, tas }: Props) {
       }
     }
 
-    router.replace(params.size > 0 ? `${pathname}?${params.toString()}` : pathname)
-  }
-
-  function applySearch() {
-    setQuery({
-      page: "1",
-      search: searchInput.trim() || null,
+    startTransition(() => {
+      router.replace(params.size > 0 ? `${pathname}?${params.toString()}` : pathname)
     })
   }
+
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
+  useEffect(() => {
+    const trimmedInput = searchInput.trim()
+    if (trimmedInput === search) {
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setQuery({
+        page: "1",
+        search: trimmedInput || null,
+      })
+    }, 350)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [searchInput, search, searchParams, pathname])
 
   function goToPage(nextPage: number) {
     setQuery({
@@ -136,28 +154,19 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             <Input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault()
-                  applySearch()
-                }
-              }}
-              placeholder="Search by title, source ID, term, department, or TA..."
+              placeholder="Search by title, IDs, term, department, TA name, or TA email..."
               className="pl-9 pr-3"
             />
             {searchInput && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute right-[84px] top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
                 onClick={() => { setSearchInput(""); setQuery({ page: "1", search: null }) }}
               >
                 ×
               </Button>
             )}
-            <Button size="sm" onClick={applySearch} className="shrink-0">
-              Search
-            </Button>
           </div>
           <div className="flex gap-2">
             <Select
@@ -209,6 +218,20 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+          <p>
+            {search
+              ? <>Results for <span className="font-medium text-foreground">"{search}"</span></>
+              : "Showing all courses"}
+          </p>
+          {isPending ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Loader2 className="size-3 animate-spin" />
+              Searching…
+            </span>
+          ) : null}
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
