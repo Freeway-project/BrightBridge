@@ -4,11 +4,10 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   assignUserToCourse,
-  getAccessibleCourses,
   transitionCourseStatus,
 } from "@/lib/courses/service";
 import { requireAnyRole, requireProfile } from "@/lib/auth/context";
-import { getAdminCoursesPage } from "@/lib/admin/queries";
+import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
 import { resolveEscalation } from "@/lib/services/escalations";
 
 export type AssignTaState = {
@@ -34,11 +33,13 @@ export async function searchAssignableCoursesAction(searchTerm: string): Promise
     search: normalized || undefined,
   });
 
-  return page.data.map((course) => ({
-    id: course.id,
-    title: course.title,
-    sourceCourseId: course.sourceCourseId,
-  }));
+  return page.data
+    .filter((course) => course.ta === null)
+    .map((course) => ({
+      id: course.id,
+      title: course.title,
+      sourceCourseId: course.sourceCourseId,
+    }));
 }
 
 export async function assignTaToCourseAction(
@@ -55,13 +56,13 @@ export async function assignTaToCourseAction(
     };
   }
 
-  const { courses } = await getAccessibleCourses();
-  const course = courses.find((item) => item.id === courseId);
+  const detail = await getAdminCourseDetail(courseId);
 
-  if (!course) {
+  if (!detail) {
+    console.error("[assignTaToCourseAction] Course not found:", courseId);
     return {
       kind: "error",
-      message: "Course not found or not accessible.",
+      message: "Course not found.",
     };
   }
 
@@ -72,7 +73,7 @@ export async function assignTaToCourseAction(
       role: "staff",
     });
 
-    if (course.status === "course_created") {
+    if (detail.course.status === "course_created") {
       await transitionCourseStatus({
         courseId,
         toStatus: "assigned_to_ta",
@@ -89,6 +90,7 @@ export async function assignTaToCourseAction(
       message: "Staff member assigned to course.",
     };
   } catch (error) {
+    console.error("[assignTaToCourseAction] Error:", error);
     return {
       kind: "error",
       message: error instanceof Error ? error.message : "Could not assign staff member.",

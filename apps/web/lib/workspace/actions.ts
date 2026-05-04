@@ -1,4 +1,4 @@
-"use server";
+ "use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -57,7 +57,7 @@ export async function saveDraft(
 export async function submitReview(courseId: string): Promise<void> {
   const ctx = await requireProfile();
   const course = await getCourseById(courseId, ctx.userId);
-  if (!course) throw new Error("Course not found or not accessible.");
+  if (!course) redirect("/ta?error=course_not_accessible");
 
   const fromStatus =
     course.status === "assigned_to_ta" || course.status === "admin_changes_requested"
