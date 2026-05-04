@@ -10,9 +10,11 @@ export {
   COURSE_STATUS_LABELS,
   COURSE_STATUSES,
   getCourseStatusLabel,
+  getPipelineStage,
   isFinalStatus,
   isInstructorVisibleStatus,
-  type CourseStatus
+  type CourseStatus,
+  type PipelineStage
 } from "./statuses";
 export {
   assertCanTransition,

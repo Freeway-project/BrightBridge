@@ -45,7 +45,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
         </TweakableContent>
 
         {/* Sidebar Panel */}
-        <aside className="w-80 flex-shrink-0 border-l border-border bg-card overflow-y-auto shadow-sm">
+        <aside className="w-[400px] flex-shrink-0 border-l border-border bg-card overflow-y-auto shadow-sm">
           <AdminCourseSidebar course={course} escalations={escalations} currentUserId={context.userId} />
         </aside>
       </main>

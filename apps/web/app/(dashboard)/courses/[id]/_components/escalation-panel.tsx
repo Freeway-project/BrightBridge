@@ -46,11 +46,13 @@ export function EscalationPanel({ courseId, currentUserId, initialEscalations }:
 
   if (openEscalation) {
     return (
-      <EscalationThread
-        courseId={courseId}
-        currentUserId={currentUserId}
-        escalation={openEscalation}
-      />
+      <div className="h-full flex flex-col min-h-0">
+        <EscalationThread
+          courseId={courseId}
+          currentUserId={currentUserId}
+          escalation={openEscalation}
+        />
+      </div>
     )
   }
 
@@ -72,41 +74,50 @@ function EscalationCreateForm({ courseId }: { courseId: string }) {
   }
 
   return (
-    <div className="space-y-3">
-      <Select value={severity} onValueChange={(v) => setSeverity(v as EscalationSeverity)}>
-        <SelectTrigger className="h-8 text-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="minor">Minor</SelectItem>
-          <SelectItem value="major">Major</SelectItem>
-          <SelectItem value="critical">Critical</SelectItem>
-        </SelectContent>
-      </Select>
+    <div className="space-y-4 p-4 rounded-xl border border-border bg-card shadow-sm">
+      <div className="space-y-1.5">
+        <label className="text-[11px] font-bold text-muted-foreground uppercase px-1">Severity</label>
+        <Select value={severity} onValueChange={(v) => setSeverity(v as EscalationSeverity)}>
+          <SelectTrigger className="h-9 text-[13px] bg-background">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="minor">Minor</SelectItem>
+            <SelectItem value="major">Major</SelectItem>
+            <SelectItem value="critical">Critical</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-      <Input
-        placeholder="Short title (e.g. Syllabus missing)"
-        className="h-8 text-xs"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <div className="space-y-1.5">
+        <label className="text-[11px] font-bold text-muted-foreground uppercase px-1">Issue Title</label>
+        <Input
+          placeholder="e.g. Broken links in week 3"
+          className="h-9 text-[13px] bg-background"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-      <Textarea
-        placeholder="Describe the issue..."
-        className="min-h-[80px] resize-none text-xs"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
+      <div className="space-y-1.5">
+        <label className="text-[11px] font-bold text-muted-foreground uppercase px-1">Message</label>
+        <Textarea
+          placeholder="Explain the problem to the admin..."
+          className="min-h-[100px] resize-none text-[13px] bg-background leading-relaxed"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+      </div>
 
       <Button
         size="sm"
         variant="destructive"
-        className="w-full h-8 text-xs font-bold gap-1.5"
+        className="w-full h-10 text-[13px] font-bold gap-2 mt-2 shadow-sm active:scale-[0.98] transition-all"
         disabled={!title.trim() || !message.trim() || isPending}
         onClick={handleSubmit}
       >
-        <AlertTriangle className="size-3.5" />
-        {isPending ? "Submitting..." : "Submit Escalation"}
+        <AlertTriangle className="size-4" />
+        {isPending ? "Submitting..." : "Submit to Admin"}
       </Button>
     </div>
   )
@@ -127,7 +138,10 @@ function EscalationThread({
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]')
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "smooth" })
+      }
     }
   }, [escalation.messages])
 
@@ -141,37 +155,39 @@ function EscalationThread({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3 p-3 rounded-xl border border-border bg-muted/5 flex-1 min-h-0">
       <div className={cn(
-        "flex items-center justify-between rounded-md border px-2.5 py-1.5 text-[11px] font-semibold",
+        "flex items-center justify-between rounded-lg border px-3 py-2 text-[11px] font-bold shadow-sm shrink-0",
         SEVERITY_STYLES[escalation.severity],
       )}>
-        <span className="flex items-center gap-1.5">
-          <AlertTriangle className="size-3 shrink-0" />
+        <span className="flex items-center gap-2 truncate text-[12px]">
+          <AlertTriangle className="size-4 shrink-0" />
           {escalation.title}
         </span>
-        <span className="capitalize opacity-70">{escalation.severity}</span>
+        <span className="capitalize px-2 py-0.5 rounded-full bg-background/50 border border-current/20 ml-2 shrink-0">{escalation.severity}</span>
       </div>
 
-      <ScrollArea className="h-[180px] rounded-md border border-border bg-muted/10 p-2" ref={scrollRef}>
-        <div className="space-y-3">
+      <ScrollArea className="flex-1 min-h-[150px] rounded-lg border border-border bg-background p-3 shadow-inner" ref={scrollRef}>
+        <div className="space-y-4">
           {escalation.messages.map((msg) => {
             const isMe = msg.author_id === currentUserId
             return (
               <div
                 key={msg.id}
-                className={cn("flex gap-1.5 max-w-[90%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}
+                className={cn("flex gap-2.5 max-w-[90%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}
               >
-                <Avatar className="size-5 shrink-0 mt-0.5">
-                  <AvatarFallback className="text-[9px]">{getInitials(msg.author_name)}</AvatarFallback>
+                <Avatar className="size-7 shrink-0 border border-border shadow-sm">
+                  <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground">{getInitials(msg.author_name)}</AvatarFallback>
                 </Avatar>
-                <div className={cn("space-y-0.5", isMe ? "items-end" : "items-start")}>
-                  <p className="text-[10px] text-muted-foreground">
-                    {msg.author_name ?? "Unknown"} · {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                <div className={cn("space-y-1", isMe ? "items-end text-right" : "items-start text-left")}>
+                  <p className="text-[10px] font-medium text-muted-foreground/80 px-1">
+                    {msg.author_name ?? "Unknown"} • {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
                   </p>
                   <div className={cn(
-                    "rounded-lg px-2.5 py-1.5 text-xs",
-                    isMe ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                    "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
+                    isMe 
+                      ? "bg-primary text-primary-foreground rounded-tr-none" 
+                      : "bg-muted/50 text-foreground border border-border/50 rounded-tl-none",
                   )}>
                     {msg.body}
                   </div>
@@ -182,10 +198,10 @@ function EscalationThread({
         </div>
       </ScrollArea>
 
-      <div className="flex gap-1.5">
+      <div className="flex gap-2 shrink-0">
         <Textarea
-          placeholder="Reply..."
-          className="min-h-[52px] resize-none text-xs flex-1"
+          placeholder="Type a response..."
+          className="min-h-[56px] resize-none text-[13px] flex-1 bg-background border-border/60 focus:border-primary/40 transition-colors"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           onKeyDown={(e) => {
@@ -194,18 +210,18 @@ function EscalationThread({
         />
         <Button
           size="icon"
-          className="size-9 shrink-0 self-end"
+          className="size-10 shrink-0 self-end rounded-full shadow-sm"
           disabled={!body.trim() || isPending}
           onClick={handleSend}
         >
-          <Send className="size-3.5" />
+          <Send className="size-4" />
         </Button>
       </div>
 
       {escalation.status === "resolved" && (
-        <div className="flex items-center gap-1.5 rounded-md bg-green-500/10 border border-green-500/20 px-2.5 py-1.5 text-[11px] text-green-700">
-          <CheckCircle2 className="size-3 shrink-0" />
-          Resolved
+        <div className="flex items-center justify-center gap-2 rounded-lg bg-green-500/10 border border-green-500/20 px-3 py-2 text-[12px] font-bold text-green-700 dark:text-green-400 shrink-0">
+          <CheckCircle2 className="size-4 shrink-0" />
+          Escalation Resolved
         </div>
       )}
     </div>
