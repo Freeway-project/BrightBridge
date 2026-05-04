@@ -20,7 +20,7 @@ export async function getCourseInstructor(courseId: string): Promise<ProfileOpti
     .maybeSingle();
 
   if (error || !data) return null;
-  const p = data.profiles as { id: string; email: string; full_name: string | null; role: string } | null;
+  const p = data.profiles as unknown as { id: string; email: string; full_name: string | null; role: string } | null;
   if (!p) return null;
   return { id: p.id, email: p.email, fullName: p.full_name, role: p.role as Role };
 }

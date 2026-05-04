@@ -56,7 +56,12 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             unassignedCount={unassignedPage.total}
             openEscalationsCount={openEscalations.length}
             coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
-            assignPanel={<AdminAssignmentPanel courses={unassignedPage.data} tas={tas} />}
+            assignPanel={
+              <AdminAssignmentPanel
+                courses={unassignedPage.data}
+                tas={tas}
+              />
+            }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
           />

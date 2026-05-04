@@ -7,13 +7,39 @@ import {
   getAccessibleCourses,
   transitionCourseStatus,
 } from "@/lib/courses/service";
-import { requireProfile } from "@/lib/auth/context";
+import { requireAnyRole, requireProfile } from "@/lib/auth/context";
+import { getAdminCoursesPage } from "@/lib/admin/queries";
 import { resolveEscalation } from "@/lib/services/escalations";
 
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
   message: string | null;
 };
+
+export type AssignableCourseOption = {
+  id: string;
+  title: string;
+  sourceCourseId: string | null;
+};
+
+export async function searchAssignableCoursesAction(searchTerm: string): Promise<AssignableCourseOption[]> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["admin_full", "super_admin"]);
+
+  const normalized = searchTerm.trim();
+  const page = await getAdminCoursesPage({
+    page: 1,
+    pageSize: 250,
+    status: "course_created",
+    search: normalized || undefined,
+  });
+
+  return page.data.map((course) => ({
+    id: course.id,
+    title: course.title,
+    sourceCourseId: course.sourceCourseId,
+  }));
+}
 
 export async function assignTaToCourseAction(
   _state: AssignTaState,

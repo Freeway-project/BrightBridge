@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
-import { assignTaToCourseAction, type AssignTaState } from "../actions";
+import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
+import { assignTaToCourseAction, searchAssignableCoursesAction, type AssignTaState } from "../actions";
 
 type AssignableCourse = {
   id: string;
@@ -29,6 +29,7 @@ const initialState: AssignTaState = {
 
 const MAX_VISIBLE_COURSES = 250;
 const MAX_VISIBLE_TAS = 150;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps) {
   const [state, formAction, pending] = useActionState(assignTaToCourseAction, initialState);
@@ -38,13 +39,20 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   const [taSearch, setTaSearch] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [selectedTaId, setSelectedTaId] = useState<string>("");
-  const canAssign = courses.length > 0 && tas.length > 0;
-  const normalizedCourseSearch = courseSearch.trim().toLowerCase();
+  const [searchResults, setSearchResults] = useState<AssignableCourse[] | null>(null);
+  const [isSearching, startSearch] = useTransition();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const canAssign = courses.length > 0 || (searchResults?.length ?? 0) > 0;
   const normalizedTaSearch = taSearch.trim().toLowerCase();
 
+  // All known courses: search results when searching, initial list otherwise
+  const activeCourseList = courseSearch.trim() ? (searchResults ?? []) : courses;
+
   const selectedCourse = useMemo(
-    () => courses.find((course) => course.id === selectedCourseId) ?? null,
-    [courses, selectedCourseId]
+    () => activeCourseList.find((course) => course.id === selectedCourseId) ??
+          courses.find((course) => course.id === selectedCourseId) ?? null,
+    [activeCourseList, courses, selectedCourseId]
   );
 
   const selectedTa = useMemo(
@@ -52,21 +60,27 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     [tas, selectedTaId]
   );
 
-  const filteredCourses = useMemo(
-    () =>
-      courses.filter((course) => {
-        if (!normalizedCourseSearch) return true;
-        return (
-          course.title.toLowerCase().includes(normalizedCourseSearch) ||
-          course.sourceCourseId?.toLowerCase().includes(normalizedCourseSearch)
-        );
-      }),
-    [courses, normalizedCourseSearch]
-  );
+  const handleCourseSearchChange = useCallback((value: string) => {
+    setCourseSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setSearchResults(null);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      startSearch(async () => {
+        const results = await searchAssignableCoursesAction(trimmed);
+        setSearchResults(results);
+      });
+    }, SEARCH_DEBOUNCE_MS);
+  }, []);
+
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
   const visibleCourses = useMemo(
-    () => filteredCourses.slice(0, MAX_VISIBLE_COURSES),
-    [filteredCourses]
+    () => activeCourseList.slice(0, MAX_VISIBLE_COURSES),
+    [activeCourseList]
   );
 
   const filteredTas = useMemo(
@@ -80,6 +94,8 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     [tas, normalizedTaSearch]
   );
 
+  const courseResultCount = activeCourseList.length;
+
   const visibleTas = useMemo(() => filteredTas.slice(0, MAX_VISIBLE_TAS), [filteredTas]);
   const canSubmit = canAssign && Boolean(selectedCourseId) && Boolean(selectedTaId) && !pending;
 
@@ -91,7 +107,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
             <CardTitle className="text-base">Assign TA to Course</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
               {courses.length > 0
-                ? `${courses.length.toLocaleString()} unassigned course${courses.length === 1 ? "" : "s"} awaiting a TA.`
+                ? `${courses.length.toLocaleString()} unassigned course${courses.length === 1 ? "" : "s"} awaiting a TA. Search to find any course.`
                 : "All courses have been assigned."}
             </p>
           </div>
@@ -129,24 +145,25 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                       <Input
                         autoFocus
                         value={courseSearch}
-                        onChange={(e) => setCourseSearch(e.target.value)}
+                        onChange={(e) => handleCourseSearchChange(e.target.value)}
                         placeholder="Search by title or source course ID..."
                         className="h-10 pl-9 pr-8"
                       />
-                      {courseSearch ? (
+                      {isSearching ? (
+                        <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />
+                      ) : courseSearch ? (
                         <button
                           type="button"
                           aria-label="Clear course search"
                           className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
-                          onClick={() => setCourseSearch("")}
+                          onClick={() => { handleCourseSearchChange(""); }}
                         >
                           ×
                         </button>
                       ) : null}
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
-                      {filteredCourses.length.toLocaleString()} matching course
-                      {filteredCourses.length === 1 ? "" : "s"}
+                      {isSearching ? "Searching…" : `${courseResultCount.toLocaleString()} matching course${courseResultCount === 1 ? "" : "s"}`}
                     </p>
                   </div>
                   <ScrollArea className="h-[360px]">
@@ -186,7 +203,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                       </div>
                     )}
                   </ScrollArea>
-                  {filteredCourses.length > MAX_VISIBLE_COURSES ? (
+                  {courseResultCount > MAX_VISIBLE_COURSES ? (
                     <p className="border-t px-3 py-2 text-xs text-muted-foreground">
                       Showing first {MAX_VISIBLE_COURSES.toLocaleString()} results. Keep typing to narrow down.
                     </p>
