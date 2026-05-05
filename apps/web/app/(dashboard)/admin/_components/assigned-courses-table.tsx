@@ -129,7 +129,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   }
 
   return (
-    <Card>
+    <Card className="min-w-0 max-w-full">
       <CardHeader className="gap-4">
         <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
           <div>
@@ -148,8 +148,8 @@ export function AssignedCoursesTable({ page, tas }: Props) {
         </div>
       </CardHeader>
       <CardContent className="space-y-[var(--card-spacing,1rem)]">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex flex-1 items-center gap-2">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="relative flex min-w-0 flex-1 items-center gap-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchInput}
@@ -168,7 +168,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               </Button>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
             <Select
               value={statusFilter}
               onValueChange={(value) =>
@@ -178,7 +178,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                 })
               }
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full min-w-0 sm:w-[200px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent className="max-h-64 overflow-y-auto">
@@ -205,7 +205,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                 })
               }
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full min-w-0 sm:w-[160px]">
                 <SelectValue placeholder="Filter by TA" />
               </SelectTrigger>
               <SelectContent>
@@ -252,7 +252,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             </Button>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-border">
+          <div className="min-w-0 max-w-full overflow-x-auto rounded-lg border border-border">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -270,7 +270,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                     className="cursor-pointer border-b border-border/70 hover:bg-muted/40"
                     onClick={() => router.push(`/admin/courses/${course.id}`)}
                   >
-                    <TableCell className="pl-4 align-top">
+                    <TableCell className="max-w-[min(28rem,100%)] whitespace-normal break-words pl-4 align-top">
                       <div className="space-y-2 py-1">
                         <div>
                           <p className="text-sm font-semibold text-foreground">{course.title}</p>
@@ -286,7 +286,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="align-top">
+                    <TableCell className="max-w-xs whitespace-normal break-words align-top sm:max-w-none">
                       {course.ta ? (
                         <div className="flex items-start gap-3 py-1">
                           <Avatar>
@@ -302,16 +302,16 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                         <span className="text-xs text-muted-foreground">Unassigned</span>
                       )}
                     </TableCell>
-                    <TableCell className="align-top">
+                    <TableCell className="min-w-[10rem] max-w-md whitespace-normal align-top">
                       <WorkflowPipeline status={course.status} />
                     </TableCell>
-                    <TableCell className="align-top">
+                    <TableCell className="max-w-sm whitespace-normal break-words align-top">
                       <div className="space-y-2 py-1">
                         <StatusBadge status={course.status} className="w-fit" />
                         <p className="text-xs text-muted-foreground">{getStatusHint(course.status)}</p>
                       </div>
                     </TableCell>
-                    <TableCell className="pr-4 text-right align-top">
+                    <TableCell className="whitespace-normal pr-4 text-right align-top">
                       <div className="space-y-1 py-1 text-xs text-muted-foreground">
                         <p className="font-medium text-foreground">
                           {new Date(course.updatedAt).toLocaleDateString("en-US", {
@@ -337,12 +337,12 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </div>
         )}
         <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-muted-foreground">
+          <p className="min-w-0 text-xs text-muted-foreground">
             {page.total === 0
               ? "No courses"
               : `Showing ${pageStart}–${pageEnd} of ${page.total.toLocaleString()} courses`}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
             <Button
               variant="outline"
               size="sm"
@@ -359,7 +359,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             >
               Previous
             </Button>
-            <span className="min-w-[80px] text-center text-xs text-muted-foreground">
+            <span className="min-w-0 basis-full text-center text-xs text-muted-foreground sm:basis-auto sm:min-w-[5.5rem]">
               Page {currentPage} of {Math.max(page.totalPages, 1)}
             </span>
             <Button
@@ -411,9 +411,9 @@ function WorkflowPipeline({ status }: { status: CourseStatus }) {
   ]
 
   return (
-    <div className="flex items-center gap-1 py-1">
+    <div className="flex flex-wrap items-center gap-1 py-1">
       {phases.map((phase, i) => (
-        <div key={phase.label} className="flex items-center gap-1">
+        <div key={phase.label} className="flex shrink-0 items-center gap-1">
           {i > 0 && <div className="h-px w-3 shrink-0 bg-border" />}
           <PhasePill label={phase.label} state={phase.state} />
         </div>
@@ -434,7 +434,7 @@ function PhasePill({ label, state }: { label: string; state: PhaseState }) {
   return (
     <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5", styles)}>
       <Icon className={cn("size-2.5 shrink-0", state === "active" && "animate-spin")} />
-      <span className="text-[10px] font-medium whitespace-nowrap">{label}</span>
+      <span className="text-[10px] font-medium">{label}</span>
     </div>
   )
 }

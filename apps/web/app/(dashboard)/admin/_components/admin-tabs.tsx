@@ -23,8 +23,8 @@ export function AdminTabs({
   const [tab, setTab] = useState("courses")
 
   return (
-    <Tabs value={tab} onValueChange={setTab} className="flex flex-col gap-4">
-      <TabsList variant="line" className="w-fit">
+    <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
+      <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
         <TabsTrigger value="courses">All Courses</TabsTrigger>
         <TabsTrigger value="assign">
           Assign TA

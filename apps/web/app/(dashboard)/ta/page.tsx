@@ -30,7 +30,7 @@ export default async function TADashboardPage() {
   ];
 
   return (
-    <TweakableContent className="flex-1 overflow-hidden">
+    <TweakableContent className="min-w-0 flex-1 overflow-hidden">
       <TaRefreshWrapper>
         <CourseListView initialCourses={courses} stats={stats} />
       </TaRefreshWrapper>
