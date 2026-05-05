@@ -4,6 +4,8 @@ import { requireProfile } from "@/lib/auth/context";
 import { getCourseById } from "@/lib/services/courses";
 import { getReviewResponses, getReviewSectionByKey } from "@/lib/services/review";
 import { getEscalationsForCourse } from "@/lib/services/escalations";
+import { getCourseInstructor } from "@/lib/services/profiles";
+import { getCourseComments } from "@/lib/services/comments";
 import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
 import { TweakableContent } from "@/components/shared/tweakable-content";
@@ -30,9 +32,11 @@ export default async function CourseWorkspaceLayout({
 
   if (!course) notFound();
 
-  const [responses, escalations] = await Promise.all([
+  const [responses, escalations, instructor, comments] = await Promise.all([
     getReviewResponses(id),
     getEscalationsForCourse(id),
+    getCourseInstructor(id),
+    getCourseComments(id),
   ]);
   const respondedSectionIds = new Set(
     responses
@@ -68,9 +72,11 @@ export default async function CourseWorkspaceLayout({
         courseStatus={course.status}
         reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
         reviewerId={ctx.userId}
+        instructorName={instructor?.fullName ?? instructor?.email ?? null}
         progress={sectionMeta}
         lastSavedAt={lastSavedAt}
         escalations={escalations}
+        comments={comments}
       />
     </div>
   );

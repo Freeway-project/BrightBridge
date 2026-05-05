@@ -17,7 +17,7 @@ export default async function SuperAdminDashboardPage() {
   return (
     <>
       <Topbar title="System Overview" subtitle="Super Admin" />
-      <TweakableContent className="flex-1 overflow-hidden">
+      <TweakableContent className="min-w-0 flex-1 overflow-hidden">
         <OverviewView data={data} />
       </TweakableContent>
     </>

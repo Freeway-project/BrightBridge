@@ -3,7 +3,7 @@ import type { CourseStatus } from "@coursebridge/workflow"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
-import { EscalationPanel } from "./escalation-panel"
+import { CourseConversation } from "./course-conversation"
 
 type SectionProgress = {
   key: string
@@ -16,9 +16,11 @@ type InfoPanelProps = {
   courseStatus: CourseStatus
   reviewerName: string
   reviewerId: string
+  instructorName: string | null
   progress: SectionProgress[]
   lastSavedAt: string | null
   escalations: EscalationWithMessages[]
+  comments: any[]
 }
 
 export function InfoPanel({
@@ -26,9 +28,11 @@ export function InfoPanel({
   courseStatus,
   reviewerName,
   reviewerId,
+  instructorName,
   progress,
   lastSavedAt,
   escalations,
+  comments,
 }: InfoPanelProps) {
   return (
     <aside className="hidden w-[360px] shrink-0 border-l border-border bg-sidebar/5 p-6 xl:block">
@@ -54,9 +58,21 @@ export function InfoPanel({
                 <p className="text-[11px] text-muted-foreground mt-1">Assigned TA</p>
               </div>
             </div>
-            <div className="pt-2 border-t border-border/50 space-y-2">
+            <div className="pt-2 border-t border-border/50 space-y-3">
               <p className="text-[11px] text-muted-foreground">Admin: <span className="text-foreground/70 italic">Pending assignment</span></p>
-              <p className="text-[11px] text-muted-foreground">Instructor: <span className="text-foreground/70 italic">Pending selection</span></p>
+              {instructorName ? (
+                <div className="flex items-center gap-3">
+                  <div className="size-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-secondary-foreground">
+                    {instructorName[0]?.toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground leading-none">{instructorName}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">Instructor</p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">Instructor: <span className="text-foreground/70 italic">Pending selection</span></p>
+              )}
             </div>
           </div>
         </section>
@@ -117,10 +133,11 @@ export function InfoPanel({
               </p>
             </div>
             <div className="flex-1 min-h-0">
-              <EscalationPanel
+              <CourseConversation
                 courseId={courseId}
                 currentUserId={reviewerId}
-                initialEscalations={escalations}
+                escalations={escalations}
+                comments={comments}
               />
             </div>
           </section>

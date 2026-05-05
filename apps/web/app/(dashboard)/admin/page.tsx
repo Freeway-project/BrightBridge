@@ -5,6 +5,7 @@ import { getAdminCoursesPage } from "@/lib/admin/queries"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { getOpenEscalations } from "@/lib/services/escalations"
 import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
+import { InstructorAssignmentPanel } from "./_components/instructor-assignment-panel"
 import { AssignedCoursesTable } from "./_components/assigned-courses-table"
 import { AdminTabs } from "./_components/admin-tabs"
 import { EscalationsTable } from "./_components/escalations-table"
@@ -60,6 +61,11 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               <AdminAssignmentPanel
                 courses={unassignedPage.data.filter(c => c.ta === null)}
                 tas={tas}
+              />
+            }
+            instructorPanel={
+              <InstructorAssignmentPanel
+                courses={unassignedPage.data}
               />
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}

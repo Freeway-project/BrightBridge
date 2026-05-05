@@ -27,7 +27,7 @@ export default async function SuperAdminUsersPage({ searchParams }: Props) {
   return (
     <>
       <Topbar title="User Management" subtitle="Super Admin" backHref="/super-admin" />
-      <TweakableContent className="flex-1 overflow-hidden">
+      <TweakableContent className="min-w-0 flex-1 overflow-hidden">
         <UsersView result={paginatedResult} search={search ?? ""} />
       </TweakableContent>
     </>

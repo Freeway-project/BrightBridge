@@ -22,6 +22,9 @@ graphify-out/cache/
 *.log
 *.tsbuildinfo
 
+# local DB dumps (never commit)
+backups/
+
 # sensitive data
 *Educator*
 *Heirarchy*
