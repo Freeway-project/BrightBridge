@@ -7,6 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
@@ -37,6 +44,8 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   const [coursePickerOpen, setCoursePickerOpen] = useState(false);
   const [taPickerOpen, setTaPickerOpen] = useState(false);
   const [courseSearch, setCourseSearch] = useState("");
+  const [courseYear, setCourseYear] = useState<string>("all");
+  const [courseTerm, setCourseTerm] = useState<string>("all");
   const [taSearch, setTaSearch] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [selectedTaId, setSelectedTaId] = useState<string>("");
@@ -50,10 +59,33 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   // All known courses: search results when searching, initial list otherwise
   const activeCourseList = courseSearch.trim() ? (searchResults ?? []) : courses;
 
+  const filteredCourseList = useMemo(() => {
+    return activeCourseList.filter((course) => {
+      if (courseYear === "all" && courseTerm === "all") return true;
+      const textToSearch = `${course.title} ${course.sourceCourseId ?? ""}`;
+      
+      if (courseYear !== "all" && courseTerm !== "all") {
+        return textToSearch.includes(`${courseYear}${courseTerm}`) || 
+               textToSearch.includes(`${courseTerm}${courseYear}`);
+      }
+      
+      if (courseYear !== "all") {
+        return textToSearch.includes(courseYear);
+      }
+      
+      if (courseTerm !== "all") {
+        const termRegex = new RegExp(`(${courseTerm}\\d{4}|\\d{4}${courseTerm})\\b`);
+        return termRegex.test(textToSearch);
+      }
+      
+      return true;
+    });
+  }, [activeCourseList, courseYear, courseTerm]);
+
   const selectedCourse = useMemo(
-    () => activeCourseList.find((course) => course.id === selectedCourseId) ??
+    () => filteredCourseList.find((course) => course.id === selectedCourseId) ??
           courses.find((course) => course.id === selectedCourseId) ?? null,
-    [activeCourseList, courses, selectedCourseId]
+    [filteredCourseList, courses, selectedCourseId]
   );
 
   const selectedTa = useMemo(
@@ -89,8 +121,8 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   }, [state]);
 
   const visibleCourses = useMemo(
-    () => activeCourseList.slice(0, MAX_VISIBLE_COURSES),
-    [activeCourseList]
+    () => filteredCourseList.slice(0, MAX_VISIBLE_COURSES),
+    [filteredCourseList]
   );
 
   const filteredTas = useMemo(
@@ -104,7 +136,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     [tas, normalizedTaSearch]
   );
 
-  const courseResultCount = activeCourseList.length;
+  const courseResultCount = filteredCourseList.length;
 
   const visibleTas = useMemo(() => filteredTas.slice(0, MAX_VISIBLE_TAS), [filteredTas]);
   const canSubmit = canAssign && Boolean(selectedCourseId) && Boolean(selectedTaId) && !pending;
@@ -149,30 +181,60 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="w-[min(760px,calc(100vw-2rem))] p-0">
-                  <div className="border-b p-3">
-                    <div className="relative">
-                      <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        autoFocus
-                        value={courseSearch}
-                        onChange={(e) => handleCourseSearchChange(e.target.value)}
-                        placeholder="Search by title or source course ID..."
-                        className="h-10 pl-9 pr-8"
-                      />
-                      {isSearching ? (
-                        <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />
-                      ) : courseSearch ? (
-                        <button
-                          type="button"
-                          aria-label="Clear course search"
-                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
-                          onClick={() => { handleCourseSearchChange(""); }}
-                        >
-                          ×
-                        </button>
-                      ) : null}
+                  <div className="border-b p-3 space-y-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <Select value={courseYear} onValueChange={setCourseYear}>
+                        <SelectTrigger className="w-full sm:w-[130px] h-10">
+                          <SelectValue placeholder="Any Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Any Year</SelectItem>
+                          {Array.from({ length: 21 }, (_, i) => 2010 + i).map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={courseTerm} onValueChange={setCourseTerm}>
+                        <SelectTrigger className="w-full sm:w-[160px] h-10">
+                          <SelectValue placeholder="Any Term" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Any Term</SelectItem>
+                          <SelectItem value="10">Winter (10)</SelectItem>
+                          <SelectItem value="11">Winter CS (11)</SelectItem>
+                          <SelectItem value="20">Summer (20)</SelectItem>
+                          <SelectItem value="21">Spring CS (21)</SelectItem>
+                          <SelectItem value="22">Summer CS (22)</SelectItem>
+                          <SelectItem value="30">Fall (30)</SelectItem>
+                          <SelectItem value="31">Fall CS (31)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          autoFocus
+                          value={courseSearch}
+                          onChange={(e) => handleCourseSearchChange(e.target.value)}
+                          placeholder="Search by title or source course ID..."
+                          className="h-10 pl-9 pr-8"
+                        />
+                        {isSearching ? (
+                          <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />
+                        ) : courseSearch ? (
+                          <button
+                            type="button"
+                            aria-label="Clear course search"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+                            onClick={() => { handleCourseSearchChange(""); }}
+                          >
+                            ×
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
-                    <p className="mt-2 text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {isSearching ? "Searching…" : `${courseResultCount.toLocaleString()} matching course${courseResultCount === 1 ? "" : "s"}`}
                     </p>
                   </div>
