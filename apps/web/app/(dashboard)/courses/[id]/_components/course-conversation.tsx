@@ -6,14 +6,21 @@ import type { EscalationWithMessages } from "@/lib/services/escalations"
 import type { CourseComment } from "@/lib/services/comments"
 import {
   createEscalationAction,
-  sendEscalationMessageAction,
 } from "../escalation-actions"
 import { postCommentAction } from "@/app/(dashboard)/admin/courses/[id]/actions"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { AlertTriangle, CheckCircle2, Send, MessageSquare, Info } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { AlertTriangle, Send, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -25,9 +32,9 @@ interface Props {
   escalations: EscalationWithMessages[]
 }
 
-type TimelineItem = 
+type TimelineItem =
   | { type: "comment"; id: string; date: string; authorName: string; authorId: string; body: string }
-  | { type: "escalation"; id: string; date: string; authorName: string; authorId: string; body: string; title: string; severity: string; status: string; messages: any[] }
+  | { type: "escalation"; id: string; date: string; authorName: string; authorId: string; body: string; title: string; severity: string; status: string; messages: EscalationWithMessages["messages"] }
 
 export function CourseConversation({ courseId, currentUserId, comments, escalations }: Props) {
   const [activeTab, setActiveTab] = useState<"chat" | "escalate">("chat")
@@ -43,7 +50,7 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
         date: c.created_at,
         authorName: c.author_name ?? "Unknown",
         authorId: c.author_id,
-        body: c.body
+        body: c.body,
       })),
       ...escalations.map(e => ({
         type: "escalation" as const,
@@ -55,8 +62,8 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
         title: e.title,
         severity: e.severity,
         status: e.status,
-        messages: e.messages
-      }))
+        messages: e.messages,
+      })),
     ]
     return items.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   }, [comments, escalations])
@@ -86,7 +93,6 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
 
   return (
     <div className="flex flex-col h-full min-h-0 gap-3">
-      {/* Timeline */}
       <ScrollArea className="flex-1 min-h-[200px] rounded-xl border border-border bg-background p-3 shadow-inner" ref={scrollRef}>
         <div className="space-y-6">
           {timeline.length === 0 && (
@@ -110,7 +116,9 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
                     </p>
                     <div className={cn(
                       "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
-                      isMe ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-muted text-foreground border border-border/50 rounded-tl-none"
+                      isMe
+                        ? "bg-primary text-primary-foreground rounded-tr-none"
+                        : "bg-muted text-foreground border border-border/50 rounded-tl-none"
                     )}>
                       {item.body}
                     </div>
@@ -118,19 +126,23 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
                 </div>
               )
             } else {
-              // Escalation display (summary + link or expanded)
               return (
                 <div key={item.id} className="space-y-3">
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/10">
                     <AlertTriangle className="size-3.5 text-red-500" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-red-600">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
                       Escalation: {item.title}
                     </span>
-                    <Badge className="ml-auto text-[9px] uppercase h-4" variant={item.status === 'open' ? 'destructive' : 'secondary'}>
+                    <span className={cn(
+                      "ml-auto px-1.5 py-0.5 rounded-md border text-[10px] font-bold",
+                      item.status === "open"
+                        ? "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400"
+                        : "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400"
+                    )}>
                       {item.status}
-                    </Badge>
+                    </span>
                   </div>
-                  {item.messages.map((msg: any) => {
+                  {item.messages.map((msg) => {
                     const isMe = msg.author_id === currentUserId
                     return (
                       <div key={msg.id} className={cn("flex gap-2.5 max-w-[90%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
@@ -143,7 +155,9 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
                           </p>
                           <div className={cn(
                             "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm border",
-                            isMe ? "bg-red-500 text-white border-red-600 rounded-tr-none" : "bg-white text-foreground border-red-200 rounded-tl-none"
+                            isMe
+                              ? "bg-red-500 text-white border-red-600 rounded-tr-none"
+                              : "bg-red-50 dark:bg-red-950/30 text-foreground border-red-200 dark:border-red-900/40 rounded-tl-none"
                           )}>
                             {msg.body}
                           </div>
@@ -158,9 +172,8 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
         </div>
       </ScrollArea>
 
-      {/* Input Area */}
       <div className="space-y-3">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "chat" | "escalate")} className="w-full">
           <TabsList className="grid w-full grid-cols-2 h-8">
             <TabsTrigger value="chat" className="text-[11px] uppercase font-bold tracking-wider">Internal Chat</TabsTrigger>
             <TabsTrigger value="escalate" className="text-[11px] uppercase font-bold tracking-wider">Escalate</TabsTrigger>
@@ -195,21 +208,8 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
   )
 }
 
-function Badge({ children, className, variant = "outline" }: { children: React.ReactNode, className?: string, variant?: "outline" | "destructive" | "secondary" }) {
-  const styles = {
-    outline: "border-border text-muted-foreground",
-    destructive: "bg-red-500/10 border-red-500/20 text-red-600",
-    secondary: "bg-green-500/10 border-green-500/20 text-green-700"
-  }
-  return (
-    <span className={cn("px-1.5 py-0.5 rounded-md border text-[10px] font-bold", styles[variant], className)}>
-      {children}
-    </span>
-  )
-}
-
 function EscalationCreateForm({ courseId }: { courseId: string }) {
-  const [severity, setSeverity] = useState<any>("major")
+  const [severity, setSeverity] = useState<"minor" | "major" | "critical">("major")
   const [title, setTitle] = useState("")
   const [message, setMessage] = useState("")
   const [isPending, startTransition] = useTransition()
@@ -227,7 +227,7 @@ function EscalationCreateForm({ courseId }: { courseId: string }) {
   return (
     <div className="space-y-3 p-3 rounded-xl border border-red-500/20 bg-red-500/5 shadow-sm">
       <div className="flex gap-2">
-        <Select value={severity} onValueChange={(v) => setSeverity(v)}>
+        <Select value={severity} onValueChange={(v) => setSeverity(v as "minor" | "major" | "critical")}>
           <SelectTrigger className="h-8 text-[11px] w-[100px] bg-background">
             <SelectValue />
           </SelectTrigger>
@@ -265,13 +265,3 @@ function EscalationCreateForm({ courseId }: { courseId: string }) {
     </div>
   )
 }
-
-// ── Shared UI components ──────────────────────────────────────────────────────
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input"

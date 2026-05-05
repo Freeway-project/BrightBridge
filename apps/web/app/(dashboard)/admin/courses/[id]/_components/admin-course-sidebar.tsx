@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send, Building2, ChevronDown, ChevronRight } from "lucide-react"
+import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send, Building2, ChevronDown, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -52,6 +52,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
   const [fixesOpen, setFixesOpen] = useState(false)
   const [note, setNote] = useState("")
   const [isPending, startTransition] = useTransition()
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const router = useRouter()
 
   const openEscalations = escalations.filter((e) => e.status === "open")
@@ -84,151 +85,190 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
     })
   }
 
+  if (isCollapsed) {
+    return (
+      <div className="w-12 h-full border-l border-border bg-card flex flex-col items-center py-4 gap-4 transition-all duration-300">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 rounded-full hover:bg-muted"
+          onClick={() => setIsCollapsed(false)}
+          title="Expand sidebar"
+        >
+          <ChevronLeft className="size-4" />
+        </Button>
+        <div className="h-px w-6 bg-border/50" />
+        <div className="flex flex-col gap-6 py-2">
+          <Building2 className="size-5 text-muted-foreground/40" />
+          <User className="size-5 text-muted-foreground/40" />
+          <AlertTriangle className="size-5 text-muted-foreground/40" />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col gap-6 p-6 h-full overflow-hidden">
-      {/* Course Summary */}
-      <section className="space-y-4 shrink-0">
-        <div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Status</h3>
-          <StatusBadge status={course.status} />
-        </div>
+    <div className="w-[450px] h-full flex flex-col border-l border-border bg-card transition-all duration-300 relative overflow-hidden">
+      {/* Toggle Button */}
+      <div className="absolute top-4 right-4 z-10">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 rounded-full hover:bg-muted"
+          onClick={() => setIsCollapsed(true)}
+          title="Collapse sidebar"
+        >
+          <ChevronRight className="size-4" />
+        </Button>
+      </div>
 
-        <Separator />
-
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm">
-            <User className="size-4 text-muted-foreground" />
-            <span className="font-medium">TA:</span>
-            <span className="text-muted-foreground">
-              {course.ta?.name ?? course.ta?.email ?? "Unassigned"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <User className="size-4 text-muted-foreground" />
-            <span className="font-medium">Instructor:</span>
-            <span className={cn("text-muted-foreground", !instructorName && "italic")}>
-              {instructorName ?? "Unassigned"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="size-4 text-muted-foreground" />
-            <span className="font-medium">Last Updated:</span>
-            <span className="text-muted-foreground">
-              {new Date(course.updatedAt).toLocaleDateString("en-US", { timeZone: "UTC" })}
-            </span>
-          </div>
-          
-          <div className="space-y-1.5 pt-1">
-            <div className="flex items-center gap-2 text-sm">
-              <Building2 className="size-4 text-muted-foreground" />
-              <span className="font-medium">Department:</span>
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex flex-col gap-6 p-6 pb-12 h-full">
+          {/* Course Summary */}
+          <section className="space-y-4 shrink-0 pr-8">
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Status</h3>
+              <StatusBadge status={course.status} />
             </div>
-            <Select 
-              value={course.orgUnitId ?? "unassigned"} 
-              onValueChange={handleDeptChange}
-              disabled={isPending}
-            >
-              <SelectTrigger className="w-full h-8 text-xs">
-                <SelectValue placeholder="Select Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </section>
 
-      <Separator className="shrink-0" />
+            <Separator />
 
-      {/* Admin Actions */}
-      <section className="space-y-4 shrink-0">
-        {!fixesOpen ? (
-          <div className="flex flex-col gap-2">
-            <Button
-              className="w-full justify-start h-9"
-              disabled={isPending || course.status !== "submitted_to_admin"}
-              onClick={handleApprove}
-            >
-              <CheckCircle2 className="mr-2 size-4" />
-              Approve Review
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start h-9 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-              disabled={isPending || course.status !== "submitted_to_admin"}
-              onClick={() => setFixesOpen(true)}
-            >
-              <MessageSquare className="mr-2 size-4" />
-              Request Fixes
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3 p-3 rounded-lg border border-orange-200 bg-orange-50/50">
-            <Textarea
-              autoFocus
-              placeholder="What needs fixing?"
-              className="bg-background min-h-[80px] text-xs"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-            <div className="flex gap-2">
-              <Button size="sm" variant="destructive" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={handleSendFixes}>
-                Send Fix Request
-              </Button>
-              <Button size="sm" variant="ghost" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={() => { setFixesOpen(false); setNote("") }}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-      </section>
-
-      <Separator className="shrink-0" />
-
-      {/* Internal Conversation */}
-      <section className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
-          <MessageSquare className="size-3.5" />
-          Internal Discussion
-        </h3>
-        <div className="flex-1 min-h-0">
-          <CourseConversation
-            courseId={course.id}
-            currentUserId={currentUserId}
-            comments={comments}
-            escalations={escalations}
-          />
-        </div>
-      </section>
-
-      {/* Escalation Threads (Optional detailed view) */}
-      {openEscalations.length > 0 && (
-        <section className="shrink-0 space-y-3">
-          <Separator className="mb-3" />
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-red-600">Active Resolve Controls</h3>
-          <div className="space-y-2">
-            {openEscalations.map(e => (
-              <div key={e.id} className="flex items-center justify-between p-2 rounded bg-red-500/5 border border-red-500/10">
-                <span className="text-xs font-medium truncate flex-1 pr-2">{e.title}</span>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="h-7 text-[10px] uppercase font-bold text-red-600 hover:bg-red-500 hover:text-white"
-                  onClick={() => resolveEscalationAction(e.id, course.id)}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm">
+                <User className="size-4 text-muted-foreground" />
+                <span className="font-medium">TA:</span>
+                <span className="text-muted-foreground">
+                  {course.ta?.name ?? course.ta?.email ?? "Unassigned"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <User className="size-4 text-muted-foreground" />
+                <span className="font-medium">Instructor:</span>
+                <span className={cn("text-muted-foreground", !instructorName && "italic")}>
+                  {instructorName ?? "Unassigned"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="size-4 text-muted-foreground" />
+                <span className="font-medium">Last Updated:</span>
+                <span className="text-muted-foreground">
+                  {new Date(course.updatedAt).toLocaleDateString("en-US", { timeZone: "UTC" })}
+                </span>
+              </div>
+              
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center gap-2 text-sm">
+                  <Building2 className="size-4 text-muted-foreground" />
+                  <span className="font-medium">Department:</span>
+                </div>
+                <Select 
+                  value={course.orgUnitId ?? "unassigned"} 
+                  onValueChange={handleDeptChange}
+                  disabled={isPending}
                 >
-                  Resolve
+                  <SelectTrigger className="w-full h-8 text-xs">
+                    <SelectValue placeholder="Select Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </section>
+
+          <Separator className="shrink-0" />
+
+          {/* Admin Actions */}
+          <section className="space-y-4 shrink-0">
+            {!fixesOpen ? (
+              <div className="flex flex-col gap-2">
+                <Button
+                  className="w-full justify-start h-9"
+                  disabled={isPending || course.status !== "submitted_to_admin"}
+                  onClick={handleApprove}
+                >
+                  <CheckCircle2 className="mr-2 size-4" />
+                  Approve Review
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-9 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  disabled={isPending || course.status !== "submitted_to_admin"}
+                  onClick={() => setFixesOpen(true)}
+                >
+                  <MessageSquare className="mr-2 size-4" />
+                  Request Fixes
                 </Button>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            ) : (
+              <div className="space-y-3 p-3 rounded-lg border border-orange-200 bg-orange-50/50">
+                <Textarea
+                  autoFocus
+                  placeholder="What needs fixing?"
+                  className="bg-background min-h-[80px] text-xs"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" variant="destructive" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={handleSendFixes}>
+                    Send Fix Request
+                  </Button>
+                  <Button size="sm" variant="ghost" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={() => { setFixesOpen(false); setNote("") }}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <Separator className="shrink-0" />
+
+          {/* Internal Conversation */}
+          <section className="flex-1 min-h-[500px] flex flex-col gap-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
+              <MessageSquare className="size-3.5" />
+              Internal Discussion
+            </h3>
+            <div className="flex-1 min-h-0">
+              <CourseConversation
+                courseId={course.id}
+                currentUserId={currentUserId}
+                comments={comments}
+                escalations={escalations}
+              />
+            </div>
+          </section>
+
+          {/* Escalation Threads (Optional detailed view) */}
+          {openEscalations.length > 0 && (
+            <section className="shrink-0 space-y-3 pt-4">
+              <Separator className="mb-3" />
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-red-600">Active Resolve Controls</h3>
+              <div className="space-y-2">
+                {openEscalations.map(e => (
+                  <div key={e.id} className="flex items-center justify-between p-2 rounded bg-red-500/5 border border-red-500/10">
+                    <span className="text-xs font-medium truncate flex-1 pr-2">{e.title}</span>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-7 text-[10px] uppercase font-bold text-red-600 hover:bg-red-500 hover:text-white"
+                      onClick={() => resolveEscalationAction(e.id, course.id)}
+                    >
+                      Resolve
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
