@@ -6,7 +6,7 @@ const DEFAULT_CSV_PATH = "Educator Lookup(Educator Lookup).csv";
 const REQUIRED_HEADERS = ["Course_Name", "email", "lastname", "firstname"];
 const ASSIGNMENT_ROLE = "instructor";
 
-loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local"]);
+loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local", "apps/web/.env"]);
 
 const csvPath = process.argv[2] ?? DEFAULT_CSV_PATH;
 const databaseUrl = process.env.DATABASE_URL;

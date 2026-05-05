@@ -5,7 +5,7 @@ import pg from "pg";
 
 const MIGRATIONS_DIR = "supabase/migrations";
 
-loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local"]);
+loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local", "apps/web/.env"]);
 
 const databaseUrl = process.env.DATABASE_URL;
 

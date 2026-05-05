@@ -5,7 +5,7 @@ import pg from "pg";
 const migrationPath =
   process.argv[2] ?? "supabase/migrations/20260428121500_initial_schema.sql";
 
-loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local"]);
+loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local", "apps/web/.env"]);
 
 const databaseUrl = process.env.DATABASE_URL;
 

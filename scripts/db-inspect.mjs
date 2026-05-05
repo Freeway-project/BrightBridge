@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import process from "node:process";
 import pg from "pg";
 
-loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local"]);
+loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local", "apps/web/.env"]);
 
 const databaseUrl = process.env.DATABASE_URL;
 

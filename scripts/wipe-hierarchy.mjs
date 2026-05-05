@@ -21,7 +21,7 @@ function loadEnv(files) {
     }
   }
 }
-loadEnv([".env.local", "apps/web/.env.local"]);
+loadEnv([".env.local", "apps/web/.env.local", "apps/web/.env"]);
 
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
