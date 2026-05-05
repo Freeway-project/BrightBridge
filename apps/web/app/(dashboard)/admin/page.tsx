@@ -58,7 +58,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
             assignPanel={
               <AdminAssignmentPanel
-                courses={unassignedPage.data}
+                courses={unassignedPage.data.filter(c => c.ta === null)}
                 tas={tas}
               />
             }

@@ -55,23 +55,33 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
     defaultValues,
   })
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
   async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
 
     setStatus("saving")
+    setErrorMsg(null)
     startTransition(async () => {
       try {
-        await saveDraft(course.id, "course_metadata", {
+        const res = await saveDraft(course.id, "course_metadata", {
           ...form.getValues(),
           overall_time_spent_seconds: overallElapsed,
         })
+        if (!res.ok) {
+          setErrorMsg(res.error || "Failed to save draft.")
+          setStatus("error")
+          setTimeout(() => window.location.reload(), 2000)
+          return
+        }
         setStatus("saved")
         if (advance) {
           router.push(`/courses/${course.id}/review-matrix`)
         }
-      } catch {
+      } catch (err) {
         setStatus("error")
+        setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
       }
     })
   }
@@ -88,6 +98,11 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
         </div>
       </CardHeader>
       <CardContent>
+        {errorMsg ? (
+          <p className="mb-5 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
+            {errorMsg}
+          </p>
+        ) : null}
         <form className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <ReadOnlyField label="Course ID" value={course.id} />

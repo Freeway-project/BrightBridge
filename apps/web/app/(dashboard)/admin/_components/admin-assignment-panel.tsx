@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Check, ChevronsUpDown, Loader2, Search } from "lucide-react";
 import { assignTaToCourseAction, searchAssignableCoursesAction, type AssignTaState } from "../actions";
 
@@ -77,6 +78,15 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   }, []);
 
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
+
+  useEffect(() => {
+    if (state.kind === "success" && state.message) {
+      toast.success(state.message);
+      setSelectedCourseId(""); // optionally clear course selection after success
+    } else if (state.kind === "error" && state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   const visibleCourses = useMemo(
     () => activeCourseList.slice(0, MAX_VISIBLE_COURSES),

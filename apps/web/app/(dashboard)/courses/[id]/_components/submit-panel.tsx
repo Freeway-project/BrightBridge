@@ -1,6 +1,6 @@
 "use client"
 
-import { useTransition } from "react"
+import { useState, useTransition } from "react"
 import { CheckCircle2, Circle, Send } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { submitReview } from "@/lib/workspace/actions"
@@ -15,8 +15,26 @@ type SubmitPanelProps = {
 
 export function SubmitPanel({ courseId, courseStatus, sections }: SubmitPanelProps) {
   const [isPending, startTransition] = useTransition()
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const blockers = sections.filter((section) => section.required && !section.complete)
   const disabled = blockers.length > 0 || isPending || courseStatus === "submitted_to_admin"
+
+  const handleSubmit = () => {
+    startTransition(async () => {
+      setErrorMsg(null)
+      try {
+        const res = await submitReview(courseId)
+        if (res && !res.ok) {
+          setErrorMsg(res.error || "Failed to submit.")
+          setTimeout(() => {
+            window.location.reload()
+          }, 2000)
+        }
+      } catch (err) {
+        setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
+      }
+    })
+  }
 
   return (
     <Card className="max-w-2xl">
@@ -48,10 +66,16 @@ export function SubmitPanel({ courseId, courseStatus, sections }: SubmitPanelPro
           </p>
         ) : null}
 
+        {errorMsg ? (
+          <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
+            {errorMsg}
+          </p>
+        ) : null}
+
         <div className="flex justify-end">
           <Button
             disabled={disabled}
-            onClick={() => startTransition(() => void submitReview(courseId))}
+            onClick={handleSubmit}
             type="button"
           >
             <Send className="size-4" />
