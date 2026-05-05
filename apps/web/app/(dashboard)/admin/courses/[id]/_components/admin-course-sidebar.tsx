@@ -34,6 +34,7 @@ interface Props {
   currentUserId: string
   departments: OrgUnit[]
   comments: CourseComment[]
+  instructorName: string | null
 }
 
 const SEVERITY_STYLES: Record<string, string> = {
@@ -47,7 +48,7 @@ function getInitials(name?: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
 }
 
-export function AdminCourseSidebar({ course, escalations, currentUserId, departments, comments }: Props) {
+export function AdminCourseSidebar({ course, escalations, currentUserId, departments, comments, instructorName }: Props) {
   const [fixesOpen, setFixesOpen] = useState(false)
   const [note, setNote] = useState("")
   const [isPending, startTransition] = useTransition()
@@ -100,6 +101,13 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
             <span className="font-medium">TA:</span>
             <span className="text-muted-foreground">
               {course.ta?.name ?? course.ta?.email ?? "Unassigned"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <User className="size-4 text-muted-foreground" />
+            <span className="font-medium">Instructor:</span>
+            <span className={cn("text-muted-foreground", !instructorName && "italic")}>
+              {instructorName ?? "Unassigned"}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
@@ -293,7 +301,7 @@ function AdminEscalationThread({
                     "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
                     isMe 
                       ? "bg-primary text-primary-foreground rounded-tr-none" 
-                      : "bg-muted/50 text-foreground border border-border/50 rounded-tl-none"
+                      : "bg-muted text-foreground border border-border/50 rounded-tl-none"
                   )}>
                     {msg.body}
                   </div>

@@ -110,7 +110,7 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
                     </p>
                     <div className={cn(
                       "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
-                      isMe ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-muted/50 text-foreground border border-border/50 rounded-tl-none"
+                      isMe ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-muted text-foreground border border-border/50 rounded-tl-none"
                     )}>
                       {item.body}
                     </div>

@@ -5,6 +5,7 @@ import { getAdminCourseDetail } from "@/lib/admin/queries"
 import { getEscalationsForCourse } from "@/lib/services/escalations"
 import { getDepartments } from "@/lib/courses/service"
 import { getCourseComments } from "@/lib/services/comments"
+import { getCourseInstructor } from "@/lib/services/profiles"
 import { CourseReviewDetail } from "./_components/course-review-detail"
 import { AdminCourseSidebar } from "./_components/admin-course-sidebar"
 import { TweakableContent } from "@/components/shared/tweakable-content"
@@ -19,11 +20,12 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, escalations, departments, comments] = await Promise.all([
+  const [detail, escalations, departments, comments, instructor] = await Promise.all([
     getAdminCourseDetail(id),
     getEscalationsForCourse(id),
     getDepartments(),
     getCourseComments(id),
+    getCourseInstructor(id),
   ])
   
   if (!detail) notFound()
@@ -62,6 +64,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
             currentUserId={context.userId} 
             departments={departments}
             comments={comments}
+            instructorName={instructor?.fullName ?? instructor?.email ?? null}
           />
         </aside>
       </main>
