@@ -31,10 +31,10 @@ export function EscalationsTable({ escalations }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden">
+    <div className="rounded-lg border border-[--border-default] overflow-hidden bg-[--surface-2]">
       <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border bg-muted/30">
+        <thead className="bg-[--surface-4]">
+          <tr className="border-b border-[--border-subtle]">
             <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Course</th>
             <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Severity</th>
             <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Issue</th>
@@ -44,7 +44,7 @@ export function EscalationsTable({ escalations }: Props) {
             <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-y divide-[--border-subtle]">
           {escalations.map((row) => (
             <EscalationRow key={row.id} row={row} />
           ))}
@@ -64,7 +64,7 @@ function EscalationRow({ row }: { row: OpenEscalationRow }) {
   }
 
   return (
-    <tr className={cn("bg-card hover:bg-muted/20 transition-colors", isPending && "opacity-50")}>
+    <tr className={cn("bg-transparent hover:bg-[--surface-3]/50 transition-colors", isPending && "opacity-50")}>
       <td className="px-4 py-3">
         <p className="font-medium text-foreground leading-tight">{row.course_title}</p>
         {row.course_source_id && (
@@ -72,13 +72,18 @@ function EscalationRow({ row }: { row: OpenEscalationRow }) {
         )}
       </td>
       <td className="px-4 py-3">
-        <span className={cn(
-          "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold capitalize",
-          SEVERITY_STYLES[row.severity]
-        )}>
-          <AlertTriangle className="size-2.5" />
-          {row.severity}
-        </span>
+        <div className="flex items-center gap-2">
+          {row.severity === "critical" && (
+            <div className="size-2 rounded-full bg-red-500 animate-pulse" />
+          )}
+          <span className={cn(
+            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold capitalize",
+            SEVERITY_STYLES[row.severity]
+          )}>
+            <AlertTriangle className="size-2.5" />
+            {row.severity}
+          </span>
+        </div>
       </td>
       <td className="px-4 py-3">
         <p className="font-medium text-foreground">{row.title}</p>
@@ -100,7 +105,7 @@ function EscalationRow({ row }: { row: OpenEscalationRow }) {
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center justify-end gap-2">
-          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1" asChild>
+          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1 hover:bg-[--surface-4]" asChild>
             <Link href={`/admin/courses/${row.course_id}`}>
               <ExternalLink className="size-3" />
               View
@@ -108,7 +113,7 @@ function EscalationRow({ row }: { row: OpenEscalationRow }) {
           </Button>
           <Button
             size="sm"
-            className="h-7 px-2 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
+            className="h-7 px-2 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white border-none"
             disabled={isPending}
             onClick={handleResolve}
           >

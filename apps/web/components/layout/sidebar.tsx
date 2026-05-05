@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LogOut } from "lucide-react"
+import { cn } from "@/lib/utils"
 import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
 import { signOut } from "@/app/dashboard/actions"
@@ -72,7 +73,16 @@ export function AppSidebar({ role, userName }: AppSidebarProps) {
                 const active =
                   pathname === item.href || pathname.startsWith(item.href + "/")
                 const btn = (
-                  <SidebarMenuButton asChild isActive={active}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={active}
+                    className={cn(
+                      "transition-all",
+                      active 
+                        ? "border-l-2 border-[var(--primary)] rounded-l-none pl-3"
+                        : "pl-[14px]" // adjusted to match pl-3 (12px) + 2px border
+                    )}
+                  >
                     <Link href={item.href}>
                       <item.icon className="size-4 shrink-0" />
                       <span>{item.label}</span>
@@ -98,6 +108,15 @@ export function AppSidebar({ role, userName }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
+        <div className="px-3 pb-2">
+          {!collapsed && (
+            <div className="mb-4">
+              <span className="inline-flex items-center rounded-full bg-[var(--primary)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--primary)] border border-[var(--primary)]/20 uppercase tracking-tight">
+                {role.replace("_", " ")}
+              </span>
+            </div>
+          )}
+        </div>
         <div className="border-t border-sidebar-border px-1 py-2 space-y-1">
           {!collapsed && (
             <p className="px-2 text-[11px] text-sidebar-foreground/50 truncate mb-1">
