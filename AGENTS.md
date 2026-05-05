@@ -32,6 +32,11 @@ Do not build large features without explicit instruction. Work in small, focused
 - Do not change unrelated files.
 - **SECURITY & ROLES:** When dealing with access control, roles, or database queries, you MUST consult `docs/rbac-architecture.md`. Enforce access at the application layer (PBAC) instead of relying solely on Supabase RLS.
 
+## Commits
+
+- Never add `Co-authored-by:` trailers or any tool/assistant attribution to commit messages.
+- For graphify-only updates to `graphify-out/`, use a single-line subject: `chore(graphify): refresh code graph` (no body).
+
 ## Initial Monorepo Direction
 
 Expected structure:
@@ -72,3 +77,4 @@ Rules:
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
 - For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
 - After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
+- When committing those graph outputs, follow **Commits** (single-line subject; no `Co-authored-by`).

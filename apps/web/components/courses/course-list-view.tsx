@@ -74,7 +74,7 @@ export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
     : "done"
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background p-6 space-y-6">
+    <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
       {stats && stats.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, i) => (
@@ -84,8 +84,8 @@ export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
       )}
 
       {/* Search + term filter */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative min-w-0 flex-1 sm:max-w-sm">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by title or course code..."
@@ -96,7 +96,7 @@ export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
         </div>
         {terms.length > 0 && (
           <Select value={term} onValueChange={setTerm}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full sm:w-[150px] sm:shrink-0">
               <SelectValue placeholder="All Terms" />
             </SelectTrigger>
             <SelectContent>
@@ -111,7 +111,7 @@ export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
 
       {/* Tabs */}
       <Tabs defaultValue={defaultTab}>
-        <TabsList className="w-full justify-start gap-1 bg-transparent p-0 border-b border-border rounded-none h-auto">
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-x-1 gap-y-1 rounded-none border-b border-border bg-transparent p-0">
           <TabItem value="todo" count={byTab.todo.length} label="To Do" activeColor="text-amber-600 border-amber-500" />
           <TabItem value="in_progress" count={byTab.in_progress.length} label="In Progress" activeColor="text-blue-600 border-blue-500" />
           <TabItem value="done" count={byTab.done.length} label="Done" activeColor="text-green-600 border-green-500" />

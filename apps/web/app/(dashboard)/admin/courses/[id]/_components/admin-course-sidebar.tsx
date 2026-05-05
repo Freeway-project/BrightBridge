@@ -4,17 +4,27 @@ import { useState, useTransition, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { formatDistanceToNow } from "date-fns"
 import type { AdminCourseRow } from "@/lib/admin/queries"
+import type { OrgUnit } from "@/lib/repositories/contracts"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
-import { approveReviewAction, requestFixesAction } from "../../../actions"
+import { approveReviewAction, requestFixesAction, updateCourseDepartmentAction } from "../../../actions"
 import { sendEscalationReplyAction, resolveEscalationAction } from "../actions"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send } from "lucide-react"
+import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send, Building2, ChevronDown, ChevronRight } from "lucide-react"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CourseConversation } from "@/app/(dashboard)/courses/[id]/_components/course-conversation"
+import type { CourseComment } from "@/lib/services/comments"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -22,6 +32,8 @@ interface Props {
   course: AdminCourseRow
   escalations: EscalationWithMessages[]
   currentUserId: string
+  departments: OrgUnit[]
+  comments: CourseComment[]
 }
 
 const SEVERITY_STYLES: Record<string, string> = {
@@ -35,7 +47,7 @@ function getInitials(name?: string) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
 }
 
-export function AdminCourseSidebar({ course, escalations, currentUserId }: Props) {
+export function AdminCourseSidebar({ course, escalations, currentUserId, departments, comments }: Props) {
   const [fixesOpen, setFixesOpen] = useState(false)
   const [note, setNote] = useState("")
   const [isPending, startTransition] = useTransition()
@@ -56,6 +68,18 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
       await requestFixesAction(course.id, note)
       toast.info("Fixes requested from TA")
       router.push("/admin")
+    })
+  }
+
+  function handleDeptChange(value: string) {
+    const orgUnitId = value === "unassigned" ? null : value
+    startTransition(async () => {
+      try {
+        await updateCourseDepartmentAction(course.id, orgUnitId)
+        toast.success("Department updated")
+      } catch (error) {
+        toast.error("Failed to update department")
+      }
     })
   }
 
@@ -85,13 +109,30 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
               {new Date(course.updatedAt).toLocaleDateString("en-US", { timeZone: "UTC" })}
             </span>
           </div>
-          {course.department && (
+          
+          <div className="space-y-1.5 pt-1">
             <div className="flex items-center gap-2 text-sm">
-              <AlertTriangle className="size-4 text-muted-foreground" />
-              <span className="font-medium">Dept:</span>
-              <span className="text-muted-foreground">{course.department}</span>
+              <Building2 className="size-4 text-muted-foreground" />
+              <span className="font-medium">Department:</span>
             </div>
-          )}
+            <Select 
+              value={course.orgUnitId ?? "unassigned"} 
+              onValueChange={handleDeptChange}
+              disabled={isPending}
+            >
+              <SelectTrigger className="w-full h-8 text-xs">
+                <SelectValue placeholder="Select Department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </section>
 
@@ -99,48 +140,40 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
 
       {/* Admin Actions */}
       <section className="space-y-4 shrink-0">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Review Actions</h3>
-
         {!fixesOpen ? (
           <div className="flex flex-col gap-2">
             <Button
-              className="w-full justify-start"
+              className="w-full justify-start h-9"
               disabled={isPending || course.status !== "submitted_to_admin"}
               onClick={handleApprove}
             >
               <CheckCircle2 className="mr-2 size-4" />
-              Approve Course
+              Approve Review
             </Button>
             <Button
               variant="outline"
-              className="w-full justify-start text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/20"
+              className="w-full justify-start h-9 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
               disabled={isPending || course.status !== "submitted_to_admin"}
               onClick={() => setFixesOpen(true)}
             >
               <MessageSquare className="mr-2 size-4" />
               Request Fixes
             </Button>
-            {course.status !== "submitted_to_admin" && (
-              <p className="text-[10px] text-muted-foreground italic">
-                Actions available once TA submits review.
-              </p>
-            )}
           </div>
         ) : (
-          <div className="space-y-3 p-3 rounded-lg border border-orange-200 bg-orange-50/50 dark:border-orange-900/50 dark:bg-orange-950/10">
-            <p className="text-xs font-medium text-orange-800 dark:text-orange-300">Note for TA</p>
+          <div className="space-y-3 p-3 rounded-lg border border-orange-200 bg-orange-50/50">
             <Textarea
               autoFocus
               placeholder="What needs fixing?"
-              className="bg-background min-h-[100px] text-sm"
+              className="bg-background min-h-[80px] text-xs"
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
             <div className="flex gap-2">
-              <Button size="sm" variant="destructive" className="flex-1" disabled={isPending} onClick={handleSendFixes}>
-                Send
+              <Button size="sm" variant="destructive" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={handleSendFixes}>
+                Send Fix Request
               </Button>
-              <Button size="sm" variant="ghost" className="flex-1" disabled={isPending} onClick={() => { setFixesOpen(false); setNote("") }}>
+              <Button size="sm" variant="ghost" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={() => { setFixesOpen(false); setNote("") }}>
                 Cancel
               </Button>
             </div>
@@ -148,28 +181,45 @@ export function AdminCourseSidebar({ course, escalations, currentUserId }: Props
         )}
       </section>
 
+      <Separator className="shrink-0" />
+
+      {/* Internal Conversation */}
+      <section className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
+          <MessageSquare className="size-3.5" />
+          Internal Discussion
+        </h3>
+        <div className="flex-1 min-h-0">
+          <CourseConversation
+            courseId={course.id}
+            currentUserId={currentUserId}
+            comments={comments}
+            escalations={escalations}
+          />
+        </div>
+      </section>
+
+      {/* Escalation Threads (Optional detailed view) */}
       {openEscalations.length > 0 && (
-        <>
-          <Separator className="shrink-0" />
-          <section className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
-              <AlertTriangle className="size-3.5 text-red-500" />
-              Open Escalations
-            </h3>
-            <div className="flex-1 min-h-0 overflow-y-auto pr-2 -mr-2">
-              <div className="space-y-5 h-full flex flex-col">
-                {openEscalations.map((e) => (
-                  <AdminEscalationThread
-                    key={e.id}
-                    courseId={course.id}
-                    currentUserId={currentUserId}
-                    escalation={e}
-                  />
-                ))}
+        <section className="shrink-0 space-y-3">
+          <Separator className="mb-3" />
+          <h3 className="text-[10px] font-bold uppercase tracking-widest text-red-600">Active Resolve Controls</h3>
+          <div className="space-y-2">
+            {openEscalations.map(e => (
+              <div key={e.id} className="flex items-center justify-between p-2 rounded bg-red-500/5 border border-red-500/10">
+                <span className="text-xs font-medium truncate flex-1 pr-2">{e.title}</span>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-7 text-[10px] uppercase font-bold text-red-600 hover:bg-red-500 hover:text-white"
+                  onClick={() => resolveEscalationAction(e.id, course.id)}
+                >
+                  Resolve
+                </Button>
               </div>
-            </div>
-          </section>
-        </>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   )

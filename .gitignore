@@ -8,15 +8,22 @@ dist/
 coverage/
 .turbo/
 
+# graphify — AST cache is reproducible; do not commit
+graphify-out/cache/
+
 # env
 .env
 .env.*
 !.env.example
+!.env.mirror.example
 
 # system
 .DS_Store
 *.log
 *.tsbuildinfo
+
+# local DB dumps (never commit)
+backups/
 
 # sensitive data
 *Educator*

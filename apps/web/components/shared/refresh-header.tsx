@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 
 interface RefreshHeaderProps {
@@ -9,8 +9,12 @@ interface RefreshHeaderProps {
 }
 
 export function RefreshHeader({ onRefresh, title }: RefreshHeaderProps) {
-  const [lastRefresh, setLastRefresh] = useState(new Date())
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    setLastRefresh(new Date())
+  }, [])
 
   const handleManualRefresh = useCallback(async () => {
     setIsLoading(true)
@@ -32,9 +36,11 @@ export function RefreshHeader({ onRefresh, title }: RefreshHeaderProps) {
     <div className="flex items-center justify-between mb-4">
       <h1 className="text-xl font-semibold">{title}</h1>
       <div className="flex items-center gap-3">
-        <span className="text-xs text-muted-foreground">
-          Updated: <span className="font-mono">{formatTime(lastRefresh)}</span>
-        </span>
+        {lastRefresh && (
+          <span className="text-xs text-muted-foreground">
+            Updated: <span className="font-mono">{formatTime(lastRefresh)}</span>
+          </span>
+        )}
         <Button
           onClick={handleManualRefresh}
           disabled={isLoading}

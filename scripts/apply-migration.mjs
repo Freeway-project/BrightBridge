@@ -5,16 +5,24 @@ import pg from "pg";
 const migrationPath =
   process.argv[2] ?? "supabase/migrations/20260428121500_initial_schema.sql";
 
-loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local"]);
+loadEnvFiles([
+  ".env.local",
+  ".env.development",
+  ".env",
+  "apps/web/.env.local",
+  "apps/web/.env",
+  ".env.mirror",
+]);
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl =
+  process.env.DEV_DATABASE_URL?.trim() || process.env.DATABASE_URL?.trim();
 
 if (!databaseUrl) {
   console.error(
     [
-      "Missing DATABASE_URL.",
-      "Add your Supabase Postgres connection string to .env.local or apps/web/.env.local."
-    ].join("\n")
+      "Missing DEV_DATABASE_URL or DATABASE_URL.",
+      "Add a Postgres connection string to .env.mirror and/or apps/web/.env.local.",
+    ].join("\n"),
   );
   process.exit(1);
 }

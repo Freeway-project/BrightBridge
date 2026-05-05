@@ -74,6 +74,7 @@ export type AdminCourseRow = {
   title: string;
   term: string | null;
   department: string | null;
+  orgUnitId: string | null;
   status: CourseStatus;
   updatedAt: string;
   ta: { id: string; name: string | null; email: string } | null;
@@ -252,6 +253,7 @@ export interface CourseRepository {
   createCourse(input: CreateCourseRecordInput): Promise<CourseSummary>;
   getCourseSummaryById(courseId: string): Promise<CourseSummary>;
   updateCourseStatus(courseId: string, status: CourseStatus): Promise<CourseSummary>;
+  updateCourseOrgUnit(courseId: string, orgUnitId: string | null): Promise<void>;
   getCourseAssignment(courseId: string, profileId: string): Promise<CourseAssignmentRecord | null>;
   hasAssignment(courseId: string, profileId: string, role: AssignmentRole): Promise<boolean>;
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;

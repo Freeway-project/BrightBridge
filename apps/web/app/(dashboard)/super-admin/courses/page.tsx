@@ -27,7 +27,7 @@ export default async function SuperAdminCoursesPage({ searchParams }: Props) {
   return (
     <>
       <Topbar title="All Courses" subtitle="Super Admin" backHref="/super-admin" />
-      <TweakableContent className="flex-1 overflow-hidden">
+      <TweakableContent className="min-w-0 flex-1 overflow-hidden">
         <CoursesView result={paginatedResult} search={search ?? ""} />
       </TweakableContent>
     </>

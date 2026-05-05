@@ -120,6 +120,18 @@ export async function assignUserToCourse(input: AssignUserToCourseInput) {
   });
 }
 
+export async function updateCourseDepartment(courseId: string, orgUnitId: string | null) {
+  const context = await requireProfile();
+  requireAnyRole(context, adminRoles);
+
+  await getCourseRepository().updateCourseOrgUnit(courseId, orgUnitId);
+}
+
+export async function getDepartments() {
+  const units = await getHierarchyRepository().listUnits();
+  return units.filter((u) => u.type === "department");
+}
+
 export async function transitionCourseStatus(input: TransitionCourseStatusInput) {
   const context = await requireProfile();
 

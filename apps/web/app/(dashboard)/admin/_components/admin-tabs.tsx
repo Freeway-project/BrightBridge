@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 type Props = {
   coursesPanel: React.ReactNode
   assignPanel: React.ReactNode
+  instructorPanel: React.ReactNode
   escalationsPanel: React.ReactNode
   completedPanel: React.ReactNode
   unassignedCount: number
@@ -15,6 +16,7 @@ type Props = {
 export function AdminTabs({
   coursesPanel,
   assignPanel,
+  instructorPanel,
   escalationsPanel,
   completedPanel,
   unassignedCount,
@@ -23,8 +25,8 @@ export function AdminTabs({
   const [tab, setTab] = useState("courses")
 
   return (
-    <Tabs value={tab} onValueChange={setTab} className="flex flex-col gap-4">
-      <TabsList variant="line" className="w-fit">
+    <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
+      <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
         <TabsTrigger value="courses">All Courses</TabsTrigger>
         <TabsTrigger value="assign">
           Assign TA
@@ -34,6 +36,7 @@ export function AdminTabs({
             </span>
           )}
         </TabsTrigger>
+        <TabsTrigger value="instructor">Instructors</TabsTrigger>
         <TabsTrigger value="escalations">
           Escalations
           {openEscalationsCount > 0 && (
@@ -47,6 +50,7 @@ export function AdminTabs({
 
       <TabsContent value="courses">{coursesPanel}</TabsContent>
       <TabsContent value="assign">{assignPanel}</TabsContent>
+      <TabsContent value="instructor">{instructorPanel}</TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
       <TabsContent value="completed">{completedPanel}</TabsContent>
     </Tabs>

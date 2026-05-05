@@ -159,6 +159,34 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return toCourseSummary(data as CourseRow);
     },
 
+    async updateCourseOrgUnit(courseId, orgUnitId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      
+      // We also update the department field for consistency if it's currently used for display
+      // Though long term we should rely on organizational_units.name
+      let department: string | null = null;
+      if (orgUnitId) {
+        const { data: unit } = await admin
+          .from("organizational_units")
+          .select("name")
+          .eq("id", orgUnitId)
+          .maybeSingle();
+        department = unit?.name ?? null;
+      }
+
+      const { error } = await admin
+        .from("courses")
+        .update({ 
+          org_unit_id: orgUnitId,
+          department: department
+        })
+        .eq("id", courseId);
+
+      if (error) {
+        throw new Error(`Could not update course department: ${error.message}`);
+      }
+    },
+
     async getCourseAssignment(courseId, profileId) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
@@ -374,6 +402,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         title: course.title,
         term: course.term,
         department: course.department,
+        orgUnitId: course.org_unit_id,
         status: toCourseStatus(course.status),
         updatedAt: course.updated_at,
         ta: staffProfile
@@ -713,6 +742,7 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
       title: course.title,
       term: course.term,
       department: course.department,
+      orgUnitId: course.org_unit_id,
       status: toCourseStatus(course.status),
       updatedAt: course.updated_at,
       ta: staffProfile

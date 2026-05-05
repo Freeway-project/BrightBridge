@@ -1,8 +1,17 @@
 import "server-only";
 
+import type { PostgrestError } from "@supabase/supabase-js";
 import type { Role } from "@coursebridge/workflow";
 import type { ProfileRepository } from "@/lib/repositories/contracts";
 import { getSupabaseAdminClientOrThrow } from "./shared";
+
+function formatPostgrestError(prefix: string, error: PostgrestError): string {
+  const bits = [error.message];
+  if (error.code) bits.push(`code=${error.code}`);
+  if (error.details) bits.push(`details=${error.details}`);
+  if (error.hint) bits.push(`hint=${error.hint}`);
+  return `${prefix}: ${bits.join(" | ")}`;
+}
 
 export function createSupabaseProfileRepository(): ProfileRepository {
   return {
@@ -15,7 +24,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
         .maybeSingle();
 
       if (error) {
-        throw new Error(`Could not load profile: ${error.message}`);
+        throw new Error(formatPostgrestError("Could not load profile", error));
       }
 
       if (!data) {
@@ -39,7 +48,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
         .order("full_name", { ascending: true, nullsFirst: false });
 
       if (error) {
-        throw new Error(`getProfilesByRole: ${error.message}`);
+        throw new Error(formatPostgrestError("getProfilesByRole", error));
       }
 
       return (data ?? []).map((profile) => ({
@@ -69,7 +78,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
         .range(from, to);
 
       if (error) {
-        throw new Error(`profiles: ${error.message}`);
+        throw new Error(formatPostgrestError("profiles list", error));
       }
 
       const rows = (data ?? []).map((profile) => ({
@@ -103,7 +112,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
       );
 
       if (error) {
-        throw new Error(`Could not upsert profile: ${error.message}`);
+        throw new Error(formatPostgrestError("Could not upsert profile", error));
       }
     },
 
@@ -112,7 +121,7 @@ export function createSupabaseProfileRepository(): ProfileRepository {
       const { error } = await admin.from("profiles").update({ role }).eq("id", profileId);
 
       if (error) {
-        throw new Error(`Could not update profile role: ${error.message}`);
+        throw new Error(formatPostgrestError("Could not update profile role", error));
       }
     },
   };
