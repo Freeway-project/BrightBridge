@@ -54,6 +54,8 @@ export default async function AdminCourseDetailPage({ params }: Props) {
               />
             </div>
           </CourseDetailRefreshWrapper>
+        </TweakableContent>
+
         {/* Sidebar Panel */}
         <aside className="flex-shrink-0 flex overflow-hidden">
           <AdminCourseSidebar 
@@ -62,9 +64,6 @@ export default async function AdminCourseDetailPage({ params }: Props) {
             currentUserId={context.userId} 
             departments={departments}
             comments={comments}
-            instructorName={instructor?.fullName ?? instructor?.email ?? null}
-          />
-        </aside>
             instructorName={instructor?.fullName ?? instructor?.email ?? null}
           />
         </aside>

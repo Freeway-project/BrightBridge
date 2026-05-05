@@ -1,4 +1,5 @@
-import { CheckCircle2, Circle, Clock3, AlertTriangle, ChevronRight, ChevronLeft, LayoutPanelRight } from "lucide-react"
+"use client"
+import { CheckCircle2, Circle, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { useState } from "react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
@@ -52,7 +53,7 @@ export function InfoPanel({
         </Button>
         <div className="h-px w-6 bg-border/50" />
         <div className="flex flex-col gap-6 py-2">
-          <LayoutPanelRight className="size-5 text-muted-foreground/40" />
+          <Layout className="size-5 text-muted-foreground/40" />
         </div>
       </aside>
     )
