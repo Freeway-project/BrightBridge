@@ -18,7 +18,8 @@
     "import:instructors": "node scripts/import-course-instructors.mjs",
     "import:courses": "node scripts/import-courses-and-assignments.mjs",
     "check:rls": "node scripts/check-core-rls.mjs",
-    "seed:dev": "node scripts/seed-dev.mjs"
+    "seed:dev": "node scripts/seed-dev.mjs",
+    "dev:users": "node scripts/ensure-dev-users.mjs"
   },
   "devDependencies": {
     "pg": "^8.20.0",
