@@ -157,7 +157,7 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
                             "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm border",
                             isMe
                               ? "bg-red-500 text-white border-red-600 rounded-tr-none"
-                              : "bg-red-50 dark:bg-red-950/30 text-foreground border-red-200 dark:border-red-900/40 rounded-tl-none"
+                              : "bg-red-900/20 text-foreground border-red-800/30 rounded-tl-none"
                           )}>
                             {msg.body}
                           </div>
