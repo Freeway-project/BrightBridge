@@ -49,15 +49,20 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   const [taSearch, setTaSearch] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [selectedTaId, setSelectedTaId] = useState<string>("");
+  const [availableCourses, setAvailableCourses] = useState<AssignableCourse[]>(courses);
   const [searchResults, setSearchResults] = useState<AssignableCourse[] | null>(null);
   const [isSearching, startSearch] = useTransition();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const canAssign = courses.length > 0 || (searchResults?.length ?? 0) > 0;
+  const canAssign = availableCourses.length > 0 || (searchResults?.length ?? 0) > 0;
   const normalizedTaSearch = taSearch.trim().toLowerCase();
 
   // All known courses: search results when searching, initial list otherwise
-  const activeCourseList = courseSearch.trim() ? (searchResults ?? []) : courses;
+  const activeCourseList = courseSearch.trim() ? (searchResults ?? []) : availableCourses;
+
+  useEffect(() => {
+    setAvailableCourses(courses);
+  }, [courses]);
 
   const filteredCourseList = useMemo(() => {
     return activeCourseList.filter((course) => {
@@ -84,8 +89,8 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
 
   const selectedCourse = useMemo(
     () => filteredCourseList.find((course) => course.id === selectedCourseId) ??
-          courses.find((course) => course.id === selectedCourseId) ?? null,
-    [filteredCourseList, courses, selectedCourseId]
+          availableCourses.find((course) => course.id === selectedCourseId) ?? null,
+    [filteredCourseList, availableCourses, selectedCourseId]
   );
 
   const selectedTa = useMemo(
@@ -114,11 +119,17 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   useEffect(() => {
     if (state.kind === "success" && state.message) {
       toast.success(state.message);
+      if (selectedCourseId) {
+        setAvailableCourses((current) => current.filter((course) => course.id !== selectedCourseId));
+        setSearchResults((current) =>
+          current ? current.filter((course) => course.id !== selectedCourseId) : current,
+        );
+      }
       setSelectedCourseId(""); // optionally clear course selection after success
     } else if (state.kind === "error" && state.message) {
       toast.error(state.message);
     }
-  }, [state]);
+  }, [state, selectedCourseId]);
 
   const visibleCourses = useMemo(
     () => filteredCourseList.slice(0, MAX_VISIBLE_COURSES),
@@ -148,8 +159,8 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
           <div>
             <CardTitle className="text-base">Assign TA to Course</CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              {courses.length > 0
-                ? `${courses.length.toLocaleString()} unassigned course${courses.length === 1 ? "" : "s"} awaiting a TA. Search to find any course.`
+              {availableCourses.length > 0
+                ? `${availableCourses.length.toLocaleString()} unassigned course${availableCourses.length === 1 ? "" : "s"} awaiting a TA. Search to find any course.`
                 : "All courses have been assigned."}
             </p>
           </div>
