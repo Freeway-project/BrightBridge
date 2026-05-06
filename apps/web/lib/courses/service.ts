@@ -20,6 +20,12 @@ export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse }
 
 const LEADERSHIP_TITLES = new Set(["dean", "assistant_dean", "dept_head", "chair"]);
 
+function toAssignmentRole(profileRole: Role): AssignmentRole {
+  if (profileRole === "standard_user") return "staff";
+  if (profileRole === "instructor") return "instructor";
+  throw new Error(`Cannot derive assignment role from profile role: ${profileRole}`);
+}
+
 export type CreateCourseInput = {
   sourceCourseId?: string | null;
   targetCourseId?: string | null;
@@ -53,7 +59,10 @@ export async function getAccessibleCourses() {
   // TAs and instructors only see courses assigned to them
   const isScoped = context.profile.role === "standard_user" || context.profile.role === "instructor";
   const summaries = isScoped
-    ? await getCourseRepository().listAssignedCourses(context.profile.id)
+    ? await getCourseRepository().listAssignedCourses(
+        context.profile.id,
+        toAssignmentRole(context.profile.role),
+      )
     : await getCourseRepository().listAccessibleCourses();
 
   const progressMap = await fetchReviewProgressForCourses(summaries.map((course) => course.id));
