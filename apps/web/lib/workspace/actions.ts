@@ -31,7 +31,7 @@ export async function saveDraft(
   data: unknown,
 ): Promise<{ ok: boolean; savedAt: string; error?: string }> {
   const ctx = await requireProfile();
-  const course = await getCourseById(courseId, ctx.userId);
+  const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
   if (!course) {
     return { ok: false, savedAt: "", error: "Course not found or assignment was revoked. Refreshing..." };
   }
@@ -58,7 +58,7 @@ export async function saveDraft(
 
 export async function submitReview(courseId: string): Promise<{ ok: boolean; error?: string }> {
   const ctx = await requireProfile();
-  const course = await getCourseById(courseId, ctx.userId);
+  const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
   if (!course) {
     return { ok: false, error: "Course not found or assignment was revoked. Refreshing..." };
   }

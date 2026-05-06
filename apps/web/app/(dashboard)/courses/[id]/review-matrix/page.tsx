@@ -19,7 +19,7 @@ interface Props {
 export default async function ReviewMatrixPage({ params }: Props) {
   const { id } = await params;
   const ctx = await requireProfile();
-  const course = await getCourseById(id, ctx.userId);
+  const course = await getCourseById(id, ctx.userId, ctx.profile.role);
   if (!course) notFound();
 
   const [matrixSection, issueSection] = await Promise.all([

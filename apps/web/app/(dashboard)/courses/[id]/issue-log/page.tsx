@@ -15,7 +15,7 @@ interface Props {
 export default async function IssueLogPage({ params }: Props) {
   const { id } = await params;
   const ctx = await requireProfile();
-  const course = await getCourseById(id, ctx.userId);
+  const course = await getCourseById(id, ctx.userId, ctx.profile.role);
   if (!course) notFound();
 
   const section = await getReviewSectionByKey("general_notes");

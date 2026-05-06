@@ -63,7 +63,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return (data ?? []).map((row) => toCourseSummary(row as CourseRow));
     },
 
-    async listAssignedCourses(userId) {
+    async listAssignedCourses(userId, assignmentRole) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("courses")
@@ -71,6 +71,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
           "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,course_assignments!inner(profile_id,role)"
         )
         .eq("course_assignments.profile_id", userId)
+        .eq("course_assignments.role", assignmentRole)
         .order("updated_at", { ascending: false });
 
       if (error) {
@@ -80,7 +81,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return (data ?? []).map((row) => toCourseSummary(row as unknown as CourseRow));
     },
 
-    async getAssignedCourseById(courseId, userId) {
+    async getAssignedCourseById(courseId, userId, assignmentRole) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("courses")
@@ -89,6 +90,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         )
         .eq("id", courseId)
         .eq("course_assignments.profile_id", userId)
+        .eq("course_assignments.role", assignmentRole)
         .maybeSingle();
 
       if (error) {

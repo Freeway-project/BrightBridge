@@ -1,41 +1,39 @@
-# Graph Report - .  (2026-05-05)
+# Graph Report - BrightBridge  (2026-05-06)
 
 ## Corpus Check
-- Large corpus: 201 files · ~81,757 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder, or use --no-semantic to run AST-only.
+- 180 files · ~87,894 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 544 nodes · 582 edges · 37 communities detected
-- Extraction: 70% EXTRACTED · 30% INFERRED · 0% AMBIGUOUS · INFERRED: 174 edges (avg confidence: 0.8)
+- 556 nodes · 617 edges · 36 communities detected
+- Extraction: 69% EXTRACTED · 31% INFERRED · 0% AMBIGUOUS · INFERRED: 189 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Admin Dashboard & Course Queries|Admin Dashboard & Course Queries]]
-- [[_COMMUNITY_Authentication & Authorization Services|Authentication & Authorization Services]]
-- [[_COMMUNITY_Dev User Management Scripts|Dev User Management Scripts]]
-- [[_COMMUNITY_Escalation Management Services|Escalation Management Services]]
-- [[_COMMUNITY_Hierarchy & Profile Seeding|Hierarchy & Profile Seeding]]
-- [[_COMMUNITY_Instructor Import Utilities|Instructor Import Utilities]]
-- [[_COMMUNITY_Course & Profile Repository Layer|Course & Profile Repository Layer]]
-- [[_COMMUNITY_Auto-Refresh & Workspace Wrappers|Auto-Refresh & Workspace Wrappers]]
-- [[_COMMUNITY_Display Settings & Providers|Display Settings & Providers]]
-- [[_COMMUNITY_Auth User Provisioning Scripts|Auth User Provisioning Scripts]]
-- [[_COMMUNITY_LMS Hierarchy Analysis|LMS Hierarchy Analysis]]
-- [[_COMMUNITY_Course & Assignment Import Scripts|Course & Assignment Import Scripts]]
-- [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 20|Community 20]]
-- [[_COMMUNITY_Community 22|Community 22]]
 - [[_COMMUNITY_Community 23|Community 23]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 26|Community 26]]
 - [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
 - [[_COMMUNITY_Community 30|Community 30]]
-- [[_COMMUNITY_Community 44|Community 44]]
-- [[_COMMUNITY_Community 45|Community 45]]
-- [[_COMMUNITY_Community 86|Community 86]]
-- [[_COMMUNITY_Community 124|Community 124]]
-- [[_COMMUNITY_Community 125|Community 125]]
-- [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 47|Community 47]]
 - [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 128|Community 128]]
 - [[_COMMUNITY_Community 129|Community 129]]
@@ -46,104 +44,110 @@
 - [[_COMMUNITY_Community 134|Community 134]]
 - [[_COMMUNITY_Community 135|Community 135]]
 - [[_COMMUNITY_Community 136|Community 136]]
+- [[_COMMUNITY_Community 137|Community 137]]
+- [[_COMMUNITY_Community 138|Community 138]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `requireProfile()` - 24 edges
-2. `getCourseRepository()` - 16 edges
+1. `requireProfile()` - 26 edges
+2. `getCourseRepository()` - 17 edges
 3. `getAuthContext()` - 13 edges
-4. `getProfileRepository()` - 11 edges
-5. `transitionCourseStatus()` - 11 edges
-6. `getAuthService()` - 10 edges
-7. `getCourseById()` - 10 edges
-8. `SupabaseAuthService` - 8 edges
-9. `getReviewRepository()` - 8 edges
-10. `getEscalationRepository()` - 8 edges
+4. `getProfileRepository()` - 12 edges
+5. `getAuthService()` - 11 edges
+6. `getCourseById()` - 11 edges
+7. `transitionCourseStatus()` - 11 edges
+8. `getEscalationRepository()` - 9 edges
+9. `AdminCourseDetailPage()` - 9 edges
+10. `SupabaseAuthService` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `transitionCourseStatus()` --calls--> `assertCanTransition()`  [INFERRED]
-  apps/web/lib/services/courses.ts → packages/workflow/src/transitions.ts
-- `transitionCourseStatus()` --calls--> `assertCanTransition()`  [INFERRED]
-  apps/web/lib/courses/service.ts → packages/workflow/src/transitions.ts
-- `signInWithPasswordAction()` --calls--> `getAuthService()`  [INFERRED]
-  apps/web/app/auth/login/actions.ts → /Users/harshsaw/Github/BrightBridge/apps/web/lib/auth/service.ts
-- `signInAsDevEmail()` --calls--> `getAuthService()`  [INFERRED]
-  apps/web/app/auth/login/actions.ts → /Users/harshsaw/Github/BrightBridge/apps/web/lib/auth/service.ts
-- `NotificationProvider()` --calls--> `createClient()`  [INFERRED]
-  apps/web/components/providers/notification-provider.tsx → /Users/harshsaw/Github/BrightBridge/apps/web/lib/supabase/client.ts
+- `assertCanTransition()` --calls--> `transitionCourseStatus()`  [INFERRED]
+  packages/workflow/src/transitions.ts → apps/web/lib/courses/service.ts
+- `ensureViaSupabaseApi()` --calls--> `createClient()`  [INFERRED]
+  scripts/ensure-dev-users.mjs → apps/web/lib/supabase/client.ts
+- `assertCanTransition()` --calls--> `transitionCourseStatus()`  [INFERRED]
+  packages/workflow/src/transitions.ts → apps/web/lib/services/courses.ts
+- `upsertProfile()` --calls--> `switchDevRole()`  [INFERRED]
+  scripts/seed-hierarchy.mjs → apps/web/components/dev-role-switcher-actions.ts
+- `signIn()` --calls--> `createClient()`  [INFERRED]
+  scripts/check-core-rls.mjs → apps/web/lib/supabase/client.ts
 
 ## Communities
 
-### Community 0 - "Admin Dashboard & Course Queries"
-Cohesion: 0.07
-Nodes (43): approveReviewAction(), assignTaToCourseAction(), requestFixesAction(), resolveEscalationAction(), searchAssignableCoursesAction(), getAdminCourseDetail(), getAdminCourses(), getAdminCoursesPage() (+35 more)
-
-### Community 1 - "Authentication & Authorization Services"
-Cohesion: 0.07
-Nodes (26): SuperAdminAuditPage(), getAuthContext(), isRole(), getAuthService(), SuperAdminCoursesPage(), signOut(), DashboardLayout(), DashboardPage() (+18 more)
-
-### Community 2 - "Dev User Management Scripts"
-Cohesion: 0.15
-Nodes (15): NotificationProvider(), assertEqual(), assertHasSource(), assertMissingSource(), checkAdminAccess(), checkCommunicationsAccess(), checkInstructorAccess(), checkMissingProfileAccess() (+7 more)
-
-### Community 3 - "Escalation Management Services"
+### Community 0 - "Community 0"
 Cohesion: 0.11
-Nodes (17): postCommentAction(), resolveEscalationAction(), sendEscalationReplyAction(), createEscalationAction(), sendEscalationMessageAction(), getCommentRepository(), getEscalationRepository(), getCourseComments() (+9 more)
+Nodes (31): approveReviewAction(), assignTaToCourseAction(), createInstructorAndAssignAction(), requestFixesAction(), searchAssignableCoursesAction(), searchCoursesForInstructorAction(), updateCourseDepartmentAction(), getAdminCourseDetail() (+23 more)
 
-### Community 4 - "Hierarchy & Profile Seeding"
-Cohesion: 0.11
-Nodes (7): SupabaseAuthService, GET(), switchDevRole(), DevRoleSwitcher(), ensureAuthUser(), upsertProfile(), createAdminClient()
+### Community 1 - "Community 1"
+Cohesion: 0.08
+Nodes (22): SuperAdminAuditPage(), getAuthContext(), isRole(), SuperAdminCoursesPage(), DashboardLayout(), DashboardPage(), SuperAdminOrganizationPage(), getHierarchyRepository() (+14 more)
 
-### Community 5 - "Instructor Import Utilities"
+### Community 2 - "Community 2"
+Cohesion: 0.1
+Nodes (19): NotFound(), CourseWorkspaceLayout(), IssueLogPage(), MetadataPage(), getReviewRepository(), ReviewMatrixPage(), getAssignedCourses(), getCourseById() (+11 more)
+
+### Community 3 - "Community 3"
+Cohesion: 0.1
+Nodes (19): resolveEscalationAction(), postCommentAction(), resolveEscalationAction(), sendEscalationReplyAction(), createEscalationAction(), sendEscalationMessageAction(), getCommentRepository(), getEscalationRepository() (+11 more)
+
+### Community 4 - "Community 4"
+Cohesion: 0.09
+Nodes (11): getAuthService(), SupabaseAuthService, GET(), switchDevRole(), DevRoleSwitcher(), signOut(), signInAsDevEmail(), signInWithPasswordAction() (+3 more)
+
+### Community 5 - "Community 5"
+Cohesion: 0.21
+Nodes (13): NotificationProvider(), assertEqual(), assertHasSource(), assertMissingSource(), checkAdminAccess(), checkCommunicationsAccess(), checkInstructorAccess(), checkMissingProfileAccess() (+5 more)
+
+### Community 6 - "Community 6"
 Cohesion: 0.25
 Nodes (12): buildDbDryRunSummary(), buildStats(), chunkArray(), fetchExistingCourseInstructorPairs(), fetchExistingValues(), isSimpleValidEmail(), normalizeEmail(), normalizeText() (+4 more)
 
-### Community 6 - "Course & Profile Repository Layer"
-Cohesion: 0.15
-Nodes (7): getCourseInstructor(), getProfilesByRole(), createSupabaseCourseRepository(), findMatchingStaffProfileIds(), toCourseSummary(), getSupabaseAdminClientOrThrow(), toCourseStatus()
-
-### Community 8 - "Auto-Refresh & Workspace Wrappers"
+### Community 8 - "Community 8"
 Cohesion: 0.17
 Nodes (6): AdminRefreshWrapper(), CourseDetailRefreshWrapper(), CourseWorkspaceRefreshWrapper(), QueueRefreshWrapper(), TaRefreshWrapper(), useAutoRefresh()
 
-### Community 9 - "Display Settings & Providers"
+### Community 9 - "Community 9"
 Cohesion: 0.18
 Nodes (4): DisplaySettings(), useTweaks(), SidebarMenuButton(), useSidebar()
 
-### Community 10 - "Auth User Provisioning Scripts"
+### Community 10 - "Community 10"
 Cohesion: 0.22
 Nodes (4): normalizeEmail(), normalizeText(), parseCsv(), parseCsvLine()
 
-### Community 12 - "LMS Hierarchy Analysis"
+### Community 11 - "Community 11"
+Cohesion: 0.2
+Nodes (5): createSupabaseCourseRepository(), findMatchingStaffProfileIds(), toCourseSummary(), getSupabaseAdminClientOrThrow(), toCourseStatus()
+
+### Community 13 - "Community 13"
 Cohesion: 0.25
 Nodes (5): derive_name_from_email(), name_matches_email(), Analyze LMS Hierarchy CSVs and prepare data for DB insertion.  Sources:   - ADs-, Both the first initial AND some part of the surname must appear in the email pre, Guess 'Initial. Surname' from a local part like 'wwheeler' → 'W. Wheeler'.
 
-### Community 13 - "Course & Assignment Import Scripts"
+### Community 14 - "Community 14"
 Cohesion: 0.32
 Nodes (4): normalizeEmail(), normalizeText(), parseCsv(), parseCsvLine()
 
-### Community 19 - "Community 19"
+### Community 15 - "Community 15"
 Cohesion: 0.33
-Nodes (6): Ensure Dev Users, Import Courses and Assignments, Seed Dev Courses, Workflow Roles, Course Statuses, Workflow Transitions
+Nodes (2): parseCsv(), parseCsvLine()
+
+### Community 16 - "Community 16"
+Cohesion: 0.43
+Nodes (5): ensureEmailIdentities(), ensureViaPostgres(), ensureViaSupabaseApi(), findUserIdByEmail(), repairAuthTokenColumns()
 
 ### Community 20 - "Community 20"
-Cohesion: 0.5
-Nodes (2): assertCanTransition(), canTransition()
+Cohesion: 0.4
+Nodes (3): transitionCourseStatus(), assertCanTransition(), canTransition()
 
-### Community 22 - "Community 22"
+### Community 23 - "Community 23"
 Cohesion: 0.6
 Nodes (3): clearFilters(), goToPage(), setQuery()
 
-### Community 23 - "Community 23"
+### Community 24 - "Community 24"
 Cohesion: 0.4
 Nodes (2): if(), SaveState()
 
-### Community 25 - "Community 25"
+### Community 26 - "Community 26"
 Cohesion: 0.4
 Nodes (5): MetadataForm, ReviewMatrixForm, requireProfile, saveDraft, submitReview
-
-### Community 27 - "Community 27"
-Cohesion: 0.67
-Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
 ### Community 28 - "Community 28"
 Cohesion: 0.67
@@ -154,131 +158,119 @@ Cohesion: 0.67
 Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
 ### Community 30 - "Community 30"
+Cohesion: 0.67
+Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
+
+### Community 31 - "Community 31"
 Cohesion: 0.5
 Nodes (2): updateSession(), proxy()
 
-### Community 44 - "Community 44"
-Cohesion: 0.67
-Nodes (3): Analyze Hierarchy, Seed All, Seed Hierarchy
-
-### Community 45 - "Community 45"
+### Community 47 - "Community 47"
 Cohesion: 0.67
 Nodes (3): TADashboardPage, getAccessibleCourses, getCourseRepository
 
-### Community 86 - "Community 86"
-Cohesion: 1.0
-Nodes (2): DesignCanvas, TweaksPanel
-
-### Community 124 - "Community 124"
-Cohesion: 1.0
-Nodes (1): DB Migrate All
-
-### Community 125 - "Community 125"
+### Community 127 - "Community 127"
 Cohesion: 1.0
 Nodes (1): getAuthContext
 
-### Community 126 - "Community 126"
+### Community 128 - "Community 128"
 Cohesion: 1.0
 Nodes (1): createAdminClient
 
-### Community 127 - "Community 127"
+### Community 129 - "Community 129"
 Cohesion: 1.0
 Nodes (1): CourseRepository
 
-### Community 128 - "Community 128"
+### Community 130 - "Community 130"
 Cohesion: 1.0
 Nodes (1): AdminDashboardPage
 
-### Community 129 - "Community 129"
+### Community 131 - "Community 131"
 Cohesion: 1.0
 Nodes (1): assignTaToCourseAction
 
-### Community 130 - "Community 130"
+### Community 132 - "Community 132"
 Cohesion: 1.0
 Nodes (1): AdminCourseDetailPage
 
-### Community 131 - "Community 131"
+### Community 133 - "Community 133"
 Cohesion: 1.0
 Nodes (1): InstructorDashboardPage
 
-### Community 132 - "Community 132"
+### Community 134 - "Community 134"
 Cohesion: 1.0
 Nodes (1): LoginPage
 
-### Community 133 - "Community 133"
+### Community 135 - "Community 135"
 Cohesion: 1.0
 Nodes (1): AppSidebar
 
-### Community 134 - "Community 134"
+### Community 136 - "Community 136"
 Cohesion: 1.0
 Nodes (1): UsersView
 
-### Community 135 - "Community 135"
+### Community 137 - "Community 137"
 Cohesion: 1.0
 Nodes (1): NotificationProvider
 
-### Community 136 - "Community 136"
+### Community 138 - "Community 138"
 Cohesion: 1.0
 Nodes (1): StatusBadge
 
 ## Knowledge Gaps
-- **28 isolated node(s):** `Analyze LMS Hierarchy CSVs and prepare data for DB insertion.  Sources:   - ADs-`, `Both the first initial AND some part of the surname must appear in the email pre`, `Guess 'Initial. Surname' from a local part like 'wwheeler' → 'W. Wheeler'.`, `DesignCanvas`, `TweaksPanel` (+23 more)
+- **20 isolated node(s):** `Analyze LMS Hierarchy CSVs and prepare data for DB insertion.  Sources:   - ADs-`, `Both the first initial AND some part of the surname must appear in the email pre`, `Guess 'Initial. Surname' from a local part like 'wwheeler' → 'W. Wheeler'.`, `getAuthContext`, `submitReview` (+15 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 20`** (5 nodes): `transitions.ts`, `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`
+- **Thin community `Community 15`** (7 nodes): `chunkArray()`, `fatal()`, `loadEnvFiles()`, `migrate-courses-from-csv.mjs`, `normDept()`, `parseCsv()`, `parseCsvLine()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 23`** (5 nodes): `if()`, `page.tsx`, `IssueLogTable()`, `SaveState()`, `issue-log-table.tsx`
+- **Thin community `Community 24`** (5 nodes): `if()`, `page.tsx`, `issue-log-table.tsx`, `IssueLogTable()`, `SaveState()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (4 nodes): `loadEnvFiles()`, `db-migrate-all.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 28`** (4 nodes): `loadEnvFiles()`, `db-migrate-all.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 28`** (4 nodes): `loadEnvFiles()`, `db-inspect.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 29`** (4 nodes): `loadEnvFiles()`, `db-inspect.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 30`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (4 nodes): `updateSession()`, `middleware.ts`, `proxy.ts`, `proxy()`
+- **Thin community `Community 31`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 86`** (2 nodes): `DesignCanvas`, `TweaksPanel`
+- **Thin community `Community 127`** (1 nodes): `getAuthContext`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 124`** (1 nodes): `DB Migrate All`
+- **Thin community `Community 128`** (1 nodes): `createAdminClient`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 125`** (1 nodes): `getAuthContext`
+- **Thin community `Community 129`** (1 nodes): `CourseRepository`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 126`** (1 nodes): `createAdminClient`
+- **Thin community `Community 130`** (1 nodes): `AdminDashboardPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 127`** (1 nodes): `CourseRepository`
+- **Thin community `Community 131`** (1 nodes): `assignTaToCourseAction`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 128`** (1 nodes): `AdminDashboardPage`
+- **Thin community `Community 132`** (1 nodes): `AdminCourseDetailPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 129`** (1 nodes): `assignTaToCourseAction`
+- **Thin community `Community 133`** (1 nodes): `InstructorDashboardPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 130`** (1 nodes): `AdminCourseDetailPage`
+- **Thin community `Community 134`** (1 nodes): `LoginPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 131`** (1 nodes): `InstructorDashboardPage`
+- **Thin community `Community 135`** (1 nodes): `AppSidebar`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 132`** (1 nodes): `LoginPage`
+- **Thin community `Community 136`** (1 nodes): `UsersView`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 133`** (1 nodes): `AppSidebar`
+- **Thin community `Community 137`** (1 nodes): `NotificationProvider`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 134`** (1 nodes): `UsersView`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 135`** (1 nodes): `NotificationProvider`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 136`** (1 nodes): `StatusBadge`
+- **Thin community `Community 138`** (1 nodes): `StatusBadge`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getProfileRepository()` connect `Authentication & Authorization Services` to `Admin Dashboard & Course Queries`, `Hierarchy & Profile Seeding`, `Course & Profile Repository Layer`?**
-  _High betweenness centrality (0.040) - this node is a cross-community bridge._
-- **Why does `requireProfile()` connect `Admin Dashboard & Course Queries` to `Authentication & Authorization Services`, `Escalation Management Services`?**
+- **Why does `requireProfile()` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`?**
   _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `createAdminClient()` connect `Hierarchy & Profile Seeding` to `Dev User Management Scripts`, `Course & Profile Repository Layer`?**
+- **Why does `createAdminClient()` connect `Community 4` to `Community 11`, `Community 5`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **Why does `getProfileRepository()` connect `Community 1` to `Community 0`, `Community 2`, `Community 4`?**
   _High betweenness centrality (0.036) - this node is a cross-community bridge._
-- **Are the 22 inferred relationships involving `requireProfile()` (e.g. with `saveDraft()` and `submitReview()`) actually correct?**
-  _`requireProfile()` has 22 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 15 inferred relationships involving `getCourseRepository()` (e.g. with `getAdminCourses()` and `getAdminCoursesPage()`) actually correct?**
-  _`getCourseRepository()` has 15 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 24 inferred relationships involving `requireProfile()` (e.g. with `saveDraft()` and `submitReview()`) actually correct?**
+  _`requireProfile()` has 24 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 16 inferred relationships involving `getCourseRepository()` (e.g. with `getAdminCourses()` and `getAdminCoursesPage()`) actually correct?**
+  _`getCourseRepository()` has 16 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 10 inferred relationships involving `getAuthContext()` (e.g. with `getAuthService()` and `getProfileRepository()`) actually correct?**
   _`getAuthContext()` has 10 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 10 inferred relationships involving `getProfileRepository()` (e.g. with `getAuthContext()` and `getSuperAdminData()`) actually correct?**
-  _`getProfileRepository()` has 10 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 11 inferred relationships involving `getProfileRepository()` (e.g. with `getAuthContext()` and `getSuperAdminData()`) actually correct?**
+  _`getProfileRepository()` has 11 INFERRED edges - model-reasoned connections that need verification._
