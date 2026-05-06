@@ -121,6 +121,18 @@ export async function assignUserToCourse(input: AssignUserToCourseInput) {
     throw new Error("Assigned profile does not exist.");
   }
 
+  if (input.role === "staff") {
+    const adminCourse = await getCourseRepository().getAdminCourse(input.courseId);
+
+    if (!adminCourse) {
+      throw new Error("Course not found.");
+    }
+
+    if (adminCourse.ta && adminCourse.ta.id !== input.profileId) {
+      throw new Error("This course is already assigned to a TA.");
+    }
+  }
+
   await getCourseRepository().assignUserToCourse({
     courseId: input.courseId,
     profileId: input.profileId,
