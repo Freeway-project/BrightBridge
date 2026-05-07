@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
@@ -66,6 +67,9 @@ export async function assignTaToCourseAction(
   _state: AssignTaState,
   formData: FormData,
 ): Promise<AssignTaState> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["admin_full", "super_admin"]);
+
   const requestId = `assign-ta-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const courseId = String(formData.get("courseId") ?? "");
   const profileId = String(formData.get("profileId") ?? "");
@@ -140,8 +144,27 @@ export async function assignTaToCourseAction(
       message.includes("course_assignments_one_staff_per_course_idx") ||
       message.includes("duplicate key value violates unique constraint");
 
+    Sentry.withScope((scope) => {
+      scope.setTag("area", "admin_assignment");
+      scope.setTag("action", "assign_ta_to_course");
+      scope.setTag("request_id", requestId);
+      scope.setTag("actor_role", context.profile.role);
+      scope.setContext("assignment_attempt", {
+        actorId: context.profile.id,
+        actorEmail: context.profile.email,
+        courseId,
+        profileId,
+        priorStatus: detail.course.status,
+        isAlreadyAssigned,
+      });
+      scope.setLevel("error");
+      Sentry.captureException(error instanceof Error ? error : new Error(message));
+    });
+
     console.error("[assignTaToCourseAction] Attempt failed", {
       requestId,
+      actorId: context.profile.id,
+      actorEmail: context.profile.email,
       courseId,
       profileId,
       priorStatus: detail.course.status,

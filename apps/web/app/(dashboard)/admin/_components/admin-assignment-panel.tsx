@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
@@ -108,8 +109,19 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     }
     debounceRef.current = setTimeout(() => {
       startSearch(async () => {
-        const results = await searchAssignableCoursesAction(trimmed);
-        setSearchResults(results);
+        try {
+          const results = await searchAssignableCoursesAction(trimmed);
+          setSearchResults(results);
+        } catch (error) {
+          Sentry.withScope((scope) => {
+            scope.setTag("area", "admin_assignment");
+            scope.setTag("action", "search_assignable_courses");
+            scope.setContext("search", { term: trimmed });
+            Sentry.captureException(error instanceof Error ? error : new Error("Course search failed"));
+          });
+          toast.error("Search failed. Please try again.");
+          setSearchResults([]);
+        }
       });
     }, SEARCH_DEBOUNCE_MS);
   }, []);
@@ -127,9 +139,20 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
       }
       setSelectedCourseId(""); // optionally clear course selection after success
     } else if (state.kind === "error" && state.message) {
+      Sentry.withScope((scope) => {
+        scope.setTag("area", "admin_assignment");
+        scope.setTag("action", "assign_ta_to_course");
+        scope.setLevel("warning");
+        scope.setContext("ui_state", {
+          selectedCourseId: selectedCourseId || null,
+          selectedTaId: selectedTaId || null,
+          message: state.message,
+        });
+        Sentry.captureMessage("[AdminAssignmentPanel] assignment error surfaced in UI");
+      });
       toast.error(state.message);
     }
-  }, [state, selectedCourseId]);
+  }, [state, selectedCourseId, selectedTaId]);
 
   const visibleCourses = useMemo(
     () => filteredCourseList.slice(0, MAX_VISIBLE_COURSES),
