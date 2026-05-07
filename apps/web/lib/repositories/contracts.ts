@@ -246,6 +246,16 @@ export type PaginatedResult<T> = {
   totalPages: number;
 };
 
+export type AssignmentLog = {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  assignedUser: { name: string | null; email: string };
+  role: AssignmentRole;
+  assignedBy: { name: string | null; email: string };
+  assignedAt: string;
+};
+
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
   listAssignedCourses(userId: string, assignmentRole: AssignmentRole): Promise<CourseSummary[]>;
@@ -274,6 +284,7 @@ export interface CourseRepository {
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
+  listRecentAssignments(limit: number): Promise<AssignmentLog[]>;
   listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
   listInstructorCourses(profileId: string): Promise<InstructorCourse[]>;
 }

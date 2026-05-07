@@ -9,6 +9,7 @@ type Props = {
   instructorPanel: React.ReactNode
   escalationsPanel: React.ReactNode
   completedPanel: React.ReactNode
+  assignmentLogsPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
 }
@@ -19,6 +20,7 @@ export function AdminTabs({
   instructorPanel,
   escalationsPanel,
   completedPanel,
+  assignmentLogsPanel,
   unassignedCount,
   openEscalationsCount,
 }: Props) {
@@ -49,8 +51,14 @@ export function AdminTabs({
       </TabsList>
 
       <TabsContent value="courses">{coursesPanel}</TabsContent>
-      <TabsContent value="assign">{assignPanel}</TabsContent>
-      <TabsContent value="instructor">{instructorPanel}</TabsContent>
+      <TabsContent value="assign" className="space-y-6 outline-none">
+        {assignPanel}
+        {assignmentLogsPanel}
+      </TabsContent>
+      <TabsContent value="instructor" className="space-y-6 outline-none">
+        {instructorPanel}
+        {assignmentLogsPanel}
+      </TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
       <TabsContent value="completed">{completedPanel}</TabsContent>
     </Tabs>
