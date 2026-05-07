@@ -90,7 +90,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L1",
       "id": "design_handoff_tweaks_panel_jsx",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaks-panel.jsx"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L139",
       "id": "design_handoff_tweaks_panel_usetweaks",
-      "community": 8,
+      "community": 7,
       "norm_label": "usetweaks()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L160",
       "id": "design_handoff_tweaks_panel_tweakspanel",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakspanel()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L250",
       "id": "design_handoff_tweaks_panel_tweaksection",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaksection()"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L259",
       "id": "design_handoff_tweaks_panel_tweakrow",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakrow()"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L273",
       "id": "design_handoff_tweaks_panel_tweakslider",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakslider()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L282",
       "id": "design_handoff_tweaks_panel_tweaktoggle",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaktoggle()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L293",
       "id": "design_handoff_tweaks_panel_tweakradio",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakradio()"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L347",
       "id": "design_handoff_tweaks_panel_tweakselect",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakselect()"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L361",
       "id": "design_handoff_tweaks_panel_tweaktext",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaktext()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L370",
       "id": "design_handoff_tweaks_panel_tweaknumber",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweaknumber()"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L404",
       "id": "design_handoff_tweaks_panel_tweakcolor",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakcolor()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "design_handoff/tweaks-panel.jsx",
       "source_location": "L414",
       "id": "design_handoff_tweaks_panel_tweakbutton",
-      "community": 8,
+      "community": 7,
       "norm_label": "tweakbutton()"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L1",
       "id": "packages_workflow_src_transitions_ts",
-      "community": 3,
+      "community": 1,
       "norm_label": "transitions.ts"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L81",
       "id": "src_transitions_cantransition",
-      "community": 3,
+      "community": 1,
       "norm_label": "cantransition()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L90",
       "id": "src_transitions_getallowedtransitions",
-      "community": 3,
+      "community": 1,
       "norm_label": "getallowedtransitions()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L96",
       "id": "src_transitions_assertcantransition",
-      "community": 3,
+      "community": 1,
       "norm_label": "assertcantransition()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "packages/workflow/src/transitions.ts",
       "source_location": "L104",
       "id": "src_transitions_transitionallowsrole",
-      "community": 3,
+      "community": 1,
       "norm_label": "transitionallowsrole()"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L1",
       "id": "scripts_import_course_instructors_dry_run_mjs",
-      "community": 7,
+      "community": 6,
       "norm_label": "import-course-instructors-dry-run.mjs"
     },
     {
@@ -657,7 +657,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L76",
       "id": "scripts_import_course_instructors_dry_run_buildstats",
-      "community": 7,
+      "community": 6,
       "norm_label": "buildstats()"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L157",
       "id": "scripts_import_course_instructors_dry_run_builddbdryrunsummary",
-      "community": 7,
+      "community": 6,
       "norm_label": "builddbdryrunsummary()"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L198",
       "id": "scripts_import_course_instructors_dry_run_fetchexistingvalues",
-      "community": 7,
+      "community": 6,
       "norm_label": "fetchexistingvalues()"
     },
     {
@@ -684,7 +684,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L219",
       "id": "scripts_import_course_instructors_dry_run_fetchexistingcourseinstructorpairs",
-      "community": 7,
+      "community": 6,
       "norm_label": "fetchexistingcourseinstructorpairs()"
     },
     {
@@ -693,7 +693,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L239",
       "id": "scripts_import_course_instructors_dry_run_parsecsv",
-      "community": 7,
+      "community": 6,
       "norm_label": "parsecsv()"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L266",
       "id": "scripts_import_course_instructors_dry_run_parsecsvline",
-      "community": 7,
+      "community": 6,
       "norm_label": "parsecsvline()"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L299",
       "id": "scripts_import_course_instructors_dry_run_normalizetext",
-      "community": 7,
+      "community": 6,
       "norm_label": "normalizetext()"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L303",
       "id": "scripts_import_course_instructors_dry_run_normalizeemail",
-      "community": 7,
+      "community": 6,
       "norm_label": "normalizeemail()"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L307",
       "id": "scripts_import_course_instructors_dry_run_issimplevalidemail",
-      "community": 7,
+      "community": 6,
       "norm_label": "issimplevalidemail()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L311",
       "id": "scripts_import_course_instructors_dry_run_chunkarray",
-      "community": 7,
+      "community": 6,
       "norm_label": "chunkarray()"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L319",
       "id": "scripts_import_course_instructors_dry_run_loadenvfiles",
-      "community": 7,
+      "community": 6,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -756,7 +756,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L350",
       "id": "scripts_import_course_instructors_dry_run_parsedatabaseurl",
-      "community": 7,
+      "community": 6,
       "norm_label": "parsedatabaseurl()"
     },
     {
@@ -765,7 +765,7 @@
       "source_file": "scripts/import-course-instructors-dry-run.mjs",
       "source_location": "L361",
       "id": "scripts_import_course_instructors_dry_run_parsesupabasedatabaseurl",
-      "community": 7,
+      "community": 6,
       "norm_label": "parsesupabasedatabaseurl()"
     },
     {
@@ -918,169 +918,304 @@
       "source_file": "scripts/import-ta-review-form.mjs",
       "source_location": "L1",
       "id": "scripts_import_ta_review_form_mjs",
-      "community": 6,
+      "community": 2,
       "norm_label": "import-ta-review-form.mjs"
     },
     {
       "label": "askDedupeChoice()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L135",
+      "source_location": "L173",
       "id": "scripts_import_ta_review_form_askdedupechoice",
-      "community": 6,
+      "community": 2,
       "norm_label": "askdedupechoice()"
     },
     {
       "label": "askReviewerMappings()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L145",
+      "source_location": "L183",
       "id": "scripts_import_ta_review_form_askreviewermappings",
-      "community": 6,
+      "community": 2,
       "norm_label": "askreviewermappings()"
     },
     {
       "label": "normalizeRows()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L168",
+      "source_location": "L205",
       "id": "scripts_import_ta_review_form_normalizerows",
-      "community": 6,
+      "community": 2,
       "norm_label": "normalizerows()"
     },
     {
-      "label": "buildResponseData()",
+      "label": "buildRawResponseData()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L188",
-      "id": "scripts_import_ta_review_form_buildresponsedata",
-      "community": 6,
-      "norm_label": "buildresponsedata()"
+      "source_location": "L227",
+      "id": "scripts_import_ta_review_form_buildrawresponsedata",
+      "community": 2,
+      "norm_label": "buildrawresponsedata()"
     },
     {
       "label": "buildImportRows()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L196",
+      "source_location": "L235",
       "id": "scripts_import_ta_review_form_buildimportrows",
-      "community": 6,
+      "community": 2,
       "norm_label": "buildimportrows()"
+    },
+    {
+      "label": "buildSectionPayloads()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L258",
+      "id": "scripts_import_ta_review_form_buildsectionpayloads",
+      "community": 2,
+      "norm_label": "buildsectionpayloads()"
+    },
+    {
+      "label": "buildMatrixItem()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L321",
+      "id": "scripts_import_ta_review_form_buildmatrixitem",
+      "community": 2,
+      "norm_label": "buildmatrixitem()"
+    },
+    {
+      "label": "normalizeMatrixStatus()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L330",
+      "id": "scripts_import_ta_review_form_normalizematrixstatus",
+      "community": 2,
+      "norm_label": "normalizematrixstatus()"
+    },
+    {
+      "label": "normalizeNote()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L347",
+      "id": "scripts_import_ta_review_form_normalizenote",
+      "community": 2,
+      "norm_label": "normalizenote()"
+    },
+    {
+      "label": "normalizeLink()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L355",
+      "id": "scripts_import_ta_review_form_normalizelink",
+      "community": 2,
+      "norm_label": "normalizelink()"
+    },
+    {
+      "label": "parseSectionNumbers()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L362",
+      "id": "scripts_import_ta_review_form_parsesectionnumbers",
+      "community": 2,
+      "norm_label": "parsesectionnumbers()"
+    },
+    {
+      "label": "combineNotes()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L368",
+      "id": "scripts_import_ta_review_form_combinenotes",
+      "community": 2,
+      "norm_label": "combinenotes()"
+    },
+    {
+      "label": "parseDurationSeconds()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L372",
+      "id": "scripts_import_ta_review_form_parsedurationseconds",
+      "community": 2,
+      "norm_label": "parsedurationseconds()"
+    },
+    {
+      "label": "normalizeTermDisplay()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L396",
+      "id": "scripts_import_ta_review_form_normalizetermdisplay",
+      "community": 2,
+      "norm_label": "normalizetermdisplay()"
     },
     {
       "label": "computePlan()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L215",
+      "source_location": "L407",
       "id": "scripts_import_ta_review_form_computeplan",
-      "community": 6,
+      "community": 2,
       "norm_label": "computeplan()"
     },
     {
       "label": "printPlan()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L249",
+      "source_location": "L442",
       "id": "scripts_import_ta_review_form_printplan",
-      "community": 6,
+      "community": 2,
       "norm_label": "printplan()"
+    },
+    {
+      "label": "printSampleMappings()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L452",
+      "id": "scripts_import_ta_review_form_printsamplemappings",
+      "community": 2,
+      "norm_label": "printsamplemappings()"
     },
     {
       "label": "executeImport()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L259",
+      "source_location": "L462",
       "id": "scripts_import_ta_review_form_executeimport",
-      "community": 6,
+      "community": 2,
       "norm_label": "executeimport()"
     },
     {
       "label": "getAdminProfileId()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L333",
+      "source_location": "L549",
       "id": "scripts_import_ta_review_form_getadminprofileid",
-      "community": 6,
+      "community": 2,
       "norm_label": "getadminprofileid()"
     },
     {
       "label": "findProfileByEmail()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L341",
+      "source_location": "L555",
       "id": "scripts_import_ta_review_form_findprofilebyemail",
-      "community": 6,
+      "community": 2,
       "norm_label": "findprofilebyemail()"
     },
     {
-      "label": "getReviewMatrixSectionId()",
+      "label": "getSectionIdsByKey()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L347",
-      "id": "scripts_import_ta_review_form_getreviewmatrixsectionid",
-      "community": 6,
-      "norm_label": "getreviewmatrixsectionid()"
+      "source_location": "L561",
+      "id": "scripts_import_ta_review_form_getsectionidsbykey",
+      "community": 2,
+      "norm_label": "getsectionidsbykey()"
     },
     {
       "label": "listCoursesBySourceIds()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L359",
+      "source_location": "L571",
       "id": "scripts_import_ta_review_form_listcoursesbysourceids",
-      "community": 6,
+      "community": 2,
       "norm_label": "listcoursesbysourceids()"
     },
     {
       "label": "extractBrightspaceCourseId()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L369",
+      "source_location": "L578",
       "id": "scripts_import_ta_review_form_extractbrightspacecourseid",
-      "community": 6,
+      "community": 2,
       "norm_label": "extractbrightspacecourseid()"
+    },
+    {
+      "label": "normalizeHeader()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L585",
+      "id": "scripts_import_ta_review_form_normalizeheader",
+      "community": 2,
+      "norm_label": "normalizeheader()"
+    },
+    {
+      "label": "safeUrlOrBlank()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L589",
+      "id": "scripts_import_ta_review_form_safeurlorblank",
+      "community": 2,
+      "norm_label": "safeurlorblank()"
+    },
+    {
+      "label": "normalizeFreeText()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L600",
+      "id": "scripts_import_ta_review_form_normalizefreetext",
+      "community": 2,
+      "norm_label": "normalizefreetext()"
     },
     {
       "label": "cleanText()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L376",
+      "source_location": "L604",
       "id": "scripts_import_ta_review_form_cleantext",
-      "community": 6,
+      "community": 2,
       "norm_label": "cleantext()"
     },
     {
       "label": "groupBy()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L381",
+      "source_location": "L609",
       "id": "scripts_import_ta_review_form_groupby",
-      "community": 6,
+      "community": 2,
       "norm_label": "groupby()"
     },
     {
       "label": "parseCsv()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L391",
+      "source_location": "L619",
       "id": "scripts_import_ta_review_form_parsecsv",
-      "community": 6,
+      "community": 2,
       "norm_label": "parsecsv()"
     },
     {
       "label": "parseCsvLine()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L411",
+      "source_location": "L638",
       "id": "scripts_import_ta_review_form_parsecsvline",
-      "community": 6,
+      "community": 2,
       "norm_label": "parsecsvline()"
+    },
+    {
+      "label": "sha256()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L665",
+      "id": "scripts_import_ta_review_form_sha256",
+      "community": 2,
+      "norm_label": "sha256()"
+    },
+    {
+      "label": "cryptoRandomId()",
+      "file_type": "code",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L669",
+      "id": "scripts_import_ta_review_form_cryptorandomid",
+      "community": 2,
+      "norm_label": "cryptorandomid()"
     },
     {
       "label": "fatal()",
       "file_type": "code",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L438",
+      "source_location": "L674",
       "id": "scripts_import_ta_review_form_fatal",
-      "community": 6,
+      "community": 2,
       "norm_label": "fatal()"
     },
     {
@@ -1152,7 +1287,7 @@
       "source_file": "scripts/seed-hierarchy.mjs",
       "source_location": "L1",
       "id": "scripts_seed_hierarchy_mjs",
-      "community": 4,
+      "community": 3,
       "norm_label": "seed-hierarchy.mjs"
     },
     {
@@ -1161,7 +1296,7 @@
       "source_file": "scripts/seed-hierarchy.mjs",
       "source_location": "L48",
       "id": "scripts_seed_hierarchy_log",
-      "community": 4,
+      "community": 3,
       "norm_label": "log()"
     },
     {
@@ -1170,7 +1305,7 @@
       "source_file": "scripts/seed-hierarchy.mjs",
       "source_location": "L52",
       "id": "scripts_seed_hierarchy_upsertprofile",
-      "community": 4,
+      "community": 3,
       "norm_label": "upsertprofile()"
     },
     {
@@ -1179,7 +1314,7 @@
       "source_file": "scripts/seed-hierarchy.mjs",
       "source_location": "L60",
       "id": "scripts_seed_hierarchy_ensureauthuser",
-      "community": 4,
+      "community": 3,
       "norm_label": "ensureauthuser()"
     },
     {
@@ -1188,7 +1323,7 @@
       "source_file": "scripts/seed-hierarchy.mjs",
       "source_location": "L310",
       "id": "scripts_seed_hierarchy_loadenvfiles",
-      "community": 4,
+      "community": 3,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -1233,7 +1368,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L1",
       "id": "scripts_import_course_instructors_mjs",
-      "community": 11,
+      "community": 10,
       "norm_label": "import-course-instructors.mjs"
     },
     {
@@ -1242,7 +1377,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L156",
       "id": "scripts_import_course_instructors_createauthuser",
-      "community": 11,
+      "community": 10,
       "norm_label": "createauthuser()"
     },
     {
@@ -1251,7 +1386,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L194",
       "id": "scripts_import_course_instructors_parsecsv",
-      "community": 11,
+      "community": 10,
       "norm_label": "parsecsv()"
     },
     {
@@ -1260,7 +1395,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L211",
       "id": "scripts_import_course_instructors_parsecsvline",
-      "community": 11,
+      "community": 10,
       "norm_label": "parsecsvline()"
     },
     {
@@ -1269,7 +1404,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L230",
       "id": "scripts_import_course_instructors_normalizetext",
-      "community": 11,
+      "community": 10,
       "norm_label": "normalizetext()"
     },
     {
@@ -1278,7 +1413,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L231",
       "id": "scripts_import_course_instructors_normalizeemail",
-      "community": 11,
+      "community": 10,
       "norm_label": "normalizeemail()"
     },
     {
@@ -1287,7 +1422,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L232",
       "id": "scripts_import_course_instructors_isvalidemail",
-      "community": 11,
+      "community": 10,
       "norm_label": "isvalidemail()"
     },
     {
@@ -1296,7 +1431,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L233",
       "id": "scripts_import_course_instructors_chunkarray",
-      "community": 11,
+      "community": 10,
       "norm_label": "chunkarray()"
     },
     {
@@ -1305,7 +1440,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L238",
       "id": "scripts_import_course_instructors_fatal",
-      "community": 11,
+      "community": 10,
       "norm_label": "fatal()"
     },
     {
@@ -1314,7 +1449,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L240",
       "id": "scripts_import_course_instructors_loadenvfiles",
-      "community": 11,
+      "community": 10,
       "norm_label": "loadenvfiles()"
     },
     {
@@ -1323,7 +1458,7 @@
       "source_file": "scripts/import-course-instructors.mjs",
       "source_location": "L255",
       "id": "scripts_import_course_instructors_parsedatabaseurl",
-      "community": 11,
+      "community": 10,
       "norm_label": "parsedatabaseurl()"
     },
     {
@@ -1602,7 +1737,7 @@
       "source_file": "apps/web/lib/admin/queries.ts",
       "source_location": "L1",
       "id": "apps_web_lib_admin_queries_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "queries.ts"
     },
     {
@@ -1611,7 +1746,7 @@
       "source_file": "apps/web/lib/admin/queries.ts",
       "source_location": "L26",
       "id": "admin_queries_getadmincourses",
-      "community": 0,
+      "community": 1,
       "norm_label": "getadmincourses()"
     },
     {
@@ -1629,7 +1764,7 @@
       "source_file": "apps/web/lib/admin/queries.ts",
       "source_location": "L49",
       "id": "admin_queries_getadmincoursedetail",
-      "community": 0,
+      "community": 1,
       "norm_label": "getadmincoursedetail()"
     },
     {
@@ -1638,7 +1773,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L1",
       "id": "apps_web_lib_auth_service_ts",
-      "community": 4,
+      "community": 3,
       "norm_label": "service.ts"
     },
     {
@@ -1647,7 +1782,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L28",
       "id": "auth_service_supabaseauthservice",
-      "community": 4,
+      "community": 3,
       "norm_label": "supabaseauthservice"
     },
     {
@@ -1656,7 +1791,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L29",
       "id": "auth_service_supabaseauthservice_getcurrentsessionuser",
-      "community": 4,
+      "community": 3,
       "norm_label": ".getcurrentsessionuser()"
     },
     {
@@ -1665,7 +1800,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L46",
       "id": "auth_service_supabaseauthservice_signinwithpassword",
-      "community": 4,
+      "community": 3,
       "norm_label": ".signinwithpassword()"
     },
     {
@@ -1674,7 +1809,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L52",
       "id": "auth_service_supabaseauthservice_signout",
-      "community": 4,
+      "community": 3,
       "norm_label": ".signout()"
     },
     {
@@ -1683,7 +1818,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L57",
       "id": "auth_service_supabaseauthservice_exchangecodeforsession",
-      "community": 4,
+      "community": 3,
       "norm_label": ".exchangecodeforsession()"
     },
     {
@@ -1692,7 +1827,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L62",
       "id": "auth_service_supabaseauthservice_createuserwithpassword",
-      "community": 4,
+      "community": 3,
       "norm_label": ".createuserwithpassword()"
     },
     {
@@ -1701,7 +1836,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L95",
       "id": "auth_service_supabaseauthservice_updateusermetadata",
-      "community": 4,
+      "community": 3,
       "norm_label": ".updateusermetadata()"
     },
     {
@@ -1710,7 +1845,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L111",
       "id": "auth_service_supabaseauthservice_getbrowserclient",
-      "community": 4,
+      "community": 3,
       "norm_label": ".getbrowserclient()"
     },
     {
@@ -1719,7 +1854,7 @@
       "source_file": "apps/web/lib/auth/service.ts",
       "source_location": "L118",
       "id": "auth_service_getauthservice",
-      "community": 1,
+      "community": 3,
       "norm_label": "getauthservice()"
     },
     {
@@ -1728,7 +1863,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L1",
       "id": "apps_web_lib_auth_context_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "context.ts"
     },
     {
@@ -1737,7 +1872,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L20",
       "id": "auth_context_getauthcontext",
-      "community": 1,
+      "community": 0,
       "norm_label": "getauthcontext()"
     },
     {
@@ -1764,7 +1899,7 @@
       "source_file": "apps/web/lib/auth/context.ts",
       "source_location": "L71",
       "id": "auth_context_isrole",
-      "community": 1,
+      "community": 0,
       "norm_label": "isrole()"
     },
     {
@@ -1800,7 +1935,7 @@
       "source_file": "apps/web/lib/workspace/actions.ts",
       "source_location": "L1",
       "id": "apps_web_lib_workspace_actions_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "actions.ts"
     },
     {
@@ -1809,7 +1944,7 @@
       "source_file": "apps/web/lib/workspace/actions.ts",
       "source_location": "L29",
       "id": "workspace_actions_savedraft",
-      "community": 0,
+      "community": 1,
       "norm_label": "savedraft()"
     },
     {
@@ -1818,7 +1953,7 @@
       "source_file": "apps/web/lib/workspace/actions.ts",
       "source_location": "L75",
       "id": "workspace_actions_submitreview",
-      "community": 0,
+      "community": 1,
       "norm_label": "submitreview()"
     },
     {
@@ -1827,7 +1962,7 @@
       "source_file": "apps/web/lib/workspace/use-auto-refresh.ts",
       "source_location": "L1",
       "id": "apps_web_lib_workspace_use_auto_refresh_ts",
-      "community": 9,
+      "community": 8,
       "norm_label": "use-auto-refresh.ts"
     },
     {
@@ -1836,7 +1971,7 @@
       "source_file": "apps/web/lib/workspace/use-auto-refresh.ts",
       "source_location": "L10",
       "id": "workspace_use_auto_refresh_useautorefresh",
-      "community": 9,
+      "community": 8,
       "norm_label": "useautorefresh()"
     },
     {
@@ -1863,7 +1998,7 @@
       "source_file": "apps/web/lib/super-admin/queries.ts",
       "source_location": "L1",
       "id": "apps_web_lib_super_admin_queries_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "queries.ts"
     },
     {
@@ -1872,7 +2007,7 @@
       "source_file": "apps/web/lib/super-admin/queries.ts",
       "source_location": "L42",
       "id": "super_admin_queries_getsuperadmindata",
-      "community": 1,
+      "community": 0,
       "norm_label": "getsuperadmindata()"
     },
     {
@@ -1881,7 +2016,7 @@
       "source_file": "apps/web/lib/super-admin/queries.ts",
       "source_location": "L83",
       "id": "super_admin_queries_getpaginatedsuperadmincourses",
-      "community": 1,
+      "community": 0,
       "norm_label": "getpaginatedsuperadmincourses()"
     },
     {
@@ -1890,7 +2025,7 @@
       "source_file": "apps/web/lib/super-admin/queries.ts",
       "source_location": "L88",
       "id": "super_admin_queries_getpaginatedusers",
-      "community": 1,
+      "community": 0,
       "norm_label": "getpaginatedusers()"
     },
     {
@@ -1953,7 +2088,7 @@
       "source_file": "apps/web/lib/supabase/admin.ts",
       "source_location": "L1",
       "id": "apps_web_lib_supabase_admin_ts",
-      "community": 4,
+      "community": 3,
       "norm_label": "admin.ts"
     },
     {
@@ -1962,7 +2097,7 @@
       "source_file": "apps/web/lib/supabase/admin.ts",
       "source_location": "L3",
       "id": "supabase_admin_createadminclient",
-      "community": 4,
+      "community": 3,
       "norm_label": "createadminclient()"
     },
     {
@@ -1971,7 +2106,7 @@
       "source_file": "apps/web/lib/services/escalations.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_escalations_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "escalations.ts"
     },
     {
@@ -1980,7 +2115,7 @@
       "source_file": "apps/web/lib/services/escalations.ts",
       "source_location": "L13",
       "id": "services_escalations_getescalationsforcourse",
-      "community": 2,
+      "community": 4,
       "norm_label": "getescalationsforcourse()"
     },
     {
@@ -1989,7 +2124,7 @@
       "source_file": "apps/web/lib/services/escalations.ts",
       "source_location": "L21",
       "id": "services_escalations_getopenescalations",
-      "community": 2,
+      "community": 4,
       "norm_label": "getopenescalations()"
     },
     {
@@ -1998,7 +2133,7 @@
       "source_file": "apps/web/lib/services/escalations.ts",
       "source_location": "L29",
       "id": "services_escalations_countopenescalations",
-      "community": 2,
+      "community": 4,
       "norm_label": "countopenescalations()"
     },
     {
@@ -2007,7 +2142,7 @@
       "source_file": "apps/web/lib/services/escalations.ts",
       "source_location": "L37",
       "id": "services_escalations_createescalation",
-      "community": 2,
+      "community": 4,
       "norm_label": "createescalation()"
     },
     {
@@ -2016,7 +2151,7 @@
       "source_file": "apps/web/lib/services/escalations.ts",
       "source_location": "L41",
       "id": "services_escalations_addescalationmessage",
-      "community": 2,
+      "community": 4,
       "norm_label": "addescalationmessage()"
     },
     {
@@ -2025,7 +2160,7 @@
       "source_file": "apps/web/lib/services/escalations.ts",
       "source_location": "L49",
       "id": "services_escalations_resolveescalation",
-      "community": 2,
+      "community": 4,
       "norm_label": "resolveescalation()"
     },
     {
@@ -2034,7 +2169,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_review_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "review.ts"
     },
     {
@@ -2043,7 +2178,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L14",
       "id": "services_review_getreviewresponse",
-      "community": 3,
+      "community": 1,
       "norm_label": "getreviewresponse()"
     },
     {
@@ -2052,7 +2187,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L21",
       "id": "services_review_getreviewresponses",
-      "community": 0,
+      "community": 1,
       "norm_label": "getreviewresponses()"
     },
     {
@@ -2061,7 +2196,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L25",
       "id": "services_review_upsertreviewresponse",
-      "community": 0,
+      "community": 1,
       "norm_label": "upsertreviewresponse()"
     },
     {
@@ -2070,7 +2205,7 @@
       "source_file": "apps/web/lib/services/review.ts",
       "source_location": "L47",
       "id": "services_review_markallresponsessubmitted",
-      "community": 0,
+      "community": 1,
       "norm_label": "markallresponsessubmitted()"
     },
     {
@@ -2079,7 +2214,7 @@
       "source_file": "apps/web/lib/services/conversation.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_conversation_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "conversation.ts"
     },
     {
@@ -2088,7 +2223,7 @@
       "source_file": "apps/web/lib/services/conversation.ts",
       "source_location": "L8",
       "id": "services_conversation_getcourseconversation",
-      "community": 2,
+      "community": 4,
       "norm_label": "getcourseconversation()"
     },
     {
@@ -2097,7 +2232,7 @@
       "source_file": "apps/web/lib/services/profiles.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_profiles_ts",
-      "community": 2,
+      "community": 1,
       "norm_label": "profiles.ts"
     },
     {
@@ -2106,7 +2241,7 @@
       "source_file": "apps/web/lib/services/profiles.ts",
       "source_location": "L9",
       "id": "services_profiles_getprofilesbyrole",
-      "community": 2,
+      "community": 1,
       "norm_label": "getprofilesbyrole()"
     },
     {
@@ -2115,7 +2250,7 @@
       "source_file": "apps/web/lib/services/profiles.ts",
       "source_location": "L13",
       "id": "services_profiles_getcourseinstructor",
-      "community": 2,
+      "community": 1,
       "norm_label": "getcourseinstructor()"
     },
     {
@@ -2124,7 +2259,7 @@
       "source_file": "apps/web/lib/services/comments.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_comments_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "comments.ts"
     },
     {
@@ -2133,7 +2268,7 @@
       "source_file": "apps/web/lib/services/comments.ts",
       "source_location": "L5",
       "id": "services_comments_getcoursecomments",
-      "community": 2,
+      "community": 4,
       "norm_label": "getcoursecomments()"
     },
     {
@@ -2142,7 +2277,7 @@
       "source_file": "apps/web/lib/services/comments.ts",
       "source_location": "L9",
       "id": "services_comments_postcoursecomment",
-      "community": 2,
+      "community": 4,
       "norm_label": "postcoursecomment()"
     },
     {
@@ -2151,7 +2286,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L1",
       "id": "apps_web_lib_services_courses_ts",
-      "community": 3,
+      "community": 1,
       "norm_label": "courses.ts"
     },
     {
@@ -2160,7 +2295,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L14",
       "id": "services_courses_toassignmentrole",
-      "community": 3,
+      "community": 1,
       "norm_label": "toassignmentrole()"
     },
     {
@@ -2169,7 +2304,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L20",
       "id": "services_courses_getassignedcourses",
-      "community": 3,
+      "community": 1,
       "norm_label": "getassignedcourses()"
     },
     {
@@ -2178,7 +2313,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L24",
       "id": "services_courses_getcoursebyid",
-      "community": 3,
+      "community": 1,
       "norm_label": "getcoursebyid()"
     },
     {
@@ -2187,7 +2322,7 @@
       "source_file": "apps/web/lib/services/courses.ts",
       "source_location": "L32",
       "id": "services_courses_transitioncoursestatus",
-      "community": 3,
+      "community": 1,
       "norm_label": "transitioncoursestatus()"
     },
     {
@@ -2205,7 +2340,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_index_ts",
-      "community": 1,
+      "community": 4,
       "norm_label": "index.ts"
     },
     {
@@ -2223,7 +2358,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L30",
       "id": "repositories_index_getprofilerepository",
-      "community": 1,
+      "community": 0,
       "norm_label": "getprofilerepository()"
     },
     {
@@ -2232,7 +2367,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L35",
       "id": "repositories_index_getreviewrepository",
-      "community": 0,
+      "community": 1,
       "norm_label": "getreviewrepository()"
     },
     {
@@ -2241,7 +2376,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L40",
       "id": "repositories_index_getcommentrepository",
-      "community": 2,
+      "community": 4,
       "norm_label": "getcommentrepository()"
     },
     {
@@ -2250,7 +2385,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L45",
       "id": "repositories_index_gethierarchyrepository",
-      "community": 1,
+      "community": 12,
       "norm_label": "gethierarchyrepository()"
     },
     {
@@ -2259,7 +2394,7 @@
       "source_file": "apps/web/lib/repositories/index.ts",
       "source_location": "L50",
       "id": "repositories_index_getescalationrepository",
-      "community": 2,
+      "community": 4,
       "norm_label": "getescalationrepository()"
     },
     {
@@ -2268,7 +2403,7 @@
       "source_file": "apps/web/lib/repositories/supabase/escalation-repository.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_escalation_repository_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "escalation-repository.ts"
     },
     {
@@ -2277,7 +2412,7 @@
       "source_file": "apps/web/lib/repositories/supabase/escalation-repository.ts",
       "source_location": "L36",
       "id": "supabase_escalation_repository_mapmessage",
-      "community": 2,
+      "community": 4,
       "norm_label": "mapmessage()"
     },
     {
@@ -2286,7 +2421,7 @@
       "source_file": "apps/web/lib/repositories/supabase/escalation-repository.ts",
       "source_location": "L48",
       "id": "supabase_escalation_repository_mapescalation",
-      "community": 2,
+      "community": 4,
       "norm_label": "mapescalation()"
     },
     {
@@ -2295,7 +2430,7 @@
       "source_file": "apps/web/lib/repositories/supabase/escalation-repository.ts",
       "source_location": "L65",
       "id": "supabase_escalation_repository_createsupabaseescalationrepository",
-      "community": 2,
+      "community": 4,
       "norm_label": "createsupabaseescalationrepository()"
     },
     {
@@ -2304,7 +2439,7 @@
       "source_file": "apps/web/lib/repositories/supabase/hierarchy-repository.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_hierarchy_repository_ts",
-      "community": 1,
+      "community": 12,
       "norm_label": "hierarchy-repository.ts"
     },
     {
@@ -2313,7 +2448,7 @@
       "source_file": "apps/web/lib/repositories/supabase/hierarchy-repository.ts",
       "source_location": "L6",
       "id": "supabase_hierarchy_repository_createsupabasehierarchyrepository",
-      "community": 1,
+      "community": 12,
       "norm_label": "createsupabasehierarchyrepository()"
     },
     {
@@ -2322,7 +2457,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_course_repository_ts",
-      "community": 12,
+      "community": 11,
       "norm_label": "course-repository.ts"
     },
     {
@@ -2331,7 +2466,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L40",
       "id": "supabase_course_repository_firstrelation",
-      "community": 12,
+      "community": 11,
       "norm_label": "firstrelation()"
     },
     {
@@ -2340,7 +2475,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L48",
       "id": "supabase_course_repository_createsupabasecourserepository",
-      "community": 12,
+      "community": 11,
       "norm_label": "createsupabasecourserepository()"
     },
     {
@@ -2349,7 +2484,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L675",
       "id": "supabase_course_repository_tocoursesummary",
-      "community": 12,
+      "community": 11,
       "norm_label": "tocoursesummary()"
     },
     {
@@ -2358,7 +2493,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L691",
       "id": "supabase_course_repository_normalizesearchterm",
-      "community": 12,
+      "community": 11,
       "norm_label": "normalizesearchterm()"
     },
     {
@@ -2367,7 +2502,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L703",
       "id": "supabase_course_repository_findmatchingstaffprofileids",
-      "community": 12,
+      "community": 11,
       "norm_label": "findmatchingstaffprofileids()"
     },
     {
@@ -2376,7 +2511,7 @@
       "source_file": "apps/web/lib/repositories/supabase/course-repository.ts",
       "source_location": "L720",
       "id": "supabase_course_repository_mapadmincourserows",
-      "community": 12,
+      "community": 11,
       "norm_label": "mapadmincourserows()"
     },
     {
@@ -2385,7 +2520,7 @@
       "source_file": "apps/web/lib/repositories/supabase/comment-repository.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_comment_repository_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "comment-repository.ts"
     },
     {
@@ -2394,7 +2529,7 @@
       "source_file": "apps/web/lib/repositories/supabase/comment-repository.ts",
       "source_location": "L6",
       "id": "supabase_comment_repository_createsupabasecommentrepository",
-      "community": 2,
+      "community": 4,
       "norm_label": "createsupabasecommentrepository()"
     },
     {
@@ -2403,7 +2538,7 @@
       "source_file": "apps/web/lib/repositories/supabase/profile-repository.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_profile_repository_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "profile-repository.ts"
     },
     {
@@ -2412,7 +2547,7 @@
       "source_file": "apps/web/lib/repositories/supabase/profile-repository.ts",
       "source_location": "L8",
       "id": "supabase_profile_repository_formatpostgresterror",
-      "community": 1,
+      "community": 0,
       "norm_label": "formatpostgresterror()"
     },
     {
@@ -2421,7 +2556,7 @@
       "source_file": "apps/web/lib/repositories/supabase/profile-repository.ts",
       "source_location": "L16",
       "id": "supabase_profile_repository_createsupabaseprofilerepository",
-      "community": 1,
+      "community": 0,
       "norm_label": "createsupabaseprofilerepository()"
     },
     {
@@ -2430,7 +2565,7 @@
       "source_file": "apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_shared_ts",
-      "community": 12,
+      "community": 11,
       "norm_label": "shared.ts"
     },
     {
@@ -2439,7 +2574,7 @@
       "source_file": "apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L6",
       "id": "supabase_shared_getsupabaseadminclientorthrow",
-      "community": 12,
+      "community": 11,
       "norm_label": "getsupabaseadminclientorthrow()"
     },
     {
@@ -2448,7 +2583,7 @@
       "source_file": "apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L16",
       "id": "supabase_shared_cleanoptionaltext",
-      "community": 12,
+      "community": 11,
       "norm_label": "cleanoptionaltext()"
     },
     {
@@ -2457,7 +2592,7 @@
       "source_file": "apps/web/lib/repositories/supabase/shared.ts",
       "source_location": "L21",
       "id": "supabase_shared_tocoursestatus",
-      "community": 12,
+      "community": 11,
       "norm_label": "tocoursestatus()"
     },
     {
@@ -2466,7 +2601,7 @@
       "source_file": "apps/web/lib/repositories/supabase/review-repository.ts",
       "source_location": "L1",
       "id": "apps_web_lib_repositories_supabase_review_repository_ts",
-      "community": 0,
+      "community": 1,
       "norm_label": "review-repository.ts"
     },
     {
@@ -2475,7 +2610,7 @@
       "source_file": "apps/web/lib/repositories/supabase/review-repository.ts",
       "source_location": "L12",
       "id": "supabase_review_repository_createsupabasereviewrepository",
-      "community": 0,
+      "community": 1,
       "norm_label": "createsupabasereviewrepository()"
     },
     {
@@ -2511,7 +2646,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L76",
       "id": "courses_service_fetchreviewprogressforcourses",
-      "community": 0,
+      "community": 1,
       "norm_label": "fetchreviewprogressforcourses()"
     },
     {
@@ -2547,7 +2682,7 @@
       "source_file": "apps/web/lib/courses/service.ts",
       "source_location": "L151",
       "id": "courses_service_getdepartments",
-      "community": 2,
+      "community": 1,
       "norm_label": "getdepartments()"
     },
     {
@@ -2637,7 +2772,7 @@
       "source_file": "apps/web/app/not-found.tsx",
       "source_location": "L1",
       "id": "apps_web_app_not_found_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "not-found.tsx"
     },
     {
@@ -2646,7 +2781,7 @@
       "source_file": "apps/web/app/not-found.tsx",
       "source_location": "L4",
       "id": "app_not_found_notfound",
-      "community": 3,
+      "community": 1,
       "norm_label": "notfound()"
     },
     {
@@ -2655,7 +2790,7 @@
       "source_file": "apps/web/app/dashboard/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_page_tsx",
-      "community": 1,
+      "community": 0,
       "norm_label": "page.tsx"
     },
     {
@@ -2664,7 +2799,7 @@
       "source_file": "apps/web/app/dashboard/page.tsx",
       "source_location": "L13",
       "id": "dashboard_page_dashboardpage",
-      "community": 1,
+      "community": 0,
       "norm_label": "dashboardpage()"
     },
     {
@@ -2673,7 +2808,7 @@
       "source_file": "apps/web/app/dashboard/actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_actions_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "actions.ts"
     },
     {
@@ -2682,7 +2817,7 @@
       "source_file": "apps/web/app/dashboard/actions.ts",
       "source_location": "L6",
       "id": "dashboard_actions_signout",
-      "community": 1,
+      "community": 3,
       "norm_label": "signout()"
     },
     {
@@ -2709,7 +2844,7 @@
       "source_file": "apps/web/app/(dashboard)/layout.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_layout_tsx",
-      "community": 1,
+      "community": 0,
       "norm_label": "layout.tsx"
     },
     {
@@ -2718,7 +2853,7 @@
       "source_file": "apps/web/app/(dashboard)/layout.tsx",
       "source_location": "L9",
       "id": "dashboard_layout_dashboardlayout",
-      "community": 1,
+      "community": 0,
       "norm_label": "dashboardlayout()"
     },
     {
@@ -2790,7 +2925,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_page_tsx",
-      "community": 24,
+      "community": 23,
       "norm_label": "page.tsx"
     },
     {
@@ -2799,7 +2934,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/page.tsx",
       "source_location": "L103",
       "id": "admin_page_if",
-      "community": 24,
+      "community": 23,
       "norm_label": "if()"
     },
     {
@@ -2853,7 +2988,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/actions.ts",
       "source_location": "L191",
       "id": "admin_actions_createinstructorandassignaction",
-      "community": 1,
+      "community": 0,
       "norm_label": "createinstructorandassignaction()"
     },
     {
@@ -2889,7 +3024,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/admin-refresh-wrapper.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_components_admin_refresh_wrapper_tsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "admin-refresh-wrapper.tsx"
     },
     {
@@ -2898,7 +3033,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/admin-refresh-wrapper.tsx",
       "source_location": "L12",
       "id": "components_admin_refresh_wrapper_adminrefreshwrapper",
-      "community": 9,
+      "community": 8,
       "norm_label": "adminrefreshwrapper()"
     },
     {
@@ -2943,7 +3078,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_components_assigned_courses_table_tsx",
-      "community": 23,
+      "community": 24,
       "norm_label": "assigned-courses-table.tsx"
     },
     {
@@ -2952,7 +3087,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L77",
       "id": "components_assigned_courses_table_clearfilters",
-      "community": 23,
+      "community": 24,
       "norm_label": "clearfilters()"
     },
     {
@@ -2961,7 +3096,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L87",
       "id": "components_assigned_courses_table_setquery",
-      "community": 23,
+      "community": 24,
       "norm_label": "setquery()"
     },
     {
@@ -2970,7 +3105,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L125",
       "id": "components_assigned_courses_table_gotopage",
-      "community": 23,
+      "community": 24,
       "norm_label": "gotopage()"
     },
     {
@@ -2979,7 +3114,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/_components/assigned-courses-table.tsx",
       "source_location": "L490",
       "id": "components_assigned_courses_table_switch",
-      "community": 23,
+      "community": 24,
       "norm_label": "switch()"
     },
     {
@@ -3051,7 +3186,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/queue/_components/queue-refresh-wrapper.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_queue_components_queue_refresh_wrapper_tsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "queue-refresh-wrapper.tsx"
     },
     {
@@ -3060,7 +3195,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/queue/_components/queue-refresh-wrapper.tsx",
       "source_location": "L11",
       "id": "components_queue_refresh_wrapper_queuerefreshwrapper",
-      "community": 9,
+      "community": 8,
       "norm_label": "queuerefreshwrapper()"
     },
     {
@@ -3069,7 +3204,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/courses/[id]/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_courses_id_page_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -3078,7 +3213,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/courses/[id]/page.tsx",
       "source_location": "L18",
       "id": "id_page_admincoursedetailpage",
-      "community": 2,
+      "community": 1,
       "norm_label": "admincoursedetailpage()"
     },
     {
@@ -3123,7 +3258,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/courses/[id]/_components/course-detail-refresh-wrapper.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_admin_courses_id_components_course_detail_refresh_wrapper_tsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "course-detail-refresh-wrapper.tsx"
     },
     {
@@ -3132,7 +3267,7 @@
       "source_file": "apps/web/app/(dashboard)/admin/courses/[id]/_components/course-detail-refresh-wrapper.tsx",
       "source_location": "L14",
       "id": "components_course_detail_refresh_wrapper_coursedetailrefreshwrapper",
-      "community": 9,
+      "community": 8,
       "norm_label": "coursedetailrefreshwrapper()"
     },
     {
@@ -3285,7 +3420,7 @@
       "source_file": "apps/web/app/(dashboard)/ta/_components/ta-refresh-wrapper.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_ta_components_ta_refresh_wrapper_tsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "ta-refresh-wrapper.tsx"
     },
     {
@@ -3294,7 +3429,7 @@
       "source_file": "apps/web/app/(dashboard)/ta/_components/ta-refresh-wrapper.tsx",
       "source_location": "L11",
       "id": "components_ta_refresh_wrapper_tarefreshwrapper",
-      "community": 9,
+      "community": 8,
       "norm_label": "tarefreshwrapper()"
     },
     {
@@ -3303,7 +3438,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_super_admin_page_tsx",
-      "community": 1,
+      "community": 0,
       "norm_label": "page.tsx"
     },
     {
@@ -3312,7 +3447,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/page.tsx",
       "source_location": "L8",
       "id": "super_admin_page_superadmindashboardpage",
-      "community": 1,
+      "community": 0,
       "norm_label": "superadmindashboardpage()"
     },
     {
@@ -3321,7 +3456,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_super_admin_actions_ts",
-      "community": 1,
+      "community": 12,
       "norm_label": "actions.ts"
     },
     {
@@ -3330,7 +3465,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L15",
       "id": "super_admin_actions_createuseraction",
-      "community": 1,
+      "community": 12,
       "norm_label": "createuseraction()"
     },
     {
@@ -3339,7 +3474,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L63",
       "id": "super_admin_actions_updateuserroleaction",
-      "community": 1,
+      "community": 12,
       "norm_label": "updateuserroleaction()"
     },
     {
@@ -3348,7 +3483,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L108",
       "id": "super_admin_actions_createunitaction",
-      "community": 1,
+      "community": 12,
       "norm_label": "createunitaction()"
     },
     {
@@ -3357,7 +3492,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L135",
       "id": "super_admin_actions_addunitmemberaction",
-      "community": 1,
+      "community": 12,
       "norm_label": "addunitmemberaction()"
     },
     {
@@ -3366,7 +3501,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L162",
       "id": "super_admin_actions_removeunitmemberaction",
-      "community": 1,
+      "community": 12,
       "norm_label": "removeunitmemberaction()"
     },
     {
@@ -3375,7 +3510,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/actions.ts",
       "source_location": "L168",
       "id": "super_admin_actions_requiresuperadmin",
-      "community": 1,
+      "community": 12,
       "norm_label": "requiresuperadmin()"
     },
     {
@@ -3402,7 +3537,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/audit/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_super_admin_audit_page_tsx",
-      "community": 1,
+      "community": 0,
       "norm_label": "page.tsx"
     },
     {
@@ -3411,7 +3546,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/audit/page.tsx",
       "source_location": "L8",
       "id": "audit_page_superadminauditpage",
-      "community": 1,
+      "community": 0,
       "norm_label": "superadminauditpage()"
     },
     {
@@ -3420,7 +3555,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/users/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_super_admin_users_page_tsx",
-      "community": 1,
+      "community": 0,
       "norm_label": "page.tsx"
     },
     {
@@ -3429,7 +3564,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/users/page.tsx",
       "source_location": "L14",
       "id": "users_page_superadminuserspage",
-      "community": 1,
+      "community": 0,
       "norm_label": "superadminuserspage()"
     },
     {
@@ -3456,7 +3591,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/organization/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_super_admin_organization_page_tsx",
-      "community": 1,
+      "community": 0,
       "norm_label": "page.tsx"
     },
     {
@@ -3465,7 +3600,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/organization/page.tsx",
       "source_location": "L8",
       "id": "organization_page_superadminorganizationpage",
-      "community": 1,
+      "community": 0,
       "norm_label": "superadminorganizationpage()"
     },
     {
@@ -3474,7 +3609,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/courses/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_super_admin_courses_page_tsx",
-      "community": 1,
+      "community": 0,
       "norm_label": "page.tsx"
     },
     {
@@ -3483,7 +3618,7 @@
       "source_file": "apps/web/app/(dashboard)/super-admin/courses/page.tsx",
       "source_location": "L14",
       "id": "courses_page_superadmincoursespage",
-      "community": 1,
+      "community": 0,
       "norm_label": "superadmincoursespage()"
     },
     {
@@ -3546,7 +3681,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/_components/course-workspace-refresh-wrapper.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_components_course_workspace_refresh_wrapper_tsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "course-workspace-refresh-wrapper.tsx"
     },
     {
@@ -3555,7 +3690,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/_components/course-workspace-refresh-wrapper.tsx",
       "source_location": "L14",
       "id": "components_course_workspace_refresh_wrapper_courseworkspacerefreshwrapper",
-      "community": 9,
+      "community": 8,
       "norm_label": "courseworkspacerefreshwrapper()"
     },
     {
@@ -3582,7 +3717,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/escalation-actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_escalation_actions_ts",
-      "community": 2,
+      "community": 4,
       "norm_label": "escalation-actions.ts"
     },
     {
@@ -3591,7 +3726,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/escalation-actions.ts",
       "source_location": "L8",
       "id": "id_escalation_actions_createescalationaction",
-      "community": 2,
+      "community": 4,
       "norm_label": "createescalationaction()"
     },
     {
@@ -3600,7 +3735,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/escalation-actions.ts",
       "source_location": "L32",
       "id": "id_escalation_actions_sendescalationmessageaction",
-      "community": 2,
+      "community": 4,
       "norm_label": "sendescalationmessageaction()"
     },
     {
@@ -3609,7 +3744,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/layout.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_layout_tsx",
-      "community": 2,
+      "community": 1,
       "norm_label": "layout.tsx"
     },
     {
@@ -3618,7 +3753,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/layout.tsx",
       "source_location": "L25",
       "id": "id_layout_courseworkspacelayout",
-      "community": 2,
+      "community": 1,
       "norm_label": "courseworkspacelayout()"
     },
     {
@@ -3627,7 +3762,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/issue-log-table.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_components_issue_log_table_tsx",
-      "community": 24,
+      "community": 23,
       "norm_label": "issue-log-table.tsx"
     },
     {
@@ -3636,7 +3771,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/issue-log-table.tsx",
       "source_location": "L35",
       "id": "components_issue_log_table_issuelogtable",
-      "community": 24,
+      "community": 23,
       "norm_label": "issuelogtable()"
     },
     {
@@ -3645,7 +3780,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/_components/issue-log-table.tsx",
       "source_location": "L186",
       "id": "components_issue_log_table_savestate",
-      "community": 24,
+      "community": 23,
       "norm_label": "savestate()"
     },
     {
@@ -3888,7 +4023,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/issue-log/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_issue_log_page_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -3897,7 +4032,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/issue-log/page.tsx",
       "source_location": "L15",
       "id": "issue_log_page_issuelogpage",
-      "community": 3,
+      "community": 1,
       "norm_label": "issuelogpage()"
     },
     {
@@ -3906,7 +4041,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/submit/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_submit_page_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -3915,7 +4050,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/submit/page.tsx",
       "source_location": "L14",
       "id": "submit_page_submitpage",
-      "community": 3,
+      "community": 1,
       "norm_label": "submitpage()"
     },
     {
@@ -3924,7 +4059,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/syllabus-gradebook/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_syllabus_gradebook_page_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -3933,7 +4068,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/syllabus-gradebook/page.tsx",
       "source_location": "L20",
       "id": "syllabus_gradebook_page_syllabusgradebookpage",
-      "community": 3,
+      "community": 1,
       "norm_label": "syllabusgradebookpage()"
     },
     {
@@ -3942,7 +4077,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/metadata/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_metadata_page_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -3951,7 +4086,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/metadata/page.tsx",
       "source_location": "L15",
       "id": "metadata_page_metadatapage",
-      "community": 3,
+      "community": 1,
       "norm_label": "metadatapage()"
     },
     {
@@ -3960,7 +4095,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/review-matrix/page.tsx",
       "source_location": "L1",
       "id": "apps_web_app_dashboard_courses_id_review_matrix_page_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "page.tsx"
     },
     {
@@ -3969,7 +4104,7 @@
       "source_file": "apps/web/app/(dashboard)/courses/[id]/review-matrix/page.tsx",
       "source_location": "L19",
       "id": "review_matrix_page_reviewmatrixpage",
-      "community": 3,
+      "community": 1,
       "norm_label": "reviewmatrixpage()"
     },
     {
@@ -4023,7 +4158,7 @@
       "source_file": "apps/web/app/auth/callback/route.ts",
       "source_location": "L1",
       "id": "apps_web_app_auth_callback_route_ts",
-      "community": 4,
+      "community": 3,
       "norm_label": "route.ts"
     },
     {
@@ -4032,7 +4167,7 @@
       "source_file": "apps/web/app/auth/callback/route.ts",
       "source_location": "L4",
       "id": "callback_route_get",
-      "community": 4,
+      "community": 3,
       "norm_label": "get()"
     },
     {
@@ -4050,7 +4185,7 @@
       "source_file": "apps/web/app/auth/login/actions.ts",
       "source_location": "L1",
       "id": "apps_web_app_auth_login_actions_ts",
-      "community": 1,
+      "community": 3,
       "norm_label": "actions.ts"
     },
     {
@@ -4059,7 +4194,7 @@
       "source_file": "apps/web/app/auth/login/actions.ts",
       "source_location": "L15",
       "id": "login_actions_signinwithpasswordaction",
-      "community": 1,
+      "community": 3,
       "norm_label": "signinwithpasswordaction()"
     },
     {
@@ -4068,7 +4203,7 @@
       "source_file": "apps/web/app/auth/login/actions.ts",
       "source_location": "L35",
       "id": "login_actions_signinasdevemail",
-      "community": 1,
+      "community": 3,
       "norm_label": "signinasdevemail()"
     },
     {
@@ -4104,7 +4239,7 @@
       "source_file": "apps/web/components/dev-role-switcher-actions.ts",
       "source_location": "L1",
       "id": "apps_web_components_dev_role_switcher_actions_ts",
-      "community": 4,
+      "community": 3,
       "norm_label": "dev-role-switcher-actions.ts"
     },
     {
@@ -4113,7 +4248,7 @@
       "source_file": "apps/web/components/dev-role-switcher-actions.ts",
       "source_location": "L8",
       "id": "components_dev_role_switcher_actions_switchdevrole",
-      "community": 4,
+      "community": 3,
       "norm_label": "switchdevrole()"
     },
     {
@@ -4122,7 +4257,7 @@
       "source_file": "apps/web/components/dev-role-switcher.tsx",
       "source_location": "L1",
       "id": "apps_web_components_dev_role_switcher_tsx",
-      "community": 4,
+      "community": 3,
       "norm_label": "dev-role-switcher.tsx"
     },
     {
@@ -4131,7 +4266,7 @@
       "source_file": "apps/web/components/dev-role-switcher.tsx",
       "source_location": "L15",
       "id": "components_dev_role_switcher_devroleswitcher",
-      "community": 4,
+      "community": 3,
       "norm_label": "devroleswitcher()"
     },
     {
@@ -4176,7 +4311,7 @@
       "source_file": "apps/web/components/shared/tweak-provider.tsx",
       "source_location": "L1",
       "id": "apps_web_components_shared_tweak_provider_tsx",
-      "community": 10,
+      "community": 9,
       "norm_label": "tweak-provider.tsx"
     },
     {
@@ -4185,7 +4320,7 @@
       "source_file": "apps/web/components/shared/tweak-provider.tsx",
       "source_location": "L25",
       "id": "shared_tweak_provider_tweakprovider",
-      "community": 10,
+      "community": 9,
       "norm_label": "tweakprovider()"
     },
     {
@@ -4194,7 +4329,7 @@
       "source_file": "apps/web/components/shared/tweak-provider.tsx",
       "source_location": "L59",
       "id": "shared_tweak_provider_usetweaks",
-      "community": 10,
+      "community": 9,
       "norm_label": "usetweaks()"
     },
     {
@@ -4248,7 +4383,7 @@
       "source_file": "apps/web/components/layout/display-settings.tsx",
       "source_location": "L1",
       "id": "apps_web_components_layout_display_settings_tsx",
-      "community": 10,
+      "community": 9,
       "norm_label": "display-settings.tsx"
     },
     {
@@ -4257,7 +4392,7 @@
       "source_file": "apps/web/components/layout/display-settings.tsx",
       "source_location": "L10",
       "id": "layout_display_settings_displaysettings",
-      "community": 10,
+      "community": 9,
       "norm_label": "displaysettings()"
     },
     {
@@ -4437,7 +4572,7 @@
       "source_file": "apps/web/components/ui/sidebar.tsx",
       "source_location": "L1",
       "id": "apps_web_components_ui_sidebar_tsx",
-      "community": 10,
+      "community": 9,
       "norm_label": "sidebar.tsx"
     },
     {
@@ -4446,7 +4581,7 @@
       "source_file": "apps/web/components/ui/sidebar.tsx",
       "source_location": "L46",
       "id": "ui_sidebar_usesidebar",
-      "community": 10,
+      "community": 9,
       "norm_label": "usesidebar()"
     },
     {
@@ -4455,7 +4590,7 @@
       "source_file": "apps/web/components/ui/sidebar.tsx",
       "source_location": "L97",
       "id": "ui_sidebar_handlekeydown",
-      "community": 10,
+      "community": 9,
       "norm_label": "handlekeydown()"
     },
     {
@@ -4464,7 +4599,7 @@
       "source_file": "apps/web/components/ui/sidebar.tsx",
       "source_location": "L139",
       "id": "ui_sidebar_cn",
-      "community": 10,
+      "community": 9,
       "norm_label": "cn()"
     },
     {
@@ -4473,7 +4608,7 @@
       "source_file": "apps/web/components/ui/sidebar.tsx",
       "source_location": "L446",
       "id": "ui_sidebar_sidebarmenu",
-      "community": 10,
+      "community": 9,
       "norm_label": "sidebarmenu()"
     },
     {
@@ -4482,7 +4617,7 @@
       "source_file": "apps/web/components/ui/sidebar.tsx",
       "source_location": "L457",
       "id": "ui_sidebar_sidebarmenuitem",
-      "community": 10,
+      "community": 9,
       "norm_label": "sidebarmenuitem()"
     },
     {
@@ -4491,7 +4626,7 @@
       "source_file": "apps/web/components/ui/sidebar.tsx",
       "source_location": "L490",
       "id": "ui_sidebar_sidebarmenubutton",
-      "community": 10,
+      "community": 9,
       "norm_label": "sidebarmenubutton()"
     },
     {
@@ -6316,7 +6451,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L135",
+      "source_location": "L173",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_askdedupechoice",
@@ -6328,7 +6463,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L145",
+      "source_location": "L183",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_askreviewermappings",
@@ -6340,7 +6475,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L168",
+      "source_location": "L205",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_normalizerows",
@@ -6352,19 +6487,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L188",
+      "source_location": "L227",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
-      "_tgt": "scripts_import_ta_review_form_buildresponsedata",
+      "_tgt": "scripts_import_ta_review_form_buildrawresponsedata",
       "source": "scripts_import_ta_review_form_mjs",
-      "target": "scripts_import_ta_review_form_buildresponsedata",
+      "target": "scripts_import_ta_review_form_buildrawresponsedata",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L196",
+      "source_location": "L235",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_buildimportrows",
@@ -6376,7 +6511,115 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L215",
+      "source_location": "L258",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_buildsectionpayloads",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_buildsectionpayloads",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L321",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_buildmatrixitem",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_buildmatrixitem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L330",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_normalizematrixstatus",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_normalizematrixstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L347",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_normalizenote",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_normalizenote",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L355",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_normalizelink",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_normalizelink",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L362",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_parsesectionnumbers",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_parsesectionnumbers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L368",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_combinenotes",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_combinenotes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L372",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_parsedurationseconds",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_parsedurationseconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L396",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_normalizetermdisplay",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_normalizetermdisplay",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L407",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_computeplan",
@@ -6388,7 +6631,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L249",
+      "source_location": "L442",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_printplan",
@@ -6400,7 +6643,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L259",
+      "source_location": "L452",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_printsamplemappings",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_printsamplemappings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L462",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_executeimport",
@@ -6412,7 +6667,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L333",
+      "source_location": "L549",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_getadminprofileid",
@@ -6424,7 +6679,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L341",
+      "source_location": "L555",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_findprofilebyemail",
@@ -6436,19 +6691,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L347",
+      "source_location": "L561",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
-      "_tgt": "scripts_import_ta_review_form_getreviewmatrixsectionid",
+      "_tgt": "scripts_import_ta_review_form_getsectionidsbykey",
       "source": "scripts_import_ta_review_form_mjs",
-      "target": "scripts_import_ta_review_form_getreviewmatrixsectionid",
+      "target": "scripts_import_ta_review_form_getsectionidsbykey",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L359",
+      "source_location": "L571",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_listcoursesbysourceids",
@@ -6460,7 +6715,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L369",
+      "source_location": "L578",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_extractbrightspacecourseid",
@@ -6472,7 +6727,43 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L376",
+      "source_location": "L585",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_normalizeheader",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_normalizeheader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L589",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_safeurlorblank",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_safeurlorblank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L600",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_normalizefreetext",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_normalizefreetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L604",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_cleantext",
@@ -6484,7 +6775,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L381",
+      "source_location": "L609",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_groupby",
@@ -6496,7 +6787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L391",
+      "source_location": "L619",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_parsecsv",
@@ -6508,7 +6799,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L411",
+      "source_location": "L638",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_parsecsvline",
@@ -6520,7 +6811,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L438",
+      "source_location": "L665",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_sha256",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_sha256",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L669",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_mjs",
+      "_tgt": "scripts_import_ta_review_form_cryptorandomid",
+      "source": "scripts_import_ta_review_form_mjs",
+      "target": "scripts_import_ta_review_form_cryptorandomid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L674",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_mjs",
       "_tgt": "scripts_import_ta_review_form_fatal",
@@ -6532,7 +6847,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L157",
+      "source_location": "L194",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_askreviewermappings",
       "_tgt": "scripts_import_ta_review_form_findprofilebyemail",
@@ -6544,7 +6859,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L197",
+      "source_location": "L236",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_buildimportrows",
       "_tgt": "scripts_import_ta_review_form_groupby",
@@ -6556,7 +6871,199 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L217",
+      "source_location": "L259",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildsectionpayloads",
+      "_tgt": "scripts_import_ta_review_form_parsedurationseconds",
+      "source": "scripts_import_ta_review_form_buildsectionpayloads",
+      "target": "scripts_import_ta_review_form_parsedurationseconds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L263",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildsectionpayloads",
+      "_tgt": "scripts_import_ta_review_form_parsesectionnumbers",
+      "source": "scripts_import_ta_review_form_buildsectionpayloads",
+      "target": "scripts_import_ta_review_form_parsesectionnumbers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L264",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildsectionpayloads",
+      "_tgt": "scripts_import_ta_review_form_safeurlorblank",
+      "source": "scripts_import_ta_review_form_buildsectionpayloads",
+      "target": "scripts_import_ta_review_form_safeurlorblank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L266",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildsectionpayloads",
+      "_tgt": "scripts_import_ta_review_form_combinenotes",
+      "source": "scripts_import_ta_review_form_buildsectionpayloads",
+      "target": "scripts_import_ta_review_form_combinenotes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L271",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildsectionpayloads",
+      "_tgt": "scripts_import_ta_review_form_buildmatrixitem",
+      "source": "scripts_import_ta_review_form_buildsectionpayloads",
+      "target": "scripts_import_ta_review_form_buildmatrixitem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L324",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildmatrixitem",
+      "_tgt": "scripts_import_ta_review_form_normalizematrixstatus",
+      "source": "scripts_import_ta_review_form_buildmatrixitem",
+      "target": "scripts_import_ta_review_form_normalizematrixstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L325",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildmatrixitem",
+      "_tgt": "scripts_import_ta_review_form_normalizenote",
+      "source": "scripts_import_ta_review_form_buildmatrixitem",
+      "target": "scripts_import_ta_review_form_normalizenote",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L326",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_buildmatrixitem",
+      "_tgt": "scripts_import_ta_review_form_normalizelink",
+      "source": "scripts_import_ta_review_form_buildmatrixitem",
+      "target": "scripts_import_ta_review_form_normalizelink",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L331",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizematrixstatus",
+      "_tgt": "scripts_import_ta_review_form_normalizefreetext",
+      "source": "scripts_import_ta_review_form_normalizematrixstatus",
+      "target": "scripts_import_ta_review_form_normalizefreetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L348",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizenote",
+      "_tgt": "scripts_import_ta_review_form_cleantext",
+      "source": "scripts_import_ta_review_form_normalizenote",
+      "target": "scripts_import_ta_review_form_cleantext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L350",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizenote",
+      "_tgt": "scripts_import_ta_review_form_normalizefreetext",
+      "source": "scripts_import_ta_review_form_normalizenote",
+      "target": "scripts_import_ta_review_form_normalizefreetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L356",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizelink",
+      "_tgt": "scripts_import_ta_review_form_normalizenote",
+      "source": "scripts_import_ta_review_form_normalizenote",
+      "target": "scripts_import_ta_review_form_normalizelink",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L359",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizelink",
+      "_tgt": "scripts_import_ta_review_form_safeurlorblank",
+      "source": "scripts_import_ta_review_form_normalizelink",
+      "target": "scripts_import_ta_review_form_safeurlorblank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L363",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_parsesectionnumbers",
+      "_tgt": "scripts_import_ta_review_form_cleantext",
+      "source": "scripts_import_ta_review_form_parsesectionnumbers",
+      "target": "scripts_import_ta_review_form_cleantext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L373",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_parsedurationseconds",
+      "_tgt": "scripts_import_ta_review_form_normalizefreetext",
+      "source": "scripts_import_ta_review_form_parsedurationseconds",
+      "target": "scripts_import_ta_review_form_normalizefreetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L397",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizetermdisplay",
+      "_tgt": "scripts_import_ta_review_form_cleantext",
+      "source": "scripts_import_ta_review_form_normalizetermdisplay",
+      "target": "scripts_import_ta_review_form_cleantext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L409",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_computeplan",
       "_tgt": "scripts_import_ta_review_form_listcoursesbysourceids",
@@ -6568,7 +7075,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L261",
+      "source_location": "L464",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_executeimport",
       "_tgt": "scripts_import_ta_review_form_listcoursesbysourceids",
@@ -6580,7 +7087,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L294",
+      "source_location": "L487",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_executeimport",
       "_tgt": "scripts_import_ta_review_form_extractbrightspacecourseid",
@@ -6592,7 +7099,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L370",
+      "source_location": "L579",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_extractbrightspacecourseid",
       "_tgt": "scripts_import_ta_review_form_cleantext",
@@ -6604,7 +7111,43 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "scripts/import-ta-review-form.mjs",
-      "source_location": "L396",
+      "source_location": "L586",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizeheader",
+      "_tgt": "scripts_import_ta_review_form_cleantext",
+      "source": "scripts_import_ta_review_form_normalizeheader",
+      "target": "scripts_import_ta_review_form_cleantext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L590",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_safeurlorblank",
+      "_tgt": "scripts_import_ta_review_form_cleantext",
+      "source": "scripts_import_ta_review_form_safeurlorblank",
+      "target": "scripts_import_ta_review_form_cleantext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L601",
+      "weight": 1.0,
+      "_src": "scripts_import_ta_review_form_normalizefreetext",
+      "_tgt": "scripts_import_ta_review_form_cleantext",
+      "source": "scripts_import_ta_review_form_normalizefreetext",
+      "target": "scripts_import_ta_review_form_cleantext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/import-ta-review-form.mjs",
+      "source_location": "L623",
       "weight": 1.0,
       "_src": "scripts_import_ta_review_form_parsecsv",
       "_tgt": "scripts_import_ta_review_form_parsecsvline",
