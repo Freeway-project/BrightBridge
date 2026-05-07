@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useStoredTimerValue } from "./review-timer"
+import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -40,6 +41,7 @@ function parseTerm(term: string): { season: string; year: string } {
 }
 
 export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
+  const dirtySource = `metadata-form:${course.id}`;
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -56,6 +58,11 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   })
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  useEffect(() => {
+    setUnsavedChanges(dirtySource, form.formState.isDirty);
+    return () => clearUnsavedChanges(dirtySource);
+  }, [dirtySource, form.formState.isDirty]);
 
   async function handleSave(advance = false) {
     const valid = await form.trigger()
@@ -76,6 +83,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           return
         }
         setStatus("saved")
+        form.reset(form.getValues())
         if (advance) {
           router.push(`/courses/${course.id}/review-matrix`)
         }
