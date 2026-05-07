@@ -4,6 +4,10 @@
 
 CourseBridge is a Next.js + Supabase workflow platform for Moodle to Brightspace course migration review.
 
+## Memories
+
+Do not save Cursor Memories (or similar persistent AI recall) for this workspace—especially credentials, database URLs, API keys, or deploy secrets. Do not rely on previously saved Memories as source of truth for secrets; use repo docs and local gitignored env files only. If Memories exist from earlier chats, treat them as stale or unsafe until verified against current `.env.*` / hosting dashboards.
+
 ## Important Rule
 
 Do not build large features without explicit instruction. Work in small, focused tasks.

@@ -13,6 +13,10 @@
 #     are what we recommend for pg_dump.
 #   • Transaction pool (often port 6543) breaks pg_dump; this script warns.
 #
+# Password in URI userinfo must be percent-encoded if it contains reserved
+# characters (e.g. $ → %24, / → %2F, ) → %29). Otherwise libpq mis-parses and
+# you may see errors like invalid integer for connection option "port".
+#
 # Usage:
 #   ./scripts/backup-db.sh              # dev / default DB from env files
 #   ./scripts/backup-db.sh --prod       # PROD_DATABASE_URL / .env.mirror / .env.prod
@@ -64,7 +68,8 @@ fi
 get_env_val_line() {
   local file="$1"
   local key="$2"
-  grep "^${key}=" "$file" 2>/dev/null | head -1 | cut -d '=' -f2- | sed 's/^["'\'']//;s/["'\'']$//'
+  # grep exits 1 when no match; with pipefail that must not abort the caller.
+  grep "^${key}=" "$file" 2>/dev/null | head -1 | cut -d '=' -f2- | sed 's/^["'\'']//;s/["'\'']$//' || true
 }
 
 # Merge env vars from files the same way as apply-migration.mjs loadEnvFiles:
@@ -121,7 +126,7 @@ warn_pooler() {
   local url="$1"
   if echo "$url" | grep -qE '(:6543)(/|$|\?)'; then
     echo -e "${YELLOW}Warning:${NC} URL uses port 6543 (transaction pool). pg_dump usually fails here." >&2
-    echo "  Use Session mode (pooler :5432) or direct ${CYAN}db.<project-ref>.supabase.co:5432${NC}." >&2
+    echo -e "  Use Session mode (pooler ${CYAN}:5432${NC}) or direct ${CYAN}db.<project-ref>.supabase.co:5432${NC}." >&2
     echo "" >&2
   fi
 }
@@ -150,7 +155,9 @@ if [ "$PROD_MODE" -eq 1 ]; then
     echo "  Set ${CYAN}PROD_DATABASE_URL${NC}, or add it to ${CYAN}.env.mirror${NC}, or ${CYAN}DATABASE_URL${NC} in ${CYAN}apps/web/.env.prod${NC}." >&2
     exit 1
   fi
-  TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+  NS="$(date +%N 2>/dev/null | cut -c1-9)"
+  case "$NS" in '' | *[!0-9]*) NS="0" ;; esac
+  TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)-$$-${NS}"
   OUT="$BACKUP_DIR/prod-full-${TIMESTAMP}.dump"
   LABEL="production"
 else
@@ -160,7 +167,9 @@ else
     echo "  Set ${CYAN}DEV_DATABASE_URL${NC} or ${CYAN}DATABASE_URL${NC} (env or ${CYAN}.env.local${NC} / ${CYAN}apps/web/.env.local${NC} / ${CYAN}.env.mirror${NC})." >&2
     exit 1
   fi
-  TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+  NS="$(date +%N 2>/dev/null | cut -c1-9)"
+  case "$NS" in '' | *[!0-9]*) NS="0" ;; esac
+  TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)-$$-${NS}"
   OUT="$BACKUP_DIR/db-dev-${TIMESTAMP}.dump"
   LABEL="dev / default"
 fi
@@ -175,6 +184,11 @@ echo -e "  Target (masked): $(mask_url "$URL")"
 echo -e "  Output file:     ${CYAN}$OUT${NC}"
 echo ""
 
+# Write to a partial path first; rename only after pg_dump succeeds so failed
+# runs never leave a misleading timestamped .dump next to older good backups.
+DUMP_PARTIAL="${OUT}.partial-$$"
+rm -f "$DUMP_PARTIAL"
+
 run_dump() {
   dump_with_docker() {
     docker run --rm -i \
@@ -185,7 +199,7 @@ run_dump() {
       --format=custom \
       --no-owner \
       --no-acl \
-      >"$OUT"
+      >"$DUMP_PARTIAL"
   }
 
   if [ "${BACKUP_USE_DOCKER:-}" = "1" ] || [ "${BACKUP_USE_DOCKER:-}" = "true" ]; then
@@ -206,14 +220,14 @@ run_dump() {
       --format=custom \
       --no-owner \
       --no-acl \
-      --file="$OUT" 2>"$err"; then
+      --file="$DUMP_PARTIAL" 2>"$err"; then
       rm -f "$err"
       return
     fi
 
     if grep -qs 'server version mismatch' "$err" && command -v docker >/dev/null 2>&1; then
       echo -e "${YELLOW}Local pg_dump is older than the server — retrying with Docker (postgres:17)...${NC}" >&2
-      rm -f "$OUT" "$err"
+      rm -f "$DUMP_PARTIAL" "$err"
       dump_with_docker
       return
     fi
@@ -234,7 +248,8 @@ run_dump() {
   exit 1
 }
 
-run_dump
+run_dump || { rm -f "$DUMP_PARTIAL"; exit 1; }
+mv -f "$DUMP_PARTIAL" "$OUT"
 
 SIZE="$(du -h "$OUT" | cut -f1)"
 echo -e "${GREEN}✓ Backup written${NC}  ($SIZE)"

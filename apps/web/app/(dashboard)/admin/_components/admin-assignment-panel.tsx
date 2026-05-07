@@ -1,5 +1,7 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+import { useRouter } from "next/navigation";
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,7 @@ const MAX_VISIBLE_TAS = 150;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(assignTaToCourseAction, initialState);
   const [coursePickerOpen, setCoursePickerOpen] = useState(false);
   const [taPickerOpen, setTaPickerOpen] = useState(false);
@@ -53,6 +56,8 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   const [searchResults, setSearchResults] = useState<AssignableCourse[] | null>(null);
   const [isSearching, startSearch] = useTransition();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedCourseIdRef = useRef(selectedCourseId);
+  selectedCourseIdRef.current = selectedCourseId;
 
   const canAssign = availableCourses.length > 0 || (searchResults?.length ?? 0) > 0;
   const normalizedTaSearch = taSearch.trim().toLowerCase();
@@ -108,8 +113,19 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     }
     debounceRef.current = setTimeout(() => {
       startSearch(async () => {
-        const results = await searchAssignableCoursesAction(trimmed);
-        setSearchResults(results);
+        try {
+          const results = await searchAssignableCoursesAction(trimmed);
+          setSearchResults(results);
+        } catch (error) {
+          Sentry.withScope((scope) => {
+            scope.setTag("area", "admin_assignment");
+            scope.setTag("action", "search_assignable_courses");
+            scope.setContext("search", { term: trimmed });
+            Sentry.captureException(error instanceof Error ? error : new Error("Course search failed"));
+          });
+          toast.error("Search failed. Please try again.");
+          setSearchResults([]);
+        }
       });
     }, SEARCH_DEBOUNCE_MS);
   }, []);
@@ -119,17 +135,33 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   useEffect(() => {
     if (state.kind === "success" && state.message) {
       toast.success(state.message);
-      if (selectedCourseId) {
-        setAvailableCourses((current) => current.filter((course) => course.id !== selectedCourseId));
+      router.refresh();
+      const id = selectedCourseIdRef.current;
+      if (id) {
+        setAvailableCourses((current) => current.filter((course) => course.id !== id));
         setSearchResults((current) =>
-          current ? current.filter((course) => course.id !== selectedCourseId) : current,
+          current ? current.filter((course) => course.id !== id) : current,
         );
       }
-      setSelectedCourseId(""); // optionally clear course selection after success
+      setSelectedCourseId("");
+      setSelectedTaId("");
+      setCourseSearch("");
+      setTaSearch("");
     } else if (state.kind === "error" && state.message) {
+      Sentry.withScope((scope) => {
+        scope.setTag("area", "admin_assignment");
+        scope.setTag("action", "assign_ta_to_course");
+        scope.setLevel("warning");
+        scope.setContext("ui_state", {
+          selectedCourseId: selectedCourseIdRef.current || null,
+          selectedTaId: selectedTaId || null,
+          message: state.message,
+        });
+        Sentry.captureMessage("[AdminAssignmentPanel] assignment error surfaced in UI");
+      });
       toast.error(state.message);
     }
-  }, [state, selectedCourseId]);
+  }, [state, router]);
 
   const visibleCourses = useMemo(
     () => filteredCourseList.slice(0, MAX_VISIBLE_COURSES),
@@ -155,18 +187,13 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   return (
     <Card>
       <CardHeader className="pb-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <CardTitle className="text-base">Assign TA to Course</CardTitle>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {availableCourses.length > 0
-                ? `${availableCourses.length.toLocaleString()} unassigned course${availableCourses.length === 1 ? "" : "s"} awaiting a TA. Search to find any course.`
-                : "All courses have been assigned."}
-            </p>
-          </div>
-          {state.kind === "success" && state.message && (
-            <p className="text-sm text-green-600 text-right">{state.message}</p>
-          )}
+        <div>
+          <CardTitle className="text-base">Assign TA to Course</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {availableCourses.length > 0
+              ? `${availableCourses.length.toLocaleString()} unassigned course${availableCourses.length === 1 ? "" : "s"} awaiting a TA. Search to find any course.`
+              : "All courses have been assigned."}
+          </p>
         </div>
       </CardHeader>
       <CardContent className="space-y-[var(--card-spacing,1rem)] pt-0">
