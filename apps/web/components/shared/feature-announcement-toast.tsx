@@ -31,10 +31,9 @@ export function FeatureAnnouncementToast({ role }: AnnouncementToastProps) {
       const timer = setTimeout(() => {
         toast.info(ANNOUNCEMENT_CONFIG.title, {
           description: ANNOUNCEMENT_CONFIG.description,
-          duration: 10000,
+          duration: Infinity, // Persistent until dismissed
           position: "top-center",
           icon: <Info className="size-4 text-blue-500" />,
-          onAutoClose: () => localStorage.setItem(STORAGE_KEY, "true"),
           onDismiss: () => localStorage.setItem(STORAGE_KEY, "true"),
         })
       }, 1500)
