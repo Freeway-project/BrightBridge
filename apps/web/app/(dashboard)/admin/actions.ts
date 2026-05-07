@@ -66,20 +66,36 @@ export async function assignTaToCourseAction(
   _state: AssignTaState,
   formData: FormData,
 ): Promise<AssignTaState> {
+  const requestId = `assign-ta-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const courseId = String(formData.get("courseId") ?? "");
   const profileId = String(formData.get("profileId") ?? "");
 
   if (!courseId || !profileId) {
+    console.warn("[assignTaToCourseAction] Invalid payload", {
+      requestId,
+      courseIdPresent: Boolean(courseId),
+      profileIdPresent: Boolean(profileId),
+    });
     return {
       kind: "error",
       message: "Select both a course and a staff member.",
     };
   }
 
+  console.info("[assignTaToCourseAction] Attempt started", {
+    requestId,
+    courseId,
+    profileId,
+  });
+
   const detail = await getAdminCourseDetail(courseId);
 
   if (!detail) {
-    console.error("[assignTaToCourseAction] Course not found:", courseId);
+    console.error("[assignTaToCourseAction] Course not found", {
+      requestId,
+      courseId,
+      profileId,
+    });
     return {
       kind: "error",
       message: "Course not found.",
@@ -105,15 +121,38 @@ export async function assignTaToCourseAction(
     revalidatePath("/ta");
     revalidatePath(`/courses/${courseId}`);
 
+    console.info("[assignTaToCourseAction] Attempt succeeded", {
+      requestId,
+      courseId,
+      profileId,
+      priorStatus: detail.course.status,
+    });
+
     return {
       kind: "success",
       message: "Staff member assigned to course.",
     };
   } catch (error) {
-    console.error("[assignTaToCourseAction] Error:", error);
+    const message = error instanceof Error ? error.message : "Could not assign staff member.";
+
+    const isAlreadyAssigned =
+      message.includes("already assigned to a TA") ||
+      message.includes("course_assignments_one_staff_per_course_idx") ||
+      message.includes("duplicate key value violates unique constraint");
+
+    console.error("[assignTaToCourseAction] Attempt failed", {
+      requestId,
+      courseId,
+      profileId,
+      priorStatus: detail.course.status,
+      error: message,
+    });
+
     return {
       kind: "error",
-      message: error instanceof Error ? error.message : "Could not assign staff member.",
+      message: isAlreadyAssigned
+        ? "This course was just assigned to another TA. Refresh and try again."
+        : message,
     };
   }
 }

@@ -1,5 +1,9 @@
 # CourseBridge — AI Development Context
 
+## Memories
+
+Do not save Claude/Cursor Memories or other persistent recall for this workspace—especially credentials, database URLs, API keys, or deploy secrets. Prefer repo docs and gitignored env files over AI-side memory.
+
 ## Project Overview
 
 CourseBridge is a web-based workflow and collaboration platform for managing Moodle to Brightspace course migration reviews.
