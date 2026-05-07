@@ -12,6 +12,8 @@ import { EscalationsTable } from "./_components/escalations-table"
 import { CompletedCoursesTable } from "./_components/completed-courses-table"
 import { TweakableContent } from "@/components/shared/tweakable-content"
 import { AdminRefreshWrapper } from "./_components/admin-refresh-wrapper"
+import { RecentAssignmentsTable } from "./_components/recent-assignments-table"
+import { getCourseRepository } from "@/lib/repositories"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -30,7 +32,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas, openEscalations, completedPage] = await Promise.all([
+  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
@@ -46,6 +48,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getProfilesByRole("standard_user"),
     getOpenEscalations(),
     getAdminCoursesPage({ page: 1, pageSize: 200, status: "final_approved" }),
+    getCourseRepository().listRecentAssignments(20),
   ])
 
   return (
@@ -70,6 +73,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
+            assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
           />
         </AdminRefreshWrapper>
       </TweakableContent>

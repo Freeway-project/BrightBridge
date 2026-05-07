@@ -51,6 +51,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   const [courseTerm, setCourseTerm] = useState<string>("all");
   const [taSearch, setTaSearch] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedCourseObj, setSelectedCourseObj] = useState<AssignableCourse | null>(null);
   const [selectedTaId, setSelectedTaId] = useState<string>("");
   const [availableCourses, setAvailableCourses] = useState<AssignableCourse[]>(courses);
   const [searchResults, setSearchResults] = useState<AssignableCourse[] | null>(null);
@@ -144,6 +145,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
         );
       }
       setSelectedCourseId("");
+      setSelectedCourseObj(null);
       setSelectedTaId("");
       setCourseSearch("");
       setTaSearch("");
@@ -213,7 +215,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                     className="h-10 w-full justify-between px-3"
                   >
                     <span className="truncate text-left">
-                      {selectedCourse ? selectedCourse.title : "Select a course to assign..."}
+                      {selectedCourseObj ? selectedCourseObj.title : "Select a course to assign..."}
                     </span>
                     <ChevronsUpDown className="size-4 text-muted-foreground" />
                   </Button>
@@ -293,6 +295,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                             )}
                             onClick={() => {
                               setSelectedCourseId(course.id);
+                              setSelectedCourseObj(course);
                               setCoursePickerOpen(false);
                             }}
                           >

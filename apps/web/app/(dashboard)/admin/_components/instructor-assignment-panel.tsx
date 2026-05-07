@@ -43,6 +43,7 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
   const [courseYear, setCourseYear] = useState<string>("all");
   const [courseTerm, setCourseTerm] = useState<string>("all");
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedCourseObj, setSelectedCourseObj] = useState<AssignableCourse | null>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [searchResults, setSearchResults] = useState<AssignableCourse[] | null>(null);
@@ -102,6 +103,7 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
     if (state.kind === "success" && state.message) {
       toast.success(state.message);
       setSelectedCourseId("");
+      setSelectedCourseObj(null);
       setFullName("");
       setEmail("");
     } else if (state.kind === "error" && state.message) {
@@ -167,7 +169,7 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
                   className="h-10 w-full justify-between px-3"
                 >
                   <span className="truncate text-left">
-                    {selectedCourse ? selectedCourse.title : "Select a course..."}
+                    {selectedCourseObj ? selectedCourseObj.title : "Select a course..."}
                   </span>
                   <ChevronsUpDown className="size-4 text-muted-foreground" />
                 </Button>
@@ -243,6 +245,7 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
                           )}
                           onClick={() => {
                             setSelectedCourseId(course.id);
+                            setSelectedCourseObj(course);
                             setCoursePickerOpen(false);
                           }}
                         >
