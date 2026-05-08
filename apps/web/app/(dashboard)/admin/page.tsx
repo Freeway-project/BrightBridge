@@ -16,6 +16,7 @@ import { RecentAssignmentsTable } from "./_components/recent-assignments-table"
 import { getCourseRepository } from "@/lib/repositories"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
 import { AdminOverview } from "./_components/admin-overview"
+import { MigrationPanel } from "./_components/migration-panel"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -77,6 +78,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               />
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
+            migrationPanel={<MigrationPanel />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
           />

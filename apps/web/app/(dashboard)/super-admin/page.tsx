@@ -9,6 +9,7 @@ import { CoursesView } from "@/components/super-admin/courses-view"
 import { UsersView } from "@/components/super-admin/users-view"
 import { OrganizationView } from "@/components/super-admin/organization-view"
 import { AuditView } from "@/components/super-admin/audit-view"
+import { MigrationPanel } from "../admin/_components/migration-panel"
 import { AdminAssignmentPanel } from "../admin/_components/admin-assignment-panel"
 import { EscalationsTable } from "../admin/_components/escalations-table"
 import { getAdminCoursesPage } from "@/lib/admin/queries"
@@ -67,6 +68,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
               />
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
+            migrationPanel={<MigrationPanel />}
             organizationPanel={<OrganizationView data={data} />}
             auditPanel={<AuditView data={data} />}
           />

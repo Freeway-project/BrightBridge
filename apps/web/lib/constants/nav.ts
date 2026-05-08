@@ -26,7 +26,6 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   admin_full: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
   ],
   admin_viewer: [
@@ -39,7 +38,6 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   super_admin: [
     { label: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
-    { label: "Migration", href: "/migration", icon: ClipboardList },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
   ],
 }
