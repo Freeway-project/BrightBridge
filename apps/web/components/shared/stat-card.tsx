@@ -22,7 +22,7 @@ export function StatCard({ label, value, icon, className }: StatCardProps) {
   const Icon = icon ? ICONS[icon] : null
 
   return (
-    <Card className={cn("", className)}>
+    <Card className={cn("shadow-sm border-border/60", className)}>
       <CardHeader className="pb-1 pt-4 px-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>

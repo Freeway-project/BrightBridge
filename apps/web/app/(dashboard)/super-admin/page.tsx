@@ -16,6 +16,7 @@ import { getAdminCoursesPage } from "@/lib/admin/queries"
 import { getOpenEscalations } from "@/lib/services/escalations"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
+import { getLatestMigrationReport } from "@/lib/migration/report"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -40,7 +41,8 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     usersPage,
     unassignedPage,
     openEscalations,
-    tas
+    tas,
+    migrationReport,
   ] = await Promise.all([
     getSuperAdminData(),
     getPaginatedSuperAdminCourses(page, 50, search),
@@ -48,6 +50,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     getAdminCoursesPage({ page: 1, pageSize: 200, status: "course_created" }),
     getOpenEscalations(),
     getProfilesByRole("standard_user"),
+    getLatestMigrationReport(),
   ])
 
   return (
@@ -68,7 +71,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
               />
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
-            migrationPanel={<MigrationPanel />}
+            migrationPanel={<MigrationPanel report={migrationReport} />}
             organizationPanel={<OrganizationView data={data} />}
             auditPanel={<AuditView data={data} />}
           />

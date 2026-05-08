@@ -17,6 +17,7 @@ import { getCourseRepository } from "@/lib/repositories"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
 import { AdminOverview } from "./_components/admin-overview"
 import { MigrationPanel } from "./_components/migration-panel"
+import { getLatestMigrationReport } from "@/lib/migration/report"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -35,7 +36,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData] = await Promise.all([
+  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
@@ -53,6 +54,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getAdminCoursesPage({ page: 1, pageSize: 200, status: "final_approved" }),
     getCourseRepository().listRecentAssignments(20),
     getAdminOverviewData(),
+    getLatestMigrationReport(),
   ])
 
   return (
@@ -78,7 +80,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               />
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
-            migrationPanel={<MigrationPanel />}
+            migrationPanel={<MigrationPanel report={migrationReport} />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
           />

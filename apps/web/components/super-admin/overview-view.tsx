@@ -39,7 +39,7 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
 
   return (
     <div className="min-w-0 flex-1 space-y-8 overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
         <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
         <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
@@ -48,7 +48,7 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 shadow-sm border-border/60">
           <CardHeader className="pb-3 px-4 pt-4">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status Breakdown</CardTitle>
           </CardHeader>
@@ -66,7 +66,7 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 shadow-sm border-border/60">
           <CardHeader className="pb-3 px-4 pt-4">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Staff Workload</CardTitle>
           </CardHeader>
