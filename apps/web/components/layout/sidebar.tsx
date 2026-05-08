@@ -7,6 +7,7 @@ import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
 import { signOut } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
+import { UpdateStatusTab } from "./update-status-tab"
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +31,7 @@ import {
 interface AppSidebarProps {
   role: Role
   userName: string
+  initialVersion: string
 }
 
 function BrandLogo() {
@@ -52,7 +54,7 @@ function BrandLogo() {
   )
 }
 
-export function AppSidebar({ role, userName }: AppSidebarProps) {
+export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) {
   const pathname = usePathname()
   const items = NAV_ITEMS[role]
   const { state } = useSidebar()
@@ -105,6 +107,7 @@ export function AppSidebar({ role, userName }: AppSidebarProps) {
             </p>
           )}
           <DisplaySettings />
+          <UpdateStatusTab initialVersion={initialVersion} />
           <form action={signOut}>
             <button
               type="submit"
