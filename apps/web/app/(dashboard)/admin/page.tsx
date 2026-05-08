@@ -1,7 +1,7 @@
 import { Topbar } from "@/components/layout/topbar"
 import { COURSE_STATUSES, type CourseStatus } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
-import { getAdminCoursesPage } from "@/lib/admin/queries"
+import { getAdminCoursesPage, getAdminOverviewData } from "@/lib/admin/queries"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { getOpenEscalations } from "@/lib/services/escalations"
 import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
@@ -15,6 +15,9 @@ import { AdminRefreshWrapper } from "./_components/admin-refresh-wrapper"
 import { RecentAssignmentsTable } from "./_components/recent-assignments-table"
 import { getCourseRepository } from "@/lib/repositories"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
+import { AdminOverview } from "./_components/admin-overview"
+import { MigrationPanel } from "./_components/migration-panel"
+import { getLatestMigrationReport } from "@/lib/migration/report"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -33,7 +36,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments] = await Promise.all([
+  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
@@ -50,6 +53,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getOpenEscalations(),
     getAdminCoursesPage({ page: 1, pageSize: 200, status: "final_approved" }),
     getCourseRepository().listRecentAssignments(20),
+    getAdminOverviewData(),
+    getLatestMigrationReport(),
   ])
 
   return (
@@ -61,6 +66,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
           <AdminTabs
             unassignedCount={unassignedPage.total}
             openEscalationsCount={openEscalations.length}
+            overviewPanel={<AdminOverview data={overviewData} />}
             coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
             assignPanel={
               <AdminAssignmentPanel
@@ -74,6 +80,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               />
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
+            migrationPanel={<MigrationPanel report={migrationReport} />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
           />

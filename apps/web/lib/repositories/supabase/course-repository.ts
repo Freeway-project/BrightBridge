@@ -494,20 +494,15 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
     async listStatusCounts() {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin.from("courses").select("status");
+      const { data, error } = await admin.from("course_status_counts").select("status, count");
 
       if (error) {
         throw new Error(`status counts: ${error.message}`);
       }
 
-      const counts: Record<string, number> = {};
-      for (const row of data ?? []) {
-        counts[row.status] = (counts[row.status] ?? 0) + 1;
-      }
-
-      return Object.entries(counts).map(([status, count]) => ({
-        status: toCourseStatus(status),
-        count,
+      return (data ?? []).map((row) => ({
+        status: toCourseStatus(row.status),
+        count: Number(row.count),
       })) satisfies StatusCount[];
     },
 
@@ -535,43 +530,22 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
     async listTAWorkload() {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data: staff, error: staffError } = await admin
-        .from("profiles")
-        .select("id, email, full_name")
-        .eq("role", "standard_user");
+      const { data, error } = await admin
+        .from("ta_workload_stats")
+        .select("profile_id, full_name, email, active_courses, needs_fixes")
+        .order("full_name", { ascending: true });
 
-      if (staffError) {
-        throw new Error(`staff list: ${staffError.message}`);
+      if (error) {
+        throw new Error(`ta workload: ${error.message}`);
       }
 
-      const { data: assignments, error: assignError } = await admin
-        .from("course_assignments")
-        .select("profile_id, courses(status)")
-        .eq("role", "staff");
-
-      if (assignError) {
-        throw new Error(`assignments: ${assignError.message}`);
-      }
-
-      return (staff ?? []).map((member) => {
-        const memberAssignments = (assignments ?? []).filter((assignment) => assignment.profile_id === member.id);
-        const active = memberAssignments.filter(
-          (assignment) =>
-            firstRelation(assignment.courses)?.status !== "final_approved" &&
-            firstRelation(assignment.courses)?.status !== "submitted_to_admin",
-        );
-        const needsFixes = memberAssignments.filter(
-          (assignment) => firstRelation(assignment.courses)?.status === "admin_changes_requested",
-        );
-
-        return {
-          id: member.id,
-          full_name: member.full_name,
-          email: member.email,
-          active_courses: active.length,
-          needs_fixes: needsFixes.length,
-        } satisfies TAWorkload;
-      });
+      return (data ?? []).map((row) => ({
+        id: row.profile_id,
+        full_name: row.full_name,
+        email: row.email,
+        active_courses: Number(row.active_courses),
+        needs_fixes: Number(row.needs_fixes),
+      })) satisfies TAWorkload[];
     },
 
     async listAuditEvents(limit) {

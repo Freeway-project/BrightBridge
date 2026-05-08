@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "motion/react";
-import { LampContainer } from "@/components/ui/lamp";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, X, Sparkles } from "lucide-react";
+import { playUpgradeConfetti } from "@/components/shared/upgrade-confetti";
 
 interface DeploymentNotificationProps {
   onRefresh: () => void;
@@ -19,14 +19,18 @@ const UPDATE_SUMMARY = [
 ];
 
 export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotificationProps) {
+  useEffect(() => {
+    playUpgradeConfetti({ durationMs: 10000, intensity: "high" });
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-hidden pointer-events-none">
+    <div className="pointer-events-none fixed inset-0 z-[100] flex items-start justify-center overflow-hidden">
       {/* Background Dimmer + Blur Overlay */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"
       />
 
       {/* Main Container */}
@@ -40,35 +44,35 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
           stiffness: 100,
           duration: 0.6 
         }}
-        className="relative mt-8 w-[95%] max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 p-1 shadow-2xl backdrop-blur-xl pointer-events-auto"
+        className="pointer-events-auto relative mt-8 w-[95%] max-w-2xl overflow-hidden rounded-3xl border border-cyan-300/25 bg-slate-950/85 p-1 shadow-[0_25px_80px_-30px_rgba(34,211,238,0.55)] backdrop-blur-xl"
       >
-        {/* Glow effect around the border */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 blur-xl opacity-50" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-cyan-500/20 via-blue-400/20 to-emerald-400/20 blur-xl opacity-60" />
         
-        <div className="relative z-10 overflow-hidden rounded-[calc(1.5rem-1px)] bg-slate-950">
+        <div className="relative z-10 overflow-hidden rounded-[calc(1.5rem-1px)] bg-slate-950/95">
           <div className="absolute inset-0 opacity-30">
             <BackgroundBeams />
           </div>
+          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-300/10 via-transparent to-transparent" />
 
-          <div className="relative flex flex-col items-center justify-between gap-6 px-8 py-10 sm:flex-row sm:text-left">
-            <div className="relative z-20 flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400">
+          <div className="relative flex flex-col items-center justify-between gap-8 px-8 py-10 sm:flex-row sm:text-left">
+            <div className="relative z-20 flex max-w-[470px] flex-col gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-300/25">
                   <Sparkles className="size-4 animate-pulse" />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-500">
-                  System Update
+                <span className="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200">
+                  Platform Update
                 </span>
               </div>
-              
+
               <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                A new CourseBridge update is live
+                CourseBridge upgraded successfully
               </h2>
-              <p className="max-w-[340px] text-sm leading-relaxed text-slate-400">
-                We improved draft safety and update visibility so your workflow feels smoother. Would you like to switch now?
+              <p className="max-w-[420px] text-sm leading-relaxed text-slate-300">
+                New improvements are ready. Reload now to run on the latest version with safer draft handling and clearer update visibility.
               </p>
-              <details className="mt-1 max-w-[380px] rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
-                <summary className="cursor-pointer text-cyan-300">What&apos;s in this update</summary>
+              <details className="mt-1 max-w-[430px] rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-slate-300">
+                <summary className="cursor-pointer font-medium text-cyan-200">What&apos;s in this update</summary>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-slate-300">
                   {UPDATE_SUMMARY.map((item) => (
                     <li key={item}>{item}</li>
@@ -77,12 +81,12 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
               </details>
             </div>
 
-            <div className="relative z-20 flex flex-col gap-3 sm:min-w-[180px]">
+            <div className="relative z-20 flex w-full max-w-[220px] flex-col gap-3">
               <Button
                 onClick={onRefresh}
-                className="group relative h-12 w-full overflow-hidden bg-white px-6 font-bold text-slate-950 transition-all hover:bg-cyan-400 hover:text-slate-950 active:scale-95"
+                className="group relative h-12 w-full overflow-hidden bg-cyan-300 px-6 font-bold text-slate-950 transition-all hover:bg-cyan-200 active:scale-[0.98]"
               >
-                <div className="absolute inset-0 flex translate-y-[100%] items-center justify-center bg-cyan-400 transition-transform group-hover:translate-y-0">
+                <div className="absolute inset-0 flex translate-y-[100%] items-center justify-center bg-cyan-200 transition-transform group-hover:translate-y-0">
                   <RefreshCw className="mr-2 size-4 animate-spin-slow" />
                   Reload Now
                 </div>
@@ -94,7 +98,7 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
               <Button
                 variant="outline"
                 onClick={onDismiss}
-                className="h-10 border-white/10 bg-transparent text-slate-400 hover:bg-white/5 hover:text-white"
+                className="h-10 border-white/20 bg-transparent text-slate-300 hover:bg-white/10 hover:text-white"
               >
                 Keep Working
               </Button>
@@ -106,14 +110,14 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="h-[2px] w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"
+            className="h-[2px] w-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent opacity-70"
           />
         </div>
 
         {/* Dismiss Button */}
         <button
           onClick={onDismiss}
-          className="absolute right-4 top-4 z-30 flex size-8 items-center justify-center rounded-full text-slate-500 transition-all hover:bg-white/10 hover:text-white"
+          className="absolute right-4 top-4 z-30 flex size-8 items-center justify-center rounded-full text-slate-400 transition-all hover:bg-white/10 hover:text-white"
         >
           <X className="size-4" />
         </button>
@@ -124,7 +128,7 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
         initial={{ opacity: 0, height: 0 }}
         animate={{ opacity: 0.4, height: 200 }}
         exit={{ opacity: 0, height: 0 }}
-        className="absolute inset-x-0 top-0 bg-gradient-to-b from-cyan-500/20 to-transparent blur-3xl"
+        className="absolute inset-x-0 top-0 bg-gradient-to-b from-cyan-300/25 to-transparent blur-3xl"
       />
     </div>
   );

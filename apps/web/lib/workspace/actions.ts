@@ -80,6 +80,14 @@ export async function submitReview(courseId: string): Promise<{ ok: boolean; err
       return { ok: false, error: "Course not found or assignment was revoked. Refreshing..." };
     }
 
+    // Idempotency guard: avoid throwing on repeat submit clicks/race conditions
+    // when the course is already in the target status.
+    if (course.status === "submitted_to_admin") {
+      revalidatePath("/ta");
+      revalidatePath(`/courses/${courseId}`);
+      return { ok: true };
+    }
+
     const fromStatus =
       course.status === "assigned_to_ta" || course.status === "admin_changes_requested"
         ? "ta_review_in_progress"

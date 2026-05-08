@@ -1,0 +1,731 @@
+{
+  "title": "TA Form Migration Run",
+  "startedAt": "2026-05-08T21:38:31.833Z",
+  "finishedAt": "2026-05-08T21:38:32.298Z",
+  "mode": "dry-run",
+  "environment": "supabase:usijcptcubkddpkgervf",
+  "csvPath": "Gate 01 (QI) – TA Course Review Form (2)/Responses-Table 1.csv",
+  "adminActorEmail": "admin@coursebridge.dev",
+  "summary": {
+    "totalRows": 95,
+    "codeTitleSwaps": 24,
+    "blankTerms": 4,
+    "urlAutoFixes": 5,
+    "problematicRows": 4,
+    "updatedExisting": 0,
+    "createdNew": 0,
+    "staffAssignmentsAdded": 0,
+    "reviewResponsesUpserted": 0,
+    "statusEventsInserted": 0,
+    "rowsFailed": 0
+  },
+  "notes": [
+    "Orphan-course enrichment is intentionally disabled in this importer.",
+    "Reviewer mapping is authoritative for staff assignment in TA form imports."
+  ],
+  "problematicRows": [
+    {
+      "row": 11,
+      "courseRef": "001-K02",
+      "reviewer": "Alfiya K.",
+      "issues": [
+        "blank or invalid term"
+      ],
+      "urlAutoFixes": []
+    },
+    {
+      "row": 35,
+      "courseRef": "DAA 100 | Communication Skills",
+      "reviewer": "Mikhail F.",
+      "issues": [
+        "blank or invalid term"
+      ],
+      "urlAutoFixes": []
+    },
+    {
+      "row": 40,
+      "courseRef": "HLT-001",
+      "reviewer": "Mikhail F.",
+      "issues": [
+        "blank or invalid term"
+      ],
+      "urlAutoFixes": []
+    },
+    {
+      "row": 69,
+      "courseRef": "BUAD-412-001-10883.20261",
+      "reviewer": "Ava R.",
+      "issues": [
+        "blank or invalid term"
+      ],
+      "urlAutoFixes": []
+    }
+  ],
+  "involvedCourses": [
+    {
+      "row": 2,
+      "courseRef": "WINE-22-0-80579.202411",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202411"
+    },
+    {
+      "row": 3,
+      "courseRef": "BAC-12-MAY-80071.202611",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 4,
+      "courseRef": "BOOK-120-MAR-80148.202611",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 5,
+      "courseRef": "WINE-14-0-80629.202411",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202411"
+    },
+    {
+      "row": 6,
+      "courseRef": "WINE-24-0-80581.202411",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202411"
+    },
+    {
+      "row": 7,
+      "courseRef": "PRM-116-K01-70397.202531",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 8,
+      "courseRef": "TIP-101-K01-70410.202531",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 9,
+      "courseRef": "AD-001-K01-70204.202531",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 10,
+      "courseRef": "WINE-21-0-80578.202411",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202411"
+    },
+    {
+      "row": 11,
+      "courseRef": "001-K02",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": null
+    },
+    {
+      "row": 12,
+      "courseRef": "AEMP-110-K01-70208.202531_CS_Migrate",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 13,
+      "courseRef": "VGP-100-K01-80149.202611",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 14,
+      "courseRef": "AEMP-111-K01-70209.202531_CS_Migrate",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 15,
+      "courseRef": "TIP-101-K01-80158.202611",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 16,
+      "courseRef": "TIP-100-K01-70409",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 17,
+      "courseRef": "AD-001-K01-70204.202531",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 18,
+      "courseRef": "TIP-100-K01-80156",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 19,
+      "courseRef": "BOOK-120-MAR-80148.202611",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 20,
+      "courseRef": "TIP-102-K01-70411",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 21,
+      "courseRef": "BOOK-100-JAN-80143.202611",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 22,
+      "courseRef": "BOOK-100-MAR-80146.202611",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 23,
+      "courseRef": "TIP-102-K01-80159",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 24,
+      "courseRef": "ICSW-111-P01-70306.202531",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 25,
+      "courseRef": "ICSW-112-P01-70307.202531",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 26,
+      "courseRef": "ICSW-112-S01-70498.202531",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 27,
+      "courseRef": "ICSW-113-P01-70308.202531",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 28,
+      "courseRef": "ICSW-113-S01-70499.202531",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 29,
+      "courseRef": "EA11 - School Organization",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 30,
+      "courseRef": "EA-111 \"Writing\"",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 31,
+      "courseRef": "EA-111-P01-70246.202531_CS_Migrate",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 32,
+      "courseRef": "EA-111-P01-80076.202611",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 33,
+      "courseRef": "EA-111-0-80215.202611",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 34,
+      "courseRef": "EA-111",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 35,
+      "courseRef": "DAA 100 | Communication Skills",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": null
+    },
+    {
+      "row": 36,
+      "courseRef": "DAA-101",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 37,
+      "courseRef": "DAA-102",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202611"
+    },
+    {
+      "row": 38,
+      "courseRef": "GDE-100",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 39,
+      "courseRef": "GDE-110",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": "202531"
+    },
+    {
+      "row": 40,
+      "courseRef": "HLT-001",
+      "reviewer": "Mikhail F.",
+      "taEmail": "mikhail.fokin@myokanagan.bc.ca",
+      "term": null
+    },
+    {
+      "row": 41,
+      "courseRef": "BUAD-111-001-10114.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 42,
+      "courseRef": "OADM-190-Z12-11596",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 43,
+      "courseRef": "BUAD-111-002-10115.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 44,
+      "courseRef": "OADM-189-Z12-11595",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 45,
+      "courseRef": "LAA-153-Z11-11163.202610__BUAD",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 46,
+      "courseRef": "BUAD-251-001-30189.202530_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202530"
+    },
+    {
+      "row": 47,
+      "courseRef": "OADM-186-Z12-11594",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 48,
+      "courseRef": "BUAD-112-061-11721.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 49,
+      "courseRef": "BUAD-315-001-10854.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 50,
+      "courseRef": "BUAD-382-001-10881.202610",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 51,
+      "courseRef": "LAA-152-Z11-11162.202610__BUAD",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 52,
+      "courseRef": "BUAD-112-D11-11763.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 53,
+      "courseRef": "OADM-185-Z12-11593",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 54,
+      "courseRef": "BUAD-251-001/002-10172.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 55,
+      "courseRef": "BUAD-251-001/002-10172.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 56,
+      "courseRef": "LAA-141-Z11-11161.202610",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 57,
+      "courseRef": "BUAD-262-001-10174.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 58,
+      "courseRef": "BUAD-262-001-10174.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 59,
+      "courseRef": "OADM-183-Z12-11592",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 60,
+      "courseRef": "BUAD-262-001-10174.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 61,
+      "courseRef": "BUAD-113-001-10117.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 62,
+      "courseRef": "OADM-182-Z12-11591",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 63,
+      "courseRef": "BUAD-309-001-30835.202530",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202530"
+    },
+    {
+      "row": 64,
+      "courseRef": "BUAD-375-001-10880.202610",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 65,
+      "courseRef": "LAA-112-Z11-11160.202610",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 66,
+      "courseRef": "OADM-181-Z12-11590",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 67,
+      "courseRef": "BUAD-262-003-10176.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 68,
+      "courseRef": "LAA-101-Z11-11159.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 69,
+      "courseRef": "BUAD-412-001-10883.20261",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": null
+    },
+    {
+      "row": 70,
+      "courseRef": "OADM-180-Z12-11589",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 71,
+      "courseRef": "BUAD-262-004-10177.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 72,
+      "courseRef": "BUAD-113-002-10118.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 73,
+      "courseRef": "BUAD-263-001-10178.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 74,
+      "courseRef": "BUAD-116-001-10120.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 75,
+      "courseRef": "OADM-174-Z12-11588",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 76,
+      "courseRef": "BUAD-264-001-10179.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 77,
+      "courseRef": "BUAD-468-001-10892.202610",
+      "reviewer": "Nick U.",
+      "taEmail": "nusatenco@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 78,
+      "courseRef": "BUAD-116-002-10121.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 79,
+      "courseRef": "OADM-173-Z12-11587",
+      "reviewer": "Filip S.",
+      "taEmail": "fshakalau@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 80,
+      "courseRef": "BUAD-195-002-10144.202610",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 81,
+      "courseRef": "BUAD-116-004-10123.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 82,
+      "courseRef": "BUAD-315-002-10855.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 83,
+      "courseRef": "BUAD-195-003-10145.202610",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 84,
+      "courseRef": "BUAD-116-005-10124.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 85,
+      "courseRef": "BUAD-466-001-10891.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 86,
+      "courseRef": "BUAD-331-001-10857.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 87,
+      "courseRef": "BUAD-116-061-10126.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 88,
+      "courseRef": "BUAD-116-051-10125.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 89,
+      "courseRef": "BUAD-463-002-10889.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 90,
+      "courseRef": "BUAD-264-003-10181.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 91,
+      "courseRef": "BUAD-116-071-10127.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 92,
+      "courseRef": "TOUR-200B-001-10821.202610",
+      "reviewer": "Ava R.",
+      "taEmail": "aroy@okanaganbc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 93,
+      "courseRef": "BUAD-113-001-10117.202610_BUAD",
+      "reviewer": "Matthew T.",
+      "taEmail": "gtindogan@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 94,
+      "courseRef": "BUAD-339-001-10860.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 95,
+      "courseRef": "BUAD-264-004-10182.202610_BUAD",
+      "reviewer": "Alfiya K.",
+      "taEmail": "akhanum@okanagan.bc.ca",
+      "term": "202610"
+    },
+    {
+      "row": 96,
+      "courseRef": "BUAD-298-001-10203.202610",
+      "reviewer": "Nick C.",
+      "taEmail": "ncornell@okanagan.bc.ca",
+      "term": "202610"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import {
 import { StatusBadge } from "@/components/courses/status-badge"
 import { StatCard } from "@/components/shared/stat-card"
 import { type CourseStatus } from "@coursebridge/workflow"
-import type { SuperAdminData } from "@/lib/super-admin/queries"
+import type { AdminOverviewData } from "@/lib/admin/queries"
 
 const STATUS_ORDER: CourseStatus[] = [
   "course_created", "assigned_to_ta", "ta_review_in_progress",
@@ -14,7 +14,7 @@ const STATUS_ORDER: CourseStatus[] = [
   "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved",
 ]
 
-export function OverviewView({ data }: { data: SuperAdminData }) {
+export function AdminOverview({ data }: { data: AdminOverviewData }) {
   const { statusCounts, taWorkload } = data
 
   const countByStatus = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
@@ -38,7 +38,7 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
   const completed = countByStatus["final_approved"] ?? 0
 
   return (
-    <div className="min-w-0 flex-1 space-y-8 overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
+    <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
         <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
@@ -47,12 +47,12 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
         <StatCard label="Provision"        value={completed}       icon="check-square" />
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-1 shadow-sm border-border/60">
-          <CardHeader className="pb-3 px-4 pt-4">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status Breakdown</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Status Breakdown</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4 space-y-3">
+          <CardContent className="space-y-3">
             {STATUS_ORDER.map((status) => {
               const count = countByStatus[status] ?? 0
               if (count === 0) return null
@@ -67,13 +67,13 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
         </Card>
 
         <Card className="lg:col-span-2 shadow-sm border-border/60">
-          <CardHeader className="pb-3 px-4 pt-4">
-            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Staff Workload</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Staff Workload</CardTitle>
           </CardHeader>
-          <CardContent className="p-0 border-t border-border">
+          <CardContent className="p-0 border-t">
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-transparent border-border bg-muted/30">
+                <TableRow className="hover:bg-transparent bg-muted/30">
                   <TableHead className="text-[10px] uppercase font-bold pl-4 h-9">Staff</TableHead>
                   <TableHead className="text-[10px] uppercase font-bold text-center h-9">Active</TableHead>
                   <TableHead className="text-[10px] uppercase font-bold text-center h-9">Needs Fixes</TableHead>
@@ -84,10 +84,10 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
                   <TableRow><TableCell colSpan={3} className="text-center text-xs py-8">No staff assigned.</TableCell></TableRow>
                 ) : (
                   taWorkload.map((ta) => (
-                    <TableRow key={ta.id} className="border-border">
-                      <TableCell className="min-w-0 whitespace-normal py-2 pl-4">
-                        <p className="text-sm font-medium break-words">{ta.full_name ?? ta.email}</p>
-                        {ta.full_name && <p className="text-[11px] text-muted-foreground break-all">{ta.email}</p>}
+                    <TableRow key={ta.id}>
+                      <TableCell className="py-2 pl-4">
+                        <p className="text-sm font-medium">{ta.full_name ?? ta.email}</p>
+                        {ta.full_name && <p className="text-[11px] text-muted-foreground">{ta.email}</p>}
                       </TableCell>
                       <TableCell className="text-center text-sm tabular-nums">{ta.active_courses}</TableCell>
                       <TableCell className="text-center">
