@@ -6,25 +6,23 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 type Props = {
   overviewPanel: React.ReactNode
   coursesPanel: React.ReactNode
+  usersPanel: React.ReactNode
   assignPanel: React.ReactNode
-  instructorPanel: React.ReactNode
   escalationsPanel: React.ReactNode
-  completedPanel: React.ReactNode
-  migrationPanel: React.ReactNode
-  assignmentLogsPanel: React.ReactNode
+  organizationPanel: React.ReactNode
+  auditPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
 }
 
-export function AdminTabs({
+export function SuperAdminTabs({
   overviewPanel,
   coursesPanel,
+  usersPanel,
   assignPanel,
-  instructorPanel,
   escalationsPanel,
-  completedPanel,
-  migrationPanel,
-  assignmentLogsPanel,
+  organizationPanel,
+  auditPanel,
   unassignedCount,
   openEscalationsCount,
 }: Props) {
@@ -34,7 +32,8 @@ export function AdminTabs({
     <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
       <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
         <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="courses">All Courses</TabsTrigger>
+        <TabsTrigger value="courses">Courses</TabsTrigger>
+        <TabsTrigger value="users">Users</TabsTrigger>
         <TabsTrigger value="assign">
           Assign TA
           {unassignedCount > 0 && (
@@ -43,7 +42,6 @@ export function AdminTabs({
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="instructor">Instructors</TabsTrigger>
         <TabsTrigger value="escalations">
           Escalations
           {openEscalationsCount > 0 && (
@@ -52,23 +50,17 @@ export function AdminTabs({
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="migration">Migration</TabsTrigger>
-        <TabsTrigger value="completed">Provision</TabsTrigger>
+        <TabsTrigger value="organization">Organization</TabsTrigger>
+        <TabsTrigger value="audit">Audit Log</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview">{overviewPanel}</TabsContent>
       <TabsContent value="courses">{coursesPanel}</TabsContent>
-      <TabsContent value="assign" className="space-y-6 outline-none">
-        {assignPanel}
-        {assignmentLogsPanel}
-      </TabsContent>
-      <TabsContent value="instructor" className="space-y-6 outline-none">
-        {instructorPanel}
-        {assignmentLogsPanel}
-      </TabsContent>
+      <TabsContent value="users">{usersPanel}</TabsContent>
+      <TabsContent value="assign">{assignPanel}</TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
-      <TabsContent value="migration">{migrationPanel}</TabsContent>
-      <TabsContent value="completed">{completedPanel}</TabsContent>
+      <TabsContent value="organization">{organizationPanel}</TabsContent>
+      <TabsContent value="audit">{auditPanel}</TabsContent>
     </Tabs>
   )
 }
