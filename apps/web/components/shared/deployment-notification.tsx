@@ -115,3 +115,34 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
     </div>
   );
 }
+
+export function MinimizedUpdatePill({ onClick }: { onClick: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5, y: 50 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      whileHover={{ scale: 1.05 }}
+      className="fixed bottom-6 right-6 z-[90] pointer-events-auto"
+    >
+      <button
+        onClick={onClick}
+        className="group relative flex items-center gap-3 overflow-hidden rounded-full border border-cyan-500/30 bg-slate-950 px-4 py-2.5 shadow-lg shadow-cyan-500/10 backdrop-blur-md transition-all hover:border-cyan-400 hover:shadow-cyan-500/20"
+      >
+        {/* Pulsing indicator */}
+        <div className="relative flex size-2 items-center justify-center">
+          <div className="absolute inset-0 animate-ping rounded-full bg-cyan-400 opacity-75"></div>
+          <div className="relative size-2 rounded-full bg-cyan-500"></div>
+        </div>
+        
+        <span className="text-xs font-semibold text-slate-200">Update Available</span>
+        
+        <div className="flex size-5 items-center justify-center rounded-full bg-white/5 text-slate-400 transition-colors group-hover:bg-cyan-500 group-hover:text-slate-950">
+          <RefreshCw className="size-3 transition-transform group-hover:rotate-180 duration-500" />
+        </div>
+
+        {/* Inner subtle beam effect */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent translate-x-[-100%] animate-[shimmer_2s_infinite]" />
+      </button>
+    </motion.div>
+  );
+}
