@@ -5,6 +5,7 @@ import type { ReactNode } from "react"
 import { TweakProvider } from "@/components/shared/tweak-provider"
 import { NotificationProvider } from "@/components/providers/notification-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { DashboardContentShell } from "@/components/layout/dashboard-content-shell"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const context = await getAuthContext()
@@ -27,9 +28,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         <SidebarProvider>
           <div className="flex h-screen w-full overflow-hidden bg-background">
             <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
-            <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+            <DashboardContentShell>
               {children}
-            </div>
+            </DashboardContentShell>
           </div>
         </SidebarProvider>
       </NotificationProvider>

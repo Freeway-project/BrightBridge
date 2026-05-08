@@ -12,6 +12,12 @@ interface DeploymentNotificationProps {
   onDismiss: () => void;
 }
 
+const UPDATE_SUMMARY = [
+  "Your draft progress is now safer while you move between pages and tabs.",
+  "Display settings now apply across the main workspace while keeping the left sidebar stable.",
+  "You can check version status and open update notices anytime from the sidebar tab.",
+];
+
 export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotificationProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-hidden pointer-events-none">
@@ -56,11 +62,19 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
               </div>
               
               <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                CourseBridge <span className="text-cyan-400">v2.0</span> is live
+                A new CourseBridge update is live
               </h2>
               <p className="max-w-[340px] text-sm leading-relaxed text-slate-400">
-                A new version has been deployed with performance boosts and fresh UI tweaks. Would you like to switch now?
+                We improved draft safety and update visibility so your workflow feels smoother. Would you like to switch now?
               </p>
+              <details className="mt-1 max-w-[380px] rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
+                <summary className="cursor-pointer text-cyan-300">What&apos;s in this update</summary>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-slate-300">
+                  {UPDATE_SUMMARY.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </details>
             </div>
 
             <div className="relative z-20 flex flex-col gap-3 sm:min-w-[180px]">
