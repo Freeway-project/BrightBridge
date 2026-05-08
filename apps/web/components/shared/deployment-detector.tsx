@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hasUnsavedChanges } from "@/lib/deployment-sync";
+import { DeploymentNotification, MinimizedUpdatePill } from "./deployment-notification";
+import { AnimatePresence } from "motion/react";
 
 interface DeploymentDetectorProps {
   initialVersion: string;
@@ -13,6 +15,8 @@ interface DeploymentDetectorProps {
 const CHECK_INTERVAL = 1000 * 60 * 5; // Check every 5 minutes
 
 export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) {
+  const [showNotification, setShowNotification] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const hasNotified = useRef(false);
   const hasChunkWarning = useRef(false);
 
@@ -31,20 +35,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
         
         if (data.version && data.version !== initialVersion && data.version !== "development") {
           hasNotified.current = true;
-          
-          toast.info("Update Available", {
-            description: hasUnsavedChanges()
-              ? "Save your draft, then refresh to switch to the latest version."
-              : "A new version of CourseBridge has been deployed.",
-            duration: Infinity,
-            position: "bottom-left",
-            icon: <RefreshCw className="size-4 text-primary" />,
-            action: (
-              <Button size="sm" onClick={() => window.location.reload()} className="ml-auto">
-                Refresh
-              </Button>
-            ),
-          });
+          setShowNotification(true);
         }
       } catch (error) {
         // Silently fail version checks
@@ -92,5 +83,30 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     };
   }, [initialVersion]);
 
-  return null;
+  return (
+    <>
+      <AnimatePresence>
+        {showNotification && (
+          <DeploymentNotification 
+            onRefresh={() => window.location.reload()} 
+            onDismiss={() => {
+              setShowNotification(false);
+              setIsMinimized(true);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isMinimized && (
+          <MinimizedUpdatePill 
+            onClick={() => {
+              setIsMinimized(false);
+              setShowNotification(true);
+            }} 
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
 }

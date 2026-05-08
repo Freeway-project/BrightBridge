@@ -25,6 +25,7 @@ import type { ProfileOption } from "@/lib/services/profiles"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
 import { SYLLABUS_ITEMS_LIST as SYLLABUS_ITEMS, GRADEBOOK_ITEMS_LIST as GRADEBOOK_ITEMS } from "@/lib/workspace/constants"
+import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
 type SyllabusGradebookFormProps = {
   courseId: string
@@ -51,6 +52,7 @@ export function SyllabusGradebookForm({
   defaultValues,
   instructors,
 }: SyllabusGradebookFormProps) {
+  const dirtySource = `syllabus-gradebook-form:${courseId}`;
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -79,6 +81,11 @@ export function SyllabusGradebookForm({
     return () => window.removeEventListener("coursebridge:review-timer", onTick)
   }, [timerStorageKey])
 
+  useEffect(() => {
+    setUnsavedChanges(dirtySource, form.formState.isDirty);
+    return () => clearUnsavedChanges(dirtySource);
+  }, [dirtySource, form.formState.isDirty]);
+
   async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
@@ -86,12 +93,17 @@ export function SyllabusGradebookForm({
     setStatus("saving")
     startTransition(async () => {
       try {
-        await saveDraft(courseId, "syllabus_review", {
+        const res = await saveDraft(courseId, "syllabus_review", {
           ...form.getValues(),
           time_spent_seconds: elapsedRef.current,
           overall_time_spent_seconds: overallElapsed,
         })
+        if (!res.ok) {
+          setStatus("error")
+          return
+        }
         setStatus("saved")
+        form.reset(form.getValues())
         if (advance) {
           router.push(`/courses/${courseId}/issue-log`)
         }

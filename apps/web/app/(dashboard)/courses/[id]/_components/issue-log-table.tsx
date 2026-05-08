@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { Plus } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import type { Issue } from "@/lib/workspace/types"
@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { createBlankIssue, IssueDrawer } from "./issue-drawer"
+import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
 type IssueLogTableProps = {
   courseId: string
@@ -33,6 +34,7 @@ type IssueLogTableProps = {
 const ALL = "all"
 
 export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
+  const dirtySource = `issue-log-table:${courseId}`;
   const [issues, setIssues] = useState(defaultIssues)
   const [selected, setSelected] = useState<Issue | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -54,6 +56,11 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
       return searchMatch && severityMatch && statusMatch
     })
   }, [issues, query, severity, status])
+
+  useEffect(() => {
+    setUnsavedChanges(dirtySource, saveState === "saving" || isPending);
+    return () => clearUnsavedChanges(dirtySource);
+  }, [dirtySource, isPending, saveState]);
 
   function saveIssues(nextIssues: Issue[]) {
     setIssues(nextIssues)

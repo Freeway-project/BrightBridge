@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
 import { CHECKLIST } from "@/lib/workspace/constants"
+import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
 type ReviewMatrixFormProps = {
   courseId: string
@@ -59,6 +60,7 @@ export function ReviewMatrixForm({
   defaultValues,
   initialIssues,
 }: ReviewMatrixFormProps) {
+  const dirtySource = `review-matrix-form:${courseId}`;
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [issues, setIssues] = useState(initialIssues)
   const [isPending, startTransition] = useTransition()
@@ -95,6 +97,11 @@ export function ReviewMatrixForm({
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
+  useEffect(() => {
+    setUnsavedChanges(dirtySource, form.formState.isDirty);
+    return () => clearUnsavedChanges(dirtySource);
+  }, [dirtySource, form.formState.isDirty]);
+
   async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
@@ -115,6 +122,7 @@ export function ReviewMatrixForm({
           return
         }
         setStatus("saved")
+        form.reset(form.getValues())
         if (advance) {
           router.push(`/courses/${courseId}/syllabus-gradebook`)
         }
