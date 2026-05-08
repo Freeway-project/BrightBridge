@@ -4,7 +4,7 @@ import type { AssignmentRole } from "@coursebridge/workflow";
 import type {
   AdminCourseListFilters,
   AdminCourseRow,
-
+  AssignmentLog,
   AuditEvent,
   CourseAssignmentRecord,
   CourseRepository,
@@ -619,6 +619,47 @@ export function createSupabaseCourseRepository(): CourseRepository {
           note: event.note,
           created_at: event.created_at,
         } satisfies AuditEvent;
+      });
+    },
+
+    async listRecentAssignments(limit) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("course_assignments")
+        .select(`
+          id, course_id, role, assigned_at,
+          courses ( title ),
+          assigned_user:profiles!course_assignments_profile_id_fkey ( full_name, email ),
+          assigner:profiles!course_assignments_assigned_by_fkey ( full_name, email )
+        `)
+        .order("assigned_at", { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        throw new Error(`assignments_log: ${error.message}`);
+      }
+
+      return (data ?? []).map((row) => {
+        const r = row as any;
+        const course = firstRelation(r.courses);
+        const assignedUser = firstRelation(r.assigned_user);
+        const assigner = firstRelation(r.assigner);
+
+        return {
+          id: r.id,
+          courseId: r.course_id,
+          courseTitle: course?.title ?? "—",
+          assignedUser: {
+            name: assignedUser?.full_name ?? null,
+            email: assignedUser?.email ?? "—",
+          },
+          role: r.role as AssignmentRole,
+          assignedBy: {
+            name: assigner?.full_name ?? null,
+            email: assigner?.email ?? "—",
+          },
+          assignedAt: r.assigned_at,
+        } satisfies AssignmentLog;
       });
     },
 

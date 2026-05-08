@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
     "build": "next build",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
@@ -20,8 +20,10 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.38.0",
     "geist": "^1.7.0",
     "lucide-react": "^1.12.0",
+    "motion": "^12.38.0",
     "next": "^16.0.0",
     "radix-ui": "^1.4.3",
     "react": "^19.0.0",

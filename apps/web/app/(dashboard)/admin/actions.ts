@@ -14,6 +14,7 @@ import { resolveEscalation } from "@/lib/services/escalations";
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
   message: string | null;
+  results?: Array<{ courseId: string; title: string; success: boolean; message: string }>;
 };
 
 export type AssignableCourseOption = {
@@ -61,6 +62,82 @@ export async function searchCoursesForInstructorAction(searchTerm: string): Prom
     title: course.title,
     sourceCourseId: course.sourceCourseId,
   }));
+}
+
+export async function batchAssignTaAction(
+  _state: AssignTaState,
+  formData: FormData,
+): Promise<AssignTaState> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["admin_full", "super_admin"]);
+
+  const profileId = String(formData.get("profileId") ?? "");
+  const courseIds = String(formData.get("courseIds") ?? "").split(",").filter(Boolean);
+
+  if (!profileId || courseIds.length === 0) {
+    return {
+      kind: "error",
+      message: "Select both a staff member and at least one course.",
+    };
+  }
+
+  const results: Array<{ courseId: string; title: string; success: boolean; message: string }> = [];
+  let successCount = 0;
+
+  for (const courseId of courseIds) {
+    const detail = await getAdminCourseDetail(courseId);
+    const title = detail?.course.title ?? "Unknown Course";
+
+    try {
+      if (!detail) throw new Error("Course not found.");
+
+      await assignUserToCourse({
+        courseId,
+        profileId,
+        role: "staff",
+      });
+
+      if (detail.course.status === "course_created") {
+        await transitionCourseStatus({
+          courseId,
+          toStatus: "assigned_to_ta",
+          note: "Staff assigned via batch action.",
+        });
+      }
+
+      results.push({ courseId, title, success: true, message: "Assigned" });
+      successCount++;
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Assignment failed";
+      results.push({ courseId, title, success: false, message: msg });
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/ta");
+  courseIds.forEach(id => revalidatePath(`/courses/${id}`));
+
+  if (successCount === courseIds.length) {
+    return {
+      kind: "success",
+      message: `Successfully assigned ${successCount} course(s).`,
+      results,
+    };
+  }
+
+  if (successCount === 0) {
+    return {
+      kind: "error",
+      message: "All assignments failed.",
+      results,
+    };
+  }
+
+  return {
+    kind: "success",
+    message: `Assigned ${successCount} out of ${courseIds.length} courses. Some failed.`,
+    results,
+  };
 }
 
 export async function assignTaToCourseAction(
