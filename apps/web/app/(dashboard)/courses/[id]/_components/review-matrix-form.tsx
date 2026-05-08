@@ -61,6 +61,7 @@ export function ReviewMatrixForm({
   initialIssues,
 }: ReviewMatrixFormProps) {
   const dirtySource = `review-matrix-form:${courseId}`;
+  const localDraftKey = `coursebridge:${courseId}:local-draft:review_matrix`
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [issues, setIssues] = useState(initialIssues)
   const [isPending, startTransition] = useTransition()
@@ -98,6 +99,25 @@ export function ReviewMatrixForm({
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
+    const stored = localStorage.getItem(localDraftKey)
+    if (!stored) return
+    try {
+      const parsed = JSON.parse(stored) as Partial<ReviewMatrixFormValues>
+      form.reset({ ...defaultValues, ...parsed }, { keepDefaultValues: false })
+      setUnsavedChanges(dirtySource, true)
+    } catch {
+      localStorage.removeItem(localDraftKey)
+    }
+  }, [defaultValues, dirtySource, form, localDraftKey])
+
+  useEffect(() => {
+    const sub = form.watch((values) => {
+      localStorage.setItem(localDraftKey, JSON.stringify(values))
+    })
+    return () => sub.unsubscribe()
+  }, [form, localDraftKey])
+
+  useEffect(() => {
     setUnsavedChanges(dirtySource, form.formState.isDirty);
     return () => clearUnsavedChanges(dirtySource);
   }, [dirtySource, form.formState.isDirty]);
@@ -122,6 +142,7 @@ export function ReviewMatrixForm({
           return
         }
         setStatus("saved")
+        localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
         if (advance) {
           router.push(`/courses/${courseId}/syllabus-gradebook`)
@@ -289,5 +310,5 @@ function SaveState({
   if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
   if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
   if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Auto-saves while you type</p>
+  return <p className="text-xs text-muted-foreground">Saved locally until you click Save draft</p>
 }

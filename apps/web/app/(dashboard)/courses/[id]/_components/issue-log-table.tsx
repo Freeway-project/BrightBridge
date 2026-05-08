@@ -34,7 +34,8 @@ type IssueLogTableProps = {
 const ALL = "all"
 
 export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
-  const dirtySource = `issue-log-table:${courseId}`;
+  const dirtySource = `issue-log-table:${courseId}`
+  const localDraftKey = `coursebridge:${courseId}:local-draft:general_notes`
   const [issues, setIssues] = useState(defaultIssues)
   const [selected, setSelected] = useState<Issue | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -42,6 +43,7 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
   const [severity, setSeverity] = useState(ALL)
   const [status, setStatus] = useState(ALL)
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle")
+  const [hasLocalDraft, setHasLocalDraft] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const filtered = useMemo(() => {
@@ -58,16 +60,45 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
   }, [issues, query, severity, status])
 
   useEffect(() => {
-    setUnsavedChanges(dirtySource, saveState === "saving" || isPending);
-    return () => clearUnsavedChanges(dirtySource);
-  }, [dirtySource, isPending, saveState]);
+    const stored = localStorage.getItem(localDraftKey)
+    if (!stored) return
+    try {
+      const parsed = JSON.parse(stored) as { issues?: Issue[] }
+      if (Array.isArray(parsed.issues)) {
+        setIssues(parsed.issues)
+        setHasLocalDraft(true)
+      }
+    } catch {
+      localStorage.removeItem(localDraftKey)
+    }
+  }, [localDraftKey])
 
-  function saveIssues(nextIssues: Issue[]) {
+  useEffect(() => {
+    localStorage.setItem(localDraftKey, JSON.stringify({ issues }))
+  }, [issues, localDraftKey])
+
+  useEffect(() => {
+    setUnsavedChanges(dirtySource, hasLocalDraft || saveState === "saving" || isPending)
+    return () => clearUnsavedChanges(dirtySource)
+  }, [dirtySource, hasLocalDraft, isPending, saveState])
+
+  function updateIssues(nextIssues: Issue[]) {
+    setHasLocalDraft(true)
+    setSaveState("idle")
     setIssues(nextIssues)
+  }
+
+  function handleSaveDraft() {
     setSaveState("saving")
     startTransition(async () => {
       try {
-        await saveDraft(courseId, "general_notes", { issues: nextIssues })
+        const res = await saveDraft(courseId, "general_notes", { issues })
+        if (!res.ok) {
+          setSaveState("error")
+          return
+        }
+        localStorage.removeItem(localDraftKey)
+        setHasLocalDraft(false)
         setSaveState("saved")
       } catch {
         setSaveState("error")
@@ -87,6 +118,9 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
           <CardTitle className="text-base">Issue Log</CardTitle>
           <div className="flex items-center gap-3">
             <SaveState isPending={isPending} status={saveState} />
+            <Button disabled={isPending} onClick={handleSaveDraft} size="sm" type="button" variant="outline">
+              Save draft
+            </Button>
             <Button onClick={openNewIssue} size="sm" type="button">
               <Plus className="size-3.5" />
               New Issue
@@ -181,7 +215,7 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
           const nextIssues = exists
             ? issues.map((item) => (item.id === issue.id ? issue : item))
             : [...issues, issue]
-          saveIssues(nextIssues)
+          updateIssues(nextIssues)
           setDrawerOpen(false)
         }}
         open={drawerOpen}
@@ -200,5 +234,5 @@ function SaveState({
   if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
   if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
   if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Auto-saves after edits</p>
+  return <p className="text-xs text-muted-foreground">Saved locally until you click Save draft</p>
 }
