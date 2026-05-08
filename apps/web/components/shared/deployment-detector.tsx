@@ -13,6 +13,12 @@ interface DeploymentDetectorProps {
 }
 
 const CHECK_INTERVAL = 1000 * 60 * 5; // Check every 5 minutes
+type NotificationMode = "auto" | "force-on" | "force-off";
+// Manual switch for demos/testing:
+// - "auto": current API-version behavior
+// - "force-on": always show notification UI
+// - "force-off": never show notification UI
+const NOTIFICATION_MODE: NotificationMode = "auto";
 
 export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) {
   const [showNotification, setShowNotification] = useState(false);
@@ -21,6 +27,13 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
   const hasChunkWarning = useRef(false);
 
   useEffect(() => {
+    if (NOTIFICATION_MODE === "force-off") return;
+    if (NOTIFICATION_MODE === "force-on") {
+      setShowNotification(true);
+      setIsMinimized(false);
+      return;
+    }
+
     // Don't run in development or if already notified
     if (initialVersion === "development" || initialVersion === "dev") return;
 
