@@ -53,6 +53,7 @@ loadEnvFiles([".env.local", ".env", "apps/web/.env.local", "apps/web/.env"]);
 
 const csvPath = process.argv[2] ?? DEFAULT_CSV;
 const runMode = process.argv.includes("--run");
+const rollbackFile = (() => { const i = process.argv.indexOf("--rollback"); return i !== -1 ? process.argv[i + 1] : null; })();
 const adminEmail = process.env.IMPORT_ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -60,11 +61,63 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !serviceRoleKey) {
   fatal("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
 }
-if (!existsSync(csvPath)) {
+if (!rollbackFile && !existsSync(csvPath)) {
   fatal(`CSV not found: ${csvPath}`);
 }
 
 const sb = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
+
+// ── Rollback mode ────────────────────────────────────────────────────────────
+if (rollbackFile) {
+  if (!existsSync(rollbackFile)) fatal(`Rollback file not found: ${rollbackFile}`);
+  const snap = JSON.parse(readFileSync(rollbackFile, "utf8"));
+  console.log(`\n=== Rollback from ${rollbackFile} ===`);
+  console.log(`Snapshot taken : ${snap.snapshotAt}`);
+  console.log(`New courses    : ${snap.newCourseIds.length} (will be deleted)`);
+  console.log(`Updated courses: ${snap.updatedCourses.length} (will be restored)\n`);
+
+  for (const c of snap.updatedCourses) {
+    const { error } = await sb.from("courses").update({
+      source_course_id: c.source_course_id,
+      target_course_id: c.target_course_id,
+      term: c.term,
+      status: c.status,
+    }).eq("id", c.id);
+    if (error) console.error(`  WARN restore course ${c.id}: ${error.message}`);
+    else console.log(`  restored course ${c.id} (${c.title})`);
+  }
+
+  for (const rr of snap.reviewResponses) {
+    if (rr._existed) {
+      const { error } = await sb.from("review_responses").update({
+        data: rr.data, status: rr.status,
+      }).eq("id", rr.id);
+      if (error) console.error(`  WARN restore response ${rr.id}: ${error.message}`);
+    } else {
+      const { error } = await sb.from("review_responses").delete().eq("id", rr.id);
+      if (error) console.error(`  WARN delete response ${rr.id}: ${error.message}`);
+    }
+  }
+
+  for (const a of snap.assignments) {
+    if (!a._existed) {
+      const { error } = await sb.from("course_assignments").delete()
+        .eq("course_id", a.course_id).eq("profile_id", a.profile_id).eq("role", a.role);
+      if (error) console.error(`  WARN delete assignment ${a.course_id}/${a.role}: ${error.message}`);
+    }
+  }
+
+  if (snap.newCourseIds.length > 0) {
+    const { error } = await sb.from("courses").delete().in("id", snap.newCourseIds);
+    if (error) console.error(`  WARN delete new courses: ${error.message}`);
+    else console.log(`  deleted ${snap.newCourseIds.length} new courses`);
+  }
+
+  console.log("\nRollback complete.");
+  process.exit(0);
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 const startedAt = new Date().toISOString();
 console.log(`\n=== TA Migration Importer ===`);
 console.log(`Mode : ${runMode ? "LIVE RUN" : "DRY-RUN"}`);
@@ -127,6 +180,40 @@ const dbCourses = await loadCourses(sb);
 const titleToCourse = new Map(dbCourses.map((c) => [norm(c.title), c]));
 
 if (runMode) {
+  // ── Capture rollback snapshot before any writes ──────────────────────────
+  const matchedCourses = rows
+    .map((r) => titleToCourse.get(norm(r.courseRef)))
+    .filter(Boolean);
+  const matchedIds = matchedCourses.map((c) => c.id);
+
+  const { data: fullCourses } = matchedIds.length > 0
+    ? await sb.from("courses").select("id,title,source_course_id,target_course_id,term,status").in("id", matchedIds)
+    : { data: [] };
+
+  const { data: existingAssignments } = matchedIds.length > 0
+    ? await sb.from("course_assignments").select("id,course_id,profile_id,role").in("course_id", matchedIds)
+    : { data: [] };
+
+  const { data: existingResponses } = matchedIds.length > 0
+    ? await sb.from("review_responses").select("id,course_id,section_id,user_id,data,status").in("course_id", matchedIds)
+    : { data: [] };
+
+  const snapshotTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const snapshotPath = `${REPORT_DIR}/rollback-${snapshotTimestamp}.json`;
+  const snapshot = {
+    snapshotAt: new Date().toISOString(),
+    csvPath,
+    newCourseIds: [],  // filled in during run as new courses are created
+    updatedCourses: fullCourses ?? [],
+    assignments: (existingAssignments ?? []).map((a) => ({ ...a, _existed: true })),
+    reviewResponses: (existingResponses ?? []).map((r) => ({ ...r, _existed: true })),
+  };
+  mkdirSync(REPORT_DIR, { recursive: true });
+  writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
+  console.log(`\nRollback snapshot saved → ${snapshotPath}`);
+  console.log(`To undo this run:  node scripts/import-ta-form-migration.mjs --rollback ${snapshotPath}\n`);
+  // ─────────────────────────────────────────────────────────────────────────
+
   for (const row of rows) {
     try {
       let course = titleToCourse.get(norm(row.courseRef));
@@ -146,6 +233,7 @@ if (runMode) {
         if (error) throw new Error(`course insert: ${error.message}`);
         course = data;
         titleToCourse.set(norm(row.courseRef), course);
+        snapshot.newCourseIds.push(course.id);
         runResult.createdNew++;
       } else {
         const { error } = await sb
@@ -259,6 +347,11 @@ const report = {
   })),
 };
 
+if (runMode && typeof snapshot !== "undefined") {
+  writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
+  console.log(`\nRollback snapshot updated → ${snapshotPath}`);
+  console.log(`To undo: node scripts/import-ta-form-migration.mjs --rollback ${snapshotPath}`);
+}
 writeRunReports(report);
 console.log("\nRun summary:");
 console.log(JSON.stringify(report.summary, null, 2));
