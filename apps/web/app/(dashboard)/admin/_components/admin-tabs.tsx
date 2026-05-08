@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 type Props = {
+  overviewPanel: React.ReactNode
   coursesPanel: React.ReactNode
   assignPanel: React.ReactNode
   instructorPanel: React.ReactNode
@@ -15,6 +16,7 @@ type Props = {
 }
 
 export function AdminTabs({
+  overviewPanel,
   coursesPanel,
   assignPanel,
   instructorPanel,
@@ -24,11 +26,12 @@ export function AdminTabs({
   unassignedCount,
   openEscalationsCount,
 }: Props) {
-  const [tab, setTab] = useState("courses")
+  const [tab, setTab] = useState("overview")
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
       <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="courses">All Courses</TabsTrigger>
         <TabsTrigger value="assign">
           Assign TA
@@ -50,6 +53,7 @@ export function AdminTabs({
         <TabsTrigger value="completed">Provision</TabsTrigger>
       </TabsList>
 
+      <TabsContent value="overview">{overviewPanel}</TabsContent>
       <TabsContent value="courses">{coursesPanel}</TabsContent>
       <TabsContent value="assign" className="space-y-6 outline-none">
         {assignPanel}

@@ -3,7 +3,7 @@ import "server-only"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { fetchReviewProgressForCourses } from "@/lib/courses/service"
 import { getCourseRepository, getReviewRepository } from "@/lib/repositories"
-import type { AdminCourseRow, PaginatedResult } from "@/lib/repositories/contracts"
+import type { AdminCourseRow, PaginatedResult, StatusCount, TAWorkload } from "@/lib/repositories/contracts"
 import { getReviewResponses, type ReviewResponse } from "@/lib/services/review"
 export type { AdminCourseRow } from "@/lib/repositories/contracts"
 export type AdminCoursesPage = PaginatedResult<AdminCourseRow>
@@ -12,6 +12,11 @@ export type AdminCourseDetail = {
   course: AdminCourseRow
   responses: ReviewResponse[]
   sectionKeyById: Record<string, string>
+}
+
+export type AdminOverviewData = {
+  statusCounts: StatusCount[]
+  taWorkload: TAWorkload[]
 }
 
 export type AdminCoursesPageParams = {
@@ -27,6 +32,19 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
   const rows = await getCourseRepository().listAdminCourses()
   const progressMap = await fetchReviewProgressForCourses(rows.map((row) => row.id))
   return rows.map((row) => ({ ...row, reviewProgress: progressMap.get(row.id) }))
+}
+
+export async function getAdminOverviewData(): Promise<AdminOverviewData> {
+  const repository = getCourseRepository()
+  const [statusCounts, taWorkload] = await Promise.all([
+    repository.listStatusCounts(),
+    repository.listTAWorkload(),
+  ])
+
+  return {
+    statusCounts,
+    taWorkload,
+  }
 }
 
 export async function getAdminCoursesPage(
