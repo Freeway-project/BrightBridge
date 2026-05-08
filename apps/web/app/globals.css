@@ -159,48 +159,48 @@ a {
 }
 
 @layer base {
-  html[data-density="compact"] [data-slot="card"] {
+  [data-app-content][data-app-density="compact"] [data-slot="card"] {
     gap: 0.75rem;
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
   }
-  html[data-density="compact"] [data-slot="card-header"] {
+  [data-app-content][data-app-density="compact"] [data-slot="card-header"] {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
-  html[data-density="compact"] [data-slot="card-content"] {
+  [data-app-content][data-app-density="compact"] [data-slot="card-content"] {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
-  html[data-density="compact"] [data-slot="table-head"] {
+  [data-app-content][data-app-density="compact"] [data-slot="table-head"] {
     height: 2rem;
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
   }
-  html[data-density="compact"] [data-slot="table-cell"] {
+  [data-app-content][data-app-density="compact"] [data-slot="table-cell"] {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
   }
 
-  html[data-density="comfy"] [data-slot="card"] {
+  [data-app-content][data-app-density="comfy"] [data-slot="card"] {
     gap: 1.5rem;
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
   }
-  html[data-density="comfy"] [data-slot="card-header"] {
+  [data-app-content][data-app-density="comfy"] [data-slot="card-header"] {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
-  html[data-density="comfy"] [data-slot="card-content"] {
+  [data-app-content][data-app-density="comfy"] [data-slot="card-content"] {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
-  html[data-density="comfy"] [data-slot="table-head"] {
+  [data-app-content][data-app-density="comfy"] [data-slot="table-head"] {
     height: 2.75rem;
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
   }
-  html[data-density="comfy"] [data-slot="table-cell"] {
+  [data-app-content][data-app-density="comfy"] [data-slot="table-cell"] {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
   }

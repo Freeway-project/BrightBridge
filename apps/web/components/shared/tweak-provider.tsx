@@ -59,8 +59,6 @@ export function TweakProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement
     root.style.setProperty("--base-font-size", FONT_SIZE_MAP[settings.fontSize])
     root.style.setProperty("--card-spacing", DENSITY_MAP[settings.density])
-    root.style.fontSize = FONT_SIZE_MAP[settings.fontSize]
-    root.setAttribute("data-density", settings.density)
   }, [settings])
 
   return (

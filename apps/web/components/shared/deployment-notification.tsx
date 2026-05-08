@@ -13,9 +13,9 @@ interface DeploymentNotificationProps {
 }
 
 const UPDATE_SUMMARY = [
-  "Your recent edits are kept more reliably while you work.",
-  "Saving and moving to the next step is now clearer and more predictable.",
-  "Update messages are easier to access from the app sidebar.",
+  "Your draft progress is now safer while you move between pages and tabs.",
+  "Display settings now apply across the main workspace while keeping the left sidebar stable.",
+  "You can check version status and open update notices anytime from the sidebar tab.",
 ];
 
 export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotificationProps) {
