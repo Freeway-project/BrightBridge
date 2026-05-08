@@ -31,6 +31,7 @@ export type UserRow = {
 
 export type SuperAdminData = {
   users: UserRow[]
+  totalCourses: number
   statusCounts: StatusCount[]
   stuckCourses: StuckCourse[]
   taWorkload: TAWorkload[]
@@ -46,15 +47,17 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
   const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
 
   const [
-    usersPage, 
-    statusCounts, 
-    stuckCourses, 
-    taWorkload, 
+    usersPage,
+    totalCourses,
+    statusCounts,
+    stuckCourses,
+    taWorkload,
     auditEvents,
     units,
     members
   ] = await Promise.all([
     profileRepository.listUsers(1, 5000), // Get all users for organization dropdowns
+    courseRepository.countCourses(),
     courseRepository.listStatusCounts(),
     courseRepository.listStuckCourses(cutoff),
     courseRepository.listTAWorkload(),
@@ -71,6 +74,7 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
       role: user.role,
       created_at: user.createdAt,
     })),
+    totalCourses,
     statusCounts,
     stuckCourses,
     taWorkload,

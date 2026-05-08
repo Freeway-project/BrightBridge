@@ -15,6 +15,7 @@ export type AdminCourseDetail = {
 }
 
 export type AdminOverviewData = {
+  totalCourses: number
   statusCounts: StatusCount[]
   taWorkload: TAWorkload[]
 }
@@ -36,12 +37,14 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
 
 export async function getAdminOverviewData(): Promise<AdminOverviewData> {
   const repository = getCourseRepository()
-  const [statusCounts, taWorkload] = await Promise.all([
+  const [totalCourses, statusCounts, taWorkload] = await Promise.all([
+    repository.countCourses(),
     repository.listStatusCounts(),
     repository.listTAWorkload(),
   ])
 
   return {
+    totalCourses,
     statusCounts,
     taWorkload,
   }

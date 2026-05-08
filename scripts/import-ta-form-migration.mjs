@@ -16,6 +16,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import process from "node:process";
 import { createClient } from "@supabase/supabase-js";
 
@@ -180,6 +181,29 @@ const dbCourses = await loadCourses(sb);
 const titleToCourse = new Map(dbCourses.map((c) => [norm(c.title), c]));
 
 if (runMode) {
+  // ── pg_dump backup before any writes ────────────────────────────────────
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) {
+    console.warn("⚠  DATABASE_URL not set — skipping pg_dump backup. Set it to enable automatic DB backup.");
+  } else {
+    mkdirSync(REPORT_DIR, { recursive: true });
+    const dumpTs = new Date().toISOString().replace(/[:.]/g, "-");
+    const dumpPath = `${REPORT_DIR}/pg-backup-${dumpTs}.sql`;
+    const tables = ["courses", "course_assignments", "review_responses", "course_status_events"];
+    const tableArgs = tables.map((t) => `--table=${t}`).join(" ");
+    console.log(`\nBacking up DB → ${dumpPath} ...`);
+    try {
+      execSync(`pg_dump "${dbUrl}" --no-owner --no-acl ${tableArgs} -f "${dumpPath}"`, { stdio: "inherit" });
+      console.log(`DB backup saved → ${dumpPath}`);
+      console.log(`To restore: psql "${dbUrl}" < ${dumpPath}\n`);
+    } catch (e) {
+      console.error(`pg_dump failed: ${e.message}`);
+      console.error("Aborting — fix DATABASE_URL or pg_dump version mismatch before running live.");
+      process.exit(1);
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   // ── Capture rollback snapshot before any writes ──────────────────────────
   const matchedCourses = rows
     .map((r) => titleToCourse.get(norm(r.courseRef)))

@@ -280,6 +280,7 @@ export interface CourseRepository {
   ): Promise<PaginatedResult<AdminCourseRow>>;
   getAdminCourse(courseId: string): Promise<AdminCourseRow | null>;
   listSuperAdminCourses(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<SuperAdminCourseRow>>;
+  countCourses(): Promise<number>;
   listStatusCounts(): Promise<StatusCount[]>;
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;

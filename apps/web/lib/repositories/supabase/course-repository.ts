@@ -492,6 +492,13 @@ export function createSupabaseCourseRepository(): CourseRepository {
       };
     },
 
+    async countCourses() {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { count, error } = await admin.from("courses").select("*", { count: "exact", head: true });
+      if (error) throw new Error(`countCourses: ${error.message}`);
+      return count ?? 0;
+    },
+
     async listStatusCounts() {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin.from("course_status_counts").select("status, count");

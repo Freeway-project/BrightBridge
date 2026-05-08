@@ -15,11 +15,9 @@ const STATUS_ORDER: CourseStatus[] = [
 ]
 
 export function AdminOverview({ data }: { data: AdminOverviewData }) {
-  const { statusCounts, taWorkload } = data
+  const { totalCourses, statusCounts, taWorkload } = data
 
   const countByStatus = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
-
-  const totalCourses = statusCounts.reduce((acc, curr) => acc + curr.count, 0)
   
   const inProgress = 
     (countByStatus["assigned_to_ta"] ?? 0) + 
