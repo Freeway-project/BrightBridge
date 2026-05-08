@@ -497,7 +497,10 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin.from("course_status_counts").select("status, count");
 
       if (error) {
-        throw new Error(`status counts: ${error.message}`);
+        if (!isMissingRelationError(error)) {
+          throw new Error(`status counts: ${error.message}`);
+        }
+        return fallbackStatusCounts();
       }
 
       return (data ?? []).map((row) => ({
@@ -536,7 +539,10 @@ export function createSupabaseCourseRepository(): CourseRepository {
         .order("full_name", { ascending: true });
 
       if (error) {
-        throw new Error(`ta workload: ${error.message}`);
+        if (!isMissingRelationError(error)) {
+          throw new Error(`ta workload: ${error.message}`);
+        }
+        return fallbackTAWorkload();
       }
 
       return (data ?? []).map((row) => ({
@@ -771,4 +777,78 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
         : null,
     } satisfies AdminCourseRow;
   });
+}
+
+function isMissingRelationError(error: { code?: string; message?: string } | null | undefined) {
+  if (!error) return false;
+  return error.code === "42P01" || error.code === "PGRST205";
+}
+
+async function fallbackStatusCounts(): Promise<StatusCount[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  const { data, error } = await admin.from("courses").select("status");
+
+  if (error) {
+    throw new Error(`status counts fallback: ${error.message}`);
+  }
+
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const key = String((row as { status: string }).status);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries()).map(([status, count]) => ({
+    status: toCourseStatus(status),
+    count,
+  }));
+}
+
+async function fallbackTAWorkload(): Promise<TAWorkload[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  const { data, error } = await admin
+    .from("course_assignments")
+    .select(`
+      profile_id, role,
+      courses!inner ( status ),
+      profiles!course_assignments_profile_id_fkey ( full_name, email )
+    `)
+    .eq("role", "staff");
+
+  if (error) {
+    throw new Error(`ta workload fallback: ${error.message}`);
+  }
+
+  const byProfile = new Map<string, TAWorkload>();
+  for (const row of data ?? []) {
+    const typed = row as {
+      profile_id: string;
+      courses?: { status: string } | Array<{ status: string }> | null;
+      profiles?:
+        | { full_name: string | null; email: string | null }
+        | Array<{ full_name: string | null; email: string | null }>
+        | null;
+    };
+    const profile = firstRelation(typed.profiles);
+    const course = firstRelation(typed.courses);
+    if (!byProfile.has(typed.profile_id)) {
+      byProfile.set(typed.profile_id, {
+        id: typed.profile_id,
+        full_name: profile?.full_name ?? null,
+        email: profile?.email ?? "",
+        active_courses: 0,
+        needs_fixes: 0,
+      });
+    }
+    const record = byProfile.get(typed.profile_id)!;
+    if (!course?.status) continue;
+    if (course.status !== "final_approved") {
+      record.active_courses += 1;
+    }
+    if (course.status === "admin_changes_requested" || course.status === "instructor_questions") {
+      record.needs_fixes += 1;
+    }
+  }
+
+  return Array.from(byProfile.values()).sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
 }
