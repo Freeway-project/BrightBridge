@@ -9,10 +9,11 @@ import { Info } from "lucide-react"
  * Changing the 'id' will cause the toast to show again for eligible roles.
  */
 const ANNOUNCEMENT_CONFIG = {
-  id: "v1_multi_assign_audit", // Change this ID to trigger a new announcement
+  id: "v2_ui_polish_dashboard_consolidation", // Change this ID to trigger a new announcement
   roles: ["admin_full", "super_admin"],
-  title: "New: Multi-Select Assignment & Audit Trail",
-  description: "You can now assign TAs to multiple courses at once and track all recent assignment activity at the bottom of the page.",
+  title: "Dashboard UI & Experience Update",
+  description:
+    "The dashboard has been polished for better clarity! We've improved tab visibility, refined spacing, and consolidated the sidebar — moving all management tools (Courses, Users, Org, Audit, Migration) into centralized tabs.",
 }
 
 interface AnnouncementToastProps {
@@ -31,10 +32,16 @@ export function FeatureAnnouncementToast({ role }: AnnouncementToastProps) {
       const timer = setTimeout(() => {
         toast.info(ANNOUNCEMENT_CONFIG.title, {
           description: ANNOUNCEMENT_CONFIG.description,
-          duration: Infinity, // Persistent until dismissed
+          duration: Infinity,
           position: "top-center",
+          closeButton: true,
           icon: <Info className="size-4 text-blue-500" />,
           onDismiss: () => localStorage.setItem(STORAGE_KEY, "true"),
+        })
+        toast.success("Dashboard updated", {
+          description: "You're on the latest version of CourseBridge.",
+          duration: 4000,
+          position: "bottom-right",
         })
       }, 1500)
 

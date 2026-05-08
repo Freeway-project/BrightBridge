@@ -17,6 +17,7 @@ import { getOpenEscalations } from "@/lib/services/escalations"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
 import { getLatestMigrationReport } from "@/lib/migration/report"
+import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -55,6 +56,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
 
   return (
     <>
+      <FeatureAnnouncementToast role={context.profile.role} />
       <Topbar title="Super Admin Dashboard" subtitle="System-wide management and monitoring" />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background">
         <AdminRefreshWrapper title="Super Admin Dashboard">
