@@ -5,6 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --base-font-size: 16px;
+  --card-spacing: 1rem;
   --muted: oklch(0.22 0.035 260);
   --panel: oklch(0.18 0.04 260);
   --border: oklch(0.31 0.05 260);
@@ -149,8 +151,57 @@ a {
   }
   body {
     @apply bg-background text-foreground;
+    font-size: var(--base-font-size);
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer base {
+  html[data-density="compact"] [data-slot="card"] {
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  html[data-density="compact"] [data-slot="card-header"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  html[data-density="compact"] [data-slot="card-content"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  html[data-density="compact"] [data-slot="table-head"] {
+    height: 2rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  html[data-density="compact"] [data-slot="table-cell"] {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  html[data-density="comfy"] [data-slot="card"] {
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  html[data-density="comfy"] [data-slot="card-header"] {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  html[data-density="comfy"] [data-slot="card-content"] {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  html[data-density="comfy"] [data-slot="table-head"] {
+    height: 2.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  html[data-density="comfy"] [data-slot="table-cell"] {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
   }
 }
