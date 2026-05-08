@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const context = await getAuthContext()
+  const currentVersion = process.env.VERCEL_GIT_COMMIT_SHA || "development"
 
   if (context.kind === "anonymous") {
     redirect("/auth/login")
@@ -25,7 +26,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <NotificationProvider userId={context.userId} role={role}>
         <SidebarProvider>
           <div className="flex h-screen w-full overflow-hidden bg-background">
-            <AppSidebar role={role} userName={userName} />
+            <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
             <div className="flex flex-1 flex-col overflow-hidden min-w-0">
               {children}
             </div>

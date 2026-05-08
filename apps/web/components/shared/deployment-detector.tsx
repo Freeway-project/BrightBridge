@@ -88,11 +88,17 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     };
 
     window.addEventListener("error", handleChunkError);
+    const openUpdatePanel = () => {
+      setIsMinimized(false);
+      setShowNotification(true);
+    };
+    window.addEventListener("coursebridge:open-update-notice", openUpdatePanel);
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(interval);
       window.removeEventListener("error", handleChunkError);
+      window.removeEventListener("coursebridge:open-update-notice", openUpdatePanel);
     };
   }, [initialVersion]);
 
