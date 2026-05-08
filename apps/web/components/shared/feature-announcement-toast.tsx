@@ -9,11 +9,11 @@ import { Info } from "lucide-react"
  * Changing the 'id' will cause the toast to show again for eligible roles.
  */
 const ANNOUNCEMENT_CONFIG = {
-  id: "v2_ui_polish_dashboard_consolidation", // Change this ID to trigger a new announcement
+  id: "v3_migration_dashboard_release_notes", // Change this ID to trigger a new announcement
   roles: ["admin_full", "super_admin"],
-  title: "Dashboard UI & Experience Update",
+  title: "Migration + Dashboard Update",
   description:
-    "The dashboard has been polished for better clarity! We've improved tab visibility, refined spacing, and consolidated the sidebar — moving all management tools (Courses, Users, Org, Audit, Migration) into centralized tabs.",
+    "What’s now live: (1) Admin Overview with 5 KPI cards + status breakdown + staff workload table, (2) Migration panel/tab for run summary and problematic rows, (3) dashboard tab/spacing polish, (4) upgraded release notifications (persistent info toast + quick success booper). Data work included: TA CSV importer run, 95 rows processed, 285 review responses upserted, 166 status events inserted, URL/term/code normalization, and run artifacts in docs/migration-runs. Next: move Escalations + Migration from tabs to dedicated sidebar items for admin and super-admin.",
 }
 
 interface AnnouncementToastProps {
@@ -39,7 +39,7 @@ export function FeatureAnnouncementToast({ role }: AnnouncementToastProps) {
           onDismiss: () => localStorage.setItem(STORAGE_KEY, "true"),
         })
         toast.success("Dashboard updated", {
-          description: "You're on the latest version of CourseBridge.",
+          description: "Open Migration to see full run details, stats, and problematic rows.",
           duration: 4000,
           position: "bottom-right",
         })
