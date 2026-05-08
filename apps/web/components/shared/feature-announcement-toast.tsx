@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { toast } from "sonner"
 import { Info } from "lucide-react"
+import { playUpgradeConfetti } from "@/components/shared/upgrade-confetti"
 
 /**
  * QUICK CONFIG: Update this object whenever you release a new feature!
@@ -43,6 +44,7 @@ export function FeatureAnnouncementToast({ role }: AnnouncementToastProps) {
           duration: 4000,
           position: "bottom-right",
         })
+        playUpgradeConfetti({ durationMs: 2200 })
       }, 1500)
 
       return () => clearTimeout(timer)
