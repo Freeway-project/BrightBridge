@@ -25,7 +25,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <TweakProvider>
       <NotificationProvider userId={context.userId} role={role}>
-        <SidebarProvider>
+        <SidebarProvider defaultOpen={false}>
           <div className="flex h-screen w-full overflow-hidden bg-background">
             <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
             <DashboardContentShell>
