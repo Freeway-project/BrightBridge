@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+import { requireProfile } from '@/lib/auth/context'
 import { createClient } from '@supabase/supabase-js'
 import { CourseIssue, IssueComment, CreateIssueInput, AddCommentInput, IssueStatus } from './types'
 
@@ -10,8 +12,7 @@ export async function createIssueAction(
   phase: 'migration' | 'staging' | 'provision',
   input: CreateIssueInput
 ): Promise<CourseIssue> {
-  const { data: session } = await supabase.auth.getSession()
-  if (!session?.user?.id) throw new Error('Unauthorized')
+  const ctx = await requireProfile()
 
   const { data, error } = await supabase
     .from('course_issues')
@@ -25,7 +26,7 @@ export async function createIssueAction(
       location: input.location || null,
       direct_link: input.direct_link || null,
       owner_id: input.owner_id || null,
-      created_by: session.user.id,
+      created_by: ctx.userId,
     })
     .select('*')
     .single()
@@ -36,28 +37,28 @@ export async function createIssueAction(
   const { data: profile } = await supabase
     .from('profiles')
     .select('full_name')
-    .eq('id', session.user.id)
+    .eq('id', ctx.userId)
     .single()
 
   await supabase.from('course_issue_comments').insert({
     issue_id: data.id,
-    author_id: session.user.id,
+    author_id: ctx.userId,
     body: `Issue opened by ${profile?.full_name || 'User'}`,
     is_system_message: true,
   })
 
+  revalidatePath(`/courses/${courseId}/issue-log`)
   return data as CourseIssue
 }
 
 export async function updateIssueStatusAction(issueId: string, newStatus: IssueStatus): Promise<CourseIssue> {
-  const { data: session } = await supabase.auth.getSession()
-  if (!session?.user?.id) throw new Error('Unauthorized')
+  const ctx = await requireProfile()
 
   const { data, error } = await supabase
     .from('course_issues')
     .update({
       status: newStatus,
-      resolved_by: newStatus === 'resolved' ? session.user.id : null,
+      resolved_by: newStatus === 'resolved' ? ctx.userId : null,
       resolved_at: newStatus === 'resolved' ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     })
@@ -72,12 +73,12 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
   const { data: profile } = await supabase
     .from('profiles')
     .select('full_name')
-    .eq('id', session.user.id)
+    .eq('id', ctx.userId)
     .single()
 
   await supabase.from('course_issue_comments').insert({
     issue_id: issueId,
-    author_id: session.user.id,
+    author_id: ctx.userId,
     body: `Status changed to ${statusLabel} by ${profile?.full_name || 'User'}`,
     is_system_message: true,
   })
@@ -86,14 +87,13 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
 }
 
 export async function addCommentAction(issueId: string, input: AddCommentInput): Promise<IssueComment> {
-  const { data: session } = await supabase.auth.getSession()
-  if (!session?.user?.id) throw new Error('Unauthorized')
+  const ctx = await requireProfile()
 
   const { data: comment, error: commentError } = await supabase
     .from('course_issue_comments')
     .insert({
       issue_id: issueId,
-      author_id: session.user.id,
+      author_id: ctx.userId,
       body: input.body,
       is_system_message: false,
     })

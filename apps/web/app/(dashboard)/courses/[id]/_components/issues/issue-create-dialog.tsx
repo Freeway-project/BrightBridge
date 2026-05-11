@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { IssuePhase, IssueType, IssueSeverity } from '@/lib/issues/types'
 import { createIssueAction } from '@/lib/issues/actions'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import {
   Select,
   SelectContent,
@@ -20,7 +20,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 
 interface IssueCreateDialogProps {
@@ -89,20 +88,19 @@ export function IssueCreateDialog({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       {children && <div onClick={() => handleOpenChange(true)}>{children}</div>}
 
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create Issue</DialogTitle>
-          <DialogDescription>Add a new issue to this {phase} phase.</DialogDescription>
-        </DialogHeader>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Create Issue</SheetTitle>
+          <SheetDescription>Add a new issue to this {phase} phase.</SheetDescription>
+        </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div>
-            <Label htmlFor="title">Title *</Label>
+            <label className="block text-sm font-medium mb-2">Title *</label>
             <Input
-              id="title"
               placeholder="Issue title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -112,9 +110,9 @@ export function IssueCreateDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="type">Type</Label>
+              <label className="block text-sm font-medium mb-2">Type</label>
               <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v as IssueType })}>
-                <SelectTrigger id="type">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -127,12 +125,12 @@ export function IssueCreateDialog({
             </div>
 
             <div>
-              <Label htmlFor="severity">Severity</Label>
+              <label className="block text-sm font-medium mb-2">Severity</label>
               <Select
                 value={formData.severity}
                 onValueChange={(v) => setFormData({ ...formData, severity: v as IssueSeverity })}
               >
-                <SelectTrigger id="severity">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -145,9 +143,8 @@ export function IssueCreateDialog({
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <label className="block text-sm font-medium mb-2">Description</label>
             <Textarea
-              id="description"
               placeholder="Describe the issue (optional)"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -156,9 +153,8 @@ export function IssueCreateDialog({
           </div>
 
           <div>
-            <Label htmlFor="location">Location in Course</Label>
+            <label className="block text-sm font-medium mb-2">Location in Course</label>
             <Input
-              id="location"
               placeholder="e.g., Week 3, Module 2 (optional)"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -166,9 +162,8 @@ export function IssueCreateDialog({
           </div>
 
           <div>
-            <Label htmlFor="direct_link">Direct Link</Label>
+            <label className="block text-sm font-medium mb-2">Direct Link</label>
             <Input
-              id="direct_link"
               placeholder="URL to issue (optional)"
               type="url"
               value={formData.direct_link}
@@ -186,7 +181,7 @@ export function IssueCreateDialog({
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

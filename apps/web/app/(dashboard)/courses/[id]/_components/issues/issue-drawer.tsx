@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { X, Loader2, MessageCircle } from 'lucide-react'
+import { X, Loader2, MessageCircle, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface IssueDrawerProps {
