@@ -19,45 +19,81 @@ export function CoursesView({ result, search }: { result: PaginatedResult<Course
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="shrink-0 text-sm text-muted-foreground">{total} courses</p>
+        <div className="flex items-center gap-2">
+          <p className="shrink-0 text-sm font-semibold text-foreground">{total} total courses</p>
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">SUMMARY</span>
+        </div>
         <form method="GET" action="/super-admin/courses" className="relative min-w-0 w-full sm:w-64 sm:shrink-0">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <Input
             name="search"
-            placeholder="Search by title, status…"
-            className="pl-8 h-8 text-sm"
+            placeholder="Search courses..."
+            className="pl-8 h-8 text-sm rounded-full"
             defaultValue={search}
           />
         </form>
       </div>
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent border-border">
-              <TableHead className="text-xs pl-4">Title</TableHead>
-              <TableHead className="text-xs w-[200px]">Status</TableHead>
-              <TableHead className="text-xs">Staff</TableHead>
-              <TableHead className="text-xs">Instructor</TableHead>
-              <TableHead className="text-xs w-[110px]">Last Updated</TableHead>
+            <TableRow className="hover:bg-transparent border-border bg-muted/30">
+              <TableHead className="text-[11px] uppercase tracking-wider font-bold pl-6">Course Information</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wider font-bold w-[180px]">Workflow Status</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wider font-bold">Assigned Staff</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wider font-bold hidden md:table-cell">Instructor</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wider font-bold w-[100px] text-right pr-6">Activity</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {courses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
-                  No courses found.
+                <TableCell colSpan={5} className="text-center py-12 text-sm text-muted-foreground italic">
+                  No courses match your criteria.
                 </TableCell>
               </TableRow>
             ) : (
-              courses.map((c) => (
-                <TableRow key={c.id} className="border-border">
-                  <TableCell className="max-w-[min(20rem,100%)] whitespace-normal break-words pl-4 text-sm font-medium">{c.title}</TableCell>
-                  <TableCell className="align-top"><StatusBadge status={c.status} /></TableCell>
-                  <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs sm:max-w-none">{c.ta?.name ?? c.ta?.email ?? "—"}</TableCell>
-                  <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs sm:max-w-none">{c.instructor?.name ?? c.instructor?.email ?? "—"}</TableCell>
-                  <TableCell className="whitespace-normal text-xs text-muted-foreground">{fmt(c.updated_at)}</TableCell>
-                </TableRow>
-              ))
+              courses.map((c, idx) => {
+                const isProblem = c.status === "admin_changes_requested" || c.status === "instructor_questions"
+                const borderClass = 
+                  c.status === "instructor_approved" || c.status === "final_approved" ? "border-l-[success]" :
+                  isProblem ? "border-l-[warning]" :
+                  c.status === "submitted_to_admin" || c.status === "sent_to_instructor" ? "border-l-[info]" :
+                  "border-l-muted-foreground/30"
+
+                // Alternating pattern 1-3 vs 4-6
+                const groupIdx = idx % 6
+                const bgClass = groupIdx < 3 ? "bg-card" : "bg-muted/5"
+
+                return (
+                  <TableRow 
+                    key={c.id} 
+                    className={cn(
+                      "group border-border transition-all hover:bg-white/5 border-l-4",
+                      borderClass,
+                      isProblem ? "bg-warning/5 hover:bg-warning/10" : bgClass
+                    )}
+                  >
+                    <TableCell className="max-w-[20rem] whitespace-normal break-words pl-5 py-4">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-bold text-foreground leading-tight group-hover:text-primary transition-colors">{c.title}</span>
+                        <span className="text-[11px] text-muted-foreground font-medium">ID: {c.id.slice(0, 8)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="align-middle">
+                      <StatusBadge status={c.status} />
+                    </TableCell>
+                    <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs font-medium">
+                      {c.ta?.name ?? c.ta?.email ?? <span className="text-muted-foreground italic text-[11px]">Unassigned</span>}
+                    </TableCell>
+                    <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs font-medium hidden md:table-cell">
+                      {c.instructor?.name ?? c.instructor?.email ?? "—"}
+                    </TableCell>
+                    <TableCell className="whitespace-normal text-[11px] text-right pr-6 font-semibold text-muted-foreground">
+                      {fmt(c.updated_at)}
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>

@@ -22,15 +22,31 @@ export function StatCard({ label, value, icon, className }: StatCardProps) {
   const Icon = icon ? ICONS[icon] : null
 
   return (
-    <Card className={cn("shadow-sm border-border/60", className)}>
+    <Card className={cn("shadow-sm border-border/60 overflow-hidden", className)}>
       <CardHeader className="pb-1 pt-4 px-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
-          {Icon && <Icon className="size-4 text-muted-foreground" />}
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+          {Icon && (
+            <div className="flex size-8 items-center justify-center rounded-full bg-primary/10">
+              <Icon className="size-4 text-primary" />
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="px-4 pb-4">
-        <p className="text-2xl font-bold text-foreground">{value}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-bold tracking-tight text-foreground">{value}</p>
+          {icon === "alert-triangle" && Number(value) > 0 && (
+            <span className="rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-bold text-warning">
+              ISSUES
+            </span>
+          )}
+          {icon === "check-square" && Number(value) > 0 && (
+            <span className="rounded-full bg-success/20 px-2 py-0.5 text-[10px] font-bold text-success">
+              DONE
+            </span>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
