@@ -38,10 +38,10 @@ export function DisplaySettings() {
               onValueChange={(v) => setSettings({ fontSize: v as "small" | "medium" | "large" })}
               className="w-full"
             >
-              <TabsList className="grid h-8 w-full grid-cols-3 border border-cyan-500/20 bg-slate-900 p-1">
-                <TabsTrigger value="small" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Small</TabsTrigger>
-                <TabsTrigger value="medium" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Med</TabsTrigger>
-                <TabsTrigger value="large" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Large</TabsTrigger>
+              <TabsList className="grid h-8 w-full grid-cols-3 border border-primary/20 bg-background/50 p-1">
+                <TabsTrigger value="small" className="text-[10px] py-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Small</TabsTrigger>
+                <TabsTrigger value="medium" className="text-[10px] py-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Med</TabsTrigger>
+                <TabsTrigger value="large" className="text-[10px] py-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Large</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -56,10 +56,10 @@ export function DisplaySettings() {
               onValueChange={(v) => setSettings({ density: v as "compact" | "regular" | "comfy" })}
               className="w-full"
             >
-              <TabsList className="grid h-8 w-full grid-cols-3 border border-cyan-500/20 bg-slate-900 p-1">
-                <TabsTrigger value="compact" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Small</TabsTrigger>
-                <TabsTrigger value="regular" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Med</TabsTrigger>
-                <TabsTrigger value="comfy" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Large</TabsTrigger>
+              <TabsList className="grid h-8 w-full grid-cols-3 border border-primary/20 bg-background/50 p-1">
+                <TabsTrigger value="compact" className="text-[10px] py-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Small</TabsTrigger>
+                <TabsTrigger value="regular" className="text-[10px] py-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Med</TabsTrigger>
+                <TabsTrigger value="comfy" className="text-[10px] py-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Large</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

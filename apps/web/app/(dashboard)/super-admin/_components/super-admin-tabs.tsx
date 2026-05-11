@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 
 type Props = {
   overviewPanel: React.ReactNode
@@ -32,25 +33,25 @@ export function SuperAdminTabs({
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
-      <div className="border-b border-border w-full">
-        <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
+      <div className="border-b border-border w-full bg-card/30 rounded-t-xl px-2">
+        <TabsList variant="line" className="h-12 w-full flex-wrap justify-start gap-x-2 sm:w-fit">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="assign">
+          <TabsTrigger value="assign" className="gap-2">
             Assign TA
             {unassignedCount > 0 && (
-              <span className="ml-1.5 rounded-full bg-yellow-500/20 px-1.5 py-0 text-[10px] font-semibold text-yellow-700 dark:text-yellow-300">
-                {unassignedCount.toLocaleString()}
-              </span>
+              <Badge variant="count" className="bg-warning text-warning-foreground font-bold">
+                {unassignedCount}
+              </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="escalations">
+          <TabsTrigger value="escalations" className="gap-2">
             Escalations
             {openEscalationsCount > 0 && (
-              <span className="ml-1.5 rounded-full bg-red-500/20 px-1.5 py-0 text-[10px] font-semibold text-red-700 dark:text-red-300">
+              <Badge variant="count" className="bg-destructive text-destructive-foreground animate-pulse font-bold">
                 {openEscalationsCount}
-              </span>
+              </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="migration">Migration</TabsTrigger>

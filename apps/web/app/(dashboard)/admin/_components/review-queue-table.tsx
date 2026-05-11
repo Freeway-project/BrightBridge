@@ -27,7 +27,7 @@ export function ReviewQueueTable({ courses }: Props) {
       <CardHeader>
         <CardTitle className="text-base">
           Submitted for Review
-          <span className="ml-2 text-sm font-normal text-muted-foreground">({courses.length})</span>
+          <span className="ml-2 text-sm font-normal text-foreground/70">({courses.length})</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -43,7 +43,7 @@ export function ReviewQueueTable({ courses }: Props) {
           <TableBody>
             {courses.length === 0 ? (
               <TableRow>
-                <TableCell className="py-8 text-center text-sm text-muted-foreground" colSpan={4}>
+                <TableCell className="py-8 text-center text-sm text-foreground/60" colSpan={4}>
                   No submissions waiting for review.
                 </TableCell>
               </TableRow>
@@ -87,18 +87,19 @@ function QueueRow({ course, onRowClick }: { course: AdminCourseRow; onRowClick: 
       <TableRow
         className="cursor-pointer"
         onClick={onRowClick}
+        status="info"
       >
-        <TableCell className="pl-4">
-          <p className="text-sm font-medium">{course.title}</p>
+        <TableCell className="pl-5 py-3">
+          <p className="text-sm font-bold">{course.title}</p>
           {course.sourceCourseId && (
-            <p className="text-xs text-muted-foreground">{course.sourceCourseId}</p>
+            <p className="text-[11px] font-bold text-foreground/50 uppercase tracking-widest">{course.sourceCourseId}</p>
           )}
         </TableCell>
         <TableCell>
           <p className="text-sm">{course.ta?.name ?? "—"}</p>
-          <p className="text-xs text-muted-foreground">{course.ta?.email}</p>
+          <p className="text-xs text-foreground/60">{course.ta?.email}</p>
         </TableCell>
-        <TableCell className="text-xs text-muted-foreground">
+        <TableCell className="text-xs text-foreground/60">
           {new Date(course.updatedAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
@@ -108,6 +109,7 @@ function QueueRow({ course, onRowClick }: { course: AdminCourseRow; onRowClick: 
           <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
             <Button
               size="sm"
+              variant="approve"
               disabled={isPending}
               onClick={handleApprove}
             >
@@ -116,7 +118,7 @@ function QueueRow({ course, onRowClick }: { course: AdminCourseRow; onRowClick: 
             </Button>
             <Button
               size="sm"
-              variant="outline"
+              variant="warning"
               disabled={isPending}
               onClick={handleRequestFixes}
             >

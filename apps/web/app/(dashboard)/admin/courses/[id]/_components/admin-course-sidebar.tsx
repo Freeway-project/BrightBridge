@@ -15,8 +15,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send, Building2, ChevronDown, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CourseConversation } from "@/app/(dashboard)/courses/[id]/_components/course-conversation"
 import type { CourseComment } from "@/lib/services/comments"
 import {
   Select,
@@ -189,7 +187,8 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
             {!fixesOpen ? (
               <div className="flex flex-col gap-2">
                 <Button
-                  className="w-full justify-start h-9"
+                  variant="approve"
+                  className="w-full justify-start h-9 font-bold"
                   disabled={isPending || course.status !== "submitted_to_admin"}
                   onClick={handleApprove}
                 >
@@ -197,8 +196,8 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
                   Approve Review
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full justify-start h-9 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  variant="warning"
+                  className="w-full justify-start h-9 font-bold"
                   disabled={isPending || course.status !== "submitted_to_admin"}
                   onClick={() => setFixesOpen(true)}
                 >
@@ -207,7 +206,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3 p-3 rounded-lg border border-orange-200 bg-orange-50/50">
+              <div className="space-y-3 p-3 rounded-xl border border-warning/20 bg-warning/5">
                 <Textarea
                   autoFocus
                   placeholder="What needs fixing?"
@@ -216,7 +215,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
                   onChange={(e) => setNote(e.target.value)}
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" variant="destructive" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={handleSendFixes}>
+                  <Button size="sm" variant="destructive" className="flex-1 h-8 text-[11px] font-bold" disabled={isPending} onClick={handleSendFixes}>
                     Send Fix Request
                   </Button>
                   <Button size="sm" variant="ghost" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={() => { setFixesOpen(false); setNote("") }}>
@@ -228,22 +227,6 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
           </section>
 
           <Separator className="shrink-0" />
-
-          {/* Internal Conversation */}
-          <section className="flex-1 min-h-[500px] flex flex-col gap-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
-              <MessageSquare className="size-3.5" />
-              Internal Discussion
-            </h3>
-            <div className="flex-1 min-h-0">
-              <CourseConversation
-                courseId={course.id}
-                currentUserId={currentUserId}
-                comments={comments}
-                escalations={escalations}
-              />
-            </div>
-          </section>
 
           {/* Escalation Threads (Optional detailed view) */}
           {openEscalations.length > 0 && (

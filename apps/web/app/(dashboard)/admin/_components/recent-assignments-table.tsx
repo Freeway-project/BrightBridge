@@ -45,8 +45,8 @@ export function RecentAssignmentsTable({ logs }: { logs: AssignmentLog[] }) {
             </TableRow>
           ) : (
             logs.map((log) => (
-              <TableRow key={log.id} className="border-border">
-                <TableCell className="pl-4 text-sm font-medium py-3">
+              <TableRow key={log.id} status="neutral" className="border-border">
+                <TableCell className="pl-5 text-sm font-bold py-3">
                   {log.courseTitle}
                 </TableCell>
                 <TableCell className="py-3">
@@ -58,7 +58,7 @@ export function RecentAssignmentsTable({ logs }: { logs: AssignmentLog[] }) {
                 <TableCell className="py-3">
                   <Badge variant="outline" className={cn(
                     "capitalize text-[10px] px-1.5 py-0",
-                    log.role === "instructor" ? "border-blue-500/30 bg-blue-500/5 text-blue-700 dark:text-blue-400" : "border-slate-500/30 bg-slate-500/5 text-slate-700 dark:text-slate-400"
+                    log.role === "instructor" ? "border-primary/40 bg-primary/10 text-primary" : "border-primary-depth bg-primary/5 text-muted-foreground"
                   )}>
                     {log.role}
                   </Badge>
