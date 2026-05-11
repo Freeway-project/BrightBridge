@@ -1,8 +1,10 @@
 import type { ReactNode } from "react"
+import { useState } from "react"
 import { Bell, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { ChatIconButton } from "@/components/chat/chat-icon-button"
 
 interface TopbarProps {
   title: string
@@ -12,8 +14,10 @@ interface TopbarProps {
 }
 
 export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
+  const [isChatOpen, setIsChatOpen] = useState(false)
+
   return (
-    <header className="flex h-12 items-center gap-2 border-b border-sidebar-border bg-card px-4">
+    <header className="flex h-12 items-center gap-2 border-b border-border bg-card/80 backdrop-blur-sm px-4 sticky top-0 z-20">
       <SidebarTrigger className="-ml-1 shrink-0 md:hidden" />
       <div className="flex items-center gap-4 flex-1 min-w-0">
         {backHref && (
@@ -35,6 +39,7 @@ export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
 
       <div className="flex items-center gap-2">
         {actions}
+        <ChatIconButton onClick={() => setIsChatOpen(true)} />
         <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="size-4" />
         </Button>
