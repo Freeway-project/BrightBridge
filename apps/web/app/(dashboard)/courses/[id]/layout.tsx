@@ -63,6 +63,8 @@ export default async function CourseWorkspaceLayout({
         courseId={id}
         courseTitle={course.title}
         courseStatus={course.status}
+        reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
+        instructorName={instructor?.fullName ?? instructor?.email ?? null}
       />
       <TweakableContent className="flex flex-1 flex-col overflow-hidden">
         {children}
@@ -70,9 +72,7 @@ export default async function CourseWorkspaceLayout({
       <InfoPanel
         courseId={id}
         courseStatus={course.status}
-        reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
         reviewerId={ctx.userId}
-        instructorName={instructor?.fullName ?? instructor?.email ?? null}
         progress={sectionMeta}
         lastSavedAt={lastSavedAt}
         escalations={escalations}

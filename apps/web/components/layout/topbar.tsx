@@ -3,15 +3,18 @@ import { Bell, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { StatusBadge } from "@/components/courses/status-badge"
+import type { CourseStatus } from "@coursebridge/workflow"
 
 interface TopbarProps {
   title: string
   subtitle?: string
   actions?: ReactNode
   backHref?: string
+  courseStatus?: CourseStatus
 }
 
-export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
+export function Topbar({ title, subtitle, actions, backHref, courseStatus }: TopbarProps) {
   return (
     <header className="relative flex h-12 items-center gap-2 border-b border-[--border-default] bg-[--surface-0] px-4 overflow-hidden">
       {/* Gradient Overlay */}
@@ -36,7 +39,14 @@ export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
         </div>
       </div>
 
+<<<<<<< ft-UI-UX
       <div className="flex items-center gap-2 relative z-10">
+=======
+      <div className="flex items-center gap-3">
+        {courseStatus && (
+          <StatusBadge status={courseStatus} className="text-[10px]" />
+        )}
+>>>>>>> main
         {actions}
         <Button variant="ghost" size="icon" aria-label="Notifications" className="hover:bg-[--surface-4]">
           <Bell className="size-4" />

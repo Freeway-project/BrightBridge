@@ -20,6 +20,8 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
+import { CopyButton } from "@/components/ui/copy-button"
+import { FormFieldWrapper } from "./form-field-wrapper"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -131,6 +133,8 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 
   const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
   const sectionText = sectionNumbers.join(", ")
+  const brightspaceUrl = useWatch({ control: form.control, name: "brightspace_url" })
+  const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
     <Card className="max-w-3xl">
@@ -223,16 +227,20 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-1.5 text-sm font-medium">
-              Brightspace URL
+            <FormFieldWrapper
+              label="Brightspace URL"
+              value={brightspaceUrl}
+              error={form.formState.errors.brightspace_url?.message}
+            >
               <Input placeholder="https://..." {...form.register("brightspace_url")} />
-              <FieldError message={form.formState.errors.brightspace_url?.message} />
-            </label>
-            <label className="grid gap-1.5 text-sm font-medium">
-              Moodle URL
+            </FormFieldWrapper>
+            <FormFieldWrapper
+              label="Moodle URL"
+              value={moodleUrl}
+              error={form.formState.errors.moodle_url?.message}
+            >
               <Input placeholder="https://..." {...form.register("moodle_url")} />
-              <FieldError message={form.formState.errors.moodle_url?.message} />
-            </label>
+            </FormFieldWrapper>
           </div>
 
           <label className="grid gap-1.5 text-sm font-medium">
@@ -256,7 +264,10 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <label className="grid gap-1.5 text-sm font-medium">
       {label}
-      <Input readOnly value={value} />
+      <div className="flex gap-2 items-center">
+        <Input readOnly value={value} className="flex-1" />
+        <CopyButton value={value} label={label} />
+      </div>
     </label>
   )
 }

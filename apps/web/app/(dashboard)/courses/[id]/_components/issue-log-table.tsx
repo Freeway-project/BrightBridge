@@ -77,6 +77,30 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
     localStorage.setItem(localDraftKey, JSON.stringify({ issues }))
   }, [issues, localDraftKey])
 
+  // Auto-save to database when issues change
+  useEffect(() => {
+    if (!hasLocalDraft) return
+    const timer = setTimeout(() => {
+      setSaveState("saving")
+      ;(async () => {
+        try {
+          const res = await saveDraft(courseId, "general_notes", { issues })
+          if (!res.ok) {
+            setSaveState("error")
+            return
+          }
+          localStorage.removeItem(localDraftKey)
+          setHasLocalDraft(false)
+          setSaveState("saved")
+        } catch (error) {
+          console.error("Auto-save failed:", error)
+          setSaveState("error")
+        }
+      })()
+    }, 1000) // Auto-save after 1 second of no changes
+    return () => clearTimeout(timer)
+  }, [issues, courseId, hasLocalDraft, localDraftKey])
+
   useEffect(() => {
     setUnsavedChanges(dirtySource, hasLocalDraft || saveState === "saving" || isPending)
     return () => clearUnsavedChanges(dirtySource)

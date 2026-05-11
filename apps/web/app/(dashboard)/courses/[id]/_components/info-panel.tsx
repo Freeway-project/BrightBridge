@@ -1,9 +1,8 @@
 "use client"
-import { CheckCircle2, Circle, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
+import { CheckCircle2, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { useState } from "react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
-import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
 import { CourseConversation } from "./course-conversation"
 import { Button } from "@/components/ui/button"
@@ -17,9 +16,7 @@ type SectionProgress = {
 type InfoPanelProps = {
   courseId: string
   courseStatus: CourseStatus
-  reviewerName: string
   reviewerId: string
-  instructorName: string | null
   progress: SectionProgress[]
   lastSavedAt: string | null
   escalations: EscalationWithMessages[]
@@ -29,9 +26,7 @@ type InfoPanelProps = {
 export function InfoPanel({
   courseId,
   courseStatus,
-  reviewerName,
   reviewerId,
-  instructorName,
   progress,
   lastSavedAt,
   escalations,
@@ -77,46 +72,6 @@ export function InfoPanel({
 
         <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-border">
           <div className="flex flex-col gap-8 pb-10">
-            <section className="space-y-3 pr-8">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                Course Status
-              </p>
-              <StatusBadge status={courseStatus} className="w-full justify-center py-1.5" />
-            </section>
-
-            <section className="space-y-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                Participants
-              </p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
-                    {reviewerName[0]?.toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-foreground leading-none">{reviewerName}</p>
-                    <p className="text-[11px] text-muted-foreground mt-1">Assigned TA</p>
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-border/50 space-y-3">
-                  <p className="text-[11px] text-muted-foreground">Admin: <span className="text-foreground/70 italic">Pending assignment</span></p>
-                  {instructorName ? (
-                    <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-secondary-foreground">
-                        {instructorName[0]?.toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-foreground leading-none">{instructorName}</p>
-                        <p className="text-[11px] text-muted-foreground mt-1">Instructor</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-muted-foreground">Instructor: <span className="text-foreground/70 italic">Pending selection</span></p>
-                  )}
-                </div>
-              </div>
-            </section>
-
             <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">

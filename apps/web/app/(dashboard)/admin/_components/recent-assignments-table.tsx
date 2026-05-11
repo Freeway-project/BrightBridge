@@ -57,8 +57,8 @@ export function RecentAssignmentsTable({ logs }: { logs: AssignmentLog[] }) {
                 </TableCell>
                 <TableCell className="py-3">
                   <Badge variant="outline" className={cn(
-                    "capitalize text-[10px] px-1.5 py-0",
-                    log.role === "instructor" ? "border-blue-500/30 bg-blue-500/5 text-blue-700 dark:text-blue-400" : "border-slate-500/30 bg-slate-500/5 text-slate-700 dark:text-slate-400"
+                    "capitalize text-[10px] px-2 py-0.5 font-medium",
+                    log.role === "instructor" ? "border-blue-500/50 bg-blue-500/15 text-blue-900 dark:bg-blue-900/40 dark:text-blue-100" : "border-slate-500/50 bg-slate-500/15 text-slate-900 dark:bg-slate-800/40 dark:text-slate-100"
                   )}>
                     {log.role}
                   </Badge>

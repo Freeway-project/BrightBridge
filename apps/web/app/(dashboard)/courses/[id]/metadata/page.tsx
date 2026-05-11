@@ -33,7 +33,7 @@ export default async function MetadataPage({ params }: Props) {
 
   return (
     <>
-      <Topbar title="Course Workspace" subtitle="Step 1 of 5 — Metadata" />
+      <Topbar title="Course Workspace" subtitle="Step 1 of 5 — Metadata" courseStatus={course.status} />
       <main className="flex-1 overflow-y-auto p-6">
         <CourseWorkspaceRefreshWrapper
           courseId={id}

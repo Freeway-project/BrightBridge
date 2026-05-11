@@ -6,14 +6,23 @@ import type { CourseStatus } from "@coursebridge/workflow"
 import { submitReview } from "@/lib/workspace/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ReviewSummary } from "./review-summary"
 
 type SubmitPanelProps = {
   courseId: string
   courseStatus: CourseStatus
   sections: { key: string; label: string; complete: boolean; required: boolean }[]
+  reviewData?: {
+    course: { id: string; code: string; title: string; term?: string }
+    metadata?: Record<string, unknown>
+    reviewMatrix?: { pass: number; fixNeeded: number; missing: number; notApplicable: number }
+    syllabusgradebook?: Record<string, unknown>
+    issues?: Array<{ id: string; type: string; severity: "minor" | "major" | "critical"; status: "open" | "fixed" | "escalated" | "resolved" }>
+    notes?: string
+  }
 }
 
-export function SubmitPanel({ courseId, courseStatus, sections }: SubmitPanelProps) {
+export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: SubmitPanelProps) {
   const [isPending, startTransition] = useTransition()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const blockers = sections.filter((section) => section.required && !section.complete)
@@ -37,11 +46,21 @@ export function SubmitPanel({ courseId, courseStatus, sections }: SubmitPanelPro
   }
 
   return (
-    <Card className="max-w-2xl">
-      <CardHeader>
-        <CardTitle className="text-base">Submit to Admin</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <div className="space-y-6">
+      {/* Review Summary - Always shown first */}
+      {reviewData && (
+        <div>
+          <h2 className="mb-4 text-lg font-semibold">Review Summary</h2>
+          <ReviewSummary {...reviewData} />
+        </div>
+      )}
+
+      {/* Submit Card - After review */}
+      <Card className="max-w-2xl border-primary/20">
+        <CardHeader>
+          <CardTitle className="text-base">Ready to Submit?</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
         <div className="space-y-3">
           {sections.map((section) => (
             <div className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2" key={section.key}>
@@ -77,6 +96,7 @@ export function SubmitPanel({ courseId, courseStatus, sections }: SubmitPanelPro
             disabled={disabled}
             onClick={handleSubmit}
             type="button"
+            size="lg"
           >
             <Send className="size-4" />
             {isPending ? "Submitting..." : "Submit to Admin"}
@@ -84,5 +104,6 @@ export function SubmitPanel({ courseId, courseStatus, sections }: SubmitPanelPro
         </div>
       </CardContent>
     </Card>
+    </div>
   )
 }
