@@ -82,7 +82,7 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
     if (!hasLocalDraft) return
     const timer = setTimeout(() => {
       setSaveState("saving")
-      startTransition(async () => {
+      ;(async () => {
         try {
           const res = await saveDraft(courseId, "general_notes", { issues })
           if (!res.ok) {
@@ -92,10 +92,11 @@ export function IssueLogTable({ courseId, defaultIssues }: IssueLogTableProps) {
           localStorage.removeItem(localDraftKey)
           setHasLocalDraft(false)
           setSaveState("saved")
-        } catch {
+        } catch (error) {
+          console.error("Auto-save failed:", error)
           setSaveState("error")
         }
-      })
+      })()
     }, 1000) // Auto-save after 1 second of no changes
     return () => clearTimeout(timer)
   }, [issues, courseId, hasLocalDraft, localDraftKey])
