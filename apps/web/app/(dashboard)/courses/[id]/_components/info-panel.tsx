@@ -13,7 +13,6 @@ type SectionProgress = {
 }
 
 type InfoPanelProps = {
-  courseId: string
   courseStatus: CourseStatus
   reviewerName: string
   instructorName: string | null
