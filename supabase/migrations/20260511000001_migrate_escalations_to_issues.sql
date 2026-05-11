@@ -1,5 +1,4 @@
 -- Migrate existing course_escalations → course_issues
-
 INSERT INTO public.course_issues (
   course_id, phase, type, severity, title, description,
   status, created_by, resolved_by, resolved_at,
@@ -31,171 +30,97 @@ SELECT
 FROM public.escalation_messages em
 JOIN public.course_issues ci ON ci.legacy_escalation_id = em.escalation_id;
 
--- RLS Policies for course_issues
+-- ============================================================================
+-- RLS POLICIES FOR COURSE_ISSUES
+-- ============================================================================
 
--- SELECT: Users assigned to course or admin
+-- SELECT: Assigned users + admins
 CREATE POLICY "course_issues_select" ON public.course_issues
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.course_assignments ca
-      WHERE ca.course_id = course_issues.course_id
-        AND ca.profile_id = auth.uid()
-    )
-    OR EXISTS (
-      SELECT 1 FROM public.profiles p
-      WHERE p.id = auth.uid()
-        AND p.role IN ('admin_full', 'super_admin')
-    )
+    auth.uid() IN (SELECT profile_id FROM public.course_assignments WHERE course_id = course_issues.course_id)
+    OR (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('admin_full', 'super_admin')
   );
 
--- INSERT: TA for migration, staging role for staging, admin for provision
+-- INSERT: TA for migration only, Admin/Super for staging/provision
 CREATE POLICY "course_issues_insert" ON public.course_issues
   FOR INSERT WITH CHECK (
-    (
-      phase = 'migration'
-      AND EXISTS (
-        SELECT 1 FROM public.course_assignments ca
-        JOIN public.profiles p ON p.id = auth.uid()
-        WHERE ca.course_id = course_issues.course_id
-          AND ca.profile_id = auth.uid()
-          AND p.role = 'standard_user'
-      )
-    )
-    OR (
-      phase IN ('staging', 'provision')
-      AND EXISTS (
-        SELECT 1 FROM public.profiles p
-        WHERE p.id = auth.uid()
-          AND p.role IN ('admin_full', 'super_admin')
-      )
-    )
+    (phase = 'migration' AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'standard_user')
+    OR (phase IN ('staging', 'provision') AND (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('admin_full', 'super_admin'))
   );
 
--- UPDATE status: Admin always, TA only for own issues in migration
+-- UPDATE: Status changes allowed for Admin/Super only
 CREATE POLICY "course_issues_update_status" ON public.course_issues
   FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles p
-      WHERE p.id = auth.uid()
-        AND p.role IN ('admin_full', 'super_admin')
-    )
-    OR (
-      phase = 'migration'
-      AND created_by = auth.uid()
-      AND EXISTS (
-        SELECT 1 FROM public.profiles p
-        WHERE p.id = auth.uid()
-          AND p.role = 'standard_user'
-      )
-    )
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('admin_full', 'super_admin')
   );
 
--- RLS Policies for course_issue_comments
+-- ============================================================================
+-- RLS POLICIES FOR COURSE_ISSUE_COMMENTS
+-- ============================================================================
 
--- SELECT: Same as course_issues (via issue)
+-- SELECT: Same access as issue (assigned users + admins)
 CREATE POLICY "course_issue_comments_select" ON public.course_issue_comments
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.course_issues ci
+    auth.uid() IN (
+      SELECT ca.profile_id
+      FROM public.course_assignments ca
+      JOIN public.course_issues ci ON ci.course_id = ca.course_id
       WHERE ci.id = course_issue_comments.issue_id
-        AND EXISTS (
-          SELECT 1 FROM public.course_assignments ca
-          WHERE ca.course_id = ci.course_id
-            AND ca.profile_id = auth.uid()
-        )
-        OR EXISTS (
-          SELECT 1 FROM public.profiles p
-          WHERE p.id = auth.uid()
-            AND p.role IN ('admin_full', 'super_admin')
-        )
     )
+    OR (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('admin_full', 'super_admin')
   );
 
--- INSERT: depends on phase and provision @mention logic
+-- INSERT: Phase-aware comment permissions
 CREATE POLICY "course_issue_comments_insert" ON public.course_issue_comments
   FOR INSERT WITH CHECK (
     author_id = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM public.course_issues ci
-      WHERE ci.id = course_issue_comments.issue_id
-    )
+    AND EXISTS (SELECT 1 FROM public.course_issues WHERE id = course_issue_comments.issue_id)
     AND (
-      -- Admin/super_admin can always comment
-      EXISTS (
-        SELECT 1 FROM public.profiles p
-        WHERE p.id = auth.uid()
-          AND p.role IN ('admin_full', 'super_admin')
-      )
-      -- TA in migration phase can comment
+      -- Admin/Super can always comment
+      (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('admin_full', 'super_admin')
+      -- TA can comment in migration phase
       OR (
-        EXISTS (
-          SELECT 1 FROM public.course_issues ci
-          WHERE ci.id = course_issue_comments.issue_id
-            AND ci.phase = 'migration'
-            AND ci.course_id IN (
-              SELECT course_id FROM public.course_assignments ca
-              WHERE ca.profile_id = auth.uid()
-            )
-        )
+        (SELECT phase FROM public.course_issues WHERE id = course_issue_comments.issue_id) = 'migration'
+        AND auth.uid() IN (SELECT profile_id FROM public.course_assignments WHERE course_id = (SELECT course_id FROM public.course_issues WHERE id = course_issue_comments.issue_id))
       )
-      -- Instructor can comment on any phase
-      OR EXISTS (
-        SELECT 1 FROM public.profiles p
-        WHERE p.id = auth.uid()
-          AND p.role = 'instructor'
-      )
-      -- TA in provision can comment only if mentioned in this issue
+      -- Instructor can comment in provision phase
       OR (
-        EXISTS (
-          SELECT 1 FROM public.course_issues ci
-          WHERE ci.id = course_issue_comments.issue_id
-            AND ci.phase = 'provision'
-            AND ci.course_id IN (
-              SELECT course_id FROM public.course_assignments ca
-              WHERE ca.profile_id = auth.uid()
-            )
-            AND EXISTS (
-              SELECT 1 FROM public.issue_comment_mentions icm
-              JOIN public.course_issue_comments cic ON cic.id = icm.comment_id
-              WHERE cic.issue_id = ci.id
-                AND icm.mentioned_profile_id = auth.uid()
-            )
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'instructor'
+        AND (SELECT phase FROM public.course_issues WHERE id = course_issue_comments.issue_id) = 'provision'
+      )
+      -- TA in provision can comment only if @mentioned elsewhere in this issue
+      OR (
+        (SELECT phase FROM public.course_issues WHERE id = course_issue_comments.issue_id) = 'provision'
+        AND auth.uid() IN (SELECT profile_id FROM public.course_assignments WHERE course_id = (SELECT course_id FROM public.course_issues WHERE id = course_issue_comments.issue_id))
+        AND auth.uid() IN (
+          SELECT DISTINCT icm.mentioned_profile_id
+          FROM public.issue_comment_mentions icm
+          JOIN public.course_issue_comments cic ON cic.id = icm.comment_id
+          WHERE cic.issue_id = course_issue_comments.issue_id
         )
       )
     )
   );
 
--- RLS Policies for issue_comment_mentions
+-- ============================================================================
+-- RLS POLICIES FOR ISSUE_COMMENT_MENTIONS
+-- ============================================================================
 
+-- SELECT: Same access as comment's issue
 CREATE POLICY "issue_comment_mentions_select" ON public.issue_comment_mentions
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.course_issue_comments cic
+    auth.uid() IN (
+      SELECT ca.profile_id
+      FROM public.course_assignments ca
+      JOIN public.course_issues ci ON ci.course_id = ca.course_id
+      JOIN public.course_issue_comments cic ON cic.issue_id = ci.id
       WHERE cic.id = issue_comment_mentions.comment_id
-        AND EXISTS (
-          SELECT 1 FROM public.course_issues ci
-          WHERE ci.id = cic.issue_id
-            AND (
-              EXISTS (
-                SELECT 1 FROM public.course_assignments ca
-                WHERE ca.course_id = ci.course_id
-                  AND ca.profile_id = auth.uid()
-              )
-              OR EXISTS (
-                SELECT 1 FROM public.profiles p
-                WHERE p.id = auth.uid()
-                  AND p.role IN ('admin_full', 'super_admin')
-              )
-            )
-        )
     )
+    OR (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('admin_full', 'super_admin')
   );
 
+-- INSERT: Only the comment author can add mentions
 CREATE POLICY "issue_comment_mentions_insert" ON public.issue_comment_mentions
   FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.course_issue_comments cic
-      WHERE cic.id = issue_comment_mentions.comment_id
-        AND cic.author_id = auth.uid()
-    )
+    (SELECT author_id FROM public.course_issue_comments WHERE id = issue_comment_mentions.comment_id) = auth.uid()
   );

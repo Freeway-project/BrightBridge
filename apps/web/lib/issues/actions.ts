@@ -12,107 +12,161 @@ export async function createIssueAction(
   phase: 'migration' | 'staging' | 'provision',
   input: CreateIssueInput
 ): Promise<CourseIssue> {
-  const ctx = await requireProfile()
+  try {
+    if (!courseId || !phase) throw new Error('Missing required fields: courseId or phase')
+    if (!input.title?.trim()) throw new Error('Issue title is required')
+    if (input.title.length > 500) throw new Error('Issue title must be 500 characters or less')
 
-  const { data, error } = await supabase
-    .from('course_issues')
-    .insert({
-      course_id: courseId,
-      phase,
-      title: input.title,
-      type: input.type,
-      severity: input.severity,
-      description: input.description || null,
-      location: input.location || null,
-      direct_link: input.direct_link || null,
-      owner_id: input.owner_id || null,
-      created_by: ctx.userId,
+    const ctx = await requireProfile()
+
+    const { data, error } = await supabase
+      .from('course_issues')
+      .insert({
+        course_id: courseId,
+        phase,
+        title: input.title.trim(),
+        type: input.type,
+        severity: input.severity,
+        description: input.description?.trim() || null,
+        location: input.location?.trim() || null,
+        direct_link: input.direct_link?.trim() || null,
+        owner_id: input.owner_id || null,
+        created_by: ctx.userId,
+      })
+      .select('*')
+      .single()
+
+    if (error) {
+      console.error('[createIssueAction] DB insert error:', error)
+      throw new Error(error.message || 'Failed to create issue')
+    }
+
+    // Insert system message "Issue opened by X"
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', ctx.userId)
+      .single()
+
+    const commentError = await supabase.from('course_issue_comments').insert({
+      issue_id: data.id,
+      author_id: ctx.userId,
+      body: `Issue opened by ${profile?.full_name || 'User'}`,
+      is_system_message: true,
     })
-    .select('*')
-    .single()
 
-  if (error) throw error
+    if (commentError.error) {
+      console.error('[createIssueAction] Comment insert error:', commentError.error)
+    }
 
-  // Insert system message "Issue opened by X"
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', ctx.userId)
-    .single()
-
-  await supabase.from('course_issue_comments').insert({
-    issue_id: data.id,
-    author_id: ctx.userId,
-    body: `Issue opened by ${profile?.full_name || 'User'}`,
-    is_system_message: true,
-  })
-
-  revalidatePath(`/courses/${courseId}/issue-log`)
-  return data as CourseIssue
+    revalidatePath(`/courses/${courseId}/issue-log`)
+    return data as CourseIssue
+  } catch (err) {
+    console.error('[createIssueAction] Error:', err)
+    throw err instanceof Error ? err : new Error('Failed to create issue')
+  }
 }
 
 export async function updateIssueStatusAction(issueId: string, newStatus: IssueStatus): Promise<CourseIssue> {
-  const ctx = await requireProfile()
+  try {
+    if (!issueId) throw new Error('Issue ID is required')
+    if (!['open', 'in_review', 'resolved'].includes(newStatus)) {
+      throw new Error(`Invalid status: ${newStatus}`)
+    }
 
-  const { data, error } = await supabase
-    .from('course_issues')
-    .update({
-      status: newStatus,
-      resolved_by: newStatus === 'resolved' ? ctx.userId : null,
-      resolved_at: newStatus === 'resolved' ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString(),
+    const ctx = await requireProfile()
+
+    const { data, error } = await supabase
+      .from('course_issues')
+      .update({
+        status: newStatus,
+        resolved_by: newStatus === 'resolved' ? ctx.userId : null,
+        resolved_at: newStatus === 'resolved' ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', issueId)
+      .select('*')
+      .single()
+
+    if (error) {
+      console.error('[updateIssueStatusAction] DB update error:', error)
+      throw new Error(error.message || 'Failed to update issue status')
+    }
+
+    // Insert system comment
+    const statusLabel = newStatus === 'in_review' ? 'In Review' : newStatus === 'resolved' ? 'Resolved' : 'Open'
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', ctx.userId)
+      .single()
+
+    const commentError = await supabase.from('course_issue_comments').insert({
+      issue_id: issueId,
+      author_id: ctx.userId,
+      body: `Status changed to ${statusLabel} by ${profile?.full_name || 'User'}`,
+      is_system_message: true,
     })
-    .eq('id', issueId)
-    .select('*')
-    .single()
 
-  if (error) throw error
+    if (commentError.error) {
+      console.error('[updateIssueStatusAction] Comment insert error:', commentError.error)
+    }
 
-  // Insert system comment
-  const statusLabel = newStatus === 'in_review' ? 'In Review' : newStatus === 'resolved' ? 'Resolved' : 'Open'
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', ctx.userId)
-    .single()
-
-  await supabase.from('course_issue_comments').insert({
-    issue_id: issueId,
-    author_id: ctx.userId,
-    body: `Status changed to ${statusLabel} by ${profile?.full_name || 'User'}`,
-    is_system_message: true,
-  })
-
-  return data as CourseIssue
+    revalidatePath(`/courses/${data.course_id}/issue-log`)
+    return data as CourseIssue
+  } catch (err) {
+    console.error('[updateIssueStatusAction] Error:', err)
+    throw err instanceof Error ? err : new Error('Failed to update issue status')
+  }
 }
 
 export async function addCommentAction(issueId: string, input: AddCommentInput): Promise<IssueComment> {
-  const ctx = await requireProfile()
+  try {
+    if (!issueId) throw new Error('Issue ID is required')
+    if (!input.body?.trim()) throw new Error('Comment body is required')
+    if (input.body.length > 5000) throw new Error('Comment must be 5000 characters or less')
 
-  const { data: comment, error: commentError } = await supabase
-    .from('course_issue_comments')
-    .insert({
-      issue_id: issueId,
-      author_id: ctx.userId,
-      body: input.body,
-      is_system_message: false,
-    })
-    .select('*')
-    .single()
+    const ctx = await requireProfile()
 
-  if (commentError) throw commentError
+    const { data: comment, error: commentError } = await supabase
+      .from('course_issue_comments')
+      .insert({
+        issue_id: issueId,
+        author_id: ctx.userId,
+        body: input.body.trim(),
+        is_system_message: false,
+      })
+      .select('*')
+      .single()
 
-  // Insert mentions
-  if (input.mentions && input.mentions.length > 0) {
-    const mentions = input.mentions.map((profileId) => ({
-      comment_id: comment.id,
-      mentioned_profile_id: profileId,
-    }))
+    if (commentError) {
+      console.error('[addCommentAction] Comment insert error:', commentError)
+      throw new Error(commentError.message || 'Failed to add comment')
+    }
 
-    await supabase.from('issue_comment_mentions').insert(mentions)
+    // Insert mentions
+    if (input.mentions && input.mentions.length > 0) {
+      const mentions = input.mentions.map((profileId) => ({
+        comment_id: comment.id,
+        mentioned_profile_id: profileId,
+      }))
+
+      const mentionError = await supabase.from('issue_comment_mentions').insert(mentions)
+      if (mentionError.error) {
+        console.error('[addCommentAction] Mention insert error:', mentionError.error)
+      }
+    }
+
+    const issue = await supabase.from('course_issues').select('course_id').eq('id', issueId).single()
+    if (issue.data?.course_id) {
+      revalidatePath(`/courses/${issue.data.course_id}/issue-log`)
+    }
+
+    return comment as IssueComment
+  } catch (err) {
+    console.error('[addCommentAction] Error:', err)
+    throw err instanceof Error ? err : new Error('Failed to add comment')
   }
-
-  return comment as IssueComment
 }
 
 export async function getIssuesForCourseAction(
@@ -124,55 +178,78 @@ export async function getIssuesForCourseAction(
     severity?: string
   }
 ): Promise<CourseIssue[]> {
-  let query = supabase
-    .from('course_issues')
-    .select(
-      `*,
-      created_by_profile:created_by(full_name),
-      owner_profile:owner_id(full_name),
-      comment_count:course_issue_comments(count)`
-    )
-    .eq('course_id', courseId)
+  try {
+    if (!courseId) throw new Error('Course ID is required')
 
-  if (filters?.phase) query = query.eq('phase', filters.phase)
-  if (filters?.status) query = query.eq('status', filters.status)
-  if (filters?.type) query = query.eq('type', filters.type)
-  if (filters?.severity) query = query.eq('severity', filters.severity)
+    let query = supabase
+      .from('course_issues')
+      .select(
+        `*,
+        created_by_profile:created_by(full_name),
+        owner_profile:owner_id(full_name),
+        comment_count:course_issue_comments(count)`
+      )
+      .eq('course_id', courseId)
 
-  const { data, error } = await query.order('created_at', { ascending: false })
+    if (filters?.phase) query = query.eq('phase', filters.phase)
+    if (filters?.status) query = query.eq('status', filters.status)
+    if (filters?.type) query = query.eq('type', filters.type)
+    if (filters?.severity) query = query.eq('severity', filters.severity)
 
-  if (error) throw error
+    const { data, error } = await query.order('created_at', { ascending: false })
 
-  return data as CourseIssue[]
+    if (error) {
+      console.error('[getIssuesForCourseAction] Query error:', error)
+      throw new Error(error.message || 'Failed to fetch issues')
+    }
+
+    return data as CourseIssue[]
+  } catch (err) {
+    console.error('[getIssuesForCourseAction] Error:', err)
+    throw err instanceof Error ? err : new Error('Failed to fetch issues')
+  }
 }
 
 export async function getIssueWithCommentsAction(issueId: string): Promise<CourseIssue & { comments: IssueComment[] }> {
-  const { data: issue, error: issueError } = await supabase
-    .from('course_issues')
-    .select(
-      `*,
-      created_by_profile:created_by(full_name),
-      owner_profile:owner_id(full_name)`
-    )
-    .eq('id', issueId)
-    .single()
+  try {
+    if (!issueId) throw new Error('Issue ID is required')
 
-  if (issueError) throw issueError
+    const { data: issue, error: issueError } = await supabase
+      .from('course_issues')
+      .select(
+        `*,
+        created_by_profile:created_by(full_name),
+        owner_profile:owner_id(full_name)`
+      )
+      .eq('id', issueId)
+      .single()
 
-  const { data: comments, error: commentsError } = await supabase
-    .from('course_issue_comments')
-    .select(
-      `*,
-      author:author_id(full_name, role),
-      mentions:issue_comment_mentions(mentioned_profile_id)`
-    )
-    .eq('issue_id', issueId)
-    .order('created_at', { ascending: true })
+    if (issueError) {
+      console.error('[getIssueWithCommentsAction] Issue fetch error:', issueError)
+      throw new Error(issueError.message || 'Issue not found')
+    }
 
-  if (commentsError) throw commentsError
+    const { data: comments, error: commentsError } = await supabase
+      .from('course_issue_comments')
+      .select(
+        `*,
+        author:author_id(full_name, role),
+        mentions:issue_comment_mentions(mentioned_profile_id)`
+      )
+      .eq('issue_id', issueId)
+      .order('created_at', { ascending: true })
 
-  return {
-    ...(issue as CourseIssue),
-    comments: comments as IssueComment[],
+    if (commentsError) {
+      console.error('[getIssueWithCommentsAction] Comments fetch error:', commentsError)
+      throw new Error(commentsError.message || 'Failed to fetch comments')
+    }
+
+    return {
+      ...(issue as CourseIssue),
+      comments: comments as IssueComment[],
+    }
+  } catch (err) {
+    console.error('[getIssueWithCommentsAction] Error:', err)
+    throw err instanceof Error ? err : new Error('Failed to fetch issue details')
   }
 }
