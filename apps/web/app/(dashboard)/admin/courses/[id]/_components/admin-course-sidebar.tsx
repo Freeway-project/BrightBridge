@@ -15,8 +15,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send, Building2, ChevronDown, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CourseConversation } from "@/app/(dashboard)/courses/[id]/_components/course-conversation"
 import type { CourseComment } from "@/lib/services/comments"
 import {
   Select,
@@ -229,22 +227,6 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
           </section>
 
           <Separator className="shrink-0" />
-
-          {/* Internal Conversation */}
-          <section className="flex-1 min-h-[500px] flex flex-col gap-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 shrink-0">
-              <MessageSquare className="size-3.5" />
-              Internal Discussion
-            </h3>
-            <div className="flex-1 min-h-0">
-              <CourseConversation
-                courseId={course.id}
-                currentUserId={currentUserId}
-                comments={comments}
-                escalations={escalations}
-              />
-            </div>
-          </section>
 
           {/* Escalation Threads (Optional detailed view) */}
           {openEscalations.length > 0 && (
