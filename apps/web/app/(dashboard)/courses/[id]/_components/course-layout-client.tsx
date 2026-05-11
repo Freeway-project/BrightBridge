@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { UnifiedChatModal } from "@/components/chat/unified-chat-modal"
 import { WorkspaceNav } from "./workspace-nav"
 import { InfoPanel } from "./info-panel"
 import { TweakableContent } from "@/components/shared/tweakable-content"
+import { useModalContext } from "@/lib/contexts/modal-context"
 import type { CourseStatus } from "@/lib/types"
 import type { Comment, Escalation } from "@/lib/types"
 
@@ -35,7 +35,7 @@ export function CourseLayoutClient({
   escalations,
   comments,
 }: CourseLayoutClientProps) {
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const { isChatOpen, setIsChatOpen } = useModalContext()
 
   return (
     <div className="flex flex-1 overflow-hidden">

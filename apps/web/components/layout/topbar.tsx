@@ -1,12 +1,12 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useState } from "react"
 import { Bell, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ChatIconButton } from "@/components/chat/chat-icon-button"
+import { useModalContext } from "@/lib/contexts/modal-context"
 
 interface TopbarProps {
   title: string
@@ -16,7 +16,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const { setIsChatOpen } = useModalContext()
 
   return (
     <header className="flex h-12 items-center gap-2 border-b border-border bg-card/80 backdrop-blur-sm px-4 sticky top-0 z-20">

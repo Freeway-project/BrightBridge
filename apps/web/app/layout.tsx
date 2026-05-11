@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
+import { ModalProvider } from "@/lib/contexts/modal-context";
 
 export const metadata: Metadata = {
   title: "CourseBridge",
@@ -22,13 +23,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans")}>
       <body>
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
-        <DeploymentDetector initialVersion={currentVersion} />
-        <Toaster closeButton position="top-right" richColors />
-        <Analytics />
-        <SpeedInsights />
+        <ModalProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+          <DeploymentDetector initialVersion={currentVersion} />
+          <Toaster closeButton position="top-right" richColors />
+          <Analytics />
+          <SpeedInsights />
+        </ModalProvider>
       </body>
     </html>
   );

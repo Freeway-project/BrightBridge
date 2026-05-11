@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
 import { UnifiedChatModal } from "@/components/chat/unified-chat-modal"
 import { TweakableContent } from "@/components/shared/tweakable-content"
 import { AdminCourseSidebar } from "./admin-course-sidebar"
+import { useModalContext } from "@/lib/contexts/modal-context"
 import type { Course, Comment, Escalation } from "@/lib/types"
 
 interface AdminCourseLayoutClientProps {
@@ -27,7 +27,7 @@ export function AdminCourseLayoutClient({
   currentUserId,
   instructorName,
 }: AdminCourseLayoutClientProps) {
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const { isChatOpen, setIsChatOpen } = useModalContext()
 
   return (
     <main className="flex-1 flex overflow-hidden bg-muted/10">
