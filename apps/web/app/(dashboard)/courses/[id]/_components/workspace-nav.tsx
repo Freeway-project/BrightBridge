@@ -22,9 +22,11 @@ type WorkspaceNavProps = {
   courseId: string
   courseTitle: string
   courseStatus: CourseStatus
+  reviewerName: string
+  instructorName: string | null
 }
 
-export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceNavProps) {
+export function WorkspaceNav({ courseId, courseTitle, courseStatus, reviewerName, instructorName }: WorkspaceNavProps) {
   const pathname = usePathname()
   const activeIndex = Math.max(
     0,
@@ -51,6 +53,37 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
               {courseTitle}
             </h2>
             <StatusBadge status={courseStatus} className="text-[10px]" />
+          </div>
+        </div>
+
+        <div className="space-y-3 pb-4 border-b border-border/50">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+            Participants
+          </p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="size-6 rounded-full bg-primary flex items-center justify-center text-[9px] font-bold text-primary-foreground">
+                {reviewerName[0]?.toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-foreground truncate">{reviewerName}</p>
+                <p className="text-[9px] text-muted-foreground">Assigned TA</p>
+              </div>
+            </div>
+            <p className="text-[9px] text-muted-foreground pl-8">Admin: Pending</p>
+            {instructorName ? (
+              <div className="flex items-center gap-2">
+                <div className="size-6 rounded-full bg-secondary flex items-center justify-center text-[9px] font-bold text-secondary-foreground">
+                  {instructorName[0]?.toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-foreground truncate">{instructorName}</p>
+                  <p className="text-[9px] text-muted-foreground">Instructor</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-[9px] text-muted-foreground pl-8">Instructor: Pending</p>
+            )}
           </div>
         </div>
 
