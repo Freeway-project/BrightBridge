@@ -1,9 +1,8 @@
 "use client"
-import { CheckCircle2, Circle, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
+import { CheckCircle2, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { useState } from "react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
-import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
 import { CourseConversation } from "./course-conversation"
 import { Button } from "@/components/ui/button"
@@ -73,13 +72,6 @@ export function InfoPanel({
 
         <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-border">
           <div className="flex flex-col gap-8 pb-10">
-            <section className="space-y-3 pr-8">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                Course Status
-              </p>
-              <StatusBadge status={courseStatus} className="w-full justify-center py-1.5" />
-            </section>
-
             <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">

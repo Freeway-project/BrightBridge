@@ -47,7 +47,7 @@ export default async function SyllabusGradebookPage({ params }: Props) {
 
   return (
     <>
-      <Topbar title="Course Workspace" subtitle="Step 3 of 5 — Syllabus & Gradebook" />
+      <Topbar title="Course Workspace" subtitle="Step 3 of 5 — Syllabus & Gradebook" courseStatus={course.status} />
       <main className="flex-1 overflow-y-auto p-6">
         <CourseWorkspaceRefreshWrapper
           courseId={id}
