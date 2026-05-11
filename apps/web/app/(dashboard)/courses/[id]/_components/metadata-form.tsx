@@ -20,6 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
+import { CopyButton } from "@/components/ui/copy-button"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -256,7 +257,10 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <label className="grid gap-1.5 text-sm font-medium">
       {label}
-      <Input readOnly value={value} />
+      <div className="flex gap-2 items-center">
+        <Input readOnly value={value} className="flex-1" />
+        <CopyButton value={value} label={label} />
+      </div>
     </label>
   )
 }
