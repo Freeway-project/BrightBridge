@@ -38,18 +38,18 @@ function BrandLogo() {
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
   return (
-    <div className="flex h-12 items-center gap-1 border-b border-sidebar-border px-2">
-      <div className="flex min-w-0 flex-1 items-center gap-2 px-1">
-        <div className="size-6 rounded bg-sidebar-primary flex items-center justify-center text-[10px] font-bold text-sidebar-primary-foreground shrink-0">
+    <div className="flex h-14 items-center gap-1 border-b border-border-icy/50 px-3 bg-white/[0.02]">
+      <div className="flex min-w-0 flex-1 items-center gap-2.5 px-1">
+        <div className="size-7 rounded-lg bg-primary flex items-center justify-center text-[11px] font-black text-primary-foreground shrink-0 shadow-lg shadow-primary/20">
           CB
         </div>
         {!collapsed && (
-          <span className="text-sm font-semibold text-sidebar-foreground truncate">
+          <span className="text-xs font-black uppercase tracking-[0.2em] text-foreground truncate">
             CourseBridge
           </span>
         )}
       </div>
-      <SidebarTrigger className="hidden shrink-0 md:flex" />
+      <SidebarTrigger className="hidden shrink-0 md:flex text-muted-foreground/40 hover:text-primary transition-colors" />
     </div>
   )
 }
@@ -61,22 +61,25 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
   const collapsed = state === "collapsed"
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-border-icy bg-sidebar backdrop-blur-md">
       <SidebarHeader className="p-0">
         <BrandLogo />
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2 pt-4">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {items.map((item) => {
                 const active =
                   pathname === item.href || pathname.startsWith(item.href + "/")
                 const btn = (
-                  <SidebarMenuButton asChild isActive={active}>
+                  <SidebarMenuButton asChild isActive={active} className={cn(
+                    "h-10 px-3 transition-all duration-300 rounded-xl",
+                    active ? "bg-primary/10 text-primary ring-1 ring-primary/20 font-black uppercase tracking-widest text-[10px]" : "text-muted-foreground hover:bg-white/5 hover:text-foreground font-bold text-[11px]"
+                  )}>
                     <Link href={item.href}>
-                      <item.icon className="size-4 shrink-0" />
+                      <item.icon className={cn("size-4 shrink-0 transition-transform", active && "scale-110")} />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -86,7 +89,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                     {collapsed ? (
                       <Tooltip>
                         <TooltipTrigger asChild>{btn}</TooltipTrigger>
-                        <TooltipContent side="right">{item.label}</TooltipContent>
+                        <TooltipContent side="right" className="bg-popover border-border-icy font-black uppercase tracking-widest text-[9px]">{item.label}</TooltipContent>
                       </Tooltip>
                     ) : (
                       btn
@@ -99,21 +102,24 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        <div className="border-t border-sidebar-border px-1 py-2 space-y-1">
+      <SidebarFooter className="p-3">
+        <div className="border border-border-icy bg-white/[0.02] rounded-2xl p-2 space-y-2 shadow-inner">
           {!collapsed && (
-            <p className="px-2 text-[11px] text-sidebar-foreground/50 truncate mb-1">
-              {userName}
-            </p>
+            <div className="px-2 py-1 flex flex-col">
+              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Active Session</span>
+              <span className="text-[10px] font-bold text-foreground/70 truncate">
+                {userName}
+              </span>
+            </div>
           )}
           <DisplaySettings />
           <UpdateStatusTab initialVersion={initialVersion} />
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+              className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:bg-destructive/10 hover:text-destructive transition-all"
             >
-              <LogOut className="size-4 shrink-0" />
+              <LogOut className="size-3.5 shrink-0" />
               {!collapsed && <span>Sign out</span>}
             </button>
           </form>

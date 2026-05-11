@@ -3,7 +3,7 @@ import { StatusBadge } from "./status-badge"
 import { type CourseStatus } from "@coursebridge/workflow"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ChevronRight, ArrowRight } from "lucide-react"
+import { ChevronRight, ArrowRight, Clock } from "lucide-react"
 import type { ReviewProgress } from "@/lib/courses/service"
 import { cn } from "@/lib/utils"
 
@@ -20,33 +20,55 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
+  const isProblem = course.status === "admin_changes_requested" || course.status === "instructor_questions"
+  
+  let rowStatus: 'success' | 'warning' | 'info' | 'neutral' = 'neutral'
+  if (['final_approved', 'instructor_approved'].includes(course.status)) rowStatus = 'success'
+  else if (isProblem) rowStatus = 'warning'
+  else if (course.status === 'ta_review_in_progress') rowStatus = 'info'
+
   return (
-    <Card className="overflow-hidden border-border bg-card hover:border-primary/20 transition-colors">
-      <CardHeader className="p-5 border-b border-border/50">
+    <Card className={cn(
+      "overflow-hidden border-border bg-card transition-all relative pl-1 hover:bg-accent/10 group/card",
+      // Status border punch
+      "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[4px] before:transition-all",
+      rowStatus === 'success' && "before:bg-success",
+      rowStatus === 'warning' && "before:bg-warning",
+      rowStatus === 'info' && "before:bg-primary",
+      rowStatus === 'neutral' && "before:bg-primary-depth",
+      isProblem && "bg-[oklch(0.23_0.08_40)]"
+    )}>
+      <CardHeader className="p-4 border-b border-border/10">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h3 className="text-lg font-bold text-foreground">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-base font-black tracking-tight text-foreground uppercase">
                 {course.sourceCourseId || "NO-CODE"}
               </h3>
-              <span className="text-base text-muted-foreground">{course.title}</span>
+              <span className="text-sm font-bold text-foreground/80">{course.title}</span>
               <StatusBadge status={course.status} />
               <NextStepBadge status={course.status} progress={course.reviewProgress} />
             </div>
-            <p className="text-xs text-muted-foreground">
-              {course.term || "No Term"} • Last updated {new Date(course.updatedAt).toLocaleDateString()}
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded">
+                {course.term || "No Term"}
+              </p>
+              <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground/40 uppercase">
+                <Clock className="size-3" />
+                Updated {new Date(course.updatedAt).toLocaleDateString()}
+              </div>
+            </div>
           </div>
-          <Button variant="outline" size="sm" asChild className="shrink-0">
+          <Button variant="outline" size="xs" asChild className="shrink-0 font-black uppercase tracking-widest text-[9px] border-border-icy bg-white/5 hover:bg-primary hover:text-primary-foreground transition-all">
             <Link href={`/courses/${course.id}/metadata`}>
-              View Review
-              <ChevronRight className="ml-1 size-3" />
+              Open Review
+              <ArrowRight className="ml-1.5 size-3" />
             </Link>
           </Button>
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-y md:divide-y-0 divide-border/50">
+        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-border/10">
           {deriveStatusItems(course.status, course.reviewProgress).map((item) => (
             <StatusItem key={item.label} label={item.label} value={item.value} status={item.status} />
           ))}
@@ -106,20 +128,20 @@ function StatusItem({
   status: 'success' | 'warning' | 'error' | 'muted' | 'info'
 }) {
   const statusClasses = {
-    success: "text-green-500 bg-green-500/10 border-green-500/20",
-    warning: "text-orange-500 bg-orange-500/10 border-orange-500/20",
-    error: "text-red-500 bg-red-500/10 border-red-500/20",
-    muted: "text-muted-foreground bg-muted/50 border-transparent",
-    info: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+    success: "text-success",
+    warning: "text-warning",
+    error: "text-destructive",
+    muted: "text-muted-foreground/30",
+    info: "text-primary",
   }
 
   return (
-    <div className="p-3 flex flex-col gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="p-2.5 px-4 flex flex-col gap-0.5 transition-colors group-hover/card:bg-white/[0.02]">
+      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
         {label}
       </span>
       <span className={cn(
-        "text-xs font-bold px-2 py-0.5 rounded-full w-fit border",
+        "text-[10px] font-black uppercase truncate tracking-tight",
         statusClasses[status]
       )}>
         {value}
@@ -132,27 +154,27 @@ type NextStep = { label: string; style: string }
 
 function deriveNextStep(status: CourseStatus, progress: ReviewProgress | undefined): NextStep {
   if (status === "admin_changes_requested")
-    return { label: "Fix Requested", style: "bg-red-500/15 text-red-600 border-red-400/30" }
+    return { label: "Fix Requested", style: "bg-destructive/10 text-destructive border-destructive/20" }
 
   const pastSubmit: CourseStatus[] = ["submitted_to_admin", "ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"]
   if ((pastSubmit as string[]).includes(status))
-    return { label: "Waiting on Admin", style: "bg-muted text-muted-foreground border-border" }
+    return { label: "Waiting on Admin", style: "bg-muted/20 text-muted-foreground border-border/50" }
 
   if (!progress?.courseMetadata?.exists)
-    return { label: "Fill Metadata", style: "bg-blue-500/15 text-blue-600 border-blue-400/30" }
+    return { label: "Fill Metadata", style: "bg-primary/10 text-primary border-primary/20" }
   if (!progress?.reviewMatrix?.exists)
-    return { label: "Fill Checklist", style: "bg-blue-500/15 text-blue-600 border-blue-400/30" }
+    return { label: "Fill Checklist", style: "bg-primary/10 text-primary border-primary/20" }
   if (!progress?.syllabusReview?.exists)
-    return { label: "Fill Syllabus", style: "bg-blue-500/15 text-blue-600 border-blue-400/30" }
+    return { label: "Fill Syllabus", style: "bg-primary/10 text-primary border-primary/20" }
 
-  return { label: "Ready to Submit", style: "bg-green-500/15 text-green-700 border-green-500/20" }
+  return { label: "Ready to Submit", style: "bg-success/10 text-success border-success/20" }
 }
 
 function NextStepBadge({ status, progress }: { status: CourseStatus; progress: ReviewProgress | undefined }) {
   const { label, style } = deriveNextStep(status, progress)
   return (
-    <div className={cn("flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold", style)}>
-      <ArrowRight className="size-3 shrink-0" />
+    <div className={cn("flex items-center gap-1.5 rounded px-2 py-0.5 text-[9px] font-black uppercase tracking-tighter border", style)}>
+      <ArrowRight className="size-2.5 shrink-0" />
       {label}
     </div>
   )
