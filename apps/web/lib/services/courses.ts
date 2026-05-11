@@ -14,6 +14,7 @@ export type { CourseSummary as CourseRow };
 function toAssignmentRole(profileRole: Role): AssignmentRole {
   if (profileRole === "standard_user") return "staff";
   if (profileRole === "instructor") return "instructor";
+  if (profileRole === "admin_full" || profileRole === "super_admin" || profileRole === "admin_viewer") return "staff";
   throw new Error(`Cannot derive assignment role from profile role: ${profileRole}`);
 }
 

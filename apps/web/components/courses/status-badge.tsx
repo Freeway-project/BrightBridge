@@ -25,8 +25,8 @@ const DOT_COLORS: Record<CourseStatus, string> = {
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <div className={cn("size-1.5 rounded-full", DOT_COLORS[status])} />
-      <span className="text-sm text-foreground/80">
+      <div className={cn("size-2 rounded-full", DOT_COLORS[status])} />
+      <span className="text-sm font-medium text-foreground">
         {getCourseStatusLabel(status)}
       </span>
     </div>

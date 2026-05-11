@@ -3,15 +3,18 @@ import { Bell, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { StatusBadge } from "@/components/courses/status-badge"
+import type { CourseStatus } from "@coursebridge/workflow"
 
 interface TopbarProps {
   title: string
   subtitle?: string
   actions?: ReactNode
   backHref?: string
+  courseStatus?: CourseStatus
 }
 
-export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
+export function Topbar({ title, subtitle, actions, backHref, courseStatus }: TopbarProps) {
   return (
     <header className="flex h-12 items-center gap-2 border-b border-sidebar-border bg-card px-4">
       <SidebarTrigger className="-ml-1 shrink-0 md:hidden" />
@@ -33,7 +36,10 @@ export function Topbar({ title, subtitle, actions, backHref }: TopbarProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        {courseStatus && (
+          <StatusBadge status={courseStatus} className="text-[10px]" />
+        )}
         {actions}
         <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="size-4" />

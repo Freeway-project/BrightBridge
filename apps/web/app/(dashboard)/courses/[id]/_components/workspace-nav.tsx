@@ -22,9 +22,11 @@ type WorkspaceNavProps = {
   courseId: string
   courseTitle: string
   courseStatus: CourseStatus
+  reviewerName: string
+  instructorName: string | null
 }
 
-export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceNavProps) {
+export function WorkspaceNav({ courseId, courseTitle, courseStatus, reviewerName, instructorName }: WorkspaceNavProps) {
   const pathname = usePathname()
   const activeIndex = Math.max(
     0,
@@ -51,6 +53,37 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus }: WorkspaceN
               {courseTitle}
             </h2>
             <StatusBadge status={courseStatus} className="text-[10px]" />
+          </div>
+        </div>
+
+        <div className="space-y-3 pb-3 border-b border-border/50">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 line-clamp-1">
+            Participants
+          </p>
+          <div className="space-y-2.5 text-[9px]">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <div className="size-5 shrink-0 rounded-full bg-primary flex items-center justify-center text-[8px] font-bold text-primary-foreground">
+                {reviewerName[0]?.toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-foreground truncate leading-tight">{reviewerName}</p>
+                <p className="text-muted-foreground leading-tight">TA</p>
+              </div>
+            </div>
+            <p className="text-muted-foreground">Admin: Pending</p>
+            {instructorName ? (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <div className="size-5 shrink-0 rounded-full bg-secondary flex items-center justify-center text-[8px] font-bold text-secondary-foreground">
+                  {instructorName[0]?.toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-foreground truncate leading-tight">{instructorName}</p>
+                  <p className="text-muted-foreground leading-tight">Instructor</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Instructor: Pending</p>
+            )}
           </div>
         </div>
 

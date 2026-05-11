@@ -50,7 +50,7 @@ export default async function ReviewMatrixPage({ params }: Props) {
 
   return (
     <>
-      <Topbar title="Course Workspace" subtitle="Step 2 of 5 — Review Matrix" />
+      <Topbar title="Course Workspace" subtitle="Step 2 of 5 — Review Matrix" courseStatus={course.status} />
       <main className="flex-1 overflow-y-auto p-6">
         <CourseWorkspaceRefreshWrapper
           courseId={id}

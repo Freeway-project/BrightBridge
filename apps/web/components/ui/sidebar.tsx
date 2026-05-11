@@ -27,6 +27,7 @@ import { PanelLeftIcon } from "lucide-react"
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
+const SIDEBAR_WIDTH_RIGHT = "15rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
@@ -162,6 +163,7 @@ function Sidebar({
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const sidebarWidth = side === "right" ? SIDEBAR_WIDTH_RIGHT : SIDEBAR_WIDTH
 
   if (collapsible === "none") {
     return (
@@ -171,6 +173,7 @@ function Sidebar({
           "flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground",
           className
         )}
+        style={{ "--sidebar-width": sidebarWidth } as React.CSSProperties}
         {...props}
       >
         {children}
@@ -212,6 +215,7 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      style={{ "--sidebar-width": sidebarWidth } as React.CSSProperties}
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
