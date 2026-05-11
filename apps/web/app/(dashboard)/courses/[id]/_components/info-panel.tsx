@@ -1,11 +1,9 @@
 "use client"
-import { CheckCircle2, Circle, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
+import { CheckCircle2, Circle, Clock3, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { useState } from "react"
 import type { CourseStatus } from "@coursebridge/workflow"
-import type { EscalationWithMessages } from "@/lib/services/escalations"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { cn } from "@/lib/utils"
-import { CourseConversation } from "./course-conversation"
 import { Button } from "@/components/ui/button"
 
 type SectionProgress = {
@@ -18,24 +16,17 @@ type InfoPanelProps = {
   courseId: string
   courseStatus: CourseStatus
   reviewerName: string
-  reviewerId: string
   instructorName: string | null
   progress: SectionProgress[]
   lastSavedAt: string | null
-  escalations: EscalationWithMessages[]
-  comments: any[]
 }
 
 export function InfoPanel({
-  courseId,
   courseStatus,
   reviewerName,
-  reviewerId,
   instructorName,
   progress,
   lastSavedAt,
-  escalations,
-  comments,
 }: InfoPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
@@ -165,22 +156,6 @@ export function InfoPanel({
                 </div>
               </section>
 
-              <section className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 w-fit shrink-0">
-                  <AlertTriangle className="size-3.5 text-red-500" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-red-600 dark:text-red-400">
-                    Escalation
-                  </p>
-                </div>
-                <div className="min-h-[400px]">
-                  <CourseConversation
-                    courseId={courseId}
-                    currentUserId={reviewerId}
-                    escalations={escalations}
-                    comments={comments}
-                  />
-                </div>
-              </section>
             </div>
           </div>
         </div>
