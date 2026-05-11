@@ -48,15 +48,11 @@ export function CourseLayoutClient({
         {children}
       </TweakableContent>
       <InfoPanel
-        courseId={courseId}
         courseStatus={courseStatus}
         reviewerName={reviewerName}
-        reviewerId={reviewerId}
         instructorName={instructorName}
         progress={progress}
         lastSavedAt={lastSavedAt}
-        escalations={escalations}
-        comments={comments}
       />
       <UnifiedChatModal
         courseId={courseId}

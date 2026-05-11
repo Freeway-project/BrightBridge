@@ -1,3 +1,5 @@
+"use client"
+
 import type { ReactNode } from "react"
 import { useState } from "react"
 import { Bell, ChevronLeft } from "lucide-react"

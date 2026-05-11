@@ -6,8 +6,6 @@ import { getReviewResponses, getReviewSectionByKey } from "@/lib/services/review
 import { getEscalationsForCourse } from "@/lib/services/escalations";
 import { getCourseInstructor } from "@/lib/services/profiles";
 import { getCourseComments } from "@/lib/services/comments";
-import { WorkspaceNav } from "./_components/workspace-nav";
-import { InfoPanel } from "./_components/info-panel";
 import { TweakableContent } from "@/components/shared/tweakable-content";
 import { CourseLayoutClient } from "./_components/course-layout-client";
 

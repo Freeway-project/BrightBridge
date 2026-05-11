@@ -45,8 +45,8 @@ export function RecentAssignmentsTable({ logs }: { logs: AssignmentLog[] }) {
             </TableRow>
           ) : (
             logs.map((log) => (
-              <TableRow key={log.id} className="border-border">
-                <TableCell className="pl-4 text-sm font-medium py-3">
+              <TableRow key={log.id} status="neutral" className="border-border">
+                <TableCell className="pl-5 text-sm font-bold py-3">
                   {log.courseTitle}
                 </TableCell>
                 <TableCell className="py-3">

@@ -52,12 +52,26 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+function TableRow({ 
+  className, 
+  status,
+  ...props 
+}: React.ComponentProps<"tr"> & { 
+  status?: 'success' | 'warning' | 'info' | 'neutral' | 'error' 
+}) {
   return (
     <tr
       data-slot="table-row"
+      data-status={status}
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        "group border-b transition-colors hover:bg-[oklch(0.25_0.06_260)] even:bg-muted/30 relative",
+        // Status border
+        "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[4px] before:transition-colors",
+        status === 'success' && "before:bg-success",
+        status === 'warning' && "before:bg-warning",
+        status === 'error' && "before:bg-destructive",
+        status === 'info' && "before:bg-primary",
+        status === 'neutral' && "before:bg-border",
         className
       )}
       {...props}

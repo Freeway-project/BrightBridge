@@ -87,11 +87,12 @@ function QueueRow({ course, onRowClick }: { course: AdminCourseRow; onRowClick: 
       <TableRow
         className="cursor-pointer"
         onClick={onRowClick}
+        status="info"
       >
-        <TableCell className="pl-4">
-          <p className="text-sm font-medium">{course.title}</p>
+        <TableCell className="pl-5 py-3">
+          <p className="text-sm font-bold">{course.title}</p>
           {course.sourceCourseId && (
-            <p className="text-xs text-muted-foreground">{course.sourceCourseId}</p>
+            <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">{course.sourceCourseId}</p>
           )}
         </TableCell>
         <TableCell>
@@ -108,6 +109,7 @@ function QueueRow({ course, onRowClick }: { course: AdminCourseRow; onRowClick: 
           <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
             <Button
               size="sm"
+              variant="approve"
               disabled={isPending}
               onClick={handleApprove}
             >
@@ -116,7 +118,7 @@ function QueueRow({ course, onRowClick }: { course: AdminCourseRow; onRowClick: 
             </Button>
             <Button
               size="sm"
-              variant="outline"
+              variant="warning"
               disabled={isPending}
               onClick={handleRequestFixes}
             >

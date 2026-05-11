@@ -38,28 +38,44 @@ export function CourseTable({ courses }: CourseTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {courses.map((course) => (
-          <TableRow key={course.id} className="border-border">
-            <TableCell className="text-sm font-medium">{course.title}</TableCell>
-            <TableCell className="text-xs text-muted-foreground">{course.term ?? "—"}</TableCell>
-            <TableCell className="text-xs text-muted-foreground">{course.department ?? "—"}</TableCell>
-            <TableCell>
-              <StatusBadge status={course.status} />
-            </TableCell>
-            <TableCell>
-              <NextStepBadge course={course} />
-            </TableCell>
-            <TableCell className="text-xs text-muted-foreground">
-              {new Date(course.createdAt).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}
-            </TableCell>
-            <TableCell className="text-right">
-              <CourseActionButton status={course.status} courseId={course.id} />
-            </TableCell>
-          </TableRow>
-        ))}
+        {courses.map((course) => {
+          const isProblem = course.status === "admin_changes_requested" || course.status === "instructor_questions"
+          
+          let rowStatus: 'success' | 'warning' | 'info' | 'neutral' = 'neutral'
+          if (['final_approved', 'instructor_approved'].includes(course.status)) rowStatus = 'success'
+          else if (isProblem) rowStatus = 'warning'
+          else if (course.status === 'ta_review_in_progress') rowStatus = 'info'
+
+          return (
+            <TableRow 
+              key={course.id} 
+              status={rowStatus}
+              className={cn(
+                "border-border",
+                isProblem && "bg-[oklch(0.23_0.08_40)] hover:bg-[oklch(0.28_0.10_45)] text-[oklch(0.95_0.02_40)]"
+              )}
+            >
+              <TableCell className="text-sm font-bold pl-5">{course.title}</TableCell>
+              <TableCell className="text-xs text-muted-foreground">{course.term ?? "—"}</TableCell>
+              <TableCell className="text-xs text-muted-foreground">{course.department ?? "—"}</TableCell>
+              <TableCell>
+                <StatusBadge status={course.status} />
+              </TableCell>
+              <TableCell>
+                <NextStepBadge course={course} />
+              </TableCell>
+              <TableCell className="text-xs text-muted-foreground">
+                {new Date(course.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </TableCell>
+              <TableCell className="text-right">
+                <CourseActionButton status={course.status} courseId={course.id} />
+              </TableCell>
+            </TableRow>
+          )
+        })}
       </TableBody>
     </Table>
   )

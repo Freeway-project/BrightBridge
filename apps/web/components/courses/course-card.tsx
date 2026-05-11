@@ -20,33 +20,49 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
+  const isProblem = course.status === "admin_changes_requested" || course.status === "instructor_questions"
+  
+  let rowStatus: 'success' | 'warning' | 'info' | 'neutral' = 'neutral'
+  if (['final_approved', 'instructor_approved'].includes(course.status)) rowStatus = 'success'
+  else if (isProblem) rowStatus = 'warning'
+  else if (course.status === 'ta_review_in_progress') rowStatus = 'info'
+
   return (
-    <Card className="overflow-hidden border-border bg-card hover:border-primary/20 transition-colors">
-      <CardHeader className="p-5 border-b border-border/50">
+    <Card className={cn(
+      "overflow-hidden border-border bg-card transition-all relative pl-1 hover:bg-accent/30",
+      // Status border
+      "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[4px]",
+      rowStatus === 'success' && "before:bg-success",
+      rowStatus === 'warning' && "before:bg-warning",
+      rowStatus === 'info' && "before:bg-primary",
+      rowStatus === 'neutral' && "before:bg-primary-depth",
+      isProblem && "bg-[oklch(0.23_0.08_40)] text-[oklch(0.95_0.02_40)]"
+    )}>
+      <CardHeader className="p-4 border-b border-border/20">
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h3 className="text-lg font-bold text-foreground">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-base font-black tracking-tight text-foreground">
                 {course.sourceCourseId || "NO-CODE"}
               </h3>
-              <span className="text-base text-muted-foreground">{course.title}</span>
+              <span className="text-sm font-medium opacity-80">{course.title}</span>
               <StatusBadge status={course.status} />
               <NextStepBadge status={course.status} progress={course.reviewProgress} />
             </div>
-            <p className="text-xs text-muted-foreground">
-              {course.term || "No Term"} • Last updated {new Date(course.updatedAt).toLocaleDateString()}
+            <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+              {course.term || "No Term"}
             </p>
           </div>
-          <Button variant="outline" size="sm" asChild className="shrink-0">
+          <Button variant="outline" size="xs" asChild className="shrink-0 font-black uppercase tracking-wider text-[10px]">
             <Link href={`/courses/${course.id}/metadata`}>
-              View Review
-              <ChevronRight className="ml-1 size-3" />
+              Open
+              <ArrowRight className="ml-1 size-3" />
             </Link>
           </Button>
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-y md:divide-y-0 divide-border/50">
+        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-border/20">
           {deriveStatusItems(course.status, course.reviewProgress).map((item) => (
             <StatusItem key={item.label} label={item.label} value={item.value} status={item.status} />
           ))}
@@ -54,46 +70,6 @@ export function CourseCard({ course }: CourseCardProps) {
       </CardContent>
     </Card>
   )
-}
-
-type StatusItemData = { label: string; value: string; status: 'success' | 'warning' | 'error' | 'muted' | 'info' }
-
-function deriveStatusItems(courseStatus: CourseStatus, progress: ReviewProgress | undefined): StatusItemData[] {
-  const meta = progress?.courseMetadata
-  const courseInfo: StatusItemData = meta?.exists
-    ? { label: "Course Info", value: "Complete", status: "success" }
-    : { label: "Course Info", value: "Not Started", status: "muted" }
-
-  const hasMigrationNotes =
-    meta?.exists &&
-    typeof meta.responseData?.["migration_notes"] === "string" &&
-    (meta.responseData["migration_notes"] as string).trim().length > 0
-  const migrationNotes: StatusItemData = hasMigrationNotes
-    ? { label: "Migration Notes", value: "Available", status: "success" }
-    : { label: "Migration Notes", value: "Not Available", status: "muted" }
-
-  const matrix = progress?.reviewMatrix
-  const checklist: StatusItemData = !matrix?.exists
-    ? { label: "Checklist", value: "Not Started", status: "muted" }
-    : matrix.status === "submitted"
-    ? { label: "Checklist", value: "Submitted", status: "success" }
-    : { label: "Checklist", value: "In Progress", status: "warning" }
-
-  const syllabus = progress?.syllabusReview
-  const gradebook: StatusItemData = !syllabus?.exists
-    ? { label: "Gradebook", value: "Not Started", status: "muted" }
-    : syllabus.status === "submitted"
-    ? { label: "Gradebook", value: "Submitted", status: "success" }
-    : { label: "Gradebook", value: "In Progress", status: "warning" }
-
-  const approvedStatuses: CourseStatus[] = ["instructor_approved", "final_approved"]
-  const finalApproval: StatusItemData = approvedStatuses.includes(courseStatus)
-    ? { label: "Final Approval", value: "Approved", status: "success" }
-    : courseStatus === "submitted_to_admin"
-    ? { label: "Final Approval", value: "Under Review", status: "info" }
-    : { label: "Final Approval", value: "Waiting", status: "muted" }
-
-  return [courseInfo, migrationNotes, checklist, gradebook, finalApproval]
 }
 
 function StatusItem({
@@ -106,20 +82,20 @@ function StatusItem({
   status: 'success' | 'warning' | 'error' | 'muted' | 'info'
 }) {
   const statusClasses = {
-    success: "text-green-500 bg-green-500/10 border-green-500/20",
-    warning: "text-orange-500 bg-orange-500/10 border-orange-500/20",
-    error: "text-red-500 bg-red-500/10 border-red-500/20",
-    muted: "text-muted-foreground bg-muted/50 border-transparent",
-    info: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+    success: "text-success",
+    warning: "text-warning",
+    error: "text-destructive",
+    muted: "text-muted-foreground/50",
+    info: "text-primary",
   }
 
   return (
-    <div className="p-3 flex flex-col gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="p-2 px-3 flex flex-col gap-0.5">
+      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
         {label}
       </span>
       <span className={cn(
-        "text-xs font-bold px-2 py-0.5 rounded-full w-fit border",
+        "text-[11px] font-bold truncate",
         statusClasses[status]
       )}>
         {value}

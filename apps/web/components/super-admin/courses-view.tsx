@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { PaginationControls } from "@/components/shared/pagination-controls"
 import type { PaginatedResult, SuperAdminCourseRow as CourseRow } from "@/lib/repositories/contracts"
@@ -55,40 +56,39 @@ export function CoursesView({ result, search }: { result: PaginatedResult<Course
               courses.map((c, idx) => {
                 const isProblem = c.status === "admin_changes_requested" || c.status === "instructor_questions"
                 const borderClass = 
-                  c.status === "instructor_approved" || c.status === "final_approved" ? "border-l-[success]" :
-                  isProblem ? "border-l-[warning]" :
-                  c.status === "submitted_to_admin" || c.status === "sent_to_instructor" ? "border-l-[info]" :
-                  "border-l-muted-foreground/30"
+                  c.status === "instructor_approved" || c.status === "final_approved" ? "border-l-success" :
+                  isProblem ? "border-l-warning" :
+                  c.status === "submitted_to_admin" || c.status === "sent_to_instructor" ? "border-l-primary" :
+                  "border-l-muted-foreground/20"
 
-                // Alternating pattern 1-3 vs 4-6
-                const groupIdx = idx % 6
-                const bgClass = groupIdx < 3 ? "bg-card" : "bg-muted/5"
+                // Alternating pattern: 96% (card) vs 94% (secondary)
+                const bgClass = idx % 2 === 0 ? "bg-card" : "bg-secondary/50"
 
                 return (
                   <TableRow 
                     key={c.id} 
                     className={cn(
-                      "group border-border transition-all hover:bg-white/5 border-l-4",
+                      "group border-b border-border transition-colors hover:bg-primary/5 border-l-[3px]",
                       borderClass,
-                      isProblem ? "bg-warning/5 hover:bg-warning/10" : bgClass
+                      bgClass
                     )}
                   >
                     <TableCell className="max-w-[20rem] whitespace-normal break-words pl-5 py-4">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-sm font-bold text-foreground leading-tight group-hover:text-primary transition-colors">{c.title}</span>
-                        <span className="text-[11px] text-muted-foreground font-medium">ID: {c.id.slice(0, 8)}</span>
+                        <span className="text-[11px] text-muted-foreground font-medium tracking-tight">{c.id.slice(0, 8)}</span>
                       </div>
                     </TableCell>
                     <TableCell className="align-middle">
                       <StatusBadge status={c.status} />
                     </TableCell>
-                    <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs font-medium">
-                      {c.ta?.name ?? c.ta?.email ?? <span className="text-muted-foreground italic text-[11px]">Unassigned</span>}
+                    <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs font-semibold text-foreground/80">
+                      {c.ta?.name ?? c.ta?.email ?? <span className="text-muted-foreground/50 italic text-[11px]">Unassigned</span>}
                     </TableCell>
-                    <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs font-medium hidden md:table-cell">
+                    <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs font-medium text-muted-foreground hidden md:table-cell">
                       {c.instructor?.name ?? c.instructor?.email ?? "—"}
                     </TableCell>
-                    <TableCell className="whitespace-normal text-[11px] text-right pr-6 font-semibold text-muted-foreground">
+                    <TableCell className="whitespace-normal text-[11px] text-right pr-6 font-bold text-muted-foreground/70">
                       {fmt(c.updated_at)}
                     </TableCell>
                   </TableRow>

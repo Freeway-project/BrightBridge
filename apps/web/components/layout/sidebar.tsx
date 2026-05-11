@@ -22,6 +22,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 import {
   Tooltip,
   TooltipContent,
@@ -74,10 +75,20 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                 const active =
                   pathname === item.href || pathname.startsWith(item.href + "/")
                 const btn = (
-                  <SidebarMenuButton asChild isActive={active}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={active}
+                    className={cn(
+                      "relative transition-all duration-200",
+                      active && "bg-primary/10 text-primary font-bold shadow-sm"
+                    )}
+                  >
                     <Link href={item.href}>
-                      <item.icon className="size-4 shrink-0" />
-                      <span>{item.label}</span>
+                      <item.icon className={cn("size-4 shrink-0 transition-colors", active ? "text-primary" : "text-muted-foreground")} />
+                      <span className={cn(active ? "text-primary" : "text-sidebar-foreground")}>{item.label}</span>
+                      {active && (
+                        <div className="absolute left-0 top-1 bottom-1 w-1 rounded-r-full bg-primary" />
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 )

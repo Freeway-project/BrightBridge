@@ -25,7 +25,7 @@ const STATUS_VARIANTS: Record<CourseStatus, "default" | "secondary" | "success" 
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
-    <Badge variant={STATUS_VARIANTS[status]} className={cn("px-2 py-0.5 rounded-full uppercase text-[10px] font-bold tracking-wider", className)}>
+    <Badge variant={STATUS_VARIANTS[status]} className={cn("px-1.5 py-0 h-4.5 rounded-sm uppercase text-[9px] font-black tracking-tighter", className)}>
       {getCourseStatusLabel(status)}
     </Badge>
   )

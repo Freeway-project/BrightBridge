@@ -189,7 +189,8 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
             {!fixesOpen ? (
               <div className="flex flex-col gap-2">
                 <Button
-                  className="w-full justify-start h-9"
+                  variant="approve"
+                  className="w-full justify-start h-9 font-bold"
                   disabled={isPending || course.status !== "submitted_to_admin"}
                   onClick={handleApprove}
                 >
@@ -197,8 +198,8 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
                   Approve Review
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full justify-start h-9 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  variant="warning"
+                  className="w-full justify-start h-9 font-bold"
                   disabled={isPending || course.status !== "submitted_to_admin"}
                   onClick={() => setFixesOpen(true)}
                 >
@@ -207,7 +208,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3 p-3 rounded-lg border border-orange-200 bg-orange-50/50">
+              <div className="space-y-3 p-3 rounded-xl border border-warning/20 bg-warning/5">
                 <Textarea
                   autoFocus
                   placeholder="What needs fixing?"
@@ -216,7 +217,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
                   onChange={(e) => setNote(e.target.value)}
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" variant="destructive" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={handleSendFixes}>
+                  <Button size="sm" variant="destructive" className="flex-1 h-8 text-[11px] font-bold" disabled={isPending} onClick={handleSendFixes}>
                     Send Fix Request
                   </Button>
                   <Button size="sm" variant="ghost" className="flex-1 h-8 text-[11px]" disabled={isPending} onClick={() => { setFixesOpen(false); setNote("") }}>

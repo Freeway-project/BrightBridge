@@ -138,20 +138,31 @@ function TabItem({
   count: number
   activeColor: string
 }) {
+  const semanticColors: Record<string, string> = {
+    'todo': 'data-[state=active]:after:bg-warning text-muted-foreground data-[state=active]:text-foreground',
+    'in_progress': 'data-[state=active]:after:bg-primary text-muted-foreground data-[state=active]:text-foreground',
+    'done': 'data-[state=active]:after:bg-success text-muted-foreground data-[state=active]:text-foreground',
+  }
+
+  const badgeColors: Record<string, string> = {
+    'todo': 'bg-warning text-warning-foreground',
+    'in_progress': 'bg-primary text-primary-foreground',
+    'done': 'bg-success text-success-foreground',
+  }
+
   return (
     <TabsTrigger
       value={value}
       className={cn(
-        "relative rounded-none border-b-2 border-transparent bg-transparent px-4 pb-2.5 pt-1 text-sm font-medium text-muted-foreground shadow-none transition-colors",
-        "data-[state=active]:shadow-none data-[state=active]:bg-transparent",
-        `data-[state=active]:${activeColor.split(" ")[0]}`,
-        `data-[state=active]:${activeColor.split(" ")[1]}`,
+        "relative rounded-none border-b-0 bg-transparent px-4 pb-2.5 pt-2 text-sm font-bold transition-all",
+        "data-[state=active]:bg-[oklch(0.23_0.06_260)]",
+        semanticColors[value] || ""
       )}
     >
       {label}
       <span className={cn(
-        "ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-        count > 0 ? "bg-foreground/10 text-foreground" : "bg-muted text-muted-foreground",
+        "ml-2 rounded-full px-2 py-0.5 text-[10px] font-black shadow-sm",
+        count > 0 ? (badgeColors[value] || "bg-primary text-primary-foreground") : "bg-muted text-muted-foreground",
       )}>
         {count}
       </span>
