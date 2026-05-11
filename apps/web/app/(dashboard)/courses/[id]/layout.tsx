@@ -7,6 +7,7 @@ import { getEscalationsForCourse } from "@/lib/services/escalations";
 import { getCourseInstructor } from "@/lib/services/profiles";
 import { getCourseComments } from "@/lib/services/comments";
 import { getOpenIssuesCountAction } from "@/lib/issues";
+import { startTaReview } from "@/lib/workspace/actions";
 import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
 import { TweakableContent } from "@/components/shared/tweakable-content";
@@ -31,6 +32,8 @@ export default async function CourseWorkspaceLayout({
   const course = await getCourseById(id, ctx.userId, ctx.profile.role);
 
   if (!course) notFound();
+
+  await startTaReview(id);
 
   const [responses, escalations, instructor, comments, openIssueCount] = await Promise.all([
     getReviewResponses(id),
