@@ -9,6 +9,7 @@ import { getCourseComments } from "@/lib/services/comments";
 import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
 import { TweakableContent } from "@/components/shared/tweakable-content";
+import { CourseLayoutClient } from "./_components/course-layout-client";
 
 const SECTIONS = [
   { key: "course_metadata", label: "Metadata" },
@@ -58,26 +59,19 @@ export default async function CourseWorkspaceLayout({
     }, null) ?? null;
 
   return (
-    <div className="flex flex-1 overflow-hidden">
-      <WorkspaceNav
-        courseId={id}
-        courseTitle={course.title}
-        courseStatus={course.status}
-      />
-      <TweakableContent className="flex flex-1 flex-col overflow-hidden">
-        {children}
-      </TweakableContent>
-      <InfoPanel
-        courseId={id}
-        courseStatus={course.status}
-        reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
-        reviewerId={ctx.userId}
-        instructorName={instructor?.fullName ?? instructor?.email ?? null}
-        progress={sectionMeta}
-        lastSavedAt={lastSavedAt}
-        escalations={escalations}
-        comments={comments}
-      />
-    </div>
+    <CourseLayoutClient
+      courseId={id}
+      courseTitle={course.title}
+      courseStatus={course.status}
+      reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
+      reviewerId={ctx.userId}
+      instructorName={instructor?.fullName ?? instructor?.email ?? null}
+      progress={sectionMeta}
+      lastSavedAt={lastSavedAt}
+      escalations={escalations}
+      comments={comments}
+    >
+      {children}
+    </CourseLayoutClient>
   );
 }
