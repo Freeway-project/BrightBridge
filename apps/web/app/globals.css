@@ -10,15 +10,15 @@
   
   /* 60% Dark Blues & Blacks (No Gray) */
   --background: oklch(0.08 0.02 260); /* Deep midnight black */
-  --foreground: oklch(0.96 0.06 255); /* Bright icy blue */
+  --foreground: oklch(0.98 0.12 255); /* Bright vibrant blue */
   --card: oklch(0.13 0.04 260); /* Deep navy card */
-  --card-foreground: oklch(0.96 0.06 255);
+  --card-foreground: oklch(0.98 0.12 255);
   --popover: oklch(0.12 0.04 260);
-  --popover-foreground: oklch(0.96 0.06 255);
+  --popover-foreground: oklch(0.98 0.12 255);
   --secondary: oklch(0.18 0.08 260); /* Dark blue surface */
-  --secondary-foreground: oklch(0.85 0.12 255);
+  --secondary-foreground: oklch(0.92 0.12 255);
   --muted: oklch(0.15 0.06 260);
-  --muted-foreground: oklch(0.55 0.15 255); /* Muted blue text */
+  --muted-foreground: oklch(0.72 0.08 255); /* Brighter muted blue text for better contrast */
   --accent: oklch(0.22 0.10 260); /* Highlight blue surface */
   --accent-foreground: oklch(0.98 0.05 255);
   
@@ -133,15 +133,15 @@ a {
 .dark {
   /* Redundant in this specific "dark-by-default" request, but kept for compatibility */
   --background: oklch(0.14 0.01 260);
-  --foreground: oklch(0.95 0.01 260);
+  --foreground: oklch(0.97 0.10 255);
   --card: oklch(0.20 0.02 260);
-  --card-foreground: oklch(0.95 0.01 260);
+  --card-foreground: oklch(0.97 0.10 255);
   --popover: oklch(0.20 0.02 260);
-  --popover-foreground: oklch(0.95 0.01 260);
+  --popover-foreground: oklch(0.97 0.10 255);
   --secondary: oklch(0.19 0.02 260);
-  --secondary-foreground: oklch(0.80 0.02 260);
+  --secondary-foreground: oklch(0.92 0.08 255);
   --muted: oklch(0.19 0.02 260);
-  --muted-foreground: oklch(0.65 0.02 260);
+  --muted-foreground: oklch(0.72 0.05 255);
   --accent: oklch(0.25 0.025 260);
   --accent-foreground: oklch(0.95 0.01 260);
   --border: oklch(0.30 0.04 260);
