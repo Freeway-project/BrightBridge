@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { BookOpen, UserPlus, AlertTriangle, CheckCircle } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type Props = {
   overviewPanel: React.ReactNode
