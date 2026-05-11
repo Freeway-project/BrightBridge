@@ -56,33 +56,33 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus, reviewerName
           </div>
         </div>
 
-        <div className="space-y-3 pb-4 border-b border-border/50">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+        <div className="space-y-3 pb-3 border-b border-border/50">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 line-clamp-1">
             Participants
           </p>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="size-6 rounded-full bg-primary flex items-center justify-center text-[9px] font-bold text-primary-foreground">
+          <div className="space-y-2.5 text-[9px]">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <div className="size-5 shrink-0 rounded-full bg-primary flex items-center justify-center text-[8px] font-bold text-primary-foreground">
                 {reviewerName[0]?.toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-foreground truncate">{reviewerName}</p>
-                <p className="text-[9px] text-muted-foreground">Assigned TA</p>
+                <p className="font-bold text-foreground truncate leading-tight">{reviewerName}</p>
+                <p className="text-muted-foreground leading-tight">TA</p>
               </div>
             </div>
-            <p className="text-[9px] text-muted-foreground pl-8">Admin: Pending</p>
+            <p className="text-muted-foreground">Admin: Pending</p>
             {instructorName ? (
-              <div className="flex items-center gap-2">
-                <div className="size-6 rounded-full bg-secondary flex items-center justify-center text-[9px] font-bold text-secondary-foreground">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <div className="size-5 shrink-0 rounded-full bg-secondary flex items-center justify-center text-[8px] font-bold text-secondary-foreground">
                   {instructorName[0]?.toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-foreground truncate">{instructorName}</p>
-                  <p className="text-[9px] text-muted-foreground">Instructor</p>
+                  <p className="font-bold text-foreground truncate leading-tight">{instructorName}</p>
+                  <p className="text-muted-foreground leading-tight">Instructor</p>
                 </div>
               </div>
             ) : (
-              <p className="text-[9px] text-muted-foreground pl-8">Instructor: Pending</p>
+              <p className="text-muted-foreground">Instructor: Pending</p>
             )}
           </div>
         </div>
