@@ -17,10 +17,10 @@ export function CoursesView({ result, search }: { result: PaginatedResult<Course
   const { data: courses, total, page, totalPages } = result
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 flex flex-col bg-background">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">{total} courses</p>
-        <form method="GET" action="/super-admin/courses" className="relative w-64">
+    <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="shrink-0 text-sm text-muted-foreground">{total} courses</p>
+        <form method="GET" action="/super-admin/courses" className="relative min-w-0 w-full sm:w-64 sm:shrink-0">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <Input
             name="search"
@@ -30,7 +30,7 @@ export function CoursesView({ result, search }: { result: PaginatedResult<Course
           />
         </form>
       </div>
-      <div className="rounded-lg border border-border bg-card overflow-hidden flex-1 flex flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-border">
@@ -51,11 +51,11 @@ export function CoursesView({ result, search }: { result: PaginatedResult<Course
             ) : (
               courses.map((c) => (
                 <TableRow key={c.id} className="border-border">
-                  <TableCell className="pl-4 text-sm font-medium truncate max-w-[300px]">{c.title}</TableCell>
-                  <TableCell><StatusBadge status={c.status} /></TableCell>
-                  <TableCell className="text-xs">{c.ta?.name ?? c.ta?.email ?? "—"}</TableCell>
-                  <TableCell className="text-xs">{c.instructor?.name ?? c.instructor?.email ?? "—"}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{fmt(c.updated_at)}</TableCell>
+                  <TableCell className="max-w-[min(20rem,100%)] whitespace-normal break-words pl-4 text-sm font-medium">{c.title}</TableCell>
+                  <TableCell className="align-top"><StatusBadge status={c.status} /></TableCell>
+                  <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs sm:max-w-none">{c.ta?.name ?? c.ta?.email ?? "—"}</TableCell>
+                  <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs sm:max-w-none">{c.instructor?.name ?? c.instructor?.email ?? "—"}</TableCell>
+                  <TableCell className="whitespace-normal text-xs text-muted-foreground">{fmt(c.updated_at)}</TableCell>
                 </TableRow>
               ))
             )}

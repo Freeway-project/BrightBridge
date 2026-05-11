@@ -1,5 +1,6 @@
  "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth/context";
@@ -31,65 +32,102 @@ export async function saveDraft(
   data: unknown,
 ): Promise<{ ok: boolean; savedAt: string; error?: string }> {
   const ctx = await requireProfile();
-  const course = await getCourseById(courseId, ctx.userId);
-  if (!course) {
-    return { ok: false, savedAt: "", error: "Course not found or assignment was revoked. Refreshing..." };
+  try {
+    const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
+    if (!course) {
+      return { ok: false, savedAt: "", error: "Course not found or assignment was revoked. Refreshing..." };
+    }
+
+    const schema = SECTION_SCHEMAS[sectionKey];
+    const parsed = schema ? schema.safeParse(data) : { success: true, data };
+    if (!parsed.success) {
+      throw new Error(`Invalid data for section ${sectionKey}`);
+    }
+
+    const section = await getReviewSectionByKey(sectionKey);
+    if (!section) throw new Error(`Section not found: ${sectionKey}`);
+
+    await upsertReviewResponse({
+      courseId,
+      sectionId: section.id,
+      userId: ctx.userId,
+      responseData: (parsed as { success: true; data: Record<string, unknown> }).data,
+      status: "draft",
+    });
+
+    return { ok: true, savedAt: new Date().toISOString() };
+  } catch (error) {
+    Sentry.withScope((scope) => {
+      scope.setTag("area", "ta_workspace");
+      scope.setTag("action", "save_draft");
+      scope.setTag("section_key", sectionKey);
+      scope.setContext("save_draft", {
+        actorId: ctx.userId,
+        actorRole: ctx.profile.role,
+        courseId,
+      });
+      Sentry.captureException(error instanceof Error ? error : new Error("saveDraft failed"));
+    });
+    throw error;
   }
-
-  const schema = SECTION_SCHEMAS[sectionKey];
-  const parsed = schema ? schema.safeParse(data) : { success: true, data };
-  if (!parsed.success) {
-    throw new Error(`Invalid data for section ${sectionKey}`);
-  }
-
-  const section = await getReviewSectionByKey(sectionKey);
-  if (!section) throw new Error(`Section not found: ${sectionKey}`);
-
-  await upsertReviewResponse({
-    courseId,
-    sectionId: section.id,
-    userId: ctx.userId,
-    responseData: (parsed as { success: true; data: Record<string, unknown> }).data,
-    status: "draft",
-  });
-
-  return { ok: true, savedAt: new Date().toISOString() };
 }
 
 export async function submitReview(courseId: string): Promise<{ ok: boolean; error?: string }> {
   const ctx = await requireProfile();
-  const course = await getCourseById(courseId, ctx.userId);
-  if (!course) {
-    return { ok: false, error: "Course not found or assignment was revoked. Refreshing..." };
-  }
+  try {
+    const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
+    if (!course) {
+      return { ok: false, error: "Course not found or assignment was revoked. Refreshing..." };
+    }
 
-  const fromStatus =
-    course.status === "assigned_to_ta" || course.status === "admin_changes_requested"
-      ? "ta_review_in_progress"
-      : course.status;
+    // Idempotency guard: avoid throwing on repeat submit clicks/race conditions
+    // when the course is already in the target status.
+    if (course.status === "submitted_to_admin") {
+      revalidatePath("/ta");
+      revalidatePath(`/courses/${courseId}`);
+      return { ok: true };
+    }
 
-  if (course.status !== fromStatus) {
+    const fromStatus =
+      course.status === "assigned_to_ta" || course.status === "admin_changes_requested"
+        ? "ta_review_in_progress"
+        : course.status;
+
+    if (course.status !== fromStatus) {
+      await transitionCourseStatus({
+        courseId,
+        from: course.status,
+        to: fromStatus,
+        actorId: ctx.userId,
+        actorRole: ctx.profile.role,
+        note: "TA review started",
+      });
+    }
+
+    await markAllResponsesSubmitted(courseId);
     await transitionCourseStatus({
       courseId,
-      from: course.status,
-      to: fromStatus,
+      from: fromStatus,
+      to: "submitted_to_admin",
       actorId: ctx.userId,
       actorRole: ctx.profile.role,
-      note: "TA review started",
+      note: "TA submitted review",
     });
+
+    revalidatePath("/ta");
+    revalidatePath(`/courses/${courseId}`);
+    return { ok: true };
+  } catch (error) {
+    Sentry.withScope((scope) => {
+      scope.setTag("area", "ta_workspace");
+      scope.setTag("action", "submit_review");
+      scope.setContext("submit_review", {
+        actorId: ctx.userId,
+        actorRole: ctx.profile.role,
+        courseId,
+      });
+      Sentry.captureException(error instanceof Error ? error : new Error("submitReview failed"));
+    });
+    throw error;
   }
-
-  await markAllResponsesSubmitted(courseId);
-  await transitionCourseStatus({
-    courseId,
-    from: fromStatus,
-    to: "submitted_to_admin",
-    actorId: ctx.userId,
-    actorRole: ctx.profile.role,
-    note: "TA submitted review",
-  });
-
-  revalidatePath("/ta");
-  revalidatePath(`/courses/${courseId}`);
-  return { ok: true };
 }

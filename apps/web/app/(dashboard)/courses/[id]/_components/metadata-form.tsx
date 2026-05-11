@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useStoredTimerValue } from "./review-timer"
+import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -40,8 +41,8 @@ function parseTerm(term: string): { season: string; year: string } {
 }
 
 export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
+  const dirtySource = `metadata-form:${course.id}`;
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
-  const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const parsed = parseTerm(defaultValues.term ?? "")
   const [termSeason, setTermSeason] = useState(parsed.season)
@@ -57,33 +58,75 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  async function handleSave(advance = false) {
+  useEffect(() => {
+    setUnsavedChanges(dirtySource, form.formState.isDirty);
+    return () => clearUnsavedChanges(dirtySource);
+  }, [dirtySource, form.formState.isDirty]);
+
+  // Restore from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(`coursebridge:${course.id}:local-draft:course_metadata`);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as Partial<MetadataFormValues>;
+      form.reset({ ...defaultValues, ...parsed }, { keepDefaultValues: false });
+      if (parsed.term) {
+        const { season, year } = parseTerm(parsed.term);
+        setTermSeason(season);
+        setTermYear(year);
+      }
+      // Mark as having unsaved changes since localStorage has a draft
+      setUnsavedChanges(dirtySource, true);
+    } catch {
+      localStorage.removeItem(`coursebridge:${course.id}:local-draft:course_metadata`);
+    }
+  }, []); // run once on mount
+
+  // Write to localStorage on every change
+  useEffect(() => {
+    const sub = form.watch((values) => {
+      localStorage.setItem(
+        `coursebridge:${course.id}:local-draft:course_metadata`,
+        JSON.stringify(values),
+      );
+    });
+    return () => sub.unsubscribe();
+  }, [form, course.id]);
+
+  // Save only — called manually via "Save & Next" button
+  async function performSave() {
     const valid = await form.trigger()
-    if (!valid) return
+    if (!valid) return false
 
     setStatus("saving")
     setErrorMsg(null)
-    startTransition(async () => {
-      try {
-        const res = await saveDraft(course.id, "course_metadata", {
-          ...form.getValues(),
-          overall_time_spent_seconds: overallElapsed,
-        })
-        if (!res.ok) {
-          setErrorMsg(res.error || "Failed to save draft.")
-          setStatus("error")
-          setTimeout(() => window.location.reload(), 2000)
-          return
-        }
-        setStatus("saved")
-        if (advance) {
-          router.push(`/courses/${course.id}/review-matrix`)
-        }
-      } catch (err) {
+    try {
+      const res = await saveDraft(course.id, "course_metadata", {
+        ...form.getValues(),
+        overall_time_spent_seconds: overallElapsed,
+      })
+      if (!res.ok) {
+        setErrorMsg(res.error || "Failed to save draft.")
         setStatus("error")
-        setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
+        return false
       }
-    })
+      localStorage.removeItem(`coursebridge:${course.id}:local-draft:course_metadata`)
+      setStatus("saved")
+      form.reset(form.getValues())
+      return true
+    } catch (err) {
+      setStatus("error")
+      setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
+      return false
+    }
+  }
+
+  // Navigate to next step after saving
+  async function handleAdvance() {
+    const ok = await performSave()
+    if (ok) {
+      router.push(`/courses/${course.id}/review-matrix`)
+    }
   }
 
   const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
@@ -94,7 +137,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-base">Course Metadata</CardTitle>
-          <SaveState isPending={isPending} status={status} />
+          <SaveState status={status} />
         </div>
       </CardHeader>
       <CardContent>
@@ -199,8 +242,8 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           </label>
 
           <div className="flex justify-end">
-            <Button disabled={isPending} onClick={() => void handleSave(true)} type="button">
-              Save draft
+            <Button disabled={status === "saving"} onClick={() => void handleAdvance()} type="button">
+              Save & Next →
             </Button>
           </div>
         </form>
@@ -223,14 +266,8 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-xs text-destructive">{message}</p>
 }
 
-function SaveState({
-  isPending,
-  status,
-}: {
-  isPending: boolean
-  status: "idle" | "saving" | "saved" | "error"
-}) {
-  if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
+function SaveState({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
+  if (status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
   if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
   if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
   return <p className="text-xs text-muted-foreground">Auto-saves while you type</p>

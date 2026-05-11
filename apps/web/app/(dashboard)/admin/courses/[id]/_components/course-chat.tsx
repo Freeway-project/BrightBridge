@@ -74,7 +74,7 @@ export function CourseChat({ courseId, comments, currentUserId }: Props) {
                 )}
               >
                 <Avatar className="size-6 shrink-0 mt-0.5">
-                  <AvatarFallback className="text-[10px]">
+                  <AvatarFallback className="text-[10px] text-muted-foreground bg-muted">
                     {getInitials(comment.author_name)}
                   </AvatarFallback>
                 </Avatar>
@@ -92,7 +92,7 @@ export function CourseChat({ courseId, comments, currentUserId }: Props) {
                       "rounded-lg px-3 py-2 text-sm",
                       isMe
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
+                        : "bg-muted/60 text-foreground border border-border/50"
                     )}
                   >
                     {comment.body}

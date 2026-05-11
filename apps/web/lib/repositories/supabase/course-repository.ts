@@ -4,7 +4,7 @@ import type { AssignmentRole } from "@coursebridge/workflow";
 import type {
   AdminCourseListFilters,
   AdminCourseRow,
-
+  AssignmentLog,
   AuditEvent,
   CourseAssignmentRecord,
   CourseRepository,
@@ -63,7 +63,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return (data ?? []).map((row) => toCourseSummary(row as CourseRow));
     },
 
-    async listAssignedCourses(userId) {
+    async listAssignedCourses(userId, assignmentRole) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("courses")
@@ -71,6 +71,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
           "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,course_assignments!inner(profile_id,role)"
         )
         .eq("course_assignments.profile_id", userId)
+        .eq("course_assignments.role", assignmentRole)
         .order("updated_at", { ascending: false });
 
       if (error) {
@@ -80,7 +81,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return (data ?? []).map((row) => toCourseSummary(row as unknown as CourseRow));
     },
 
-    async getAssignedCourseById(courseId, userId) {
+    async getAssignedCourseById(courseId, userId, assignmentRole) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("courses")
@@ -89,6 +90,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         )
         .eq("id", courseId)
         .eq("course_assignments.profile_id", userId)
+        .eq("course_assignments.role", assignmentRole)
         .maybeSingle();
 
       if (error) {
@@ -157,6 +159,34 @@ export function createSupabaseCourseRepository(): CourseRepository {
       }
 
       return toCourseSummary(data as CourseRow);
+    },
+
+    async updateCourseOrgUnit(courseId, orgUnitId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      
+      // We also update the department field for consistency if it's currently used for display
+      // Though long term we should rely on organizational_units.name
+      let department: string | null = null;
+      if (orgUnitId) {
+        const { data: unit } = await admin
+          .from("organizational_units")
+          .select("name")
+          .eq("id", orgUnitId)
+          .maybeSingle();
+        department = unit?.name ?? null;
+      }
+
+      const { error } = await admin
+        .from("courses")
+        .update({ 
+          org_unit_id: orgUnitId,
+          department: department
+        })
+        .eq("id", courseId);
+
+      if (error) {
+        throw new Error(`Could not update course department: ${error.message}`);
+      }
     },
 
     async getCourseAssignment(courseId, profileId) {
@@ -374,6 +404,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         title: course.title,
         term: course.term,
         department: course.department,
+        orgUnitId: course.org_unit_id,
         status: toCourseStatus(course.status),
         updatedAt: course.updated_at,
         ta: staffProfile
@@ -461,22 +492,27 @@ export function createSupabaseCourseRepository(): CourseRepository {
       };
     },
 
+    async countCourses() {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { count, error } = await admin.from("courses").select("*", { count: "exact", head: true });
+      if (error) throw new Error(`countCourses: ${error.message}`);
+      return count ?? 0;
+    },
+
     async listStatusCounts() {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin.from("courses").select("status");
+      const { data, error } = await admin.from("course_status_counts").select("status, count");
 
       if (error) {
-        throw new Error(`status counts: ${error.message}`);
+        if (!isMissingRelationError(error)) {
+          throw new Error(`status counts: ${error.message}`);
+        }
+        return fallbackStatusCounts();
       }
 
-      const counts: Record<string, number> = {};
-      for (const row of data ?? []) {
-        counts[row.status] = (counts[row.status] ?? 0) + 1;
-      }
-
-      return Object.entries(counts).map(([status, count]) => ({
-        status: toCourseStatus(status),
-        count,
+      return (data ?? []).map((row) => ({
+        status: toCourseStatus(row.status),
+        count: Number(row.count),
       })) satisfies StatusCount[];
     },
 
@@ -504,43 +540,25 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
     async listTAWorkload() {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data: staff, error: staffError } = await admin
-        .from("profiles")
-        .select("id, email, full_name")
-        .eq("role", "standard_user");
+      const { data, error } = await admin
+        .from("ta_workload_stats")
+        .select("profile_id, full_name, email, active_courses, needs_fixes")
+        .order("full_name", { ascending: true });
 
-      if (staffError) {
-        throw new Error(`staff list: ${staffError.message}`);
+      if (error) {
+        if (!isMissingRelationError(error)) {
+          throw new Error(`ta workload: ${error.message}`);
+        }
+        return fallbackTAWorkload();
       }
 
-      const { data: assignments, error: assignError } = await admin
-        .from("course_assignments")
-        .select("profile_id, courses(status)")
-        .eq("role", "staff");
-
-      if (assignError) {
-        throw new Error(`assignments: ${assignError.message}`);
-      }
-
-      return (staff ?? []).map((member) => {
-        const memberAssignments = (assignments ?? []).filter((assignment) => assignment.profile_id === member.id);
-        const active = memberAssignments.filter(
-          (assignment) =>
-            firstRelation(assignment.courses)?.status !== "final_approved" &&
-            firstRelation(assignment.courses)?.status !== "submitted_to_admin",
-        );
-        const needsFixes = memberAssignments.filter(
-          (assignment) => firstRelation(assignment.courses)?.status === "admin_changes_requested",
-        );
-
-        return {
-          id: member.id,
-          full_name: member.full_name,
-          email: member.email,
-          active_courses: active.length,
-          needs_fixes: needsFixes.length,
-        } satisfies TAWorkload;
-      });
+      return (data ?? []).map((row) => ({
+        id: row.profile_id,
+        full_name: row.full_name,
+        email: row.email,
+        active_courses: Number(row.active_courses),
+        needs_fixes: Number(row.needs_fixes),
+      })) satisfies TAWorkload[];
     },
 
     async listAuditEvents(limit) {
@@ -588,6 +606,47 @@ export function createSupabaseCourseRepository(): CourseRepository {
           note: event.note,
           created_at: event.created_at,
         } satisfies AuditEvent;
+      });
+    },
+
+    async listRecentAssignments(limit) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("course_assignments")
+        .select(`
+          id, course_id, role, assigned_at,
+          courses ( title ),
+          assigned_user:profiles!course_assignments_profile_id_fkey ( full_name, email ),
+          assigner:profiles!course_assignments_assigned_by_fkey ( full_name, email )
+        `)
+        .order("assigned_at", { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        throw new Error(`assignments_log: ${error.message}`);
+      }
+
+      return (data ?? []).map((row) => {
+        const r = row as any;
+        const course = firstRelation(r.courses);
+        const assignedUser = firstRelation(r.assigned_user);
+        const assigner = firstRelation(r.assigner);
+
+        return {
+          id: r.id,
+          courseId: r.course_id,
+          courseTitle: course?.title ?? "—",
+          assignedUser: {
+            name: assignedUser?.full_name ?? null,
+            email: assignedUser?.email ?? "—",
+          },
+          role: r.role as AssignmentRole,
+          assignedBy: {
+            name: assigner?.full_name ?? null,
+            email: assigner?.email ?? "—",
+          },
+          assignedAt: r.assigned_at,
+        } satisfies AssignmentLog;
       });
     },
 
@@ -713,6 +772,7 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
       title: course.title,
       term: course.term,
       department: course.department,
+      orgUnitId: course.org_unit_id,
       status: toCourseStatus(course.status),
       updatedAt: course.updated_at,
       ta: staffProfile
@@ -724,4 +784,78 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
         : null,
     } satisfies AdminCourseRow;
   });
+}
+
+function isMissingRelationError(error: { code?: string; message?: string } | null | undefined) {
+  if (!error) return false;
+  return error.code === "42P01" || error.code === "PGRST205";
+}
+
+async function fallbackStatusCounts(): Promise<StatusCount[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  const { data, error } = await admin.from("courses").select("status");
+
+  if (error) {
+    throw new Error(`status counts fallback: ${error.message}`);
+  }
+
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const key = String((row as { status: string }).status);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries()).map(([status, count]) => ({
+    status: toCourseStatus(status),
+    count,
+  }));
+}
+
+async function fallbackTAWorkload(): Promise<TAWorkload[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  const { data, error } = await admin
+    .from("course_assignments")
+    .select(`
+      profile_id, role,
+      courses!inner ( status ),
+      profiles!course_assignments_profile_id_fkey ( full_name, email )
+    `)
+    .eq("role", "staff");
+
+  if (error) {
+    throw new Error(`ta workload fallback: ${error.message}`);
+  }
+
+  const byProfile = new Map<string, TAWorkload>();
+  for (const row of data ?? []) {
+    const typed = row as {
+      profile_id: string;
+      courses?: { status: string } | Array<{ status: string }> | null;
+      profiles?:
+        | { full_name: string | null; email: string | null }
+        | Array<{ full_name: string | null; email: string | null }>
+        | null;
+    };
+    const profile = firstRelation(typed.profiles);
+    const course = firstRelation(typed.courses);
+    if (!byProfile.has(typed.profile_id)) {
+      byProfile.set(typed.profile_id, {
+        id: typed.profile_id,
+        full_name: profile?.full_name ?? null,
+        email: profile?.email ?? "",
+        active_courses: 0,
+        needs_fixes: 0,
+      });
+    }
+    const record = byProfile.get(typed.profile_id)!;
+    if (!course?.status) continue;
+    if (course.status !== "final_approved") {
+      record.active_courses += 1;
+    }
+    if (course.status === "admin_changes_requested" || course.status === "instructor_questions") {
+      record.needs_fixes += 1;
+    }
+  }
+
+  return Array.from(byProfile.values()).sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
 }

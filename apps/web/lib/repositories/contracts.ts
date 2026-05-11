@@ -74,6 +74,7 @@ export type AdminCourseRow = {
   title: string;
   term: string | null;
   department: string | null;
+  orgUnitId: string | null;
   status: CourseStatus;
   updatedAt: string;
   ta: { id: string; name: string | null; email: string } | null;
@@ -245,13 +246,28 @@ export type PaginatedResult<T> = {
   totalPages: number;
 };
 
+export type AssignmentLog = {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  assignedUser: { name: string | null; email: string };
+  role: AssignmentRole;
+  assignedBy: { name: string | null; email: string };
+  assignedAt: string;
+};
+
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
-  listAssignedCourses(userId: string): Promise<CourseSummary[]>;
-  getAssignedCourseById(courseId: string, userId: string): Promise<CourseSummary | null>;
+  listAssignedCourses(userId: string, assignmentRole: AssignmentRole): Promise<CourseSummary[]>;
+  getAssignedCourseById(
+    courseId: string,
+    userId: string,
+    assignmentRole: AssignmentRole,
+  ): Promise<CourseSummary | null>;
   createCourse(input: CreateCourseRecordInput): Promise<CourseSummary>;
   getCourseSummaryById(courseId: string): Promise<CourseSummary>;
   updateCourseStatus(courseId: string, status: CourseStatus): Promise<CourseSummary>;
+  updateCourseOrgUnit(courseId: string, orgUnitId: string | null): Promise<void>;
   getCourseAssignment(courseId: string, profileId: string): Promise<CourseAssignmentRecord | null>;
   hasAssignment(courseId: string, profileId: string, role: AssignmentRole): Promise<boolean>;
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;
@@ -264,10 +280,12 @@ export interface CourseRepository {
   ): Promise<PaginatedResult<AdminCourseRow>>;
   getAdminCourse(courseId: string): Promise<AdminCourseRow | null>;
   listSuperAdminCourses(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<SuperAdminCourseRow>>;
+  countCourses(): Promise<number>;
   listStatusCounts(): Promise<StatusCount[]>;
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
+  listRecentAssignments(limit: number): Promise<AssignmentLog[]>;
   listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
   listInstructorCourses(profileId: string): Promise<InstructorCourse[]>;
 }

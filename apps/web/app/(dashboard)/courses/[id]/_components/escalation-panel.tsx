@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { AlertTriangle, CheckCircle2, Send } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Send, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -42,7 +42,11 @@ function getInitials(name?: string) {
 }
 
 export function EscalationPanel({ courseId, currentUserId, initialEscalations }: Props) {
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
   const openEscalation = initialEscalations.find((e) => e.status === "open") ?? null
+  const resolvedEscalations = initialEscalations.filter((e) => e.status === "resolved")
 
   if (openEscalation) {
     return (
@@ -56,7 +60,88 @@ export function EscalationPanel({ courseId, currentUserId, initialEscalations }:
     )
   }
 
-  return <EscalationCreateForm courseId={courseId} />
+  return (
+    <div className="flex flex-col gap-3">
+      <EscalationCreateForm courseId={courseId} />
+
+      {resolvedEscalations.length > 0 && (
+        <div className="rounded-xl border border-border overflow-hidden">
+          <button
+            className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:bg-muted/30 transition-colors"
+            onClick={() => setHistoryOpen((o) => !o)}
+          >
+            <span>Past Escalations ({resolvedEscalations.length})</span>
+            <ChevronDown className={cn("size-3.5 transition-transform", historyOpen && "rotate-180")} />
+          </button>
+
+          {historyOpen && (
+            <div className="border-t border-border divide-y divide-border">
+              {resolvedEscalations.map((esc) => (
+                <div key={esc.id}>
+                  <button
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-muted/20 transition-colors"
+                    onClick={() => setExpandedId(expandedId === esc.id ? null : esc.id)}
+                  >
+                    <span className={cn(
+                      "shrink-0 px-1.5 py-0.5 rounded border text-[9px] font-bold uppercase",
+                      SEVERITY_STYLES[esc.severity],
+                    )}>
+                      {esc.severity}
+                    </span>
+                    <span className="text-[12px] font-medium text-foreground truncate flex-1">{esc.title}</span>
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
+                      {esc.messages.length} msg{esc.messages.length !== 1 ? "s" : ""}
+                    </span>
+                    <span className="shrink-0 px-1.5 py-0.5 rounded border text-[9px] font-bold bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400">
+                      Resolved
+                    </span>
+                    <ChevronDown className={cn("size-3 shrink-0 text-muted-foreground transition-transform", expandedId === esc.id && "rotate-180")} />
+                  </button>
+
+                  {expandedId === esc.id && (
+                    <div className="px-3 pb-3 space-y-3 bg-muted/10">
+                      <ScrollArea className="max-h-[240px] rounded-lg border border-border bg-background p-3">
+                        <div className="space-y-4">
+                          {esc.messages.map((msg) => {
+                            const isMe = msg.author_id === currentUserId
+                            return (
+                              <div key={msg.id} className={cn("flex gap-2.5 max-w-[90%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
+                                <Avatar className="size-6 shrink-0 border border-border">
+                                  <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground">{getInitials(msg.author_name)}</AvatarFallback>
+                                </Avatar>
+                                <div className={cn("space-y-1", isMe ? "items-end text-right" : "items-start text-left")}>
+                                  <p className="text-[10px] text-muted-foreground/80 px-1">
+                                    {msg.author_name ?? "Unknown"} • {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                                  </p>
+                                  <div className={cn(
+                                    "rounded-2xl px-3 py-1.5 text-[12px] leading-relaxed",
+                                    isMe
+                                      ? "bg-primary text-primary-foreground rounded-tr-none"
+                                      : "bg-muted text-foreground border border-border/50 rounded-tl-none"
+                                  )}>
+                                    {msg.body}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </ScrollArea>
+                      {esc.resolved_at && (
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          Resolved {formatDistanceToNow(new Date(esc.resolved_at), { addSuffix: true })}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function EscalationCreateForm({ courseId }: { courseId: string }) {
@@ -187,7 +272,7 @@ function EscalationThread({
                     "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm",
                     isMe 
                       ? "bg-primary text-primary-foreground rounded-tr-none" 
-                      : "bg-muted/50 text-foreground border border-border/50 rounded-tl-none",
+                      : "bg-muted text-foreground border border-border/50 rounded-tl-none",
                   )}>
                     {msg.body}
                   </div>

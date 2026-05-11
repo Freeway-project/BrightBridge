@@ -6,70 +6,72 @@ import { BookOpen, UserPlus, AlertTriangle, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Props = {
+  overviewPanel: React.ReactNode
   coursesPanel: React.ReactNode
   assignPanel: React.ReactNode
+  instructorPanel: React.ReactNode
   escalationsPanel: React.ReactNode
   completedPanel: React.ReactNode
+  migrationPanel: React.ReactNode
+  assignmentLogsPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
 }
 
 export function AdminTabs({
+  overviewPanel,
   coursesPanel,
   assignPanel,
+  instructorPanel,
   escalationsPanel,
   completedPanel,
+  migrationPanel,
+  assignmentLogsPanel,
   unassignedCount,
   openEscalationsCount,
 }: Props) {
-  const [tab, setTab] = useState("courses")
+  const [tab, setTab] = useState("overview")
 
   return (
-    <Tabs value={tab} onValueChange={setTab} className="flex flex-col gap-4">
-      <TabsList className="h-10 w-fit bg-[--surface-0] p-1 rounded-lg">
-        <TabsTrigger
-          value="courses"
-          className="flex items-center gap-2 px-3 data-[state=active]:bg-[--surface-2] data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md text-muted-foreground hover:text-foreground transition-all"
-        >
-          <BookOpen className="size-4" />
-          All Courses
-        </TabsTrigger>
-        <TabsTrigger
-          value="assign"
-          className="flex items-center gap-2 px-3 data-[state=active]:bg-[--surface-2] data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md text-muted-foreground hover:text-foreground transition-all"
-        >
-          <UserPlus className="size-4" />
-          Assign TA
-          {unassignedCount > 0 && (
-            <span className="bg-amber-500/20 text-amber-300 rounded-full px-1.5 text-[10px] font-bold">
-              {unassignedCount.toLocaleString()}
-            </span>
-          )}
-        </TabsTrigger>
-        <TabsTrigger
-          value="escalations"
-          className="flex items-center gap-2 px-3 data-[state=active]:bg-[--surface-2] data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md text-muted-foreground hover:text-foreground transition-all"
-        >
-          <AlertTriangle className="size-4" />
-          Escalations
-          {openEscalationsCount > 0 && (
-            <span className="bg-red-500/20 text-red-400 rounded-full px-1.5 text-[10px] font-bold">
-              {openEscalationsCount}
-            </span>
-          )}
-        </TabsTrigger>
-        <TabsTrigger
-          value="completed"
-          className="flex items-center gap-2 px-3 data-[state=active]:bg-[--surface-2] data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md text-muted-foreground hover:text-foreground transition-all"
-        >
-          <CheckCircle className="size-4" />
-          Provision
-        </TabsTrigger>
-      </TabsList>
+    <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
+      <div className="border-b border-border w-full">
+        <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="courses">All Courses</TabsTrigger>
+          <TabsTrigger value="assign">
+            Assign TA
+            {unassignedCount > 0 && (
+              <span className="ml-1.5 rounded-full bg-yellow-500/20 px-1.5 py-0 text-[10px] font-semibold text-yellow-700 dark:text-yellow-300">
+                {unassignedCount.toLocaleString()}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="instructor">Instructors</TabsTrigger>
+          <TabsTrigger value="escalations">
+            Escalations
+            {openEscalationsCount > 0 && (
+              <span className="ml-1.5 rounded-full bg-red-500/20 px-1.5 py-0 text-[10px] font-semibold text-red-700 dark:text-red-300">
+                {openEscalationsCount}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="migration">Migration</TabsTrigger>
+          <TabsTrigger value="completed">Provision</TabsTrigger>
+        </TabsList>
+      </div>
 
+      <TabsContent value="overview">{overviewPanel}</TabsContent>
       <TabsContent value="courses">{coursesPanel}</TabsContent>
-      <TabsContent value="assign">{assignPanel}</TabsContent>
+      <TabsContent value="assign" className="space-y-6 outline-none">
+        {assignPanel}
+        {assignmentLogsPanel}
+      </TabsContent>
+      <TabsContent value="instructor" className="space-y-6 outline-none">
+        {instructorPanel}
+        {assignmentLogsPanel}
+      </TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
+      <TabsContent value="migration">{migrationPanel}</TabsContent>
       <TabsContent value="completed">{completedPanel}</TabsContent>
     </Tabs>
   )

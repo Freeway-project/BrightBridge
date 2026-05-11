@@ -23,18 +23,18 @@ export function PaginationControls({ page, totalPages, totalItems }: PaginationC
 
   if (totalPages <= 1) {
     return (
-      <div className="flex items-center justify-between mt-4">
-        <p className="text-sm text-muted-foreground">Showing all {totalItems} results</p>
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="min-w-0 text-sm text-muted-foreground">Showing all {totalItems} results</p>
       </div>
     )
   }
 
   return (
-    <div className="flex items-center justify-between mt-4">
-      <p className="text-sm text-muted-foreground">
+    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <p className="min-w-0 text-sm text-muted-foreground">
         Showing page {page} of {totalPages} ({totalItems} total)
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
         <Button variant="outline" size="sm" asChild disabled={page <= 1}>
           <Link href={page <= 1 ? "#" : createPageURL(page - 1)} className={page <= 1 ? "pointer-events-none opacity-50" : ""}>
             <ChevronLeft className="size-4 mr-1" /> Previous

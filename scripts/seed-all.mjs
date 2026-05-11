@@ -27,7 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ── env ───────────────────────────────────────────────────────────────────────
 
-loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local"]);
+loadEnvFiles([".env.local", ".env.development", "apps/web/.env.local", "apps/web/.env"]);
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

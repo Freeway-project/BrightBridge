@@ -20,6 +20,12 @@ export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse }
 
 const LEADERSHIP_TITLES = new Set(["dean", "assistant_dean", "dept_head", "chair"]);
 
+function toAssignmentRole(profileRole: Role): AssignmentRole {
+  if (profileRole === "standard_user") return "staff";
+  if (profileRole === "instructor") return "instructor";
+  throw new Error(`Cannot derive assignment role from profile role: ${profileRole}`);
+}
+
 export type CreateCourseInput = {
   sourceCourseId?: string | null;
   targetCourseId?: string | null;
@@ -53,7 +59,10 @@ export async function getAccessibleCourses() {
   // TAs and instructors only see courses assigned to them
   const isScoped = context.profile.role === "standard_user" || context.profile.role === "instructor";
   const summaries = isScoped
-    ? await getCourseRepository().listAssignedCourses(context.profile.id)
+    ? await getCourseRepository().listAssignedCourses(
+        context.profile.id,
+        toAssignmentRole(context.profile.role),
+      )
     : await getCourseRepository().listAccessibleCourses();
 
   const progressMap = await fetchReviewProgressForCourses(summaries.map((course) => course.id));
@@ -112,12 +121,36 @@ export async function assignUserToCourse(input: AssignUserToCourseInput) {
     throw new Error("Assigned profile does not exist.");
   }
 
+  if (input.role === "staff") {
+    const adminCourse = await getCourseRepository().getAdminCourse(input.courseId);
+
+    if (!adminCourse) {
+      throw new Error("Course not found.");
+    }
+
+    if (adminCourse.ta && adminCourse.ta.id !== input.profileId) {
+      throw new Error("This course is already assigned to a TA.");
+    }
+  }
+
   await getCourseRepository().assignUserToCourse({
     courseId: input.courseId,
     profileId: input.profileId,
     role: input.role,
     assignedBy: context.profile.id
   });
+}
+
+export async function updateCourseDepartment(courseId: string, orgUnitId: string | null) {
+  const context = await requireProfile();
+  requireAnyRole(context, adminRoles);
+
+  await getCourseRepository().updateCourseOrgUnit(courseId, orgUnitId);
+}
+
+export async function getDepartments() {
+  const units = await getHierarchyRepository().listUnits();
+  return units.filter((u) => u.type === "department");
 }
 
 export async function transitionCourseStatus(input: TransitionCourseStatusInput) {

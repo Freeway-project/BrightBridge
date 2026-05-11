@@ -15,19 +15,29 @@ const STATUS_ORDER: CourseStatus[] = [
 ]
 
 export function OverviewView({ data }: { data: SuperAdminData }) {
-  const { statusCounts, taWorkload } = data
+  const { totalCourses, statusCounts, taWorkload } = data
 
   const countByStatus = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
-
-  const totalCourses = statusCounts.reduce((acc, curr) => acc + curr.count, 0)
-  const inProgress  = countByStatus["ta_review_in_progress"] ?? 0
-  const pendingAdmin = (countByStatus["submitted_to_admin"] ?? 0) + (countByStatus["admin_changes_requested"] ?? 0)
-  const withInstructor = (countByStatus["sent_to_instructor"] ?? 0) + (countByStatus["instructor_questions"] ?? 0)
+  
+  const inProgress = 
+    (countByStatus["assigned_to_ta"] ?? 0) + 
+    (countByStatus["ta_review_in_progress"] ?? 0) + 
+    (countByStatus["admin_changes_requested"] ?? 0)
+    
+  const pendingAdmin = 
+    (countByStatus["submitted_to_admin"] ?? 0) + 
+    (countByStatus["ready_for_instructor"] ?? 0) + 
+    (countByStatus["instructor_approved"] ?? 0)
+    
+  const withInstructor = 
+    (countByStatus["sent_to_instructor"] ?? 0) + 
+    (countByStatus["instructor_questions"] ?? 0)
+    
   const completed = countByStatus["final_approved"] ?? 0
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-background">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+    <div className="min-w-0 flex-1 space-y-8 overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
         <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
         <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
@@ -36,7 +46,7 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 shadow-sm border-border/60">
           <CardHeader className="pb-3 px-4 pt-4">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status Breakdown</CardTitle>
           </CardHeader>
@@ -54,7 +64,7 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 shadow-sm border-border/60">
           <CardHeader className="pb-3 px-4 pt-4">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Staff Workload</CardTitle>
           </CardHeader>
@@ -73,9 +83,9 @@ export function OverviewView({ data }: { data: SuperAdminData }) {
                 ) : (
                   taWorkload.map((ta) => (
                     <TableRow key={ta.id} className="border-border">
-                      <TableCell className="pl-4 py-2">
-                        <p className="text-sm font-medium">{ta.full_name ?? ta.email}</p>
-                        {ta.full_name && <p className="text-[11px] text-muted-foreground">{ta.email}</p>}
+                      <TableCell className="min-w-0 whitespace-normal py-2 pl-4">
+                        <p className="text-sm font-medium break-words">{ta.full_name ?? ta.email}</p>
+                        {ta.full_name && <p className="text-[11px] text-muted-foreground break-all">{ta.email}</p>}
                       </TableCell>
                       <TableCell className="text-center text-sm tabular-nums">{ta.active_courses}</TableCell>
                       <TableCell className="text-center">
