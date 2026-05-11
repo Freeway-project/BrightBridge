@@ -59,15 +59,15 @@ export function UpdateStatusTab({ initialVersion }: UpdateStatusTabProps) {
         : "Up to date"
 
   return (
-    <div className="rounded-md border border-sidebar-border bg-sidebar-accent/30 px-2 py-2">
-      <p className="text-[11px] font-medium text-sidebar-foreground/70">Version v{shortVersion}</p>
-      {!collapsed && <p className="mt-1 text-[11px] text-sidebar-foreground/60">{label}</p>}
+    <div className="rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2.5 transition-all hover:bg-primary/10">
+      <p className="text-[10px] font-black uppercase tracking-widest text-primary">Version v{shortVersion}</p>
+      {!collapsed && <p className="mt-1 text-[11px] font-bold text-foreground/80 leading-tight">{label}</p>}
       <button
-        className="mt-1 text-left text-[11px] text-sidebar-primary hover:underline"
+        className="mt-2 text-left text-[11px] font-black uppercase tracking-tighter text-primary hover:brightness-110 active:scale-95 transition-all"
         onClick={() => window.dispatchEvent(new Event("coursebridge:open-update-notice"))}
         type="button"
       >
-        {updateState === "available" ? "Show update" : "Open update"}
+        {updateState === "available" ? "★ Show update" : "Open update notice"}
       </button>
     </div>
   )
