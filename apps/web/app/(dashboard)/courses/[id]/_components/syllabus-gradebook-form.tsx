@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { ProfileOption } from "@/lib/services/profiles"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
 import { SYLLABUS_ITEMS_LIST as SYLLABUS_ITEMS, GRADEBOOK_ITEMS_LIST as GRADEBOOK_ITEMS } from "@/lib/workspace/constants"
@@ -30,7 +29,6 @@ import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
-  instructors: ProfileOption[]
 }
 
 const SYLLABUS_STATUS_OPTIONS: { value: SyllabusRowStatus; label: string }[] = [
@@ -50,7 +48,6 @@ const REVIEW_STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string }[] = [
 export function SyllabusGradebookForm({
   courseId,
   defaultValues,
-  instructors,
 }: SyllabusGradebookFormProps) {
   const dirtySource = `syllabus-gradebook-form:${courseId}`;
   const localDraftKey = `coursebridge:${courseId}:local-draft:syllabus_review`
@@ -147,49 +144,6 @@ export function SyllabusGradebookForm({
       </CardHeader>
       <CardContent>
         <form className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-1.5 text-sm font-medium">
-              Instructor
-              <Controller
-                control={form.control}
-                name="instructor_id"
-                render={({ field }) => (
-                  <Select
-                    disabled={instructors.length === 0}
-                    onValueChange={(value) => {
-                      field.onChange(value)
-                      const instructor = instructors.find((item) => item.id === value)
-                      form.setValue("instructor_email", instructor?.email ?? "", {
-                        shouldDirty: true,
-                      })
-                    }}
-                    value={field.value}
-                  >
-                    <SelectTrigger className="w-full" disabled={instructors.length === 0}>
-                      <SelectValue placeholder="Select instructor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {instructors.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id}>
-                          {instructor.fullName ?? instructor.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {instructors.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
-                  No instructor profiles found in Supabase.
-                </p>
-              ) : null}
-            </label>
-            <label className="grid gap-1.5 text-sm font-medium">
-              Instructor Email
-              <Input readOnly {...form.register("instructor_email")} />
-            </label>
-          </div>
-
           <section className="space-y-3">
             <h3 className="text-sm font-semibold">Syllabus Review</h3>
             <Table>

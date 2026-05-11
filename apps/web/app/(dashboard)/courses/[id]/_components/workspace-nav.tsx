@@ -14,7 +14,7 @@ const STEPS = [
   { label: "Metadata", sub: "Course info", href: "metadata" },
   { label: "Review Matrix", sub: "Checklist items", href: "review-matrix" },
   { label: "Syllabus & GB", sub: "Docs review", href: "syllabus-gradebook" },
-  { label: "Issue Log", sub: "Track problems", href: "issue-log" },
+  { label: "Issues", sub: "Track problems", href: "issue-log" },
   { label: "Submit", sub: "Final review", href: "submit" },
 ] as const
 
@@ -26,7 +26,7 @@ type WorkspaceNavProps = {
   instructorName: string | null
 }
 
-function getInitials(name?: string) {
+function getInitials(name?: string | null) {
   if (!name) return "?"
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 1)
 }

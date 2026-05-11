@@ -1,6 +1,6 @@
 "use client"
 import { CheckCircle2, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
 import { cn } from "@/lib/utils"
@@ -33,6 +33,18 @@ export function InfoPanel({
   comments,
 }: InfoPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [formattedDate, setFormattedDate] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (lastSavedAt) {
+      setFormattedDate(
+        new Date(lastSavedAt).toLocaleString("en-US", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      )
+    }
+  }, [lastSavedAt])
 
   if (isCollapsed) {
     return (
@@ -120,12 +132,7 @@ export function InfoPanel({
                   <div className="flex flex-col">
                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">Last Saved</span>
                      <span className="text-[11px] font-bold text-foreground/80">
-                       {lastSavedAt
-                         ? new Date(lastSavedAt).toLocaleString("en-US", {
-                             dateStyle: "medium",
-                             timeStyle: "short",
-                           })
-                         : "No drafts saved yet"}
+                       {formattedDate || "No drafts saved yet"}
                      </span>
                   </div>
                 </div>

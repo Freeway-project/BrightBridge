@@ -3,6 +3,7 @@ import { Topbar } from "@/components/layout/topbar"
 import { requireProfile } from "@/lib/auth/context"
 import { getCourseById } from "@/lib/services/courses"
 import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review"
+import { getIssuesForCourseAction } from "@/lib/issues"
 import { SubmitPanel } from "../_components/submit-panel"
 import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper"
 import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions"
@@ -22,20 +23,41 @@ export default async function SubmitPage({ params }: Props) {
     { key: "course_metadata", label: "Metadata", required: false },
     { key: "review_matrix", label: "Review Matrix", required: false },
     { key: "syllabus_review", label: "Syllabus & Gradebook", required: false },
-    { key: "general_notes", label: "Issue Log", required: false },
   ] as const
 
-  const sections = await Promise.all(
-    sectionDefs.map(async (definition) => {
-      const section = await getReviewSectionByKey(definition.key)
-      const response = section ? await getReviewResponse(id, section.id) : null
+  const [reviewSections, issues] = await Promise.all([
+    Promise.all(
+      sectionDefs.map(async (definition) => {
+        const section = await getReviewSectionByKey(definition.key)
+        const response = section ? await getReviewResponse(id, section.id) : null
 
-      return {
-        ...definition,
-        complete: Boolean(response && Object.keys(response.response_data ?? {}).length > 0),
-      }
-    }),
-  )
+        return {
+          ...definition,
+          complete: Boolean(response && Object.keys(response.response_data ?? {}).length > 0),
+        }
+      }),
+    ),
+    getIssuesForCourseAction(id, { phase: "migration" }),
+  ])
+
+  const sections = [
+    ...reviewSections,
+    { key: "issues", label: "Issues", required: false, complete: issues.length === 0 },
+  ]
+
+  const reviewData = {
+    course: {
+      id: course.id,
+      code: course.sourceCourseId || "",
+      title: course.title,
+    },
+    issues: issues.map((issue) => ({
+      id: issue.id,
+      type: issue.type || "general",
+      severity: (issue.severity || "minor") as "minor" | "major" | "critical",
+      status: (issue.status || "open") as "open" | "fixed" | "escalated" | "resolved",
+    })),
+  }
 
   return (
     <>
@@ -46,7 +68,7 @@ export default async function SubmitPage({ params }: Props) {
           title="Submit Review"
           refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
-          <SubmitPanel courseId={course.id} courseStatus={course.status} sections={sections} />
+          <SubmitPanel courseId={course.id} courseStatus={course.status} sections={sections} reviewData={reviewData} />
         </CourseWorkspaceRefreshWrapper>
       </main>
     </>

@@ -7,12 +7,11 @@ import type {
   MetadataResponseData,
   ReviewMatrixResponseData,
   SyllabusGradebookResponseData,
-  IssueLogResponseData,
 } from "@/lib/workspace/types"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronRight, ExternalLink, AlertTriangle, CheckCircle2, MinusCircle, HelpCircle, Clock, Circle, FileText, ListChecks, BookOpen, Bug } from "lucide-react"
+import { ChevronDown, ChevronRight, ExternalLink, AlertTriangle, CheckCircle2, MinusCircle, HelpCircle, Clock, Circle, FileText, ListChecks, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ITEM_LABELS, SYLLABUS_ITEM_LABELS, GRADEBOOK_ITEM_LABELS } from "@/lib/workspace/constants"
 
@@ -32,7 +31,6 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
   const meta = byKey["course_metadata"]?.response_data as MetadataResponseData | undefined
   const matrix = byKey["review_matrix"]?.response_data as ReviewMatrixResponseData | undefined
   const syllabus = byKey["syllabus_review"]?.response_data as SyllabusGradebookResponseData | undefined
-  const notes = byKey["general_notes"]?.response_data as IssueLogResponseData | undefined
 
   const metaStatus = byKey["course_metadata"]?.status ?? null
   const matrixStatus = byKey["review_matrix"]?.status ?? null
@@ -40,11 +38,10 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
 
   return (
     <div className="space-y-[var(--card-spacing,1rem)]">
-      <ReviewProgressSummary metaStatus={metaStatus} matrixStatus={matrixStatus} syllabusStatus={syllabusStatus} issueCount={(notes?.issues ?? []).length} />
+      <ReviewProgressSummary metaStatus={metaStatus} matrixStatus={matrixStatus} syllabusStatus={syllabusStatus} />
       <MetadataCard data={meta} responseStatus={metaStatus} />
       <ReviewMatrixCard data={matrix} responseStatus={matrixStatus} />
       <SyllabusCard data={syllabus} responseStatus={syllabusStatus} />
-      <IssueLogCard data={notes} />
     </div>
   )
 }
@@ -52,18 +49,16 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
 function ReviewProgressSummary({
-  metaStatus, matrixStatus, syllabusStatus, issueCount,
+  metaStatus, matrixStatus, syllabusStatus,
 }: {
   metaStatus: "draft" | "submitted" | null
   matrixStatus: "draft" | "submitted" | null
   syllabusStatus: "draft" | "submitted" | null
-  issueCount: number
 }) {
   const tiles = [
     { label: "Metadata", status: metaStatus, icon: FileText },
     { label: "Review Matrix", status: matrixStatus, icon: ListChecks },
     { label: "Syllabus & GB", status: syllabusStatus, icon: BookOpen },
-    { label: "Issue Log", status: null as "draft" | "submitted" | null, icon: Bug, extra: issueCount > 0 ? `${issueCount} logged` : "None logged" },
   ]
 
   const submittedCount = [metaStatus, matrixStatus, syllabusStatus].filter((s) => s === "submitted").length
@@ -87,7 +82,7 @@ function ReviewProgressSummary({
       </CardHeader>
       <CardContent className="pb-4">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {tiles.map(({ label, status, icon: Icon, extra }) => {
+          {tiles.map(({ label, status, icon: Icon }) => {
             const isSubmitted = status === "submitted"
             const isDraft = status === "draft"
             return (
@@ -108,17 +103,17 @@ function ReviewProgressSummary({
                     <CheckCircle2 className="size-4 text-green-600" />
                   ) : isDraft ? (
                     <Clock className="size-4 text-orange-500" />
-                  ) : extra ? null : (
+                  ) : (
                     <Circle className="size-4 text-muted-foreground/30" />
                   )}
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold text-foreground leading-tight">{label}</p>
                   <p className={cn(
-                    "text-[11px] font-medium mt-0.5",
-                    isSubmitted ? "text-green-700 dark:text-green-400" : isDraft ? "text-orange-600" : "text-muted-foreground",
+                    "text-[9px] font-black uppercase tracking-widest mt-1",
+                    isSubmitted ? "text-success" : isDraft ? "text-warning" : "text-muted-foreground/40",
                   )}>
-                    {extra ?? (isSubmitted ? "Submitted" : isDraft ? "Draft saved" : "Not started")}
+                    {isSubmitted ? "Submitted" : isDraft ? "Draft saved" : "Not started"}
                   </p>
                 </div>
               </div>
@@ -551,59 +546,3 @@ function SyllabusCard({
   )
 }
 
-function IssueLogCard({ data }: { data: IssueLogResponseData | undefined }) {
-  const issues = data?.issues ?? []
-  const open = issues.filter((i) => i.status === "open" || i.status === "escalated")
-  const resolved = issues.filter((i) => i.status === "fixed" || i.status === "resolved")
-
-  const bySeverity = (list: typeof issues, sev: string) =>
-    list.filter((i) => i.severity === sev).length
-
-  return (
-    <CollapsibleCard
-      title="Issue Log"
-      chip={
-        issues.length > 0 ? (
-          <Badge variant="outline" className="text-xs">
-            {issues.length} issue{issues.length !== 1 ? "s" : ""}
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-muted-foreground text-xs">No issues</Badge>
-        )
-      }
-    >
-      {issues.length > 0 ? (
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-4 text-sm">
-            <span className="text-red-600 font-medium">{bySeverity(open, "critical")} critical open</span>
-            <span className="text-orange-600 font-medium">{bySeverity(open, "major")} major open</span>
-            <span className="text-muted-foreground">{bySeverity(open, "minor")} minor open</span>
-            <span className="text-muted-foreground">{resolved.length} resolved</span>
-          </div>
-          <div className="space-y-2">
-            {issues.map((issue) => (
-              <div key={issue.id} className="flex items-start gap-3 rounded-md border border-border p-2">
-                <Badge
-                  variant={issue.severity === "critical" ? "destructive" : "outline"}
-                  className="shrink-0 text-[10px]"
-                >
-                  {issue.severity}
-                </Badge>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">{issue.type}</p>
-                  <p className="text-xs text-muted-foreground">{issue.location}</p>
-                  {issue.description && (
-                    <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{issue.description}</p>
-                  )}
-                </div>
-                <Badge variant="secondary" className="shrink-0 text-[10px]">{issue.status}</Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">No issues logged.</p>
-      )}
-    </CollapsibleCard>
-  )
-}

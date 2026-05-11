@@ -41,7 +41,7 @@ const SEVERITY_STYLES: Record<string, string> = {
   minor:    "bg-yellow-500/15 text-yellow-700 border-yellow-400/30",
 }
 
-function getInitials(name?: string) {
+function getInitials(name?: string | null) {
   if (!name) return "?"
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
 }

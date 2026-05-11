@@ -92,25 +92,44 @@ export function createSupabaseEscalationRepository(): EscalationRepository {
     async getOpenEscalations() {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
-        .from("course_escalations")
+        .from("course_issues")
         .select(`
-          *,
+          id,
+          course_id,
+          created_by,
+          severity,
+          title,
+          status,
+          resolved_by,
+          resolved_at,
+          created_at,
           profiles:created_by ( full_name, email ),
           courses:course_id ( title, source_course_id ),
-          escalation_messages ( body, created_at )
+          course_issue_comments ( body, created_at )
         `)
+        .eq("type", "escalation")
         .eq("status", "open")
         .order("created_at", { ascending: true });
 
       if (error) throw error;
 
       return (data ?? []).map((row) => {
-        const r = row as unknown as RawEscalation & {
+        const r = row as unknown as {
+          id: string;
+          course_id: string;
+          created_by: string;
+          severity: string;
+          title: string;
+          status: string;
+          resolved_by: string | null;
+          resolved_at: string | null;
+          created_at: string;
+          profiles?: { full_name?: string | null; email?: string | null } | null;
           courses?: { title?: string | null; source_course_id?: string | null } | null;
-          escalation_messages?: { body: string; created_at: string }[];
+          course_issue_comments?: { body: string; created_at: string }[];
         };
 
-        const msgs = (r.escalation_messages ?? []).sort((a, b) =>
+        const msgs = (r.course_issue_comments ?? []).sort((a, b) =>
           b.created_at.localeCompare(a.created_at),
         );
 
@@ -192,8 +211,9 @@ export function createSupabaseEscalationRepository(): EscalationRepository {
     async countOpenEscalations() {
       const admin = getSupabaseAdminClientOrThrow();
       const { count, error } = await admin
-        .from("course_escalations")
+        .from("course_issues")
         .select("id", { count: "exact", head: true })
+        .eq("type", "escalation")
         .eq("status", "open");
 
       if (error) return 0;
