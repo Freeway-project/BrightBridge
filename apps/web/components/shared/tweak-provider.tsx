@@ -2,9 +2,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react"
 
+export type ThemeId = "ocean" | "sunset" | "monochrome" | "aurora"
+
 type TweakSettings = {
   fontSize: "small" | "medium" | "large"
-  density: "compact" | "regular" | "comfy"
+  theme: ThemeId
 }
 
 type TweakContextType = {
@@ -16,31 +18,26 @@ const TweakContext = createContext<TweakContextType | undefined>(undefined)
 
 const STORAGE_KEY = "coursebridge-display-settings"
 
-const DENSITY_MAP: Record<TweakSettings["density"], string> = {
-  compact: "0.75rem",
-  regular: "1rem",
-  comfy: "1.5rem",
-}
-
 const FONT_SIZE_MAP: Record<TweakSettings["fontSize"], string> = {
   small: "14px",
   medium: "16px",
   large: "18px",
 }
 
-export function TweakProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettingsState] = useState<TweakSettings>({
-    fontSize: "medium",
-    density: "regular",
-  })
+const DEFAULT_SETTINGS: TweakSettings = {
+  fontSize: "medium",
+  theme: "ocean",
+}
 
-  // Load from localStorage on mount
+export function TweakProvider({ children }: { children: React.ReactNode }) {
+  const [settings, setSettingsState] = useState<TweakSettings>(DEFAULT_SETTINGS)
+
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        setSettingsState(parsed)
+        setSettingsState({ ...DEFAULT_SETTINGS, ...parsed })
       } catch (e) {
         console.error("Failed to load tweak settings", e)
       }
@@ -58,7 +55,7 @@ export function TweakProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const root = document.documentElement
     root.style.setProperty("--base-font-size", FONT_SIZE_MAP[settings.fontSize])
-    root.style.setProperty("--card-spacing", DENSITY_MAP[settings.density])
+    root.setAttribute("data-theme", settings.theme)
   }, [settings])
 
   return (
