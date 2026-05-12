@@ -28,12 +28,16 @@ interface NotificationProviderProps {
 }
 
 export function NotificationProvider({ children, userId, role }: NotificationProviderProps) {
-  const supabase = createClient()
   const router = useRouter()
   const seenIds = useRef(new Set<string>())
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
 
   useEffect(() => {
     if (!userId) return
+    if (!supabaseRef.current) {
+      supabaseRef.current = createClient()
+    }
+    const supabase = supabaseRef.current
 
     function dedup(id: string): boolean {
       if (seenIds.current.has(id)) return false
@@ -249,7 +253,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       supabase.removeChannel(commentChannel)
       supabase.removeChannel(assignmentChannel)
     }
-  }, [supabase, userId, role, router])
+  }, [userId, role, router])
 
   return <>{children}</>
 }
