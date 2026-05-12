@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
+import { OneTimeThoughtModal } from "@/components/shared/one-time-thought-modal";
 
 export const metadata: Metadata = {
   title: "CourseBridge",
@@ -25,6 +26,7 @@ export default function RootLayout({
         <TooltipProvider>
           {children}
         </TooltipProvider>
+        <OneTimeThoughtModal />
         <DeploymentDetector initialVersion={currentVersion} />
         <Toaster closeButton position="top-right" richColors />
         <Analytics />
