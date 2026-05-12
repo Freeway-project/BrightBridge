@@ -73,14 +73,14 @@ export function OneTimeThoughtModal() {
         className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-primary/30 bg-card/95 p-8 text-center text-card-foreground shadow-2xl"
       >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-indigo-300/10" />
-        <p className="relative text-xs tracking-[0.2em] text-primary/85 uppercase">
-          Gentle Reminder
+        <p className=”relative text-xs tracking-[0.2em] text-primary/85 uppercase”>
+          Afternoon Momentum
         </p>
-        <h2 id={TITLE_ID} className="relative mt-4 text-xl leading-relaxed font-semibold md:text-2xl">
-          “Almost everything will work again if you unplug it for a few minutes… Including you.”
+        <h2 id={TITLE_ID} className=”relative mt-4 text-xl leading-relaxed font-semibold md:text-2xl”>
+          &quot;Every issue you resolve, every course you review, every problem you solve — that&apos;s progress. Keep going.&quot;
         </h2>
-        <p id={DESCRIPTION_ID} className="relative mt-4 text-sm text-muted-foreground">
-          Breathe. Reset. Then build something beautiful.
+        <p id={DESCRIPTION_ID} className=”relative mt-4 text-sm text-muted-foreground”>
+          You&apos;re building something that matters. One update at a time.
         </p>
       </div>
     </div>
