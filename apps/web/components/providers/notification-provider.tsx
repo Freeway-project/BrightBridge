@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import type { Role } from "@coursebridge/workflow"
 
-const POLL_INTERVAL_MS = 2 * 60 * 1000 // 2 minutes
 const IS_ADMIN = (role: Role) => role === "admin_full" || role === "super_admin"
 
 interface NotificationProviderProps {
@@ -18,144 +17,141 @@ interface NotificationProviderProps {
 export function NotificationProvider({ children, userId, role }: NotificationProviderProps) {
   const supabase = createClient()
   const router = useRouter()
-  // Tracks IDs already surfaced (via realtime or polling) to prevent duplicate toasts
-  const seenEscalationIds = useRef(new Set<string>())
-  // Tracks the timestamp from which the next poll should look for new escalations
-  const lastPolledAt = useRef(new Date().toISOString())
+  const seenIds = useRef(new Set<string>())
 
   useEffect(() => {
     if (!userId) return
 
-    function showEscalationToast(id: string, title: string, courseId: string) {
-      if (seenEscalationIds.current.has(id)) return
-      seenEscalationIds.current.add(id)
-      toast.error("New Escalation", {
-        description: title,
-        action: {
-          label: "View",
-          onClick: () => router.push(`/admin/courses/${courseId}`),
-        },
-      })
+    function dedup(id: string): boolean {
+      if (seenIds.current.has(id)) return false
+      seenIds.current.add(id)
+      return true
     }
 
-    // 1. Realtime: new escalations → admins
-    const escalationChannel = supabase
-      .channel("public:course_escalations")
+    // ── Course Issues ────────────────────────────────────────────────
+    const issueChannel = supabase
+      .channel("public:course_issues")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "course_escalations" },
-        (payload) => {
-          if (IS_ADMIN(role)) {
-            showEscalationToast(payload.new.id, payload.new.title, payload.new.course_id)
+        { event: "INSERT", schema: "public", table: "course_issues" },
+        async (payload) => {
+          if (!dedup(`issue-${payload.new.id}`)) return
+          if (payload.new.created_by === userId) return
+
+          const courseHref = IS_ADMIN(role)
+            ? `/admin/courses/${payload.new.course_id}`
+            : `/courses/${payload.new.course_id}/issues`
+
+          const severityMap: Record<string, string> = {
+            critical: "🔴",
+            major: "🟠",
+            minor: "🟡",
           }
+          const icon = severityMap[payload.new.severity] ?? "⚠️"
+
+          toast.warning(`${icon} New Issue — ${payload.new.severity}`, {
+            description: payload.new.title,
+            duration: Infinity,
+            action: { label: "View", onClick: () => router.push(courseHref) },
+          })
         }
       )
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "course_escalations" },
-        (payload) => {
-          if (payload.old.status !== "resolved" && payload.new.status === "resolved") {
-            if (role === "standard_user") {
-              toast.success("Escalation Resolved", {
-                description: `Admin resolved: ${payload.new.title}`,
-                action: {
-                  label: "View",
-                  onClick: () => router.push(`/courses/${payload.new.course_id}/issue-log`),
-                },
-              })
-            }
+        { event: "UPDATE", schema: "public", table: "course_issues" },
+        async (payload) => {
+          if (!dedup(`issue-status-${payload.new.id}-${payload.new.status}`)) return
+          if (payload.old.status === payload.new.status) return
+          if (payload.new.resolved_by === userId) return
+
+          const courseHref = IS_ADMIN(role)
+            ? `/admin/courses/${payload.new.course_id}`
+            : `/courses/${payload.new.course_id}/issues`
+
+          if (payload.new.status === "resolved") {
+            toast.success("✅ Issue Resolved", {
+              description: payload.new.title,
+              duration: Infinity,
+              action: { label: "View", onClick: () => router.push(courseHref) },
+            })
+          } else if (payload.new.status === "in_review") {
+            toast.info("🔄 Issue In Review", {
+              description: payload.new.title,
+              duration: Infinity,
+              action: { label: "View", onClick: () => router.push(courseHref) },
+            })
           }
         }
       )
       .subscribe()
 
-    // 2. Realtime: new messages in escalation threads
-    const messageChannel = supabase
-      .channel("public:escalation_messages")
+    // ── Issue Comments ───────────────────────────────────────────────
+    const commentChannel = supabase
+      .channel("public:course_issue_comments")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "escalation_messages" },
+        { event: "INSERT", schema: "public", table: "course_issue_comments" },
         async (payload) => {
+          if (!dedup(`comment-${payload.new.id}`)) return
           if (payload.new.author_id === userId) return
+          if (payload.new.is_system_message) return
 
-          const { data: escalation } = await supabase
-            .from("course_escalations")
+          const { data: issue } = await supabase
+            .from("course_issues")
             .select("course_id, title")
-            .eq("id", payload.new.escalation_id)
+            .eq("id", payload.new.issue_id)
             .single()
 
-          if (!escalation) return
+          if (!issue) return
 
-          const href = IS_ADMIN(role)
-            ? `/admin/courses/${escalation.course_id}`
-            : `/courses/${escalation.course_id}/issue-log`
+          const courseHref = IS_ADMIN(role)
+            ? `/admin/courses/${issue.course_id}`
+            : `/courses/${issue.course_id}/issues`
 
           const body: string = payload.new.body
-          toast.info("New Reply", {
+          toast.info("💬 New Comment", {
             description: body.length > 60 ? `${body.substring(0, 60)}…` : body,
-            action: { label: "View", onClick: () => router.push(href) },
-            duration: 7000,
+            duration: Infinity,
+            action: { label: "View", onClick: () => router.push(courseHref) },
           })
         }
       )
       .subscribe()
 
-    // 3. Realtime: new course assignments → TAs
+    // ── Course Assignments → TAs ─────────────────────────────────────
     const assignmentChannel = supabase
       .channel("public:course_assignments")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "course_assignments" },
         async (payload) => {
-          if (payload.new.profile_id === userId && payload.new.role === "staff") {
-            const { data: course } = await supabase
-              .from("courses")
-              .select("title")
-              .eq("id", payload.new.course_id)
-              .single()
+          if (payload.new.profile_id !== userId) return
+          if (!dedup(`assign-${payload.new.id}`)) return
 
-            if (course) {
-              toast.success("New Course Assigned", {
-                description: course.title,
-                action: {
-                  label: "View",
-                  onClick: () => router.push(`/courses/${payload.new.course_id}`),
-                },
-                duration: 10000,
-              })
-            }
+          const { data: course } = await supabase
+            .from("courses")
+            .select("title")
+            .eq("id", payload.new.course_id)
+            .single()
+
+          if (course) {
+            toast.success("📚 New Course Assigned", {
+              description: course.title,
+              duration: Infinity,
+              action: {
+                label: "Open",
+                onClick: () => router.push(`/courses/${payload.new.course_id}`),
+              },
+            })
           }
         }
       )
       .subscribe()
 
-    // 3. Polling fallback for admins — catches new escalations if realtime drops
-    let pollTimer: ReturnType<typeof setInterval> | null = null
-
-    if (IS_ADMIN(role)) {
-      pollTimer = setInterval(async () => {
-        const since = lastPolledAt.current
-        lastPolledAt.current = new Date().toISOString()
-
-        const { data } = await supabase
-          .from("course_escalations")
-          .select("id, title, course_id")
-          .eq("status", "open")
-          .gt("created_at", since)
-          .order("created_at", { ascending: true })
-
-        if (!data) return
-        for (const esc of data) {
-          showEscalationToast(esc.id, esc.title, esc.course_id)
-        }
-      }, POLL_INTERVAL_MS)
-    }
-
     return () => {
-      supabase.removeChannel(escalationChannel)
-      supabase.removeChannel(messageChannel)
+      supabase.removeChannel(issueChannel)
+      supabase.removeChannel(commentChannel)
       supabase.removeChannel(assignmentChannel)
-      if (pollTimer) clearInterval(pollTimer)
     }
   }, [supabase, userId, role, router])
 

@@ -28,7 +28,7 @@ export default function RootLayout({
         </TooltipProvider>
         <OneTimeThoughtModal />
         <DeploymentDetector initialVersion={currentVersion} />
-        <Toaster closeButton position="top-right" richColors />
+        <Toaster closeButton position="top-right" richColors expand visibleToasts={8} />
         <Analytics />
         <SpeedInsights />
       </body>

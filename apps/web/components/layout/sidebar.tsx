@@ -39,9 +39,9 @@ function BrandLogo() {
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
   return (
-    <div className="flex h-14 items-center gap-1 border-b border-border-icy/50 px-3 bg-white/[0.02]">
+    <div className="flex h-14 items-center gap-1 border-b border-sidebar-border px-3 bg-white/[0.01]">
       <div className="flex min-w-0 flex-1 items-center gap-2.5 px-1">
-        <div className="size-7 rounded-lg bg-primary flex items-center justify-center text-[11px] font-black text-primary-foreground shrink-0 shadow-lg shadow-primary/20">
+        <div className="size-7 rounded-lg bg-primary flex items-center justify-center text-[11px] font-black text-primary-foreground shrink-0 shadow-lg shadow-primary/40">
           CB
         </div>
         {!collapsed && (
@@ -62,7 +62,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
   const collapsed = state === "collapsed"
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border-icy bg-sidebar backdrop-blur-md">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/50 backdrop-blur-xl">
       <SidebarHeader className="p-0">
         <BrandLogo />
       </SidebarHeader>
@@ -77,7 +77,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                 const btn = (
                   <SidebarMenuButton asChild isActive={active} className={cn(
                     "h-10 px-3 transition-all duration-300 rounded-xl",
-                    active ? "bg-primary/10 text-primary ring-1 ring-primary/20 font-black uppercase tracking-widest text-[10px]" : "text-muted-foreground hover:bg-white/5 hover:text-foreground font-bold text-[11px]"
+                    active ? "bg-primary/15 text-primary ring-1 ring-primary/30 shadow-lg shadow-primary/5 font-black uppercase tracking-widest text-[10px]" : "text-muted-foreground hover:bg-white/5 hover:text-foreground font-bold text-[11px]"
                   )}>
                     <Link href={item.href}>
                       <item.icon className={cn("size-4 shrink-0 transition-transform", active && "scale-110")} />
@@ -104,7 +104,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <div className="border border-border-icy bg-white/[0.02] rounded-2xl p-2 space-y-2 shadow-inner">
+        <div className="border border-sidebar-border bg-white/[0.02] rounded-2xl p-2 space-y-2 shadow-inner backdrop-blur-md">
           {!collapsed && (
             <div className="px-2 py-1 flex flex-col">
               <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40">Active Session</span>
