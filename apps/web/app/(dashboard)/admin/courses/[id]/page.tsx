@@ -34,12 +34,12 @@ export default async function AdminCourseDetailPage({ params }: Props) {
         subtitle={course.sourceCourseId ? `${course.sourceCourseId} — ${course.title}` : course.title} 
         backHref="/admin"
       />
-      <main className="flex-1 flex overflow-hidden bg-muted/10">
+      <main className="flex-1 flex overflow-hidden bg-background">
         <Tabs defaultValue="review" className="flex-1 flex flex-col overflow-hidden w-full">
-          <TabsList variant="line" className="border-b border-border px-6 pt-4">
-            <TabsTrigger value="review">Review</TabsTrigger>
-            <TabsTrigger value="issues">Issues</TabsTrigger>
-            <TabsTrigger value="chat">Chat</TabsTrigger>
+          <TabsList variant="line" className="border-b border-border px-6 pt-4 bg-background">
+            <TabsTrigger value="review" className="text-base">Review</TabsTrigger>
+            <TabsTrigger value="issues" className="text-base">Issues</TabsTrigger>
+            <TabsTrigger value="chat" className="text-base">Chat</TabsTrigger>
           </TabsList>
 
           {/* Review Tab */}
@@ -60,22 +60,26 @@ export default async function AdminCourseDetailPage({ params }: Props) {
 
           {/* Issues Tab */}
           <TabsContent value="issues" className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-[var(--card-spacing,1.5rem)]">
-              <IssueTracker
-                courseId={id}
-                phase="migration"
-                userRole={context.profile.role}
-              />
+            <div className="flex flex-col gap-6 h-full">
+              <div className="bg-card border border-border rounded-lg p-6 flex-1 overflow-y-auto">
+                <IssueTracker
+                  courseId={id}
+                  phase="migration"
+                  userRole={context.profile.role}
+                />
+              </div>
             </div>
           </TabsContent>
 
           {/* Chat Tab */}
-          <TabsContent value="chat" className="flex-1 overflow-hidden">
-            <CourseChat
-              courseId={id}
-              comments={comments}
-              currentUserId={context.userId}
-            />
+          <TabsContent value="chat" className="flex-1 overflow-hidden p-6">
+            <div className="bg-card border border-border rounded-lg h-full overflow-hidden flex flex-col">
+              <CourseChat
+                courseId={id}
+                comments={comments}
+                currentUserId={context.userId}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </main>
