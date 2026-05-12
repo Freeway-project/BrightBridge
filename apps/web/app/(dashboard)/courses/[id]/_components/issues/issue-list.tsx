@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CourseIssue, IssuePhase, IssueStatus } from '@/lib/issues/types'
 import { IssueCard } from './issue-card'
 import { IssueDrawer } from './issue-drawer'
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Loader2 } from 'lucide-react'
+import { Loader2, AlertCircle, CheckCircle2, Clock } from 'lucide-react'
 
 interface IssueListProps {
   issues: CourseIssue[]
@@ -39,11 +39,40 @@ export function IssueList({ issues, loading = false, phase, onIssuesChange }: Is
     return statusOrder[a.status] - statusOrder[b.status]
   })
 
+  // Auto-select the first (latest/most recent) issue on load or when issues change
+  useEffect(() => {
+    if (sortedIssues.length > 0 && !selectedIssueId) {
+      setSelectedIssueId(sortedIssues[0].id)
+    }
+  }, [sortedIssues, selectedIssueId])
+
   const selectedIssue = issues.find((i) => i.id === selectedIssueId)
+
+  const getStatusIcon = (status: IssueStatus) => {
+    switch (status) {
+      case 'open':
+        return <AlertCircle className="w-4 h-4 text-destructive" />
+      case 'in_review':
+        return <Clock className="w-4 h-4 text-warning" />
+      case 'resolved':
+        return <CheckCircle2 className="w-4 h-4 text-success" />
+    }
+  }
+
+  const getStatusLabel = (status: IssueStatus) => {
+    const labels = { open: 'Open', in_review: 'In Review', resolved: 'Resolved' }
+    return labels[status]
+  }
 
   return (
     <div className="flex gap-4 h-full">
       <div className="flex-1 flex flex-col gap-4 min-w-0 bg-background rounded-lg p-4 border border-border">
+        {/* Filter Section Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-border/50">
+          <h4 className="text-sm font-semibold text-foreground/80">Filter Issues</h4>
+          <span className="text-xs text-muted-foreground">{sortedIssues.length} total</span>
+        </div>
+
         {/* Filters */}
         <div className="flex gap-2 flex-wrap">
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as IssueStatus | 'all')}>
@@ -87,12 +116,16 @@ export function IssueList({ issues, loading = false, phase, onIssuesChange }: Is
         {/* Issues List */}
         <div className="flex-1 overflow-y-auto space-y-2">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center py-12 gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Loading issues...</p>
             </div>
           ) : sortedIssues.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground/60">
-              {issues.length === 0 ? 'No issues yet. Create one to get started! 🚀' : 'No issues match your filters'}
+            <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
+              <AlertCircle className="w-8 h-8 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground/60">
+                {issues.length === 0 ? 'No issues yet. Create one to get started! 🚀' : 'No issues match your filters'}
+              </p>
             </div>
           ) : (
             sortedIssues.map((issue) => (
