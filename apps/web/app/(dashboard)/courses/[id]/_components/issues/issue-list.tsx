@@ -43,7 +43,7 @@ export function IssueList({ issues, loading = false, phase, onIssuesChange }: Is
 
   return (
     <div className="flex gap-4 h-full">
-      <div className="flex-1 flex flex-col gap-4 min-w-0">
+      <div className="flex-1 flex flex-col gap-4 min-w-0 bg-background rounded-lg p-4 border border-border">
         {/* Filters */}
         <div className="flex gap-2 flex-wrap">
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as IssueStatus | 'all')}>
@@ -91,8 +91,8 @@ export function IssueList({ issues, loading = false, phase, onIssuesChange }: Is
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
           ) : sortedIssues.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {issues.length === 0 ? 'No issues yet' : 'No issues match your filters'}
+            <div className="text-center py-8 text-muted-foreground/60">
+              {issues.length === 0 ? 'No issues yet. Create one to get started! 🚀' : 'No issues match your filters'}
             </div>
           ) : (
             sortedIssues.map((issue) => (

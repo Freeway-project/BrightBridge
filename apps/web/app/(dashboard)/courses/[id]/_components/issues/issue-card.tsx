@@ -14,15 +14,15 @@ interface IssueCardProps {
 
 export function IssueCard({ issue, isSelected, onClick }: IssueCardProps) {
   const statusColors = {
-    open: 'bg-red-100 text-red-800 hover:bg-red-200',
-    in_review: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-    resolved: 'bg-green-100 text-green-800 hover:bg-green-200',
+    open: 'bg-destructive/20 text-destructive',
+    in_review: 'bg-primary/20 text-primary',
+    resolved: 'bg-success/20 text-success',
   }
 
   const severityColors = {
-    critical: 'bg-red-100 text-red-800',
-    major: 'bg-orange-100 text-orange-800',
-    minor: 'bg-yellow-100 text-yellow-800',
+    critical: 'bg-destructive/20 text-destructive font-semibold',
+    major: 'bg-warning/20 text-warning',
+    minor: 'bg-info/20 text-info',
   }
 
   const typeLabel = {
@@ -35,15 +35,15 @@ export function IssueCard({ issue, isSelected, onClick }: IssueCardProps) {
   return (
     <Card
       className={cn(
-        'p-3 cursor-pointer transition-all',
-        isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:bg-gray-50'
+        'p-3 cursor-pointer transition-all border',
+        isSelected ? 'ring-2 ring-primary bg-primary/5 border-primary' : 'hover:bg-muted/30 border-border'
       )}
       onClick={onClick}
     >
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <h4 className="font-medium text-sm flex-1 line-clamp-2">{issue.title}</h4>
-          <Badge variant="outline" className="shrink-0">
+          <h4 className="font-medium text-sm flex-1 line-clamp-2 text-foreground">{issue.title}</h4>
+          <Badge variant="outline" className="shrink-0 text-xs">
             {typeLabel[issue.type]}
           </Badge>
         </div>

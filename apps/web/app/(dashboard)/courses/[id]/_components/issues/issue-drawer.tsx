@@ -81,15 +81,15 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated }: IssueDraw
   }
 
   const statusColors = {
-    open: 'bg-red-100 text-red-800',
-    in_review: 'bg-blue-100 text-blue-800',
-    resolved: 'bg-green-100 text-green-800',
+    open: 'bg-destructive/20 text-destructive',
+    in_review: 'bg-primary/20 text-primary',
+    resolved: 'bg-success/20 text-success',
   }
 
   const severityColors = {
-    critical: 'bg-red-100 text-red-800',
-    major: 'bg-orange-100 text-orange-800',
-    minor: 'bg-yellow-100 text-yellow-800',
+    critical: 'bg-destructive/20 text-destructive font-semibold',
+    major: 'bg-warning/20 text-warning',
+    minor: 'bg-info/20 text-info',
   }
 
   const typeLabel = {
@@ -100,12 +100,12 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated }: IssueDraw
   }
 
   return (
-    <div className="w-96 border-l bg-white flex flex-col">
+    <div className="w-96 border-l bg-card border-border flex flex-col">
       {/* Header */}
-      <div className="border-b p-4 space-y-3">
+      <div className="border-b border-border p-4 space-y-3 bg-card">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-sm flex-1 line-clamp-2">{fullIssue.title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <h3 className="font-semibold text-sm flex-1 line-clamp-2 text-card-foreground">{fullIssue.title}</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -165,19 +165,19 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated }: IssueDraw
           <div className="text-xs space-y-1 pt-2 border-t">
             {fullIssue.location && (
               <div>
-                <span className="text-gray-600">Location:</span> {fullIssue.location}
+                <span className="text-muted-foreground">Location:</span> <span className="text-foreground">{fullIssue.location}</span>
               </div>
             )}
             {fullIssue.direct_link && (
               <div>
-                <a href={fullIssue.direct_link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                <a href={fullIssue.direct_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                   View in course →
                 </a>
               </div>
             )}
             {fullIssue.description && (
               <div>
-                <p className="text-gray-700">{fullIssue.description}</p>
+                <p className="text-foreground/90">{fullIssue.description}</p>
               </div>
             )}
           </div>
@@ -185,29 +185,29 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated }: IssueDraw
       </div>
 
       {/* Comments Section */}
-      <ScrollArea className="flex-1 p-4 space-y-3">
+      <ScrollArea className="flex-1 p-4 space-y-3 bg-background/50">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
           </div>
         ) : fullIssue.comments && fullIssue.comments.length > 0 ? (
           fullIssue.comments.map((comment) => (
-            <div key={comment.id} className="space-y-1 text-xs pb-3 border-b last:border-b-0">
+            <div key={comment.id} className="space-y-1 text-xs pb-3 border-b border-border last:border-b-0">
               <div className="flex items-center justify-between">
-                <span className={cn('font-medium', comment.is_system_message && 'text-gray-500 italic')}>
+                <span className={cn('font-medium text-card-foreground', comment.is_system_message && 'text-muted-foreground italic')}>
                   {comment.author?.full_name || 'Unknown'}
                 </span>
-                <span className="text-gray-400">
+                <span className="text-muted-foreground text-[10px]">
                   {new Date(comment.created_at).toLocaleDateString()} {new Date(comment.created_at).toLocaleTimeString()}
                 </span>
               </div>
-              <p className={cn('text-gray-700', comment.is_system_message && 'text-gray-500 italic')}>
+              <p className={cn('text-foreground/80', comment.is_system_message && 'text-muted-foreground italic')}>
                 {comment.body}
               </p>
             </div>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
             <MessageCircle className="w-5 h-5 mb-2" />
             <p className="text-xs">No comments yet</p>
           </div>
@@ -215,7 +215,7 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated }: IssueDraw
       </ScrollArea>
 
       {/* Comment Input */}
-      <div className="border-t p-4 space-y-2">
+      <div className="border-t border-border p-4 space-y-2 bg-card">
         <Input
           placeholder="Add a comment..."
           value={commentBody}

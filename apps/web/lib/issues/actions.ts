@@ -7,6 +7,30 @@ import { CourseIssue, IssueComment, CreateIssueInput, AddCommentInput, IssueStat
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
+export type IssueCountSummary = { open: number; resolved: number }
+
+export async function getIssueCountsForCoursesAction(
+  courseIds: string[]
+): Promise<Map<string, IssueCountSummary>> {
+  if (!courseIds.length) return new Map()
+
+  const { data, error } = await supabase
+    .from('course_issues')
+    .select('course_id, status')
+    .in('course_id', courseIds)
+
+  if (error) return new Map()
+
+  const map = new Map<string, IssueCountSummary>()
+  for (const row of data ?? []) {
+    const existing = map.get(row.course_id) ?? { open: 0, resolved: 0 }
+    if (row.status === 'resolved') existing.resolved++
+    else existing.open++
+    map.set(row.course_id, existing)
+  }
+  return map
+}
+
 export async function createIssueAction(
   courseId: string,
   phase: 'migration' | 'staging' | 'provision',
@@ -187,7 +211,7 @@ export async function getIssuesForCourseAction(
         `*,
         created_by_profile:created_by(full_name),
         owner_profile:owner_id(full_name),
-        comment_count:course_issue_comments(count)`
+        course_issue_comments(id)`
       )
       .eq('course_id', courseId)
 
@@ -203,7 +227,14 @@ export async function getIssuesForCourseAction(
       throw new Error(error.message || 'Failed to fetch issues')
     }
 
-    return data as CourseIssue[]
+    // Transform data to include comment_count
+    const transformedData = data?.map((issue: any) => ({
+      ...issue,
+      comment_count: issue.course_issue_comments?.length || 0,
+      course_issue_comments: undefined, // Remove the nested array
+    })) || []
+
+    return transformedData as CourseIssue[]
   } catch (err) {
     console.error('[getIssuesForCourseAction] Error:', err)
     throw err instanceof Error ? err : new Error('Failed to fetch issues')
