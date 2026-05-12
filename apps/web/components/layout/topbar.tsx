@@ -16,7 +16,7 @@ interface TopbarProps {
 
 export function Topbar({ title, subtitle, actions, backHref, courseStatus }: TopbarProps) {
   return (
-    <header className="flex h-12 items-center gap-2 border-b border-sidebar-border bg-card px-4">
+    <header className="sticky top-0 z-40 flex h-12 items-center gap-2 border-b border-sidebar-border bg-background/50 backdrop-blur-xl px-4">
       <SidebarTrigger className="-ml-1 shrink-0 md:hidden" />
       <div className="flex items-center gap-4 flex-1 min-w-0">
         {backHref && (

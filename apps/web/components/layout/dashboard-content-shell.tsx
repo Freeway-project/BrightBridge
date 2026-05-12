@@ -20,7 +20,6 @@ export function DashboardContentShell({ children }: DashboardContentShellProps) 
   return (
     <div
       data-app-content
-      data-app-density={settings.density}
       className="flex flex-1 flex-col overflow-hidden min-w-0"
       style={{ zoom: scale }}
     >

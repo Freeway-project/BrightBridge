@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Search as SearchIcon } from "lucide-react"
+import { Search as SearchIcon, AlertCircle } from "lucide-react"
 import { StatCard, type StatCardIcon } from "@/components/shared/stat-card"
 import { cn } from "@/lib/utils"
 import type { CourseStatus } from "@coursebridge/workflow"
@@ -24,9 +24,12 @@ export interface CourseStat {
   icon?: StatCardIcon
 }
 
+export type IssueCountMap = Record<string, { open: number; resolved: number }>
+
 interface CourseListViewProps {
   initialCourses: CourseSummary[]
   stats?: CourseStat[]
+  issueCounts?: IssueCountMap
 }
 
 const TODO_STATUSES = new Set<CourseStatus>(["course_created", "assigned_to_ta"])
@@ -42,9 +45,10 @@ function getTab(status: CourseStatus): "todo" | "in_progress" | "done" {
   return "done"
 }
 
-export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
+export function CourseListView({ initialCourses, stats, issueCounts = {} }: CourseListViewProps) {
   const [search, setSearch] = useState("")
   const [term, setTerm] = useState("all")
+  const [issueSort, setIssueSort] = useState<"latest" | "replies">("latest")
 
   const terms = useMemo(() => {
     const set = new Set(initialCourses.map((c) => c.term).filter(Boolean) as string[])
@@ -66,7 +70,8 @@ export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
     todo:        filtered.filter((c) => getTab(c.status) === "todo"),
     in_progress: filtered.filter((c) => getTab(c.status) === "in_progress"),
     done:        filtered.filter((c) => getTab(c.status) === "done"),
-  }), [filtered])
+    issues:      filtered.filter((c) => (issueCounts[c.id]?.open ?? 0) > 0),
+  }), [filtered, issueCounts])
 
   const defaultTab =
     byTab.in_progress.length > 0 ? "in_progress"
@@ -111,17 +116,68 @@ export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
 
       {/* Tabs */}
       <Tabs defaultValue={defaultTab}>
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-x-1 gap-y-1 rounded-none border-b border-border bg-transparent p-0">
-          <TabItem value="todo" count={byTab.todo.length} label="To Do" activeColor="text-amber-600 border-amber-500" />
-          <TabItem value="in_progress" count={byTab.in_progress.length} label="In Progress" activeColor="text-blue-600 border-blue-500" />
-          <TabItem value="done" count={byTab.done.length} label="Done" activeColor="text-green-600 border-green-500" />
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-x-2 gap-y-2 bg-transparent p-0">
+          <TabItem
+            value="todo"
+            count={byTab.todo.length}
+            label="To Do"
+            textColor="text-amber-600"
+            emoji="📋"
+          />
+          <TabItem
+            value="in_progress"
+            count={byTab.in_progress.length}
+            label="In Progress"
+            textColor="text-blue-600"
+            emoji="⚙️"
+          />
+          <TabItem
+            value="done"
+            count={byTab.done.length}
+            label="Done"
+            textColor="text-green-600"
+            emoji="✅"
+          />
+          <TabItem
+            value="issues"
+            count={byTab.issues.length}
+            label="Issues"
+            textColor="text-red-600"
+            emoji="🔴"
+          />
         </TabsList>
 
         {(["todo", "in_progress", "done"] as const).map((tab) => (
           <TabsContent key={tab} value={tab} className="mt-4">
-            <CourseGrid courses={byTab[tab]} onClear={() => { setSearch(""); setTerm("all") }} />
+            <CourseGrid courses={byTab[tab]} issueCounts={issueCounts} onClear={() => { setSearch(""); setTerm("all") }} />
           </TabsContent>
         ))}
+
+        {/* Issues Tab */}
+        <TabsContent value="issues" className="mt-4">
+          <div className="space-y-4">
+            {byTab.issues.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-foreground">Sort by:</span>
+                <Select value={issueSort} onValueChange={(v) => setIssueSort(v as "latest" | "replies")}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="latest">Latest Activity</SelectItem>
+                    <SelectItem value="replies">Most Replies</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <CourseGrid 
+              courses={byTab.issues} 
+              issueCounts={issueCounts} 
+              onClear={() => { setSearch(""); setTerm("all") }}
+              sortBy={issueSort}
+            />
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   )
@@ -131,39 +187,66 @@ function TabItem({
   value,
   label,
   count,
-  activeColor,
+  textColor,
+  emoji,
 }: {
   value: string
   label: string
   count: number
-  activeColor: string
+  textColor: string
+  emoji: string
 }) {
   return (
     <TabsTrigger
       value={value}
       className={cn(
-        "relative rounded-none border-b-2 border-transparent bg-transparent px-4 pb-2.5 pt-1 text-sm font-medium text-muted-foreground shadow-none transition-colors",
-        "data-[state=active]:shadow-none data-[state=active]:bg-transparent",
-        `data-[state=active]:${activeColor.split(" ")[0]}`,
-        `data-[state=active]:${activeColor.split(" ")[1]}`,
+        "px-3 py-1.5 text-sm font-medium gap-1.5 flex items-center transition-colors",
+        "text-foreground/60",
+        `data-[state=active]:${textColor}`,
+        "data-[state=active]:font-semibold",
+        "hover:text-foreground/80",
       )}
     >
+      <span className="text-base">{emoji}</span>
       {label}
-      <span className={cn(
-        "ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-        count > 0 ? "bg-foreground/10 text-foreground" : "bg-muted text-muted-foreground",
-      )}>
-        {count}
-      </span>
+      {count > 0 && (
+        <span className={cn(
+          "ml-1 text-[11px] font-bold px-1.5 py-0.5 rounded-full",
+          `data-[state=active]:${textColor}`,
+        )}>
+          {count}
+        </span>
+      )}
     </TabsTrigger>
   )
 }
 
-function CourseGrid({ courses, onClear }: { courses: CourseSummary[]; onClear: () => void }) {
+function CourseGrid({ 
+  courses, 
+  issueCounts, 
+  onClear,
+  sortBy = "latest",
+}: { 
+  courses: CourseSummary[]
+  issueCounts: IssueCountMap
+  onClear: () => void
+  sortBy?: "latest" | "replies"
+}) {
+  const sortedCourses = useMemo(() => {
+    if (sortBy === "replies") {
+      return [...courses].sort((a, b) => {
+        const aCount = issueCounts[a.id]?.open ?? 0
+        const bCount = issueCounts[b.id]?.open ?? 0
+        return bCount - aCount
+      })
+    }
+    return courses
+  }, [courses, sortBy, issueCounts])
+
   if (courses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-border rounded-lg text-center p-8">
-        <SearchIcon className="size-8 text-muted-foreground/40 mb-3" />
+        <AlertCircle className="size-8 text-muted-foreground/40 mb-3" />
         <p className="text-sm font-medium text-foreground">No courses here</p>
         <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or term filter.</p>
         <Button variant="link" size="sm" onClick={onClear} className="mt-2">Clear filters</Button>
@@ -173,8 +256,8 @@ function CourseGrid({ courses, onClear }: { courses: CourseSummary[]; onClear: (
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      {courses.map((course) => (
-        <CourseCard key={course.id} course={course} />
+      {sortedCourses.map((course) => (
+        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} />
       ))}
     </div>
   )

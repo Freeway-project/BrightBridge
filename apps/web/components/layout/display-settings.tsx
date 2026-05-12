@@ -2,10 +2,11 @@
 
 import { useTweaks } from "@/components/shared/tweak-provider"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Type, Layout, Settings2 } from "lucide-react"
+import { Type, Settings2 } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/ui/sidebar"
+import { ThemeSwitcher } from "./theme-switcher"
 
 export function DisplaySettings() {
   const { settings, setSettings } = useTweaks()
@@ -26,8 +27,9 @@ export function DisplaySettings() {
       </PopoverTrigger>
       <PopoverContent side="right" align="end" className="w-64 p-4 space-y-4" sideOffset={12}>
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Display Settings</h3>
-        
+
         <div className="space-y-4">
+          <ThemeSwitcher />
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-xs font-medium">
               <Type className="size-3.5" />
@@ -46,23 +48,6 @@ export function DisplaySettings() {
             </Tabs>
           </div>
 
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-medium">
-              <Layout className="size-3.5" />
-              Card Density
-            </label>
-            <Tabs
-              value={settings.density}
-              onValueChange={(v) => setSettings({ density: v as "compact" | "regular" | "comfy" })}
-              className="w-full"
-            >
-              <TabsList className="grid h-8 w-full grid-cols-3 border border-cyan-500/20 bg-slate-900 p-1">
-                <TabsTrigger value="compact" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Small</TabsTrigger>
-                <TabsTrigger value="regular" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Med</TabsTrigger>
-                <TabsTrigger value="comfy" className="text-[10px] py-1 data-[state=active]:bg-cyan-500 data-[state=active]:text-slate-950">Large</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
         </div>
       </PopoverContent>
     </Popover>

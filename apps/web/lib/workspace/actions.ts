@@ -26,6 +26,28 @@ const SECTION_SCHEMAS: Partial<Record<SectionKey, ZodTypeAny>> = {
   general_notes: issueLogSchema,
 };
 
+export async function startTaReview(courseId: string): Promise<void> {
+  const ctx = await requireProfile();
+  try {
+    const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
+    if (!course) return;
+
+    if (course.status === "assigned_to_ta") {
+      await transitionCourseStatus({
+        courseId,
+        from: "assigned_to_ta",
+        to: "ta_review_in_progress",
+        actorId: ctx.userId,
+        actorRole: ctx.profile.role,
+        note: "TA opened workspace",
+      });
+      revalidatePath(`/courses/${courseId}`);
+    }
+  } catch (error) {
+    Sentry.captureException(error);
+  }
+}
+
 export async function saveDraft(
   courseId: string,
   sectionKey: SectionKey,

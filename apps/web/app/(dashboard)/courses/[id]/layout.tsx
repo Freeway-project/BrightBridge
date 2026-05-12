@@ -6,6 +6,8 @@ import { getReviewResponses, getReviewSectionByKey } from "@/lib/services/review
 import { getEscalationsForCourse } from "@/lib/services/escalations";
 import { getCourseInstructor } from "@/lib/services/profiles";
 import { getCourseComments } from "@/lib/services/comments";
+import { getOpenIssuesCountAction } from "@/lib/issues";
+import { startTaReview } from "@/lib/workspace/actions";
 import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
 import { TweakableContent } from "@/components/shared/tweakable-content";
@@ -14,7 +16,6 @@ const SECTIONS = [
   { key: "course_metadata", label: "Metadata" },
   { key: "review_matrix", label: "Review Matrix" },
   { key: "syllabus_review", label: "Syllabus & GB" },
-  { key: "general_notes", label: "Issue Log" },
 ] as const;
 
 interface CourseWorkspaceLayoutProps {
@@ -32,11 +33,14 @@ export default async function CourseWorkspaceLayout({
 
   if (!course) notFound();
 
-  const [responses, escalations, instructor, comments] = await Promise.all([
+  await startTaReview(id);
+
+  const [responses, escalations, instructor, comments, openIssueCount] = await Promise.all([
     getReviewResponses(id),
     getEscalationsForCourse(id),
     getCourseInstructor(id),
     getCourseComments(id),
+    getOpenIssuesCountAction(id),
   ]);
   const respondedSectionIds = new Set(
     responses
@@ -44,12 +48,17 @@ export default async function CourseWorkspaceLayout({
       .map((r) => r.section_id),
   );
 
-  const sectionMeta = await Promise.all(
+  const reviewSectionMeta = await Promise.all(
     SECTIONS.map(async ({ key, label }) => {
       const s = await getReviewSectionByKey(key);
       return { key, label, complete: s ? respondedSectionIds.has(s.id) : false };
     }),
   );
+
+  const sectionMeta = [
+    ...reviewSectionMeta,
+    { key: "issues", label: "Issues", complete: openIssueCount === 0 },
+  ];
 
   const lastSavedAt =
     responses.reduce<string | null>((latest, r) => {

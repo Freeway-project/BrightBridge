@@ -51,8 +51,8 @@ const gradebookItemSchema = z.object({
 });
 
 export const syllabusGradebookSchema = z.object({
-  instructor_id: z.string(),
-  instructor_email: z.string(),
+  instructor_id: z.string().optional(),
+  instructor_email: z.string().optional(),
   syllabus_items: z.array(syllabusItemSchema),
   gradebook_items: z.array(gradebookItemSchema),
   time_spent_seconds: z.number().int().nonnegative(),

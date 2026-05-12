@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import { AppSidebar } from "@/components/layout/sidebar"
 import { getAuthContext } from "@/lib/auth/context"
 import type { ReactNode } from "react"
@@ -22,10 +23,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const role = context.profile.role
   const userName = context.profile.fullName ?? context.email ?? ""
 
+  const cookieStore = await cookies()
+  const sidebarCookie = cookieStore.get("sidebar_state")?.value
+  const sidebarOpen = sidebarCookie !== "false"
+
   return (
     <TweakProvider>
       <NotificationProvider userId={context.userId} role={role}>
-        <SidebarProvider defaultOpen={false}>
+        <SidebarProvider defaultOpen={sidebarOpen}>
           <div className="flex h-screen w-full overflow-hidden bg-background">
             <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
             <DashboardContentShell>

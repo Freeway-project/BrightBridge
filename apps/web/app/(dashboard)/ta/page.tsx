@@ -2,29 +2,34 @@ import { getAccessibleCourses } from "@/lib/courses/service";
 import { CourseListView, type CourseStat } from "@/components/courses/course-list-view";
 import { TweakableContent } from "@/components/shared/tweakable-content";
 import { TaRefreshWrapper } from "./_components/ta-refresh-wrapper";
+import { getIssueCountsForCoursesAction } from "@/lib/issues/actions";
 
 export default async function TADashboardPage() {
   const { courses } = await getAccessibleCourses();
 
+  const courseIds = courses.map(c => c.id)
+  const issueCountsMap = await getIssueCountsForCoursesAction(courseIds)
+  const issueCounts = Object.fromEntries(issueCountsMap)
+
   const stats: CourseStat[] = [
-    { 
-      label: "Assigned", 
-      value: courses.length, 
+    {
+      label: "Assigned",
+      value: courses.length,
       icon: "book-open",
     },
-    { 
-      label: "In Progress", 
-      value: courses.filter(c => c.status === "ta_review_in_progress").length, 
+    {
+      label: "In Progress",
+      value: courses.filter(c => c.status === "ta_review_in_progress").length,
       icon: "clock",
     },
-    { 
-      label: "Submitted to Admin", 
-      value: courses.filter(c => c.status === "submitted_to_admin").length, 
+    {
+      label: "Submitted to Admin",
+      value: courses.filter(c => c.status === "submitted_to_admin").length,
       icon: "check-square",
     },
-    { 
-      label: "Changes Requested", 
-      value: courses.filter(c => c.status === "admin_changes_requested").length, 
+    {
+      label: "Changes Requested",
+      value: courses.filter(c => c.status === "admin_changes_requested").length,
       icon: "alert-triangle",
     },
   ];
@@ -32,7 +37,7 @@ export default async function TADashboardPage() {
   return (
     <TweakableContent className="min-w-0 flex-1 overflow-hidden">
       <TaRefreshWrapper>
-        <CourseListView initialCourses={courses} stats={stats} />
+        <CourseListView initialCourses={courses} stats={stats} issueCounts={issueCounts} />
       </TaRefreshWrapper>
     </TweakableContent>
   );

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
-// Bump this suffix to re-show the modal for a future message revision.
 const STORAGE_KEY = "cb_seen_thought_modal_v1"
 const DISPLAY_DURATION_MS = 10_000
 const TITLE_ID = "one-time-thought-modal-title"
@@ -17,7 +16,6 @@ export function OneTimeThoughtModal() {
       window.clearTimeout(timerRef.current)
       timerRef.current = null
     }
-
     setIsVisible(false)
     try {
       window.localStorage.setItem(STORAGE_KEY, "true")
@@ -30,13 +28,10 @@ export function OneTimeThoughtModal() {
     try {
       const hasSeen = window.localStorage.getItem(STORAGE_KEY)
       if (hasSeen) return
-
       setIsVisible(true)
-
       timerRef.current = window.setTimeout(() => {
         dismissModal()
       }, DISPLAY_DURATION_MS)
-
       return () => {
         if (timerRef.current) {
           window.clearTimeout(timerRef.current)
@@ -50,16 +45,14 @@ export function OneTimeThoughtModal() {
 
   useEffect(() => {
     if (!isVisible) return
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         dismissModal()
       }
     }
-
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isVisible])
+  }, [isVisible, dismissModal])
 
   if (!isVisible) return null
 
@@ -74,13 +67,13 @@ export function OneTimeThoughtModal() {
       >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-indigo-300/10" />
         <p className="relative text-xs tracking-[0.2em] text-primary/85 uppercase">
-          Gentle Reminder
+          Afternoon Momentum
         </p>
         <h2 id={TITLE_ID} className="relative mt-4 text-xl leading-relaxed font-semibold md:text-2xl">
-          “Almost everything will work again if you unplug it for a few minutes… Including you.”
+          Every issue resolved, every course reviewed. That is progress. Keep going.
         </h2>
         <p id={DESCRIPTION_ID} className="relative mt-4 text-sm text-muted-foreground">
-          Breathe. Reset. Then build something beautiful.
+          You are building something that matters. One update at a time.
         </p>
       </div>
     </div>
