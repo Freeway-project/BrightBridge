@@ -76,10 +76,13 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                   pathname === item.href || pathname.startsWith(item.href + "/")
                 const btn = (
                   <SidebarMenuButton asChild isActive={active} className={cn(
-                    "h-10 px-3 transition-all duration-300 rounded-xl",
+                    "h-10 px-3 transition-all duration-300 rounded-xl justify-start group-data-[collapsible=icon]:justify-center",
                     active ? "bg-primary/15 text-primary ring-1 ring-primary/30 shadow-lg shadow-primary/5 font-black uppercase tracking-widest text-[10px]" : "text-muted-foreground hover:bg-white/5 hover:text-foreground font-bold text-[11px]"
                   )}>
-                    <Link href={item.href}>
+                    <Link
+                      href={item.href}
+                      className={cn("flex w-full items-center gap-2", collapsed && "justify-center")}
+                    >
                       <item.icon className={cn("size-4 shrink-0 transition-transform", active && "scale-110")} />
                       <span>{item.label}</span>
                     </Link>
@@ -114,7 +117,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
             </div>
           )}
           <DisplaySettings />
-          <UpdateStatusTab initialVersion={initialVersion} />
+          {!collapsed && <UpdateStatusTab initialVersion={initialVersion} />}
           <form action={signOut}>
             <button
               type="submit"
