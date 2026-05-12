@@ -8,6 +8,19 @@ import type { Role } from "@coursebridge/workflow"
 
 const IS_ADMIN = (role: Role) => role === "admin_full" || role === "super_admin"
 
+const SEVERITY_ICON: Record<string, string> = {
+  critical: "🔴",
+  major:    "🟠",
+  minor:    "🟡",
+}
+
+const TYPE_LABEL: Record<string, string> = {
+  escalation: "Escalation",
+  question:   "Question",
+  fix_needed: "Fix Needed",
+  general:    "Note",
+}
+
 interface NotificationProviderProps {
   children: React.ReactNode
   userId: string
@@ -28,9 +41,27 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       return true
     }
 
-    // ── Course Issues ────────────────────────────────────────────────
-    const issueChannel = supabase
-      .channel("public:course_issues")
+    async function getCourseCode(courseId: string): Promise<string> {
+      const { data } = await supabase
+        .from("courses")
+        .select("title")
+        .eq("id", courseId)
+        .single()
+      return data?.title ?? "Unknown Course"
+    }
+
+    async function getAuthorName(authorId: string): Promise<string> {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", authorId)
+        .single()
+      return data?.full_name ?? "Someone"
+    }
+
+    // ── New Issue Created ────────────────────────────────────────────
+    const issueInsertChannel = supabase
+      .channel("public:course_issues:insert")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "course_issues" },
@@ -38,24 +69,29 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
           if (!dedup(`issue-${payload.new.id}`)) return
           if (payload.new.created_by === userId) return
 
-          const courseHref = IS_ADMIN(role)
+          const [courseTitle, authorName] = await Promise.all([
+            getCourseCode(payload.new.course_id),
+            getAuthorName(payload.new.created_by),
+          ])
+
+          const icon = SEVERITY_ICON[payload.new.severity] ?? "⚠️"
+          const typeLabel = TYPE_LABEL[payload.new.type] ?? "Issue"
+          const href = IS_ADMIN(role)
             ? `/admin/courses/${payload.new.course_id}`
             : `/courses/${payload.new.course_id}/issues`
 
-          const severityMap: Record<string, string> = {
-            critical: "🔴",
-            major: "🟠",
-            minor: "🟡",
-          }
-          const icon = severityMap[payload.new.severity] ?? "⚠️"
-
-          toast.warning(`${icon} New Issue — ${payload.new.severity}`, {
-            description: payload.new.title,
+          toast.warning(`${icon} New ${typeLabel} · ${payload.new.severity}`, {
+            description: `${authorName} raised "${payload.new.title}" on ${courseTitle}`,
             duration: Infinity,
-            action: { label: "View", onClick: () => router.push(courseHref) },
+            action: { label: "Go to Issue →", onClick: () => router.push(href) },
           })
         }
       )
+      .subscribe()
+
+    // ── Issue Status Changed ─────────────────────────────────────────
+    const issueUpdateChannel = supabase
+      .channel("public:course_issues:update")
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "course_issues" },
@@ -64,30 +100,37 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
           if (payload.old.status === payload.new.status) return
           if (payload.new.resolved_by === userId) return
 
-          const courseHref = IS_ADMIN(role)
+          const courseTitle = await getCourseCode(payload.new.course_id)
+          const href = IS_ADMIN(role)
             ? `/admin/courses/${payload.new.course_id}`
             : `/courses/${payload.new.course_id}/issues`
 
           if (payload.new.status === "resolved") {
             toast.success("✅ Issue Resolved", {
-              description: payload.new.title,
+              description: `"${payload.new.title}" was marked resolved on ${courseTitle}`,
               duration: Infinity,
-              action: { label: "View", onClick: () => router.push(courseHref) },
+              action: { label: "Go to Course →", onClick: () => router.push(href) },
             })
           } else if (payload.new.status === "in_review") {
             toast.info("🔄 Issue In Review", {
-              description: payload.new.title,
+              description: `"${payload.new.title}" is now being reviewed — ${courseTitle}`,
               duration: Infinity,
-              action: { label: "View", onClick: () => router.push(courseHref) },
+              action: { label: "Go to Course →", onClick: () => router.push(href) },
+            })
+          } else if (payload.new.status === "open") {
+            toast.warning("↩️ Issue Reopened", {
+              description: `"${payload.new.title}" was reopened on ${courseTitle}`,
+              duration: Infinity,
+              action: { label: "Go to Course →", onClick: () => router.push(href) },
             })
           }
         }
       )
       .subscribe()
 
-    // ── Issue Comments ───────────────────────────────────────────────
+    // ── New Comment on Issue ─────────────────────────────────────────
     const commentChannel = supabase
-      .channel("public:course_issue_comments")
+      .channel("public:course_issue_comments:insert")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "course_issue_comments" },
@@ -104,23 +147,30 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
 
           if (!issue) return
 
-          const courseHref = IS_ADMIN(role)
+          const [courseTitle, authorName] = await Promise.all([
+            getCourseCode(issue.course_id),
+            getAuthorName(payload.new.author_id),
+          ])
+
+          const href = IS_ADMIN(role)
             ? `/admin/courses/${issue.course_id}`
             : `/courses/${issue.course_id}/issues`
 
           const body: string = payload.new.body
+          const preview = body.length > 60 ? `${body.substring(0, 60)}…` : body
+
           toast.info("💬 New Comment", {
-            description: body.length > 60 ? `${body.substring(0, 60)}…` : body,
+            description: `${authorName} on "${issue.title}" (${courseTitle}): ${preview}`,
             duration: Infinity,
-            action: { label: "View", onClick: () => router.push(courseHref) },
+            action: { label: "Reply →", onClick: () => router.push(href) },
           })
         }
       )
       .subscribe()
 
-    // ── Course Assignments → TAs ─────────────────────────────────────
+    // ── Course Assignment → TA ───────────────────────────────────────
     const assignmentChannel = supabase
-      .channel("public:course_assignments")
+      .channel("public:course_assignments:insert")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "course_assignments" },
@@ -128,28 +178,23 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
           if (payload.new.profile_id !== userId) return
           if (!dedup(`assign-${payload.new.id}`)) return
 
-          const { data: course } = await supabase
-            .from("courses")
-            .select("title")
-            .eq("id", payload.new.course_id)
-            .single()
+          const courseTitle = await getCourseCode(payload.new.course_id)
 
-          if (course) {
-            toast.success("📚 New Course Assigned", {
-              description: course.title,
-              duration: Infinity,
-              action: {
-                label: "Open",
-                onClick: () => router.push(`/courses/${payload.new.course_id}`),
-              },
-            })
-          }
+          toast.success("📚 Course Assigned to You", {
+            description: `You've been assigned to review "${courseTitle}" — start when ready`,
+            duration: Infinity,
+            action: {
+              label: "Open Review →",
+              onClick: () => router.push(`/courses/${payload.new.course_id}/metadata`),
+            },
+          })
         }
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(issueChannel)
+      supabase.removeChannel(issueInsertChannel)
+      supabase.removeChannel(issueUpdateChannel)
       supabase.removeChannel(commentChannel)
       supabase.removeChannel(assignmentChannel)
     }

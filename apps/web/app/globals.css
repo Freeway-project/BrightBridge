@@ -88,100 +88,100 @@
   --radius: 0.875rem;
 }
 
-/* ── Sunset Theme ─────────────────────────────────────── */
+/* ── Sunset Theme — Deep amber embers, volcanic warmth ── */
 [data-theme="sunset"] {
-  --background: #0f0506;
-  --foreground: #fdddd8;
-  --card: #1a0b0e;
-  --card-foreground: #f4c2b8;
-  --popover: #2d1215;
-  --popover-foreground: #fdddd8;
-  --primary: #ff6b35;
-  --primary-foreground: #0f0506;
-  --primary-hover: #ff8c42;
-  --primary-depth: #d62828;
-  --secondary: #d62828;
-  --secondary-foreground: #fdddd8;
-  --muted: #2d1215;
-  --muted-foreground: #e8a87c;
-  --accent: #f77f00;
-  --accent-foreground: #fdddd8;
-  --border: color-mix(in srgb, #d62828 25%, transparent);
-  --border-icy: color-mix(in srgb, #fdddd8 10%, transparent);
-  --input: #2d1215;
-  --ring: #ff6b35;
-  --sidebar: #0f0506;
-  --sidebar-foreground: #f4c2b8;
-  --sidebar-primary: #ff6b35;
-  --sidebar-primary-foreground: #0f0506;
-  --sidebar-accent: #2d1215;
-  --sidebar-accent-foreground: #ff8c42;
-  --sidebar-border: color-mix(in srgb, #d62828 15%, transparent);
-  --sidebar-ring: #ff6b35;
+  --background: #0e0500;           /* Char black with ember warmth */
+  --foreground: #ffe8c8;           /* Warm cream */
+  --card: #1c0c00;                 /* Burnt wood surface */
+  --card-foreground: #ffd4a0;      /* Amber text */
+  --popover: #2e1500;              /* Deep ember */
+  --popover-foreground: #ffe8c8;
+  --primary: #f97316;              /* Vivid orange */
+  --primary-foreground: #0e0500;
+  --primary-hover: #fb923c;
+  --primary-depth: #c2410c;
+  --secondary: #b91c1c;            /* Deep red */
+  --secondary-foreground: #ffe8c8;
+  --muted: #2e1500;
+  --muted-foreground: #d97706;     /* Golden amber muted text */
+  --accent: #451a03;               /* Dark amber surface */
+  --accent-foreground: #fb923c;
+  --border: color-mix(in srgb, #f97316 30%, transparent);
+  --border-icy: color-mix(in srgb, #ffe8c8 8%, transparent);
+  --input: #2e1500;
+  --ring: #f97316;
+  --sidebar: #0a0300;              /* Deepest ember */
+  --sidebar-foreground: #ffd4a0;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #0e0500;
+  --sidebar-accent: #2e1500;
+  --sidebar-accent-foreground: #fb923c;
+  --sidebar-border: color-mix(in srgb, #f97316 20%, transparent);
+  --sidebar-ring: #f97316;
 }
 
-/* ── Monochrome Theme ─────────────────────────────────── */
+/* ── Monochrome Theme — Graphite studio, sharp contrast ─ */
 [data-theme="monochrome"] {
-  --background: #0a0a0a;
-  --foreground: #e8e8e8;
-  --card: #141414;
-  --card-foreground: #d0d0d0;
-  --popover: #1f1f1f;
-  --popover-foreground: #e8e8e8;
-  --primary: #d4d4d4;
-  --primary-foreground: #0a0a0a;
-  --primary-hover: #ffffff;
-  --primary-depth: #808080;
-  --secondary: #4a4a4a;
-  --secondary-foreground: #e8e8e8;
-  --muted: #1f1f1f;
-  --muted-foreground: #808080;
-  --accent: #333333;
-  --accent-foreground: #e8e8e8;
-  --border: color-mix(in srgb, #808080 25%, transparent);
-  --border-icy: color-mix(in srgb, #e8e8e8 10%, transparent);
-  --input: #1f1f1f;
-  --ring: #d4d4d4;
-  --sidebar: #0a0a0a;
-  --sidebar-foreground: #d0d0d0;
-  --sidebar-primary: #d4d4d4;
-  --sidebar-primary-foreground: #0a0a0a;
-  --sidebar-accent: #1f1f1f;
+  --background: #0d0d0d;           /* Near-black graphite */
+  --foreground: #f5f5f5;           /* Bright off-white */
+  --card: #1a1a1a;                 /* Elevated graphite */
+  --card-foreground: #e5e5e5;
+  --popover: #242424;
+  --popover-foreground: #f5f5f5;
+  --primary: #ffffff;              /* Pure white action */
+  --primary-foreground: #0d0d0d;
+  --primary-hover: #e5e5e5;
+  --primary-depth: #737373;
+  --secondary: #404040;            /* Mid graphite */
+  --secondary-foreground: #f5f5f5;
+  --muted: #242424;
+  --muted-foreground: #a3a3a3;     /* Silver muted */
+  --accent: #2e2e2e;
+  --accent-foreground: #ffffff;
+  --border: color-mix(in srgb, #ffffff 15%, transparent);
+  --border-icy: color-mix(in srgb, #ffffff 6%, transparent);
+  --input: #242424;
+  --ring: #ffffff;
+  --sidebar: #080808;              /* Pure graphite black */
+  --sidebar-foreground: #e5e5e5;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #080808;
+  --sidebar-accent: #1a1a1a;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: color-mix(in srgb, #808080 15%, transparent);
-  --sidebar-ring: #d4d4d4;
+  --sidebar-border: color-mix(in srgb, #ffffff 10%, transparent);
+  --sidebar-ring: #ffffff;
 }
 
-/* ── Aurora Theme ─────────────────────────────────────── */
+/* ── Aurora Theme — Neon deep space, fuchsia & violet ─── */
 [data-theme="aurora"] {
-  --background: #0d0621;
-  --foreground: #ecdff5;
-  --card: #150d2e;
-  --card-foreground: #d8c4e8;
-  --popover: #1f1240;
-  --popover-foreground: #ecdff5;
-  --primary: #b565d8;
-  --primary-foreground: #0d0621;
-  --primary-hover: #d28ef9;
+  --background: #06001a;           /* Deep space black-violet */
+  --foreground: #f0e6ff;           /* Soft lavender white */
+  --card: #0e0030;                 /* Deep purple surface */
+  --card-foreground: #ddbfff;      /* Light violet text */
+  --popover: #160045;
+  --popover-foreground: #f0e6ff;
+  --primary: #c026d3;              /* Vivid fuchsia */
+  --primary-foreground: #06001a;
+  --primary-hover: #d946ef;
   --primary-depth: #7c3aed;
-  --secondary: #e75480;
-  --secondary-foreground: #ecdff5;
-  --muted: #1f1240;
-  --muted-foreground: #b89fc9;
-  --accent: #2d1b4e;
-  --accent-foreground: #d28ef9;
-  --border: color-mix(in srgb, #7c3aed 25%, transparent);
-  --border-icy: color-mix(in srgb, #ecdff5 10%, transparent);
-  --input: #1f1240;
-  --ring: #b565d8;
-  --sidebar: #0d0621;
-  --sidebar-foreground: #d8c4e8;
-  --sidebar-primary: #b565d8;
-  --sidebar-primary-foreground: #0d0621;
-  --sidebar-accent: #1f1240;
-  --sidebar-accent-foreground: #d28ef9;
-  --sidebar-border: color-mix(in srgb, #7c3aed 15%, transparent);
-  --sidebar-ring: #b565d8;
+  --secondary: #7c3aed;            /* Electric violet */
+  --secondary-foreground: #f0e6ff;
+  --muted: #160045;
+  --muted-foreground: #a78bfa;     /* Periwinkle muted text */
+  --accent: #1e0060;
+  --accent-foreground: #d946ef;
+  --border: color-mix(in srgb, #c026d3 35%, transparent);
+  --border-icy: color-mix(in srgb, #f0e6ff 8%, transparent);
+  --input: #160045;
+  --ring: #c026d3;
+  --sidebar: #04000f;              /* Void black */
+  --sidebar-foreground: #ddbfff;
+  --sidebar-primary: #c026d3;
+  --sidebar-primary-foreground: #06001a;
+  --sidebar-accent: #160045;
+  --sidebar-accent-foreground: #d946ef;
+  --sidebar-border: color-mix(in srgb, #7c3aed 25%, transparent);
+  --sidebar-ring: #c026d3;
 }
 
 * {

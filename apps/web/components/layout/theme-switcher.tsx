@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils"
 
 const THEMES: { id: ThemeId; label: string; swatch: string; ring: string }[] = [
   { id: "ocean",      label: "Ocean",      swatch: "bg-[#00b4d8]", ring: "ring-[#00b4d8]" },
-  { id: "sunset",     label: "Sunset",     swatch: "bg-[#ff6b35]", ring: "ring-[#ff6b35]" },
-  { id: "monochrome", label: "Mono",       swatch: "bg-[#d4d4d4]", ring: "ring-[#d4d4d4]" },
-  { id: "aurora",     label: "Aurora",     swatch: "bg-[#b565d8]", ring: "ring-[#b565d8]" },
+  { id: "sunset",     label: "Sunset",     swatch: "bg-[#f97316]", ring: "ring-[#f97316]" },
+  { id: "monochrome", label: "Mono",       swatch: "bg-[#ffffff]", ring: "ring-[#ffffff]"  },
+  { id: "aurora",     label: "Aurora",     swatch: "bg-[#c026d3]", ring: "ring-[#c026d3]" },
 ]
 
 export function ThemeSwitcher() {
