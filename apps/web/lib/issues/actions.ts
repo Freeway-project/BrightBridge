@@ -55,7 +55,7 @@ export async function createIssueAction(
         location: input.location?.trim() || null,
         direct_link: input.direct_link?.trim() || null,
         owner_id: input.owner_id || null,
-        created_by: ctx.userId,
+        created_by: ctx.profile.id,
       })
       .select('*')
       .single()
@@ -69,12 +69,12 @@ export async function createIssueAction(
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name')
-      .eq('id', ctx.userId)
+      .eq('id', ctx.profile.id)
       .single()
 
     const commentError = await supabase.from('course_issue_comments').insert({
       issue_id: data.id,
-      author_id: ctx.userId,
+      author_id: ctx.profile.id,
       body: `Issue opened by ${profile?.full_name || 'User'}`,
       is_system_message: true,
     })
@@ -100,11 +100,37 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
 
     const ctx = await requireProfile()
 
-    const { data, error } = await supabase
+    // Get the course for this issue
+    const { data: issue, error: issueError } = await supabase
+      .from('course_issues')
+      .select('course_id')
+      .eq('id', issueId)
+      .single()
+
+    if (issueError || !issue) {
+      throw new Error('Issue not found')
+    }
+
+    // Check if user is assigned to this course or is an admin
+    const isAdmin = ['super_admin', 'admin_full', 'admin_viewer'].includes(ctx.profile.role)
+    if (!isAdmin) {
+      const { data: assignment, error: assignmentError } = await supabase
+        .from('course_assignments')
+        .select('role')
+        .eq('profile_id', ctx.profile.id)
+        .eq('course_id', issue.course_id)
+        .single()
+
+      if (assignmentError || !assignment) {
+        throw new Error('No access to resolve issues in this course')
+      }
+    }
+
+    const { data: updatedIssue, error } = await supabase
       .from('course_issues')
       .update({
         status: newStatus,
-        resolved_by: newStatus === 'resolved' ? ctx.userId : null,
+        resolved_by: newStatus === 'resolved' ? ctx.profile.id : null,
         resolved_at: newStatus === 'resolved' ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
       })
@@ -122,12 +148,12 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name')
-      .eq('id', ctx.userId)
+      .eq('id', ctx.profile.id)
       .single()
 
     const commentError = await supabase.from('course_issue_comments').insert({
       issue_id: issueId,
-      author_id: ctx.userId,
+      author_id: ctx.profile.id,
       body: `Status changed to ${statusLabel} by ${profile?.full_name || 'User'}`,
       is_system_message: true,
     })
@@ -136,8 +162,8 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
       console.error('[updateIssueStatusAction] Comment insert error:', commentError.error)
     }
 
-    revalidatePath(`/courses/${data.course_id}/issue-log`)
-    return data as CourseIssue
+    revalidatePath(`/courses/${issue.course_id}/issue-log`)
+    return updatedIssue as CourseIssue
   } catch (err) {
     console.error('[updateIssueStatusAction] Error:', err)
     throw err instanceof Error ? err : new Error('Failed to update issue status')
@@ -156,7 +182,7 @@ export async function addCommentAction(issueId: string, input: AddCommentInput):
       .from('course_issue_comments')
       .insert({
         issue_id: issueId,
-        author_id: ctx.userId,
+        author_id: ctx.profile.id,
         body: input.body.trim(),
         is_system_message: false,
       })
