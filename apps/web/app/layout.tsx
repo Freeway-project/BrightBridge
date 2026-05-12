@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -21,7 +22,7 @@ export default function RootLayout({
   const currentVersion = process.env.VERCEL_GIT_COMMIT_SHA || "development";
 
   return (
-    <html lang="en" className={cn("font-sans")}>
+    <html lang="en" className={cn("font-sans", GeistSans.className)}>
       <body>
         <TooltipProvider>
           {children}

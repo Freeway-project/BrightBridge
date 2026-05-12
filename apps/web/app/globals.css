@@ -31,9 +31,10 @@
   --lc-500: #caf0f8;
   --lc-900: #f4fcfe;
 
-  /* Electric Violet (Special Accent) */
-  --ev-500: #8a2be2;
-  --ev-600: #9400d3;
+  /* Luminous Iris (Light Blue-Violet Accent) */
+  --ev-500: #818cf8; /* Soft Indigo/Violet */
+  --ev-600: #6366f1; /* Deeper Indigo */
+  --ev-neon: #a78bfa; /* Bright Periwinkle */
 
   /* Theme Mapping */
   --background: var(--dt-100);
@@ -64,14 +65,14 @@
   --input: var(--dt-300);
   --ring: var(--ts-500);
   
-  /* Sidebar (Deep Midnight) */
-  --sidebar: var(--dt-100);
-  --sidebar-foreground: var(--fb-700);
+  /* Sidebar (Neutral Grey) */
+  --sidebar: #18181b; /* Zinc 900 - Solid Grey */
+  --sidebar-foreground: #d4d4d8; /* Zinc 300 - Light Grey Text */
   --sidebar-primary: var(--ts-500);
   --sidebar-primary-foreground: var(--dt-100);
-  --sidebar-accent: var(--dt-300);
-  --sidebar-accent-foreground: var(--ts-600);
-  --sidebar-border: color-mix(in srgb, var(--bt-500) 15%, transparent);
+  --sidebar-accent: #27272a; /* Zinc 800 */
+  --sidebar-accent-foreground: #fafafa; /* Zinc 50 */
+  --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: var(--ts-500);
 
   /* Semantic Colors */

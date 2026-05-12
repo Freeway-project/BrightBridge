@@ -50,7 +50,7 @@ function BrandLogo() {
           </span>
         )}
       </div>
-      <SidebarTrigger className="hidden shrink-0 md:flex text-muted-foreground/40 hover:text-primary transition-colors" />
+      <SidebarTrigger className="hidden shrink-0 md:flex text-slate-400 hover:text-slate-200 transition-colors" />
     </div>
   )
 }
