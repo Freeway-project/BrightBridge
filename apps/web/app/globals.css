@@ -59,36 +59,36 @@
   --radius: 0.875rem;
 }
 
-/* ── Sunset Theme — Deep amber embers, volcanic warmth ── */
+/* ── Sunset Theme — Candy pink & violet dream ── */
 [data-theme="sunset"] {
-  --background: #0e0500;           /* Char black with ember warmth */
-  --foreground: #ffe8c8;           /* Warm cream */
-  --card: #1c0c00;                 /* Burnt wood surface */
-  --card-foreground: #ffd4a0;      /* Amber text */
-  --popover: #2e1500;              /* Deep ember */
-  --popover-foreground: #ffe8c8;
-  --primary: #f97316;              /* Vivid orange */
-  --primary-foreground: #0e0500;
-  --primary-hover: #fb923c;
-  --primary-depth: #c2410c;
-  --secondary: #b91c1c;            /* Deep red */
-  --secondary-foreground: #ffe8c8;
-  --muted: #2e1500;
-  --muted-foreground: #d97706;     /* Golden amber muted text */
-  --accent: #451a03;               /* Dark amber surface */
-  --accent-foreground: #fb923c;
-  --border: color-mix(in srgb, #f97316 30%, transparent);
-  --border-icy: color-mix(in srgb, #ffe8c8 8%, transparent);
-  --input: #2e1500;
-  --ring: #f97316;
-  --sidebar: #0a0300;              /* Deepest ember */
-  --sidebar-foreground: #ffd4a0;
-  --sidebar-primary: #f97316;
-  --sidebar-primary-foreground: #0e0500;
-  --sidebar-accent: #2e1500;
-  --sidebar-accent-foreground: #fb923c;
-  --sidebar-border: color-mix(in srgb, #f97316 20%, transparent);
-  --sidebar-ring: #f97316;
+  --background: #0a0010;           /* Deep black-violet */
+  --foreground: #ffffff;           /* Pure white */
+  --card: #150020;                 /* Dark violet card */
+  --card-foreground: #fbcfe8;      /* Light pink text */
+  --popover: #1f0030;
+  --popover-foreground: #ffffff;
+  --primary: #ec4899;              /* Pink */
+  --primary-foreground: #0a0010;
+  --primary-hover: #f472b6;
+  --primary-depth: #be185d;
+  --secondary: #a855f7;            /* Violet */
+  --secondary-foreground: #ffffff;
+  --muted: #1f0030;
+  --muted-foreground: #d946ef;     /* Fuchsia muted text */
+  --accent: #2e0040;
+  --accent-foreground: #ec4899;
+  --border: color-mix(in srgb, #ec4899 30%, transparent);
+  --border-icy: color-mix(in srgb, #ffffff 10%, transparent);
+  --input: #1f0030;
+  --ring: #ec4899;
+  --sidebar: #06000a;              /* Deepest violet */
+  --sidebar-foreground: #fbcfe8;
+  --sidebar-primary: #ec4899;
+  --sidebar-primary-foreground: #0a0010;
+  --sidebar-accent: #150020;
+  --sidebar-accent-foreground: #ec4899;
+  --sidebar-border: color-mix(in srgb, #ec4899 20%, transparent);
+  --sidebar-ring: #ec4899;
 }
 
 /* ── Monochrome Theme — Graphite studio, sharp contrast ─ */

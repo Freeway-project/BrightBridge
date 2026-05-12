@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 const THEMES: { id: ThemeId; label: string; swatch: string; ring: string }[] = [
   { id: "ocean",      label: "Ocean",      swatch: "bg-[#00b4d8]", ring: "ring-[#00b4d8]" },
-  { id: "sunset",     label: "Sunset",     swatch: "bg-[#f97316]", ring: "ring-[#f97316]" },
+  { id: "sunset",     label: "Candy",      swatch: "bg-[#ec4899]", ring: "ring-[#ec4899]" },
   { id: "monochrome", label: "Mono",       swatch: "bg-[#ffffff]", ring: "ring-[#ffffff]"  },
   { id: "aurora",     label: "Aurora",     swatch: "bg-[#c026d3]", ring: "ring-[#c026d3]" },
 ]
