@@ -116,37 +116,33 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
 
       {/* Tabs */}
       <Tabs defaultValue={defaultTab}>
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-x-2 gap-y-2 rounded-lg border border-border bg-card p-2 shadow-sm">
-          <TabItem 
-            value="todo" 
-            count={byTab.todo.length} 
-            label="To Do" 
-            bgColor="bg-amber-500/10"
-            activeColor="bg-amber-500/20 text-amber-600 border-amber-500"
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-x-2 gap-y-2 bg-transparent p-0">
+          <TabItem
+            value="todo"
+            count={byTab.todo.length}
+            label="To Do"
+            textColor="text-amber-600"
             emoji="📋"
           />
-          <TabItem 
-            value="in_progress" 
-            count={byTab.in_progress.length} 
-            label="In Progress" 
-            bgColor="bg-blue-500/10"
-            activeColor="bg-blue-500/20 text-blue-600 border-blue-500"
+          <TabItem
+            value="in_progress"
+            count={byTab.in_progress.length}
+            label="In Progress"
+            textColor="text-blue-600"
             emoji="⚙️"
           />
-          <TabItem 
-            value="done" 
-            count={byTab.done.length} 
-            label="Done" 
-            bgColor="bg-green-500/10"
-            activeColor="bg-green-500/20 text-green-600 border-green-500"
+          <TabItem
+            value="done"
+            count={byTab.done.length}
+            label="Done"
+            textColor="text-green-600"
             emoji="✅"
           />
-          <TabItem 
-            value="issues" 
-            count={byTab.issues.length} 
-            label="Issues" 
-            bgColor="bg-red-500/10"
-            activeColor="bg-red-500/20 text-red-600 border-red-500"
+          <TabItem
+            value="issues"
+            count={byTab.issues.length}
+            label="Issues"
+            textColor="text-red-600"
             emoji="🔴"
           />
         </TabsList>
@@ -191,38 +187,36 @@ function TabItem({
   value,
   label,
   count,
-  bgColor,
-  activeColor,
+  textColor,
   emoji,
 }: {
   value: string
   label: string
   count: number
-  bgColor: string
-  activeColor: string
+  textColor: string
   emoji: string
 }) {
   return (
     <TabsTrigger
       value={value}
       className={cn(
-        "relative rounded-lg border-2 border-transparent px-3 py-2 text-sm font-semibold transition-all gap-1.5 flex items-center",
-        bgColor,
-        "text-foreground/70",
-        "hover:bg-opacity-20",
-        `data-[state=active]:${activeColor}`,
-        `data-[state=active]:border-current`,
-        `data-[state=active]:shadow-sm`,
+        "px-3 py-1.5 text-sm font-medium gap-1.5 flex items-center transition-colors",
+        "text-foreground/60",
+        `data-[state=active]:${textColor}`,
+        "data-[state=active]:font-semibold",
+        "hover:text-foreground/80",
       )}
     >
-      <span className="text-lg">{emoji}</span>
+      <span className="text-base">{emoji}</span>
       {label}
-      <span className={cn(
-        "ml-1 rounded-full px-2 py-0.5 text-[11px] font-bold",
-        count > 0 ? "bg-current/20 text-current" : "bg-muted text-muted-foreground",
-      )}>
-        {count}
-      </span>
+      {count > 0 && (
+        <span className={cn(
+          "ml-1 text-[11px] font-bold px-1.5 py-0.5 rounded-full",
+          `data-[state=active]:${textColor}`,
+        )}>
+          {count}
+        </span>
+      )}
     </TabsTrigger>
   )
 }
