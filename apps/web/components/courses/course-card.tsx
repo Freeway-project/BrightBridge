@@ -3,7 +3,7 @@ import { StatusBadge } from "./status-badge"
 import { type CourseStatus } from "@coursebridge/workflow"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowRight, Clock } from "lucide-react"
+import { ArrowRight, Clock, AlertCircle, CheckCircle2 } from "lucide-react"
 import type { ReviewProgress } from "@/lib/courses/service"
 import { cn } from "@/lib/utils"
 
@@ -18,9 +18,10 @@ interface CourseCardProps {
     updatedAt: string
     reviewProgress?: ReviewProgress
   }
+  issueCounts?: { open: number; resolved: number }
 }
 
-export function CourseCard({ course }: CourseCardProps) {
+export function CourseCard({ course, issueCounts }: CourseCardProps) {
   const { action, owner, tone } = deriveNextAction(course.status)
 
   return (
@@ -54,6 +55,18 @@ export function CourseCard({ course }: CourseCardProps) {
                 <Clock className="size-3" />
                 Updated {new Date(course.updatedAt).toLocaleDateString()}
               </div>
+              {issueCounts && issueCounts.open > 0 && (
+                <div className="flex items-center gap-1 rounded border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 font-semibold text-destructive">
+                  <AlertCircle className="size-3" />
+                  {issueCounts.open} open {issueCounts.open === 1 ? "issue" : "issues"}
+                </div>
+              )}
+              {issueCounts && issueCounts.resolved > 0 && (
+                <div className="flex items-center gap-1 rounded border border-success/40 bg-success/10 px-1.5 py-0.5 font-semibold text-success">
+                  <CheckCircle2 className="size-3" />
+                  {issueCounts.resolved} resolved
+                </div>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs">

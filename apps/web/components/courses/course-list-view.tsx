@@ -24,9 +24,12 @@ export interface CourseStat {
   icon?: StatCardIcon
 }
 
+export type IssueCountMap = Record<string, { open: number; resolved: number }>
+
 interface CourseListViewProps {
   initialCourses: CourseSummary[]
   stats?: CourseStat[]
+  issueCounts?: IssueCountMap
 }
 
 const TODO_STATUSES = new Set<CourseStatus>(["course_created", "assigned_to_ta"])
@@ -42,7 +45,7 @@ function getTab(status: CourseStatus): "todo" | "in_progress" | "done" {
   return "done"
 }
 
-export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
+export function CourseListView({ initialCourses, stats, issueCounts = {} }: CourseListViewProps) {
   const [search, setSearch] = useState("")
   const [term, setTerm] = useState("all")
 
@@ -119,7 +122,7 @@ export function CourseListView({ initialCourses, stats }: CourseListViewProps) {
 
         {(["todo", "in_progress", "done"] as const).map((tab) => (
           <TabsContent key={tab} value={tab} className="mt-4">
-            <CourseGrid courses={byTab[tab]} onClear={() => { setSearch(""); setTerm("all") }} />
+            <CourseGrid courses={byTab[tab]} issueCounts={issueCounts} onClear={() => { setSearch(""); setTerm("all") }} />
           </TabsContent>
         ))}
       </Tabs>
@@ -159,7 +162,7 @@ function TabItem({
   )
 }
 
-function CourseGrid({ courses, onClear }: { courses: CourseSummary[]; onClear: () => void }) {
+function CourseGrid({ courses, issueCounts, onClear }: { courses: CourseSummary[]; issueCounts: IssueCountMap; onClear: () => void }) {
   if (courses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-border rounded-lg text-center p-8">
@@ -174,7 +177,7 @@ function CourseGrid({ courses, onClear }: { courses: CourseSummary[]; onClear: (
   return (
     <div className="grid grid-cols-1 gap-4">
       {courses.map((course) => (
-        <CourseCard key={course.id} course={course} />
+        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} />
       ))}
     </div>
   )
