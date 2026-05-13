@@ -22,6 +22,7 @@ import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
 import { FormFieldWrapper } from "./form-field-wrapper"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -114,6 +115,8 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
       }
       localStorage.removeItem(`coursebridge:${course.id}:local-draft:course_metadata`)
       setStatus("saved")
+      setTimeout(() => setStatus("idle"), 2500)
+      localStorage.setItem(`coursebridge:${course.id}:form-done:course_metadata`, "1")
       form.reset(form.getValues())
       return true
     } catch (err) {
@@ -137,7 +140,17 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
-    <Card className="max-w-3xl">
+    <div className="relative mx-auto max-w-3xl rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
+      <GlowingEffect
+        blur={0}
+        spread={28}
+        glow
+        disabled={false}
+        proximity={72}
+        inactiveZone={0.65}
+        borderWidth={1}
+      />
+      <Card className="relative border-0 bg-background/90 shadow-none ring-0">
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-base">Course Metadata</CardTitle>
@@ -256,7 +269,8 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           </div>
         </form>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   )
 }
 

@@ -36,6 +36,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { CHECKLIST } from "@/lib/workspace/constants"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
@@ -142,6 +143,8 @@ export function ReviewMatrixForm({
           return
         }
         setStatus("saved")
+        setTimeout(() => setStatus("idle"), 2500)
+        localStorage.setItem(`coursebridge:${courseId}:form-done:review_matrix`, "1")
         localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
         if (advance) {
@@ -185,7 +188,17 @@ export function ReviewMatrixForm({
   }
 
   return (
-    <Card>
+    <div className="relative rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
+      <GlowingEffect
+        blur={0}
+        spread={28}
+        glow
+        disabled={false}
+        proximity={72}
+        inactiveZone={0.65}
+        borderWidth={1}
+      />
+      <Card className="relative border-0 bg-background/90 shadow-none ring-0">
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-2">
@@ -218,7 +231,7 @@ export function ReviewMatrixForm({
                         <TableHead className="w-[150px]">Status</TableHead>
                         <TableHead>Notes</TableHead>
                         <TableHead>Direct Link</TableHead>
-                        <TableHead className="w-[92px] text-right">Issue</TableHead>
+                        <TableHead className="w-[136px] text-right">Issue</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -264,18 +277,21 @@ export function ReviewMatrixForm({
                             <TableCell>
                               <Input placeholder="https://..." {...form.register(`items.${index}.direct_link`)} />
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right align-middle">
                               {needsIssue ? (
                                 <Button
                                   onClick={() => addIssue(item.id, item.label)}
                                   size="sm"
                                   type="button"
                                   variant="outline"
+                                  className="h-8 min-w-[92px] shrink-0 border-primary/30 bg-background text-foreground hover:bg-primary/10"
                                 >
-                                  <Plus className="size-3.5" />
+                                  <Plus className="size-4" />
                                   Issue
                                 </Button>
-                              ) : null}
+                              ) : (
+                                <span className="inline-block w-[92px] text-center text-xs text-muted-foreground">—</span>
+                              )}
                             </TableCell>
                           </TableRow>
                         )
@@ -295,7 +311,8 @@ export function ReviewMatrixForm({
           </div>
         </form>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   )
 }
 

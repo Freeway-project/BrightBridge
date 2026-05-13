@@ -7,6 +7,7 @@ import { submitReview } from "@/lib/workspace/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ReviewSummary } from "./review-summary"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { toast } from "sonner"
 
 type SubmitPanelProps = {
@@ -70,10 +71,20 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
       )}
 
       {/* Submit Card - After review */}
-      <Card className="max-w-2xl border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-base">Ready to Submit?</CardTitle>
-        </CardHeader>
+      <div className="relative max-w-2xl rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
+        <GlowingEffect
+          blur={0}
+          spread={28}
+          glow
+          disabled={false}
+          proximity={72}
+          inactiveZone={0.65}
+          borderWidth={1}
+        />
+        <Card className="relative border-0 bg-background/90 shadow-none ring-0">
+          <CardHeader>
+            <CardTitle className="text-base">Ready to Submit?</CardTitle>
+          </CardHeader>
         <CardContent className="space-y-5">
         <div className="space-y-3">
           {sections.map((section) => (
@@ -122,8 +133,9 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
             {isPending ? "Submitting..." : "Submit to Admin"}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

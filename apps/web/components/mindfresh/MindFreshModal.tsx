@@ -158,7 +158,6 @@ export function MindFreshModal({ open, onOpenChange }: MindFreshModalProps) {
         <div className={`bg-gradient-to-r ${activeMode?.gradient ?? "from-teal-500/10 to-cyan-500/10"} border-b border-border/40 px-6 py-4 transition-all duration-500`}>
           <SheetHeader>
             <SheetTitle className="text-base">MindFresh — 15-second reset</SheetTitle>
-            <SheetDescription className="text-xs">Pick a mode, take a quick reset, return to your workflow.</SheetDescription>
           </SheetHeader>
         </div>
 
@@ -213,10 +212,12 @@ export function MindFreshModal({ open, onOpenChange }: MindFreshModalProps) {
                       durationSeconds={item.durationSeconds}
                       onComplete={complete}
                     />
-                    {isLoadingAi
-                      ? <p className="text-xs text-muted-foreground text-center animate-pulse py-4">Writing a fresh line…</p>
-                      : <QuoteCard item={displayItem} showInput={item.type === "prompt"} />
-                    }
+                    <div className="min-h-[110px] flex flex-col justify-center">
+                      {isLoadingAi
+                        ? <p className="text-sm text-muted-foreground text-center animate-pulse py-8">Writing a fresh line…</p>
+                        : <QuoteCard item={displayItem} showInput={item.type === "prompt"} />
+                      }
+                    </div>
                   </>
                 )}
               </motion.div>

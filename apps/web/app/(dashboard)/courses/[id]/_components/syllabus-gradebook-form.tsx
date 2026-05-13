@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { SYLLABUS_ITEMS_LIST as SYLLABUS_ITEMS, GRADEBOOK_ITEMS_LIST as GRADEBOOK_ITEMS } from "@/lib/workspace/constants"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
@@ -120,6 +121,8 @@ export function SyllabusGradebookForm({
           return
         }
         setStatus("saved")
+        setTimeout(() => setStatus("idle"), 2500)
+        localStorage.setItem(`coursebridge:${courseId}:form-done:syllabus_review`, "1")
         localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
         if (advance) {
@@ -132,7 +135,17 @@ export function SyllabusGradebookForm({
   }
 
   return (
-    <Card>
+    <div className="relative rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
+      <GlowingEffect
+        blur={0}
+        spread={28}
+        glow
+        disabled={false}
+        proximity={72}
+        inactiveZone={0.65}
+        borderWidth={1}
+      />
+      <Card className="relative border-0 bg-background/90 shadow-none ring-0">
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-2">
@@ -251,7 +264,8 @@ export function SyllabusGradebookForm({
           </div>
         </form>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   )
 }
 
