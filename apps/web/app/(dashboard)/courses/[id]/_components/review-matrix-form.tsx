@@ -189,7 +189,7 @@ export function ReviewMatrixForm({
 
   return (
     <Card className="relative overflow-hidden">
-      {status === "saved" && <Meteors number={14} className="opacity-50" />}
+      {status === "saved" && <Meteors number={18} className="bg-indigo-400" />}
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-2">

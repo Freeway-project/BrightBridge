@@ -141,7 +141,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 
   return (
     <Card className="max-w-3xl relative overflow-hidden">
-      {status === "saved" && <Meteors number={14} className="opacity-50" />}
+      {status === "saved" && <Meteors number={18} className="bg-indigo-400" />}
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-base">Course Metadata</CardTitle>
