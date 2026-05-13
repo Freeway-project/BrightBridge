@@ -39,9 +39,19 @@ const DONE_STATUSES = new Set<CourseStatus>([
   "instructor_questions", "instructor_approved", "final_approved",
 ])
 
-function getTab(status: CourseStatus): "todo" | "in_progress" | "done" {
+function getTab(course: CourseSummary): "todo" | "in_progress" | "done" {
+  const { status, reviewProgress } = course
   if (TODO_STATUSES.has(status)) return "todo"
-  if (IN_PROGRESS_STATUSES.has(status)) return "in_progress"
+  if (IN_PROGRESS_STATUSES.has(status)) {
+    if (status === "ta_review_in_progress") {
+      const hasAnyWork =
+        reviewProgress?.courseMetadata.exists ||
+        reviewProgress?.reviewMatrix.exists ||
+        reviewProgress?.syllabusReview.exists
+      if (!hasAnyWork) return "todo"
+    }
+    return "in_progress"
+  }
   return "done"
 }
 
@@ -67,9 +77,9 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
   }, [initialCourses, search, term])
 
   const byTab = useMemo(() => ({
-    todo:        filtered.filter((c) => getTab(c.status) === "todo"),
-    in_progress: filtered.filter((c) => getTab(c.status) === "in_progress"),
-    done:        filtered.filter((c) => getTab(c.status) === "done"),
+    todo:        filtered.filter((c) => getTab(c) === "todo"),
+    in_progress: filtered.filter((c) => getTab(c) === "in_progress"),
+    done:        filtered.filter((c) => getTab(c) === "done"),
     issues:      filtered.filter((c) => (issueCounts[c.id]?.open ?? 0) > 0),
   }), [filtered, issueCounts])
 
