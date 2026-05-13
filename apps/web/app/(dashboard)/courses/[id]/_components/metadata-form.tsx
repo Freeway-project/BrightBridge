@@ -22,6 +22,7 @@ import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
 import { FormFieldWrapper } from "./form-field-wrapper"
+import { Meteors } from "@/components/ui/meteors"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -114,6 +115,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
       }
       localStorage.removeItem(`coursebridge:${course.id}:local-draft:course_metadata`)
       setStatus("saved")
+      setTimeout(() => setStatus("idle"), 2500)
       form.reset(form.getValues())
       return true
     } catch (err) {
@@ -137,7 +139,8 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
-    <Card className="max-w-3xl">
+    <Card className="max-w-3xl relative overflow-hidden">
+      {status === "saved" && <Meteors number={14} className="opacity-50" />}
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-base">Course Metadata</CardTitle>

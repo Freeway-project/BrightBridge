@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { ChevronDown, Plus } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
+import { Meteors } from "@/components/ui/meteors"
 import {
   reviewMatrixSchema,
   type ReviewMatrixFormValues,
@@ -142,6 +143,7 @@ export function ReviewMatrixForm({
           return
         }
         setStatus("saved")
+        setTimeout(() => setStatus("idle"), 2500)
         localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
         if (advance) {
@@ -185,7 +187,8 @@ export function ReviewMatrixForm({
   }
 
   return (
-    <Card>
+    <Card className="relative overflow-hidden">
+      {status === "saved" && <Meteors number={14} className="opacity-50" />}
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-2">
