@@ -222,7 +222,7 @@ export function ReviewMatrixForm({
                         <TableHead className="w-[150px]">Status</TableHead>
                         <TableHead>Notes</TableHead>
                         <TableHead>Direct Link</TableHead>
-                        <TableHead className="w-[92px] text-right">Issue</TableHead>
+                        <TableHead className="w-[136px] text-right">Issue</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -268,18 +268,21 @@ export function ReviewMatrixForm({
                             <TableCell>
                               <Input placeholder="https://..." {...form.register(`items.${index}.direct_link`)} />
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right align-middle">
                               {needsIssue ? (
                                 <Button
                                   onClick={() => addIssue(item.id, item.label)}
                                   size="sm"
                                   type="button"
                                   variant="outline"
+                                  className="h-8 min-w-[92px] shrink-0 border-primary/30 bg-background text-foreground hover:bg-primary/10"
                                 >
-                                  <Plus className="size-3.5" />
+                                  <Plus className="size-4" />
                                   Issue
                                 </Button>
-                              ) : null}
+                              ) : (
+                                <span className="inline-block w-[92px] text-center text-xs text-muted-foreground">—</span>
+                              )}
                             </TableCell>
                           </TableRow>
                         )

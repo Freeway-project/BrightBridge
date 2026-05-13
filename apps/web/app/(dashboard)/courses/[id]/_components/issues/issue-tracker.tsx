@@ -47,7 +47,7 @@ export function IssueTracker({ courseId, phase, userRole }: IssueTrackerProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-semibold">Issues</h3>
         {canCreateIssue && (
           <IssueCreateDialog
@@ -57,8 +57,12 @@ export function IssueTracker({ courseId, phase, userRole }: IssueTrackerProps) {
             onOpenChange={setCreateDialogOpen}
             onCreated={handleIssueCreated}
           >
-            <Button size="sm" variant="default">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button
+              size="sm"
+              variant="default"
+              className="h-8 shrink-0 px-3 font-semibold whitespace-nowrap"
+            >
+              <Plus className="mr-1.5 size-4 shrink-0" />
               New Issue
             </Button>
           </IssueCreateDialog>
