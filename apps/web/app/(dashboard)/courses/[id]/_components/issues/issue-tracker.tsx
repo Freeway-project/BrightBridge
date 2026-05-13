@@ -65,7 +65,13 @@ export function IssueTracker({ courseId, phase, userRole }: IssueTrackerProps) {
         )}
       </div>
 
-      <IssueList issues={issues} loading={loading} phase={phase} onIssuesChange={loadIssues} />
+      <IssueList
+        issues={issues}
+        loading={loading}
+        phase={phase}
+        onIssuesChange={loadIssues}
+        canResolve={['super_admin', 'admin_full', 'admin_viewer'].includes(userRole ?? '')}
+      />
     </div>
   )
 }

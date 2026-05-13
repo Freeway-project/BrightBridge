@@ -111,19 +111,10 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
       throw new Error('Issue not found')
     }
 
-    // Check if user is assigned to this course or is an admin
+    // Only admins can change issue status
     const isAdmin = ['super_admin', 'admin_full', 'admin_viewer'].includes(ctx.profile.role)
     if (!isAdmin) {
-      const { data: assignment, error: assignmentError } = await supabase
-        .from('course_assignments')
-        .select('role')
-        .eq('profile_id', ctx.profile.id)
-        .eq('course_id', issue.course_id)
-        .single()
-
-      if (assignmentError || !assignment) {
-        throw new Error('No access to resolve issues in this course')
-      }
+      throw new Error('Only admins can resolve issues')
     }
 
     const { data: updatedIssue, error } = await supabase

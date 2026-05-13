@@ -7,6 +7,7 @@ import { submitReview } from "@/lib/workspace/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ReviewSummary } from "./review-summary"
+import { toast } from "sonner"
 
 type SubmitPanelProps = {
   courseId: string
@@ -25,23 +26,36 @@ type SubmitPanelProps = {
 export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: SubmitPanelProps) {
   const [isPending, startTransition] = useTransition()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const submitAllowedStatuses: CourseStatus[] = ["assigned_to_ta", "ta_review_in_progress", "admin_changes_requested"]
+  const isStatusSubmittable = submitAllowedStatuses.includes(courseStatus)
   const blockers = sections.filter((section) => section.required && !section.complete)
-  const disabled = blockers.length > 0 || isPending || courseStatus === "submitted_to_admin"
+  const disabled = blockers.length > 0 || isPending || !isStatusSubmittable
 
   const handleSubmit = () => {
+    if (!isStatusSubmittable) {
+      const message = `Cannot submit from current status: ${courseStatus.replaceAll("_", " ")}.`
+      setErrorMsg(message)
+      toast.error(message)
+      return
+    }
+
     startTransition(async () => {
       setErrorMsg(null)
-      try {
-        const res = await submitReview(courseId)
-        if (res && !res.ok) {
-          setErrorMsg(res.error || "Failed to submit.")
-          setTimeout(() => {
-            window.location.reload()
-          }, 2000)
-        }
-      } catch (err) {
-        setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
+      const res = await submitReview(courseId)
+      if (!res?.ok) {
+        const message = res?.error || "Failed to submit."
+        setErrorMsg(message)
+        toast.error(message)
+        setTimeout(() => {
+          window.location.reload()
+        }, 2000)
+        return
       }
+
+      toast.success("Review submitted to admin.")
+      setTimeout(() => {
+        window.location.reload()
+      }, 1200)
     })
   }
 
@@ -82,6 +96,12 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
         {blockers.length > 0 ? (
           <p className="rounded-md border border-orange-500/30 bg-orange-500/10 px-3 py-2 text-sm text-orange-700">
             Complete Metadata and Review Matrix before submitting.
+          </p>
+        ) : null}
+
+        {!isStatusSubmittable ? (
+          <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800">
+            This course is not in a TA-submittable stage. Current status: {courseStatus.replaceAll("_", " ")}.
           </p>
         ) : null}
 
