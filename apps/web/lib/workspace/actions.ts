@@ -41,7 +41,6 @@ export async function startTaReview(courseId: string): Promise<void> {
         actorRole: ctx.profile.role,
         note: "TA opened workspace",
       });
-      revalidatePath(`/courses/${courseId}`);
     }
   } catch (error) {
     Sentry.captureException(error);
