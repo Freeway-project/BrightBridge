@@ -139,6 +139,12 @@ export async function submitReview(courseId: string): Promise<{ ok: boolean; err
     revalidatePath(`/courses/${courseId}`);
     return { ok: true };
   } catch (error) {
+    console.error("submitReview failed", {
+      courseId,
+      actorId: ctx.userId,
+      actorRole: ctx.profile.role,
+      error,
+    });
     Sentry.withScope((scope) => {
       scope.setTag("area", "ta_workspace");
       scope.setTag("action", "submit_review");
@@ -149,6 +155,6 @@ export async function submitReview(courseId: string): Promise<{ ok: boolean; err
       });
       Sentry.captureException(error instanceof Error ? error : new Error("submitReview failed"));
     });
-    throw error;
+    return { ok: false, error: "Failed to submit review. Please try again." };
   }
 }

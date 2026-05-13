@@ -18,9 +18,10 @@ interface IssueListProps {
   loading?: boolean
   phase: IssuePhase
   onIssuesChange?: () => void
+  canResolve?: boolean
 }
 
-export function IssueList({ issues, loading = false, phase, onIssuesChange }: IssueListProps) {
+export function IssueList({ issues, loading = false, phase, onIssuesChange, canResolve = false }: IssueListProps) {
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<IssueStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
@@ -147,6 +148,7 @@ export function IssueList({ issues, loading = false, phase, onIssuesChange }: Is
           phase={phase}
           onClose={() => setSelectedIssueId(null)}
           onIssueUpdated={onIssuesChange}
+          canResolve={canResolve}
         />
       )}
     </div>

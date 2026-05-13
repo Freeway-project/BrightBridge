@@ -15,9 +15,10 @@ interface IssueDrawerProps {
   phase: IssuePhase
   onClose?: () => void
   onIssueUpdated?: () => void
+  canResolve?: boolean
 }
 
-export function IssueDrawer({ issue, phase, onClose, onIssueUpdated }: IssueDrawerProps) {
+export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve = false }: IssueDrawerProps) {
   const [fullIssue, setFullIssue] = useState<(CourseIssue & { comments: IssueComment[] }) | null>(null)
   const [loading, setLoading] = useState(true)
   const [commenting, setCommenting] = useState(false)
@@ -118,47 +119,49 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated }: IssueDraw
           <Badge className={`text-xs ${severityColors[fullIssue.severity]}`}>{fullIssue.severity}</Badge>
         </div>
 
-        {/* Status Actions */}
-        <div className="space-y-2">
-          {fullIssue.status === 'open' && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full"
-              onClick={() => handleStatusChange('in_review')}
-              disabled={updatingStatus}
-            >
-              {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
-              Move to In Review
-            </Button>
-          )}
+        {/* Status Actions — admin only */}
+        {canResolve && (
+          <div className="space-y-2">
+            {fullIssue.status === 'open' && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleStatusChange('in_review')}
+                disabled={updatingStatus}
+              >
+                {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+                Move to In Review
+              </Button>
+            )}
 
-          {fullIssue.status === 'in_review' && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full"
-              onClick={() => handleStatusChange('resolved')}
-              disabled={updatingStatus}
-            >
-              {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
-              Mark as Resolved
-            </Button>
-          )}
+            {fullIssue.status === 'in_review' && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleStatusChange('resolved')}
+                disabled={updatingStatus}
+              >
+                {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+                Mark as Resolved
+              </Button>
+            )}
 
-          {fullIssue.status === 'resolved' && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full"
-              onClick={() => handleStatusChange('open')}
-              disabled={updatingStatus}
-            >
-              {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
-              Reopen
-            </Button>
-          )}
-        </div>
+            {fullIssue.status === 'resolved' && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleStatusChange('open')}
+                disabled={updatingStatus}
+              >
+                {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+                Reopen
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Issue Details */}
         {(fullIssue.description || fullIssue.location || fullIssue.direct_link) && (
