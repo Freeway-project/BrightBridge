@@ -117,6 +117,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
       setStatus("saved")
       setTimeout(() => setStatus("idle"), 2500)
       localStorage.setItem(`coursebridge:${course.id}:form-done:course_metadata`, "1")
+      window.dispatchEvent(new CustomEvent("coursebridge:form-saved"))
       form.reset(form.getValues())
       return true
     } catch (err) {

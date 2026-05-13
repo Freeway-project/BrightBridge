@@ -123,6 +123,7 @@ export function SyllabusGradebookForm({
         setStatus("saved")
         setTimeout(() => setStatus("idle"), 2500)
         localStorage.setItem(`coursebridge:${courseId}:form-done:syllabus_review`, "1")
+        window.dispatchEvent(new CustomEvent("coursebridge:form-saved"))
         localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
         if (advance) {
