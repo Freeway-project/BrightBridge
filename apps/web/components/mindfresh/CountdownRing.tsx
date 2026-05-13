@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 
 const SIZE = 96
-const STROKE = 6
+const STROKE = 7
 const RADIUS = (SIZE - STROKE) / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
+const GRADIENT_ID = "countdown-gradient"
 
 export function CountdownRing({
   durationSeconds,
@@ -44,7 +45,23 @@ export function CountdownRing({
 
   return (
     <div className="flex justify-center py-1">
-      <svg width={SIZE} height={SIZE} className="-rotate-90">
+      <svg width={SIZE} height={SIZE} className="-rotate-90" overflow="visible">
+        <defs>
+          <linearGradient id={GRADIENT_ID} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#22d3ee" />
+            <stop offset="50%" stopColor="#14b8a6" />
+            <stop offset="100%" stopColor="#6366f1" />
+          </linearGradient>
+          <filter id="ring-glow">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Track */}
         <circle
           cx={SIZE / 2}
           cy={SIZE / 2}
@@ -52,28 +69,37 @@ export function CountdownRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={STROKE}
-          className="text-muted/30"
+          className="text-muted/20"
         />
+
+        {/* Progress arc */}
         <motion.circle
           cx={SIZE / 2}
           cy={SIZE / 2}
           r={RADIUS}
           fill="none"
-          stroke="currentColor"
+          stroke={`url(#${GRADIENT_ID})`}
           strokeWidth={STROKE}
           strokeDasharray={CIRCUMFERENCE}
           strokeLinecap="round"
-          className="text-teal-500"
+          filter="url(#ring-glow)"
           animate={{ strokeDashoffset: dashOffset }}
           transition={{ duration: 0.9, ease: "linear" }}
         />
+
+        {/* Countdown number — upright */}
         <text
           x={SIZE / 2}
           y={SIZE / 2}
           textAnchor="middle"
           dominantBaseline="central"
-          className="fill-foreground text-sm font-semibold tabular-nums"
-          style={{ transform: "rotate(90deg)", transformOrigin: `${SIZE / 2}px ${SIZE / 2}px`, fontSize: 18 }}
+          fontSize={20}
+          fontWeight="600"
+          style={{
+            transform: `rotate(90deg)`,
+            transformOrigin: `${SIZE / 2}px ${SIZE / 2}px`,
+            fill: "currentColor",
+          }}
         >
           {remaining}
         </text>

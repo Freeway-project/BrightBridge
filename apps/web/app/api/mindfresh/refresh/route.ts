@@ -13,18 +13,19 @@ type GroqResponse = {
 
 function buildPrompt(mode: MindFreshMode, mood: CheckInMood | null, category: "quote" | "funny" | "prompt") {
   const styleByCategory: Record<"quote" | "funny" | "prompt", string> = {
-    quote: "motivating, warm, one-line quote",
-    funny: "light, clean workplace humor, one-line",
-    prompt: "reflective focus prompt, one-line",
+    quote: "grounding, casual, relatable to someone under 25 — not therapy-speak, not motivational poster",
+    funny: "genuinely funny to someone under 25 — relatable life humor, no tech or coding jokes, no cringe",
+    prompt: "honest self-reflection question for someone under 25 — direct, not corporate, not preachy",
   }
 
   return [
-    "You write 15-second dashboard refresh lines.",
+    "You write 15-second mental reset lines for people under 25.",
     "Constraints:",
     "- Output exactly one short line.",
-    "- Max 18 words.",
-    "- No hashtags, no emojis, no quotes.",
-    "- Friendly and practical; not therapy language.",
+    "- Max 15 words.",
+    "- No hashtags, no emojis, no quote marks.",
+    "- Casual tone. Not therapy language. Not motivational poster language.",
+    "- No references to coding, tech, or computers.",
     `Mode: ${mode}.`,
     `Selected mood check-in: ${mood ?? "unknown"}.`,
     `Requested category: ${category} (${styleByCategory[category]}).`,
@@ -69,9 +70,9 @@ export async function POST(request: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         temperature: 0.9,
-        max_tokens: 60,
+        max_tokens: 40,
         messages: [
           {
             role: "system",

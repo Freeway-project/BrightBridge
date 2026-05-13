@@ -6,7 +6,8 @@
     "SENTRY_AUTH_TOKEN",
     "SENTRY_ORG",
     "SENTRY_PROJECT",
-    "NODE_ENV"
+    "NODE_ENV",
+    "GROQ_API_KEY"
   ],
   "tasks": {
     "build": {
