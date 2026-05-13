@@ -12,6 +12,7 @@ import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
 import { TweakableContent } from "@/components/shared/tweakable-content";
 import { MilestoneReward } from "@/components/milestone-reward/MilestoneReward";
+import { ScreenMeteors } from "@/components/shared/screen-meteors";
 
 const SECTIONS = [
   { key: "course_metadata", label: "Metadata" },
@@ -79,6 +80,7 @@ export default async function CourseWorkspaceLayout({
       <TweakableContent className="flex flex-1 flex-col overflow-hidden">
         {children}
       </TweakableContent>
+      <ScreenMeteors />
       <MilestoneReward userEmail={ctx.email ?? ""} courseId={id} />
       <InfoPanel
         courseId={id}
