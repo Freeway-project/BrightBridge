@@ -116,6 +116,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
       localStorage.removeItem(`coursebridge:${course.id}:local-draft:course_metadata`)
       setStatus("saved")
       setTimeout(() => setStatus("idle"), 2500)
+      localStorage.setItem(`coursebridge:${course.id}:form-done:course_metadata`, "1")
       form.reset(form.getValues())
       return true
     } catch (err) {

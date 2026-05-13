@@ -144,6 +144,7 @@ export function ReviewMatrixForm({
         }
         setStatus("saved")
         setTimeout(() => setStatus("idle"), 2500)
+        localStorage.setItem(`coursebridge:${courseId}:form-done:review_matrix`, "1")
         localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
         if (advance) {

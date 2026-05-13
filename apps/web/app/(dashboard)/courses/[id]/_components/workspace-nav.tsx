@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle2, Circle, ChevronLeft, User, ShieldCheck, GraduationCap } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { StatusBadge } from "@/components/courses/status-badge"
@@ -83,16 +84,29 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus, reviewerName
                       : "text-muted-foreground hover:bg-white/5",
                   )}
                 >
-                  <div className={cn(
-                    "relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-black border-2 transition-all duration-500",
-                    active
-                      ? "bg-primary text-primary-foreground border-primary shadow-[0_0_15px_rgba(var(--primary),0.3)] scale-110"
-                      : done 
-                        ? "bg-success text-success-foreground border-success/50" 
-                        : "bg-background border-border group-hover:border-primary/50"
-                  )}>
-                    {done ? "✓" : index + 1}
-                  </div>
+                  <motion.div 
+                    layout
+                    className={cn(
+                      "relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-black border-2 transition-all duration-500",
+                      active
+                        ? "bg-primary text-primary-foreground border-primary shadow-[0_0_15px_rgba(var(--primary),0.3)] scale-110"
+                        : done 
+                          ? "bg-success text-success-foreground border-success/50" 
+                          : "bg-background border-border group-hover:border-primary/50"
+                    )}
+                  >
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.span
+                        key={done ? "done" : "todo"}
+                        initial={{ opacity: 0, scale: 0.5, rotate: done ? -20 : 0 }}
+                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        transition={{ type: "spring", damping: 15, stiffness: 300 }}
+                      >
+                        {done ? "✓" : index + 1}
+                      </motion.span>
+                    </AnimatePresence>
+                  </motion.div>
                   <div className="space-y-0.5 pt-0.5">
                     <p className={cn("text-[11px] font-black uppercase tracking-tight leading-none", active ? "text-primary" : "text-foreground/70 group-hover:text-foreground")}>
                       {step.label}
