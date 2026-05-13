@@ -212,10 +212,12 @@ export function MindFreshModal({ open, onOpenChange }: MindFreshModalProps) {
                       durationSeconds={item.durationSeconds}
                       onComplete={complete}
                     />
-                    {isLoadingAi
-                      ? <p className="text-xs text-muted-foreground text-center animate-pulse py-4">Writing a fresh line…</p>
-                      : <QuoteCard item={displayItem} showInput={item.type === "prompt"} />
-                    }
+                    <div className="min-h-[110px] flex flex-col justify-center">
+                      {isLoadingAi
+                        ? <p className="text-sm text-muted-foreground text-center animate-pulse py-8">Writing a fresh line…</p>
+                        : <QuoteCard item={displayItem} showInput={item.type === "prompt"} />
+                      }
+                    </div>
                   </>
                 )}
               </motion.div>

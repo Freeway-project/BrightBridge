@@ -51,7 +51,7 @@ export function MovingBorderContainer({
         <MovingBorder duration={duration} rx="30%" ry="30%">
           <div
             className={cn(
-              "h-24 w-24 opacity-[0.8] bg-[radial-gradient(theme(colors.cyan.500)_40%,theme(colors.violet.500)_50%,transparent_60%)]",
+              "h-48 w-48 opacity-[0.95] blur-md bg-[radial-gradient(theme(colors.cyan.400)_20%,theme(colors.violet.500)_45%,transparent_70%)]",
               borderClassName
             )}
           />

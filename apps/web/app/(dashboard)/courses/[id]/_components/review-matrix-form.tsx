@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { ChevronDown, Plus } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
-import { Meteors } from "@/components/ui/meteors"
 import {
   reviewMatrixSchema,
   type ReviewMatrixFormValues,
@@ -37,7 +36,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
-import { MovingBorderContainer } from "@/components/ui/moving-border"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { CHECKLIST } from "@/lib/workspace/constants"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
@@ -189,9 +188,17 @@ export function ReviewMatrixForm({
   }
 
   return (
-    <MovingBorderContainer className="overflow-hidden shadow-xl shadow-primary/5">
-      <Card className="relative border-0 bg-transparent shadow-none ring-0">
-        {status === "saved" && <Meteors number={18} className="bg-indigo-400" />}
+    <div className="relative rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
+      <GlowingEffect
+        blur={0}
+        spread={28}
+        glow
+        disabled={false}
+        proximity={72}
+        inactiveZone={0.65}
+        borderWidth={1}
+      />
+      <Card className="relative border-0 bg-background/90 shadow-none ring-0">
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-2">
@@ -304,8 +311,8 @@ export function ReviewMatrixForm({
           </div>
         </form>
       </CardContent>
-    </Card>
-    </MovingBorderContainer>
+      </Card>
+    </div>
   )
 }
 

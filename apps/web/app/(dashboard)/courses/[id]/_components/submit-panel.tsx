@@ -7,7 +7,7 @@ import { submitReview } from "@/lib/workspace/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ReviewSummary } from "./review-summary"
-import { MovingBorderContainer } from "@/components/ui/moving-border"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { toast } from "sonner"
 
 type SubmitPanelProps = {
@@ -71,8 +71,17 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
       )}
 
       {/* Submit Card - After review */}
-      <MovingBorderContainer containerClassName="max-w-2xl" className="shadow-xl shadow-primary/5">
-        <Card className="border-0 bg-transparent shadow-none ring-0">
+      <div className="relative max-w-2xl rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
+        <GlowingEffect
+          blur={0}
+          spread={28}
+          glow
+          disabled={false}
+          proximity={72}
+          inactiveZone={0.65}
+          borderWidth={1}
+        />
+        <Card className="relative border-0 bg-background/90 shadow-none ring-0">
           <CardHeader>
             <CardTitle className="text-base">Ready to Submit?</CardTitle>
           </CardHeader>
@@ -126,7 +135,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
         </div>
           </CardContent>
         </Card>
-      </MovingBorderContainer>
+      </div>
     </div>
   )
 }
