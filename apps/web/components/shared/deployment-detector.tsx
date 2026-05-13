@@ -13,6 +13,7 @@ interface DeploymentDetectorProps {
 }
 
 const CHECK_INTERVAL = 1000 * 60 * 5; // Check every 5 minutes
+const UPDATE_APPLIED_FLAG = "coursebridge:update-applied";
 type NotificationMode = "auto" | "force-on" | "force-off";
 // Manual switch for demos/testing:
 // - "auto": current API-version behavior
@@ -27,6 +28,15 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
   const hasChunkWarning = useRef(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.sessionStorage.getItem(UPDATE_APPLIED_FLAG) === "1") {
+      window.sessionStorage.removeItem(UPDATE_APPLIED_FLAG);
+      toast.success("Deployment applied", {
+        description: "You are now running the latest CourseBridge update.",
+        duration: 5000,
+        position: "bottom-left",
+      });
+    }
+
     if (NOTIFICATION_MODE === "force-off") return;
     if (NOTIFICATION_MODE === "force-on") {
       setShowNotification(true);
@@ -106,8 +116,13 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     <>
       <AnimatePresence>
         {showNotification && (
-          <DeploymentNotification 
-            onRefresh={() => window.location.reload()} 
+          <DeploymentNotification
+            onRefresh={() => {
+              if (typeof window !== "undefined") {
+                window.sessionStorage.setItem(UPDATE_APPLIED_FLAG, "1");
+              }
+              window.location.reload();
+            }}
             onDismiss={() => {
               setShowNotification(false);
               setIsMinimized(true);
