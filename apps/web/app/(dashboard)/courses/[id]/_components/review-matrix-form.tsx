@@ -37,6 +37,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
+import { MovingBorderContainer } from "@/components/ui/moving-border"
 import { CHECKLIST } from "@/lib/workspace/constants"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 
@@ -188,8 +189,9 @@ export function ReviewMatrixForm({
   }
 
   return (
-    <Card className="relative overflow-hidden">
-      {status === "saved" && <Meteors number={18} className="bg-indigo-400" />}
+    <MovingBorderContainer className="overflow-hidden shadow-xl shadow-primary/5">
+      <Card className="relative border-0 bg-transparent shadow-none ring-0">
+        {status === "saved" && <Meteors number={18} className="bg-indigo-400" />}
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-2">
@@ -303,6 +305,7 @@ export function ReviewMatrixForm({
         </form>
       </CardContent>
     </Card>
+    </MovingBorderContainer>
   )
 }
 

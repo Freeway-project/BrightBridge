@@ -7,6 +7,7 @@ import { submitReview } from "@/lib/workspace/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ReviewSummary } from "./review-summary"
+import { MovingBorderContainer } from "@/components/ui/moving-border"
 import { toast } from "sonner"
 
 type SubmitPanelProps = {
@@ -70,10 +71,11 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
       )}
 
       {/* Submit Card - After review */}
-      <Card className="max-w-2xl border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-base">Ready to Submit?</CardTitle>
-        </CardHeader>
+      <MovingBorderContainer containerClassName="max-w-2xl" className="shadow-xl shadow-primary/5">
+        <Card className="border-0 bg-transparent shadow-none ring-0">
+          <CardHeader>
+            <CardTitle className="text-base">Ready to Submit?</CardTitle>
+          </CardHeader>
         <CardContent className="space-y-5">
         <div className="space-y-3">
           {sections.map((section) => (
@@ -122,8 +124,9 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
             {isPending ? "Submitting..." : "Submit to Admin"}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </MovingBorderContainer>
     </div>
   )
 }

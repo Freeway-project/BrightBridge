@@ -22,6 +22,7 @@ import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
 import { FormFieldWrapper } from "./form-field-wrapper"
+import { MovingBorderContainer } from "@/components/ui/moving-border"
 import { Meteors } from "@/components/ui/meteors"
 
 type MetadataFormProps = {
@@ -140,8 +141,9 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
-    <Card className="max-w-3xl relative overflow-hidden">
-      {status === "saved" && <Meteors number={18} className="bg-indigo-400" />}
+    <MovingBorderContainer containerClassName="max-w-3xl" className="overflow-hidden shadow-xl shadow-primary/5">
+      <Card className="relative border-0 bg-transparent shadow-none ring-0">
+        {status === "saved" && <Meteors number={18} className="bg-indigo-400" />}
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-base">Course Metadata</CardTitle>
@@ -261,6 +263,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
         </form>
       </CardContent>
     </Card>
+    </MovingBorderContainer>
   )
 }
 
