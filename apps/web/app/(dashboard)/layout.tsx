@@ -7,6 +7,7 @@ import { TweakProvider } from "@/components/shared/tweak-provider"
 import { NotificationProvider } from "@/components/providers/notification-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContentShell } from "@/components/layout/dashboard-content-shell"
+import { MindFreshButton } from "@/components/mindfresh/MindFreshButton"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const context = await getAuthContext()
@@ -36,6 +37,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             <DashboardContentShell>
               {children}
             </DashboardContentShell>
+            <MindFreshButton />
           </div>
         </SidebarProvider>
       </NotificationProvider>
