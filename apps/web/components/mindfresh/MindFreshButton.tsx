@@ -14,7 +14,7 @@ export function MindFreshButton() {
         <Button
           type="button"
           variant="vibrant"
-          className="pointer-events-auto rounded-full px-4 py-2 text-xs normal-case tracking-normal shadow-xl"
+          className="pointer-events-auto rounded-full px-4 py-2 text-xs normal-case tracking-normal shadow-xl from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700"
           onClick={() => setOpen(true)}
         >
           <Sparkles className="size-4" />
