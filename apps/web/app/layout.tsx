@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
 import { OneTimeThoughtModal } from "@/components/shared/one-time-thought-modal";
+import { SystemMigrationBanner } from "@/components/migration/SystemMigrationBanner";
 
 export const metadata: Metadata = {
   title: "CourseBridge",
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", GeistSans.className)}>
       <body>
+        <SystemMigrationBanner />
         <TooltipProvider>
           {children}
         </TooltipProvider>

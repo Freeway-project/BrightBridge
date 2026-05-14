@@ -3,6 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { requireProfile } from "@/lib/auth/context";
 import {
   getReviewSectionByKey,
@@ -19,6 +20,8 @@ import {
 } from "./schemas";
 import type { ZodTypeAny } from "zod";
 
+import { isReadonlyMode } from "@/lib/system-migration";
+
 const SECTION_SCHEMAS: Partial<Record<SectionKey, ZodTypeAny>> = {
   course_metadata: metadataSchema,
   review_matrix: reviewMatrixSchema,
@@ -26,7 +29,13 @@ const SECTION_SCHEMAS: Partial<Record<SectionKey, ZodTypeAny>> = {
   general_notes: issueLogSchema,
 };
 
+async function isCurrentHostReadonly(): Promise<boolean> {
+  const headerStore = await headers();
+  return isReadonlyMode(headerStore.get("host"));
+}
+
 export async function startTaReview(courseId: string): Promise<void> {
+  if (await isCurrentHostReadonly()) return;
   const ctx = await requireProfile();
   try {
     const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
@@ -52,6 +61,9 @@ export async function saveDraft(
   sectionKey: SectionKey,
   data: unknown,
 ): Promise<{ ok: boolean; savedAt: string; error?: string }> {
+  if (await isCurrentHostReadonly()) {
+    return { ok: false, savedAt: "", error: "System migration in progress. Saving is disabled to prevent data loss." };
+  }
   const ctx = await requireProfile();
   try {
     const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
@@ -94,6 +106,9 @@ export async function saveDraft(
 }
 
 export async function submitReview(courseId: string): Promise<{ ok: boolean; error?: string }> {
+  if (await isCurrentHostReadonly()) {
+    return { ok: false, error: "System migration in progress. Submissions are temporarily disabled." };
+  }
   const ctx = await requireProfile();
   try {
     const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
+import { headers } from "next/headers"
 import { AppSidebar } from "@/components/layout/sidebar"
 import { getAuthContext } from "@/lib/auth/context"
 import type { ReactNode } from "react"
@@ -8,8 +9,15 @@ import { NotificationProvider } from "@/components/providers/notification-provid
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContentShell } from "@/components/layout/dashboard-content-shell"
 import { MindFreshButton } from "@/components/mindfresh/MindFreshButton"
+import { isReadonlyMode } from "@/lib/system-migration"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const headerStore = await headers()
+
+  if (isReadonlyMode(headerStore.get("host"))) {
+    redirect("/maintenance")
+  }
+
   const context = await getAuthContext()
   const currentVersion = process.env.VERCEL_GIT_COMMIT_SHA || "development"
 
