@@ -2,73 +2,52 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-const ALLOWLIST = [
-  "akhanum@okanagan.bc.ca",
-  "aroy@okanaganbc.ca",
-  "amccallum@okanagan.bc.ca",
-]
+import { Meteors } from "@/components/ui/meteors"
 
 const FORM_KEYS = ["course_metadata", "review_matrix", "syllabus_review"] as const
-const FIFTEEN_MIN_MS = 15 * 60 * 1000
+const THIRTY_MIN_MS = 30 * 60 * 1000
 
-const EMOJIS = ["🧠", "☁️", "🌊", "🎯", "✨", "🍃"]
-const FALLBACKS = [
-  "You're actually doing better than you think. Seriously.",
-  "The hard part is behind you. Breathe.",
-  "15 seconds. That's all you need right now.",
+const EMOJIS = ["🧠", "☁️", "🌊", "🎯", "✨", "🍃", "🌿", "🕊️", "🌤️", "🌱"]
+const MESSAGES = [
+  "Somewhere, someone just smiled because they remembered a tiny kindness from years ago. Maybe the person who gave it forgot, but the feeling stayed. Small good things travel farther than we think.",
+  "A cup of tea does not fix life, but for a few minutes, it makes the world softer. Some moments are not meant to solve anything. They are only meant to help you breathe.",
+  "A dog does not care how productive your day was. It only cares that you came back. That kind of love is simple, honest, and sometimes exactly what the heart needs.",
+  "Someone once planted a tree knowing they may never sit under its shade. That is hope: doing something good today for a future you may not fully see yet.",
+  "The moon does not rush to become full. It changes slowly, quietly, and still lights up the sky in every phase. You are allowed to grow like that too.",
+  "There is a person somewhere who still remembers a compliment they received on a hard day. A few kind words can become shelter inside someone's memory.",
+  "A flower does not compete with the flower beside it. It simply opens when its time comes. Your pace can be different and still be beautiful.",
+  "Some days feel heavy, but even on those days, the world keeps offering small gifts: warm sunlight, clean water, a song, a message, a quiet breath. Notice one. Let it count.",
+  "A child laughs without checking if the moment is important enough. Joy does not always need a reason. Sometimes it only needs permission.",
+  "There are mornings when the sky looks ordinary, and then suddenly it turns gold. Life can change its color quietly too. Stay open to the small golden parts.",
+  "A friend may not always know what to say, but sitting beside you can still mean, \"You do not have to carry this alone.\" Presence is also love.",
+  "Think of all the tiny things that had to go right for this moment to exist: your breath, your heartbeat, your courage, your effort. You are already holding many miracles.",
+  "Someone, somewhere, is making food for a person they love. Someone is saving a seat. Someone is waiting to hear good news. The world is still full of care.",
+  "Rain does not ask permission before it refreshes the earth. Sometimes a pause, a cry, or a quiet reset is not weakness. It is renewal.",
+  "A small candle cannot remove the whole darkness, but it changes the room it is in. You do not have to fix everything to make something better.",
+  "There is beauty in returning: returning to your breath, returning to your work, returning to yourself after a stressful moment. You can always begin again gently.",
+  "Some people become safe places for others just by being kind in ordinary moments. A soft voice, a patient reply, a small check-in — these things matter more than they look.",
+  "The ocean is powerful, but it still moves one wave at a time. You do not need to face the whole day at once. Just meet the next wave.",
+  "A little bird sings before knowing what the day will bring. Maybe joy is not proof that everything is perfect. Maybe joy is courage with music in it.",
+  "Your work matters, but so does the person doing the work. Take one soft breath. Come back not as a machine, but as a human being who deserves kindness too.",
 ]
 
 type Props = { userEmail: string; courseId: string }
 
-async function fetchLine(): Promise<string | null> {
-  try {
-    const res = await fetch("/api/mindfresh/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode: "funny", mood: null, category: "funny" }),
-    })
-    if (!res.ok) return null
-    const json = (await res.json()) as { text?: string }
-    return json.text?.trim() ?? null
-  } catch {
-    return null
-  }
-}
-
-export function MilestoneReward({ userEmail, courseId }: Props) {
-  const isAllowed = ALLOWLIST.includes(userEmail.toLowerCase())
+export function MilestoneReward({ userEmail: _userEmail, courseId }: Props) {
   const [open, setOpen] = useState(false)
-  const [aiText, setAiText] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
   const [emoji] = useState(() => EMOJIS[Math.floor(Math.random() * EMOJIS.length)])
-  const [fallback] = useState(() => FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)])
+  const [message] = useState(() => MESSAGES[Math.floor(Math.random() * MESSAGES.length)])
   const firedRef = useRef(false)
   const shownKey = `coursebridge:${courseId}:milestone-shown`
 
-  const fire = useCallback(async () => {
+  const fire = useCallback(() => {
     if (firedRef.current) return
     if (localStorage.getItem(shownKey)) return
     firedRef.current = true
     localStorage.setItem(shownKey, "1")
-
-    // Open immediately — text loads in after
     setOpen(true)
-    setIsLoading(true)
-    const text = await fetchLine()
-    setAiText(text)
-    setIsLoading(false)
   }, [shownKey])
-
-  const refresh = useCallback(async () => {
-    setIsLoading(true)
-    setAiText(null)
-    const text = await fetchLine()
-    setAiText(text)
-    setIsLoading(false)
-  }, [])
 
   const allFormsDone = useCallback(() => {
     return FORM_KEYS.every(
@@ -76,27 +55,23 @@ export function MilestoneReward({ userEmail, courseId }: Props) {
     )
   }, [courseId])
 
-  // 15-minute timer
+  // 1-hour timer — fires for all users
   useEffect(() => {
-    if (!isAllowed) return
-    const t = setTimeout(() => void fire(), FIFTEEN_MIN_MS)
+    const t = setTimeout(() => fire(), THIRTY_MIN_MS)
     return () => clearTimeout(t)
-  }, [isAllowed, fire])
+  }, [fire])
 
   // Poll for all 3 forms done (every 4s)
   useEffect(() => {
-    if (!isAllowed) return
-    if (allFormsDone()) { void fire(); return }
+    if (allFormsDone()) { fire(); return }
     const iv = setInterval(() => {
       if (allFormsDone()) {
-        void fire()
+        fire()
         clearInterval(iv)
       }
     }, 4000)
     return () => clearInterval(iv)
-  }, [isAllowed, allFormsDone, fire])
-
-  if (!isAllowed) return null
+  }, [allFormsDone, fire])
 
   return (
     <AnimatePresence>
@@ -108,6 +83,11 @@ export function MilestoneReward({ userEmail, courseId }: Props) {
           exit={{ opacity: 0 }}
           onClick={() => setOpen(false)}
         >
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <Meteors number={10} className="bg-blue-400" />
+            <Meteors number={8} className="bg-violet-400" />
+            <Meteors number={6} className="bg-emerald-300" />
+          </div>
           <motion.div
             className="relative mx-4 w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-2xl text-center"
             initial={{ scale: 0.88, opacity: 0, y: 24 }}
@@ -118,49 +98,15 @@ export function MilestoneReward({ userEmail, courseId }: Props) {
           >
             <div className="text-5xl mb-4">{emoji}</div>
             <h2 className="text-lg font-bold mb-3 text-foreground">Take 15 seconds.</h2>
-
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.p
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-sm text-muted-foreground animate-pulse min-h-[40px] flex items-center justify-center mb-6"
-                >
-                  Getting a fresh thought…
-                </motion.p>
-              ) : (
-                <motion.p
-                  key={aiText ?? "fallback"}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.25 }}
-                  className="text-sm text-muted-foreground leading-relaxed min-h-[40px] mb-6"
-                >
-                  {aiText ?? fallback}
-                </motion.p>
-              )}
-            </AnimatePresence>
-
-            <div className="flex flex-col gap-2">
-              <Button
-                className="w-full bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 text-white border-0"
-                onClick={() => setOpen(false)}
-              >
-                Back to it
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-xs text-muted-foreground"
-                disabled={isLoading}
-                onClick={() => void refresh()}
-              >
-                <RefreshCw className="size-3" />
-                {isLoading ? "Loading…" : "Try another"}
-              </Button>
-            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed min-h-[40px] mb-6">
+              {message}
+            </p>
+            <Button
+              className="w-full bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 text-white border-0"
+              onClick={() => setOpen(false)}
+            >
+              Back to it
+            </Button>
           </motion.div>
         </motion.div>
       )}
