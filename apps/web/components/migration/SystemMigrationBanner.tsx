@@ -17,12 +17,12 @@ const MIGRATION_STEPS = [
   {
     eyebrow: "Step 2 of 5",
     message: "This migration is our step toward a better, cleaner, and more dependable experience.",
-    variant: "board",
+    variant: "typewriter",
   },
   {
     eyebrow: "Step 3 of 5",
     message: "The platform may change, but the people, purpose, and support remain the same.",
-    variant: "board",
+    variant: "reveal",
   },
   {
     eyebrow: "Step 4 of 5",
@@ -32,9 +32,48 @@ const MIGRATION_STEPS = [
   {
     eyebrow: "Step 5 of 5",
     message: "Together, we are building something better.",
-    variant: "smooth",
+    variant: "board",
   },
 ] as const
+
+function TypewriterText({ text }: { text: string }) {
+  return (
+    <div className="flex min-h-[280px] items-center justify-center rounded-2xl bg-white/[0.02] border border-white/[0.05] p-8 text-center md:min-h-[380px] relative overflow-hidden shadow-inner">
+      <motion.p className="max-w-3xl text-balance text-4xl font-semibold leading-tight text-white md:text-6xl relative z-10">
+        {text.split("").map((char, index) => (
+          <motion.span
+            key={index}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.05, delay: index * 0.04 }}
+          >
+            {char}
+          </motion.span>
+        ))}
+      </motion.p>
+    </div>
+  )
+}
+
+function RevealText({ text }: { text: string }) {
+  return (
+    <div className="flex min-h-[280px] items-center justify-center rounded-2xl bg-white/[0.02] border border-white/[0.05] p-8 text-center md:min-h-[380px] relative overflow-hidden shadow-inner">
+      <motion.p className="max-w-3xl text-balance text-4xl font-semibold leading-tight text-white md:text-6xl relative z-10">
+        {text.split(" ").map((word, index) => (
+          <motion.span
+            key={index}
+            className="inline-block mr-[0.25em]"
+            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.7, delay: index * 0.2, ease: "easeOut" }}
+          >
+            {word}
+          </motion.span>
+        ))}
+      </motion.p>
+    </div>
+  )
+}
 
 export function SystemMigrationBanner() {
   const pathname = usePathname()
@@ -57,6 +96,7 @@ export function SystemMigrationBanner() {
     if (status === "NORMAL") return
 
     const timer = window.setTimeout(() => {
+      setStepIndex(0)
       setShowModal(true)
     }, 900)
 
@@ -66,12 +106,15 @@ export function SystemMigrationBanner() {
   useEffect(() => {
     if (!showModal) return
 
-    const timer = window.setInterval(() => {
+    const tick = () => {
       setStepIndex((current) => (current + 1) % MIGRATION_STEPS.length)
-    }, 6200)
+    }
 
-    return () => window.clearInterval(timer)
-  }, [showModal])
+    const currentHoldTime = stepIndex === 0 ? 18000 : 12000
+    const timer = window.setTimeout(tick, currentHoldTime)
+
+    return () => window.clearTimeout(timer)
+  }, [showModal, stepIndex])
 
   if (status === "NORMAL" || pathname === "/maintenance") return null
 
@@ -117,7 +160,10 @@ export function SystemMigrationBanner() {
                 size="sm"
                 variant={status === "ACTIVE" ? "secondary" : "outline"}
                 className="h-8 border-current/30 bg-white/10 hover:bg-white/20"
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setStepIndex(0)
+                  setShowModal(true)
+                }}
               >
                 What&apos;s changing
               </Button>
@@ -140,17 +186,46 @@ export function SystemMigrationBanner() {
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-sm"
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 px-4 py-8 backdrop-blur-xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
+            {/* Wholesome Tingling Background Effects */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/4 left-1/4 size-[40vw] rounded-full bg-amber-500/10 blur-[100px] animate-pulse" style={{ animationDuration: '4s' }} />
+              <div className="absolute bottom-1/4 right-1/4 size-[50vw] rounded-full bg-violet-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '6s', animationDelay: "1s" }} />
+              <div className="absolute top-1/2 left-1/2 size-[30vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-[80px] animate-pulse" style={{ animationDuration: '5s', animationDelay: "2s" }} />
+              
+              {/* Sparkles */}
+              {Array.from({ length: 30 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute size-1 rounded-full bg-white/60 shadow-[0_0_12px_rgba(255,255,255,1)]"
+                  style={{
+                    top: `${Math.random() * 100}%`,
+                    left: `${Math.random() * 100}%`,
+                  }}
+                  animate={{
+                    opacity: [0, 1, 0],
+                    scale: [0, 1.5, 0],
+                    y: [0, -30],
+                  }}
+                  transition={{
+                    duration: 3 + Math.random() * 5,
+                    repeat: Infinity,
+                    delay: Math.random() * 5,
+                  }}
+                />
+              ))}
+            </div>
+
             <motion.div
-              className="relative w-full max-w-6xl overflow-hidden rounded-xl border border-white/10 bg-neutral-950 text-white shadow-2xl"
+              className="relative w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/40 text-white shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 18, scale: 0.98 }}
-              transition={{ duration: 0.24, ease: "easeOut" }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
               <button
                 onClick={() => setShowModal(false)}
@@ -169,23 +244,29 @@ export function SystemMigrationBanner() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -12 }}
-                      transition={{ duration: 0.28 }}
+                      transition={{ duration: 0.3 }}
                     >
                       {currentStep.variant === "board" ? (
-                        <TextFlippingBoard
-                          text={currentStep.message}
-                          rowCount={7}
-                          columnCount={30}
-                          className="max-w-none bg-neutral-100 p-3 shadow-none md:p-5 dark:bg-neutral-900"
-                          duration={1.35}
-                        />
+                        <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] shadow-inner p-3 md:p-5 relative overflow-hidden">
+                          <TextFlippingBoard
+                            text={currentStep.message}
+                            rowCount={7}
+                            columnCount={30}
+                            className="max-w-none !bg-transparent shadow-none"
+                            duration={stepIndex === 0 ? 2.0 : 1.5}
+                          />
+                        </div>
+                      ) : currentStep.variant === "typewriter" ? (
+                        <TypewriterText text={currentStep.message} />
+                      ) : currentStep.variant === "reveal" ? (
+                        <RevealText text={currentStep.message} />
                       ) : (
-                        <div className="flex min-h-[280px] items-center justify-center rounded-xl bg-neutral-900 p-8 text-center md:min-h-[380px]">
+                        <div className="flex min-h-[280px] items-center justify-center rounded-2xl bg-white/[0.02] border border-white/[0.05] p-8 text-center md:min-h-[380px] shadow-inner relative overflow-hidden">
                           <motion.p
-                            className="max-w-3xl text-balance text-4xl font-semibold leading-tight text-white md:text-6xl"
-                            initial={{ opacity: 0, filter: "blur(8px)" }}
-                            animate={{ opacity: 1, filter: "blur(0px)" }}
-                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            className="max-w-3xl text-balance text-4xl font-semibold leading-tight text-white md:text-6xl relative z-10"
+                            initial={{ opacity: 0, filter: "blur(8px)", scale: 0.95 }}
+                            animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
                           >
                             {currentStep.message}
                           </motion.p>
@@ -207,12 +288,12 @@ export function SystemMigrationBanner() {
                       />
                     ))}
                   </div>
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center justify-between gap-3 relative z-10">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="border-white/15 bg-white/5 text-white hover:bg-white/10"
+                      className="border-white/15 bg-white/5 text-white hover:bg-white/10 backdrop-blur-sm"
                       disabled={isFirstStep}
                       onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
                     >
@@ -222,7 +303,7 @@ export function SystemMigrationBanner() {
                     <Button
                       type="button"
                       size="sm"
-                      className="bg-amber-300 text-neutral-950 hover:bg-amber-200"
+                      className="bg-amber-300 text-neutral-950 hover:bg-amber-200 shadow-[0_0_15px_rgba(252,211,77,0.4)]"
                       onClick={() => {
                         if (isLastStep) {
                           setShowModal(false)

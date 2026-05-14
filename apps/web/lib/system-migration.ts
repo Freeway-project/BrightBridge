@@ -5,8 +5,8 @@ export const SYSTEM_MIGRATION_CONFIG = {
   // Notification banner appears after this date
   BANNER_START_DATE: new Date("2026-05-14T10:00:00Z"),
   
-  // Old domain handoff starts. 20:00 UTC is 1:00 PM Pacific on May 14, 2026.
-  MIGRATION_START_DATE: new Date("2026-05-14T20:00:00Z"),
+  // Old domain handoff starts. 20:30 UTC is 1:30 PM Pacific on May 14, 2026.
+  MIGRATION_START_DATE: new Date("2026-05-14T20:30:00Z"),
 
   // New domain URL
   NEW_DOMAIN_URL: process.env.NEXT_PUBLIC_NEW_DOMAIN_URL ?? "https://brightbridge.oracle.example.com",
