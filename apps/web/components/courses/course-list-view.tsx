@@ -131,33 +131,33 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
 
       {/* Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="relative flex h-11 w-full items-center justify-start gap-1 rounded-xl border border-border/40 bg-muted/20 p-1">
+        <TabsList className="relative flex h-10 w-full items-center justify-start gap-6 border-b border-border/40 bg-transparent p-0 rounded-none">
           <TabItem
             value="todo"
             count={byTab.todo.length}
             label="To Do"
-            activeColor="bg-amber-500/10 text-amber-500 border-amber-500/20"
+            activeColor="text-amber-500 after:bg-amber-500"
             emoji="📋"
           />
           <TabItem
             value="in_progress"
             count={byTab.in_progress.length}
             label="In Progress"
-            activeColor="bg-blue-500/10 text-blue-500 border-blue-500/20"
+            activeColor="text-blue-500 after:bg-blue-500"
             emoji="⚙️"
           />
           <TabItem
             value="done"
             count={byTab.done.length}
             label="Done"
-            activeColor="bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+            activeColor="text-emerald-500 after:bg-emerald-500"
             emoji="✅"
           />
           <TabItem
             value="issues"
             count={byTab.issues.length}
             label="Issues"
-            activeColor="bg-destructive/10 text-destructive border-destructive/20"
+            activeColor="text-destructive after:bg-destructive"
             emoji="🔴"
           />
         </TabsList>
@@ -221,16 +221,16 @@ function TabItem({
     <TabsTrigger
       value={value}
       className={cn(
-        "relative flex h-full items-center gap-2 px-4 text-xs font-bold uppercase tracking-wider transition-all duration-300",
+        "relative flex h-full items-center gap-2 px-1 pb-2 text-xs font-bold uppercase tracking-wider transition-all duration-300",
         "text-muted-foreground/60 hover:text-foreground",
-        "data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-border/40",
+        "data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full",
         `data-[state=active]:${activeColor}`,
       )}
     >
-      <span className="text-base grayscale-[0.5] group-data-[state=active]:grayscale-0 transition-all">{emoji}</span>
+      <span className="text-sm grayscale-[0.8] group-data-[state=active]:grayscale-0 transition-all opacity-70">{emoji}</span>
       {label}
       {count > 0 && (
-        <span className="flex size-5 items-center justify-center rounded-full bg-current/10 text-[10px] font-black">
+        <span className="flex size-4 items-center justify-center rounded-full bg-current/10 text-[9px] font-black">
           {count}
         </span>
       )}
