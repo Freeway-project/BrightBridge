@@ -18,6 +18,7 @@ import { StatCard, type StatCardIcon } from "@/components/shared/stat-card"
 import { cn } from "@/lib/utils"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { motion, AnimatePresence } from "framer-motion"
+import { getTab } from "@/lib/courses/tab-utils"
 
 export interface CourseStat {
   label: string
@@ -33,28 +34,10 @@ interface CourseListViewProps {
   issueCounts?: IssueCountMap
 }
 
-const TODO_STATUSES = new Set<CourseStatus>(["course_created", "assigned_to_ta"])
-const IN_PROGRESS_STATUSES = new Set<CourseStatus>(["ta_review_in_progress", "admin_changes_requested"])
 const DONE_STATUSES = new Set<CourseStatus>([
   "submitted_to_admin", "ready_for_instructor", "sent_to_instructor",
   "instructor_questions", "instructor_approved", "final_approved",
 ])
-
-function getTab(course: CourseSummary): "todo" | "in_progress" | "done" {
-  const { status, reviewProgress } = course
-  if (TODO_STATUSES.has(status)) return "todo"
-  if (IN_PROGRESS_STATUSES.has(status)) {
-    if (status === "ta_review_in_progress") {
-      const hasAnyWork =
-        reviewProgress?.courseMetadata.exists ||
-        reviewProgress?.reviewMatrix.exists ||
-        reviewProgress?.syllabusReview.exists
-      if (!hasAnyWork) return "todo"
-    }
-    return "in_progress"
-  }
-  return "done"
-}
 
 export function CourseListView({ initialCourses, stats, issueCounts = {} }: CourseListViewProps) {
   const [search, setSearch] = useState("")
