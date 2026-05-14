@@ -216,6 +216,21 @@ export function ReviewMatrixForm({
           </p>
         ) : null}
         <form className="space-y-3">
+          <div className="grid gap-3 rounded-lg border border-border/70 bg-muted/20 p-3 md:grid-cols-3">
+            <label className="grid gap-1.5 text-sm font-medium">
+              Subject
+              <Input placeholder="BUAD" {...form.register("subject")} />
+            </label>
+            <label className="grid gap-1.5 text-sm font-medium">
+              Season
+              <Input placeholder="Fall" {...form.register("season")} />
+            </label>
+            <label className="grid gap-1.5 text-sm font-medium">
+              Year
+              <Input placeholder="2026" {...form.register("year")} />
+            </label>
+          </div>
+
           {CHECKLIST.map((section) => (
             <Collapsible defaultOpen key={section.title}>
               <div className="rounded-lg border border-border">

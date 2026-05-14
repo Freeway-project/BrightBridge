@@ -13,10 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Search as SearchIcon, AlertCircle } from "lucide-react"
-import { StatCard, type StatCardIcon } from "@/components/shared/stat-card"
+import { Search as SearchIcon, AlertCircle, Filter } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { CourseStatus } from "@coursebridge/workflow"
+import { motion, AnimatePresence } from "framer-motion"
+import { getTab } from "@/lib/courses/tab-utils"
+import type { StatCardIcon } from "@/components/shared/stat-card"
 
 export interface CourseStat {
   label: string
@@ -32,33 +33,23 @@ interface CourseListViewProps {
   issueCounts?: IssueCountMap
 }
 
-const TODO_STATUSES = new Set<CourseStatus>(["course_created", "assigned_to_ta"])
-const IN_PROGRESS_STATUSES = new Set<CourseStatus>(["ta_review_in_progress", "admin_changes_requested"])
-const DONE_STATUSES = new Set<CourseStatus>([
-  "submitted_to_admin", "ready_for_instructor", "sent_to_instructor",
-  "instructor_questions", "instructor_approved", "final_approved",
-])
+const SUBJECT_PATTERN = /^([A-Za-z]+)/
 
-function getTab(course: CourseSummary): "todo" | "in_progress" | "done" {
-  const { status, reviewProgress } = course
-  if (TODO_STATUSES.has(status)) return "todo"
-  if (IN_PROGRESS_STATUSES.has(status)) {
-    if (status === "ta_review_in_progress") {
-      const hasAnyWork =
-        reviewProgress?.courseMetadata.exists ||
-        reviewProgress?.reviewMatrix.exists ||
-        reviewProgress?.syllabusReview.exists
-      if (!hasAnyWork) return "todo"
-    }
-    return "in_progress"
-  }
-  return "done"
+function getCourseSubject(course: CourseSummary): string | null {
+  const match = course.sourceCourseId?.trim().match(SUBJECT_PATTERN)
+  return match?.[1]?.toUpperCase() ?? null
 }
 
-export function CourseListView({ initialCourses, stats, issueCounts = {} }: CourseListViewProps) {
+export function CourseListView({ initialCourses, issueCounts = {} }: CourseListViewProps) {
   const [search, setSearch] = useState("")
+  const [subject, setSubject] = useState("all")
   const [term, setTerm] = useState("all")
-  const [issueSort, setIssueSort] = useState<"latest" | "replies">("latest")
+  const [issueSort, setIssueSort] = useState<"latest" | "replies" | "open">("open")
+
+  const subjects = useMemo(() => {
+    const set = new Set(initialCourses.map(getCourseSubject).filter(Boolean) as string[])
+    return Array.from(set).sort()
+  }, [initialCourses])
 
   const terms = useMemo(() => {
     const set = new Set(initialCourses.map((c) => c.term).filter(Boolean) as string[])
@@ -71,10 +62,11 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
         !search ||
         c.title.toLowerCase().includes(search.toLowerCase()) ||
         (c.sourceCourseId?.toLowerCase().includes(search.toLowerCase()) ?? false)
+      const matchesSubject = subject === "all" || getCourseSubject(c) === subject
       const matchesTerm = term === "all" || c.term === term
-      return matchesSearch && matchesTerm
+      return matchesSearch && matchesSubject && matchesTerm
     })
-  }, [initialCourses, search, term])
+  }, [initialCourses, search, subject, term])
 
   const byTab = useMemo(() => ({
     todo:        filtered.filter((c) => getTab(c) === "todo"),
@@ -89,105 +81,124 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
     : "done"
 
   return (
-    <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
-      {stats && stats.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, i) => (
-            <StatCard key={i} {...stat} />
-          ))}
-        </div>
-      )}
-
-      {/* Search + term filter */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6 scrollbar-thin">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-10 flex flex-col gap-3 rounded-xl border border-border/60 bg-background/60 p-3 backdrop-blur-md sm:flex-row sm:items-center"
+      >
         <div className="relative min-w-0 flex-1 sm:max-w-sm">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by title or course code..."
-            className="pl-9"
+            placeholder="Search courses..."
+            className="border-none bg-transparent pl-9 shadow-none focus-visible:ring-0"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        {terms.length > 0 && (
-          <Select value={term} onValueChange={setTerm}>
-            <SelectTrigger className="w-full sm:w-[150px] sm:shrink-0">
-              <SelectValue placeholder="All Terms" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Terms</SelectItem>
-              {terms.map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+        
+        <div className="flex items-center gap-2 sm:ml-auto">
+          <div className="h-8 w-px bg-border/40 hidden sm:block" />
+          <Filter className="size-4 text-muted-foreground hidden sm:block" />
+          {subjects.length > 0 && (
+            <Select value={subject} onValueChange={setSubject}>
+              <SelectTrigger className="h-9 w-full border-none bg-transparent shadow-none focus:ring-0 sm:w-[150px]">
+                <SelectValue placeholder="All Subjects" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Subjects</SelectItem>
+                {subjects.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {terms.length > 0 && (
+            <Select value={term} onValueChange={setTerm}>
+              <SelectTrigger className="h-9 w-full border-none bg-transparent shadow-none focus:ring-0 sm:w-[150px]">
+                <SelectValue placeholder="All Terms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Terms</SelectItem>
+                {terms.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      </motion.div>
 
       {/* Tabs */}
-      <Tabs defaultValue={defaultTab}>
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-x-2 gap-y-2 bg-transparent p-0">
+      <Tabs defaultValue={defaultTab} className="w-full">
+        <TabsList className="relative flex h-10 w-full items-center justify-start gap-6 border-b border-border/40 bg-transparent p-0 rounded-none">
           <TabItem
             value="todo"
             count={byTab.todo.length}
             label="To Do"
-            textColor="text-amber-600"
+            activeColor="text-amber-500 after:bg-amber-500"
             emoji="📋"
           />
           <TabItem
             value="in_progress"
             count={byTab.in_progress.length}
             label="In Progress"
-            textColor="text-blue-600"
+            activeColor="text-blue-500 after:bg-blue-500"
             emoji="⚙️"
           />
           <TabItem
             value="done"
             count={byTab.done.length}
             label="Done"
-            textColor="text-green-600"
+            activeColor="text-emerald-500 after:bg-emerald-500"
             emoji="✅"
           />
           <TabItem
             value="issues"
             count={byTab.issues.length}
             label="Issues"
-            textColor="text-red-600"
+            activeColor="text-destructive after:bg-destructive"
             emoji="🔴"
           />
         </TabsList>
 
-        {(["todo", "in_progress", "done"] as const).map((tab) => (
-          <TabsContent key={tab} value={tab} className="mt-4">
-            <CourseGrid courses={byTab[tab]} issueCounts={issueCounts} onClear={() => { setSearch(""); setTerm("all") }} />
-          </TabsContent>
-        ))}
+        <AnimatePresence mode="wait">
+          {(["todo", "in_progress", "done"] as const).map((tab) => (
+            <TabsContent key={tab} value={tab} className="mt-6 focus-visible:outline-none">
+              <CourseGrid 
+                courses={byTab[tab]} 
+                issueCounts={issueCounts} 
+                onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }} 
+              />
+            </TabsContent>
+          ))}
 
-        {/* Issues Tab */}
-        <TabsContent value="issues" className="mt-4">
-          <div className="space-y-4">
-            {byTab.issues.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground">Sort by:</span>
-                <Select value={issueSort} onValueChange={(v) => setIssueSort(v as "latest" | "replies")}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="latest">Latest Activity</SelectItem>
-                    <SelectItem value="replies">Most Replies</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <CourseGrid 
-              courses={byTab.issues} 
-              issueCounts={issueCounts} 
-              onClear={() => { setSearch(""); setTerm("all") }}
-              sortBy={issueSort}
-            />
-          </div>
-        </TabsContent>
+          <TabsContent value="issues" className="mt-6 focus-visible:outline-none">
+            <div className="space-y-4">
+              {byTab.issues.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">Sort by:</span>
+                  <Select value={issueSort} onValueChange={(v) => setIssueSort(v as any)}>
+                    <SelectTrigger className="w-[160px] h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open Issues</SelectItem>
+                      <SelectItem value="latest">Latest Activity</SelectItem>
+                      <SelectItem value="replies">Most Replies</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <CourseGrid 
+                courses={byTab.issues} 
+                issueCounts={issueCounts} 
+                onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
+                sortBy={issueSort}
+              />
+            </div>
+          </TabsContent>
+        </AnimatePresence>
       </Tabs>
     </div>
   )
@@ -197,33 +208,29 @@ function TabItem({
   value,
   label,
   count,
-  textColor,
+  activeColor,
   emoji,
 }: {
   value: string
   label: string
   count: number
-  textColor: string
+  activeColor: string
   emoji: string
 }) {
   return (
     <TabsTrigger
       value={value}
       className={cn(
-        "px-3 py-1.5 text-sm font-medium gap-1.5 flex items-center transition-colors",
-        "text-foreground/60",
-        `data-[state=active]:${textColor}`,
-        "data-[state=active]:font-semibold",
-        "hover:text-foreground/80",
+        "relative flex h-full items-center gap-2 px-1 pb-2 text-xs font-bold uppercase tracking-wider transition-all duration-300",
+        "text-muted-foreground/60 hover:text-foreground",
+        "data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full",
+        `data-[state=active]:${activeColor}`,
       )}
     >
-      <span className="text-base">{emoji}</span>
+      <span className="text-sm grayscale-[0.8] group-data-[state=active]:grayscale-0 transition-all opacity-70">{emoji}</span>
       {label}
       {count > 0 && (
-        <span className={cn(
-          "ml-1 text-[11px] font-bold px-1.5 py-0.5 rounded-full",
-          `data-[state=active]:${textColor}`,
-        )}>
+        <span className="flex size-4 items-center justify-center rounded-full bg-current/10 text-[9px] font-black">
           {count}
         </span>
       )}
@@ -240,34 +247,42 @@ function CourseGrid({
   courses: CourseSummary[]
   issueCounts: IssueCountMap
   onClear: () => void
-  sortBy?: "latest" | "replies"
+  sortBy?: "latest" | "replies" | "open"
 }) {
   const sortedCourses = useMemo(() => {
+    const arr = [...courses]
     if (sortBy === "replies") {
-      return [...courses].sort((a, b) => {
-        const aCount = issueCounts[a.id]?.open ?? 0
-        const bCount = issueCounts[b.id]?.open ?? 0
-        return bCount - aCount
-      })
+      return arr.sort((a, b) => (issueCounts[b.id]?.resolved ?? 0) - (issueCounts[a.id]?.resolved ?? 0))
     }
-    return courses
+    if (sortBy === "open") {
+      return arr.sort((a, b) => (issueCounts[b.id]?.open ?? 0) - (issueCounts[a.id]?.open ?? 0))
+    }
+    return arr
   }, [courses, sortBy, issueCounts])
 
   if (courses.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-border rounded-lg text-center p-8">
-        <AlertCircle className="size-8 text-muted-foreground/40 mb-3" />
-        <p className="text-sm font-medium text-foreground">No courses here</p>
-        <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or term filter.</p>
-        <Button variant="link" size="sm" onClick={onClear} className="mt-2">Clear filters</Button>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/40 bg-muted/5 p-12 text-center"
+      >
+        <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-muted/20">
+          <AlertCircle className="size-8 text-muted-foreground/40" />
+        </div>
+        <p className="text-base font-bold text-foreground">No courses found</p>
+        <p className="mt-1 text-sm text-muted-foreground">Adjust your filters or try a different search term.</p>
+        <Button variant="outline" size="sm" onClick={onClear} className="mt-6 border-border/60">
+          Clear filters
+        </Button>
+      </motion.div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
-      {sortedCourses.map((course) => (
-        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} />
+    <div className="grid grid-cols-1 gap-4 sm:gap-6">
+      {sortedCourses.map((course, i) => (
+        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i} />
       ))}
     </div>
   )
