@@ -118,7 +118,7 @@ export function CourseCard({ course, issueCounts, index = 0 }: CourseCardProps) 
               variant={owner === "TA" ? "default" : "outline"}
               size="sm"
               asChild
-              className="shrink-0"
+              className="shrink-0 !text-black"
             >
               <Link href={`/courses/${course.id}/metadata`}>
                 {owner === "TA" ? "Continue Review" : "View Progress"}
