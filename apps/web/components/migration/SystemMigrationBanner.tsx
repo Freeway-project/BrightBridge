@@ -83,40 +83,91 @@ export function SystemMigrationBanner() {
 
   useEffect(() => {
     const hostname = window.location.hostname
-
     setStatus(getSystemMigrationStatus(hostname))
     const interval = setInterval(() => {
       setStatus(getSystemMigrationStatus(hostname))
     }, 10000)
-
     return () => clearInterval(interval)
   }, [])
 
+  // Auto-open modal for ANNOUNCED; ACTIVE modal is always visible (no auto-open needed)
   useEffect(() => {
-    if (status === "NORMAL") return
-
+    if (status !== "ANNOUNCED") return
     const timer = window.setTimeout(() => {
       setStepIndex(0)
       setShowModal(true)
     }, 900)
-
     return () => window.clearTimeout(timer)
   }, [status])
 
   useEffect(() => {
     if (!showModal) return
-
-    const tick = () => {
-      setStepIndex((current) => (current + 1) % MIGRATION_STEPS.length)
-    }
-
-    const timer = window.setTimeout(tick, 6000)
-
+    const timer = window.setTimeout(
+      () => setStepIndex((current) => (current + 1) % MIGRATION_STEPS.length),
+      6000,
+    )
     return () => window.clearTimeout(timer)
   }, [showModal, stepIndex])
 
   if (status === "NORMAL" || pathname === "/maintenance") return null
 
+  // ── ACTIVE: blocking fullscreen takeover ──────────────────────────────────
+  if (status === "ACTIVE") {
+    return (
+      <motion.div
+        className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-neutral-950 px-6 text-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* ambient glow */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/4 top-1/4 size-[50vw] rounded-full bg-red-500/10 blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 size-[40vw] rounded-full bg-violet-500/10 blur-[100px]" />
+        </div>
+
+        <motion.div
+          className="relative flex w-full max-w-lg flex-col items-center gap-8 text-center"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
+        >
+          <div className="flex size-16 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10">
+            <AlertTriangle className="size-8 text-red-400" />
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-400">
+              Migration Complete
+            </p>
+            <h1 className="text-balance text-4xl font-semibold leading-tight md:text-5xl">
+              This domain has moved.
+            </h1>
+            <p className="text-base leading-relaxed text-white/60">
+              {SYSTEM_MIGRATION_CONFIG.REASON}
+            </p>
+          </div>
+
+          <div className="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-3 font-mono text-sm text-white/70">
+            {SYSTEM_MIGRATION_CONFIG.NEW_DOMAIN_URL}
+          </div>
+
+          <Button
+            size="lg"
+            className="w-full bg-white text-neutral-950 hover:bg-white/90 shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+            asChild
+          >
+            <a href={SYSTEM_MIGRATION_CONFIG.NEW_DOMAIN_URL}>
+              Go to New Domain
+              <ArrowRight className="ml-2 size-4" />
+            </a>
+          </Button>
+        </motion.div>
+      </motion.div>
+    )
+  }
+
+  // ── ANNOUNCED: top banner + optional info modal ───────────────────────────
   const currentStep = MIGRATION_STEPS[stepIndex]
   const isFirstStep = stepIndex === 0
   const isLastStep = stepIndex === MIGRATION_STEPS.length - 1
@@ -128,55 +179,30 @@ export function SystemMigrationBanner() {
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
-          className="fixed top-0 left-0 right-0 z-[100] p-2"
+          className="fixed left-0 right-0 top-0 z-[100] p-2"
         >
-          <div
-            className={`
-              relative overflow-hidden rounded-lg border shadow-lg backdrop-blur-md px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4
-              ${status === "ACTIVE" 
-                ? "bg-red-500/10 border-red-500/50 text-red-200" 
-                : "bg-amber-500/10 border-amber-500/50 text-amber-200"}
-            `}
-          >
-            <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-transparent via-current to-transparent animate-pulse" />
-
-            <div className="flex items-center gap-3 relative z-10 w-full min-w-0">
-              <div className={`p-2 rounded-full ${status === "ACTIVE" ? "bg-red-500/20" : "bg-amber-500/20"}`}>
-                {status === "ACTIVE" ? <AlertTriangle className="w-5 h-5" /> : <Sparkles className="w-5 h-5 animate-pulse text-amber-400" />}
+          <div className="relative flex flex-col items-center justify-between gap-4 overflow-hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-amber-200 shadow-lg backdrop-blur-md md:flex-row">
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-current to-transparent opacity-20" />
+            <div className="relative z-10 flex w-full min-w-0 items-center gap-3">
+              <div className="rounded-full bg-amber-500/20 p-2">
+                <Sparkles className="size-5 animate-pulse text-amber-400" />
               </div>
               <div className="min-w-0 space-y-0.5">
-                <p className="font-semibold text-sm">
-                  {status === "ACTIVE" ? "System Migration in Progress" : "Upcoming System Migration"}
-                </p>
+                <p className="text-sm font-semibold">Upcoming System Migration</p>
                 <p className="text-xs opacity-90">
-                  New domain goes live at {SYSTEM_MIGRATION_CONFIG.MIGRATION_START_DATE.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.
+                  Scheduled for {SYSTEM_MIGRATION_CONFIG.MIGRATION_START_DATE.toLocaleString()}
                 </p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 relative z-10 shrink-0">
+            <div className="relative z-10 flex shrink-0 items-center gap-2">
               <Button
                 size="sm"
-                variant={status === "ACTIVE" ? "secondary" : "outline"}
+                variant="outline"
                 className="h-8 border-current/30 bg-white/10 hover:bg-white/20"
-                onClick={() => {
-                  setStepIndex(0)
-                  setShowModal(true)
-                }}
+                onClick={() => { setStepIndex(0); setShowModal(true) }}
               >
                 What&apos;s changing
               </Button>
-              {status === "ACTIVE" ? (
-                <Button size="sm" className="bg-red-600 hover:bg-red-500 text-white h-8 shadow-[0_0_15px_rgba(220,38,38,0.4)]" asChild>
-                  <a href={SYSTEM_MIGRATION_CONFIG.NEW_DOMAIN_URL}>
-                    Go to New Domain <ArrowRight className="ml-2 w-3 h-3" />
-                  </a>
-                </Button>
-              ) : (
-                <p className="text-[11px] opacity-80">
-                  Scheduled for {SYSTEM_MIGRATION_CONFIG.MIGRATION_START_DATE.toLocaleString()}
-                </p>
-              )}
             </div>
           </div>
         </motion.div>
@@ -190,31 +216,16 @@ export function SystemMigrationBanner() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* Wholesome Tingling Background Effects */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-1/4 left-1/4 size-[40vw] rounded-full bg-amber-500/10 blur-[100px] animate-pulse" style={{ animationDuration: '4s' }} />
-              <div className="absolute bottom-1/4 right-1/4 size-[50vw] rounded-full bg-violet-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '6s', animationDelay: "1s" }} />
-              <div className="absolute top-1/2 left-1/2 size-[30vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-[80px] animate-pulse" style={{ animationDuration: '5s', animationDelay: "2s" }} />
-              
-              {/* Sparkles */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute left-1/4 top-1/4 size-[40vw] animate-pulse rounded-full bg-amber-500/10 blur-[100px]" style={{ animationDuration: "4s" }} />
+              <div className="absolute bottom-1/4 right-1/4 size-[50vw] animate-pulse rounded-full bg-violet-500/10 blur-[120px]" style={{ animationDuration: "6s", animationDelay: "1s" }} />
               {Array.from({ length: 30 }).map((_, i) => (
                 <motion.div
                   key={i}
                   className="absolute size-1 rounded-full bg-white/60 shadow-[0_0_12px_rgba(255,255,255,1)]"
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                  }}
-                  animate={{
-                    opacity: [0, 1, 0],
-                    scale: [0, 1.5, 0],
-                    y: [0, -30],
-                  }}
-                  transition={{
-                    duration: 3 + Math.random() * 5,
-                    repeat: Infinity,
-                    delay: Math.random() * 5,
-                  }}
+                  style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%` }}
+                  animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 0], y: [0, -30] }}
+                  transition={{ duration: 3 + Math.random() * 5, repeat: Infinity, delay: Math.random() * 5 }}
                 />
               ))}
             </div>
@@ -246,7 +257,7 @@ export function SystemMigrationBanner() {
                       transition={{ duration: 0.3 }}
                     >
                       {currentStep.variant === "board" ? (
-                        <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] shadow-inner p-3 md:p-5 relative overflow-hidden">
+                        <div className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.02] p-3 shadow-inner md:p-5">
                           <TextFlippingBoard
                             text={currentStep.message}
                             rowCount={7}
@@ -260,9 +271,9 @@ export function SystemMigrationBanner() {
                       ) : currentStep.variant === "reveal" ? (
                         <RevealText text={currentStep.message} />
                       ) : (
-                        <div className="flex min-h-[280px] items-center justify-center rounded-2xl bg-white/[0.02] border border-white/[0.05] p-8 text-center md:min-h-[380px] shadow-inner relative overflow-hidden">
+                        <div className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.02] p-8 text-center shadow-inner md:min-h-[380px]">
                           <motion.p
-                            className="max-w-3xl text-balance text-4xl font-semibold leading-tight text-white md:text-6xl relative z-10"
+                            className="relative z-10 max-w-3xl text-balance text-4xl font-semibold leading-tight text-white md:text-6xl"
                             initial={{ opacity: 0, filter: "blur(8px)", scale: 0.95 }}
                             animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -287,7 +298,7 @@ export function SystemMigrationBanner() {
                       />
                     ))}
                   </div>
-                  <div className="flex items-center justify-between gap-3 relative z-10">
+                  <div className="relative z-10 flex items-center justify-between gap-3">
                     <Button
                       type="button"
                       variant="outline"
@@ -304,10 +315,7 @@ export function SystemMigrationBanner() {
                       size="sm"
                       className="bg-amber-300 text-neutral-950 hover:bg-amber-200 shadow-[0_0_15px_rgba(252,211,77,0.4)]"
                       onClick={() => {
-                        if (isLastStep) {
-                          setShowModal(false)
-                          return
-                        }
+                        if (isLastStep) { setShowModal(false); return }
                         setStepIndex((current) => current + 1)
                       }}
                     >
