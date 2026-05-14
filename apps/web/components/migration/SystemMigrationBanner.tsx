@@ -110,8 +110,7 @@ export function SystemMigrationBanner() {
       setStepIndex((current) => (current + 1) % MIGRATION_STEPS.length)
     }
 
-    const currentHoldTime = stepIndex === 0 ? 18000 : 12000
-    const timer = window.setTimeout(tick, currentHoldTime)
+    const timer = window.setTimeout(tick, 6000)
 
     return () => window.clearTimeout(timer)
   }, [showModal, stepIndex])
