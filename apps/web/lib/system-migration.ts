@@ -37,7 +37,7 @@ export function getSystemMigrationStatus(hostname?: string | null): MigrationSta
   if (SYSTEM_MIGRATION_CONFIG.IS_FORCE_MAINTENANCE) return "ACTIVE";
 
   if (process.env.NODE_ENV !== "production" && isLocalPreviewHost(hostname)) {
-    return "ANNOUNCED";
+    return "NORMAL";
   }
 
   if (!isOldMigrationDomain(hostname)) return "NORMAL";
