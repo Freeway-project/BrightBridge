@@ -1,6 +1,5 @@
 "use client"
 
-import { RefreshHeader } from "@/components/shared/refresh-header"
 import { useAutoRefresh } from "@/lib/workspace/use-auto-refresh"
 import { refreshTAWorkspace } from "@/app/(dashboard)/refresh-actions"
 
@@ -14,7 +13,6 @@ export function TaRefreshWrapper({ children }: TaRefreshWrapperProps) {
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <RefreshHeader onRefresh={refreshTAWorkspace} title="My Courses" />
       {children}
     </div>
   )

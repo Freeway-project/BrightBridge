@@ -39,13 +39,22 @@ function getTimeSlot() {
 }
 
 export function GreetingMessage() {
-  const messages = TIME_MESSAGES[getTimeSlot()]
+  const [mounted, setMounted] = useState(false)
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const messages = mounted ? TIME_MESSAGES[getTimeSlot()] : []
+
+  useEffect(() => {
+    if (!mounted || messages.length === 0) return
     const id = setInterval(() => setIndex(i => (i + 1) % messages.length), 3500)
     return () => clearInterval(id)
-  }, [messages.length])
+  }, [mounted, messages.length])
+
+  if (!mounted) return null
 
   return (
     <AnimatePresence mode="wait">

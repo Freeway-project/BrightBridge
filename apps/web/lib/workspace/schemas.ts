@@ -25,6 +25,9 @@ const reviewMatrixItemSchema = z.object({
 });
 
 export const reviewMatrixSchema = z.object({
+  subject: z.string(),
+  season: z.string(),
+  year: z.string(),
   items: z.array(reviewMatrixItemSchema),
   time_spent_seconds: z.number().int().nonnegative(),
   overall_time_spent_seconds: z.number().int().nonnegative(),

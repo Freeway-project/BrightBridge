@@ -36,6 +36,8 @@ const MIGRATION_STEPS = [
   },
 ] as const
 
+const REDIRECT_DELAY = 5 // seconds
+
 function TypewriterText({ text }: { text: string }) {
   return (
     <div className="flex min-h-[280px] items-center justify-center rounded-2xl bg-white/[0.02] border border-white/[0.05] p-8 text-center md:min-h-[380px] relative overflow-hidden shadow-inner">
@@ -80,6 +82,7 @@ export function SystemMigrationBanner() {
   const [status, setStatus] = useState(getSystemMigrationStatus())
   const [showModal, setShowModal] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
+  const [countdown, setCountdown] = useState(REDIRECT_DELAY)
 
   useEffect(() => {
     const hostname = window.location.hostname
@@ -90,7 +93,7 @@ export function SystemMigrationBanner() {
     return () => clearInterval(interval)
   }, [])
 
-  // Auto-open modal for ANNOUNCED; ACTIVE modal is always visible (no auto-open needed)
+  // ANNOUNCED: auto-open info modal
   useEffect(() => {
     if (status !== "ANNOUNCED") return
     const timer = window.setTimeout(() => {
@@ -100,6 +103,7 @@ export function SystemMigrationBanner() {
     return () => window.clearTimeout(timer)
   }, [status])
 
+  // ANNOUNCED: cycle modal steps
   useEffect(() => {
     if (!showModal) return
     const timer = window.setTimeout(
@@ -109,9 +113,20 @@ export function SystemMigrationBanner() {
     return () => window.clearTimeout(timer)
   }, [showModal, stepIndex])
 
+  // ACTIVE: countdown timer → auto-redirect
+  useEffect(() => {
+    if (status !== "ACTIVE") return
+    if (countdown <= 0) {
+      window.location.href = SYSTEM_MIGRATION_CONFIG.NEW_DOMAIN_URL
+      return
+    }
+    const timer = window.setTimeout(() => setCountdown((c) => c - 1), 1000)
+    return () => window.clearTimeout(timer)
+  }, [status, countdown])
+
   if (status === "NORMAL" || pathname === "/maintenance") return null
 
-  // ── ACTIVE: blocking fullscreen takeover ──────────────────────────────────
+  // ── ACTIVE: blocking fullscreen takeover with countdown ───────────────────
   if (status === "ACTIVE") {
     return (
       <motion.div
@@ -120,7 +135,6 @@ export function SystemMigrationBanner() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* ambient glow */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-1/4 top-1/4 size-[50vw] rounded-full bg-red-500/10 blur-[120px]" />
           <div className="absolute bottom-1/4 right-1/4 size-[40vw] rounded-full bg-violet-500/10 blur-[100px]" />
@@ -162,6 +176,10 @@ export function SystemMigrationBanner() {
               <ArrowRight className="ml-2 size-4" />
             </a>
           </Button>
+
+          <p className="text-xs text-white/30">
+            Redirecting automatically in {countdown}s…
+          </p>
         </motion.div>
       </motion.div>
     )

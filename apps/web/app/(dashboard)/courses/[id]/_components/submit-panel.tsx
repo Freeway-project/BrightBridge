@@ -209,7 +209,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                       <Button
                         disabled={disabled}
                         onClick={handleSubmit}
-                        size="xl"
+                        size="lg"
                         className={cn(
                           "h-14 min-w-[200px] rounded-2xl px-8 text-base font-black uppercase tracking-[0.15em] transition-all duration-500",
                           !disabled && "bg-gradient-to-r from-blue-600 to-violet-600 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 active:scale-95"
