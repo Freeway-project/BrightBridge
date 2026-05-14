@@ -11,9 +11,42 @@ import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspac
 import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 const ALL_ITEM_IDS = CHECKLIST.flatMap((s) => s.items.map((i) => i.id));
+const TERM_CODE_SEASONS: Record<string, string> = {
+  "10": "Winter",
+  "11": "Winter",
+  "20": "Summer",
+  "21": "Spring",
+  "22": "Summer",
+  "30": "Fall",
+  "31": "Fall",
+};
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+function getCourseSubject(sourceCourseId: string | null): string {
+  return sourceCourseId?.trim().match(/^([A-Za-z]+)/)?.[1]?.toUpperCase() ?? "";
+}
+
+function parseTermContext(term: string | null): { season: string; year: string } {
+  const normalized = term?.trim() ?? "";
+  const compact = normalized.match(/^(\d{4})(\d{2})$/);
+  if (compact) {
+    return {
+      year: compact[1] ?? "",
+      season: TERM_CODE_SEASONS[compact[2] ?? ""] ?? "",
+    };
+  }
+
+  const parts = normalized.split(/\s+/).filter(Boolean);
+  if (parts.length === 2) {
+    const [first, second] = parts;
+    if (/^\d{4}$/.test(first ?? "")) return { year: first ?? "", season: second ?? "" };
+    return { season: first ?? "", year: second ?? "" };
+  }
+
+  return { season: "", year: "" };
 }
 
 export default async function ReviewMatrixPage({ params }: Props) {
@@ -34,8 +67,12 @@ export default async function ReviewMatrixPage({ params }: Props) {
 
   const saved = (matrixResponse?.response_data as Partial<ReviewMatrixFormValues> | null) ?? {};
   const itemMap = Object.fromEntries((saved.items ?? []).map((i) => [i.item_id, i]));
+  const termContext = parseTermContext(course.term);
 
   const defaultValues: ReviewMatrixFormValues = {
+    subject: saved.subject ?? getCourseSubject(course.sourceCourseId),
+    season: saved.season ?? termContext.season,
+    year: saved.year ?? termContext.year,
     items: ALL_ITEM_IDS.map((item_id) => ({
       item_id,
       status: itemMap[item_id]?.status ?? "na",

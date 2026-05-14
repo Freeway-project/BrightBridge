@@ -121,7 +121,7 @@ export function CourseCard({ course, issueCounts, index = 0 }: CourseCardProps) 
               className={cn(
                 "shrink-0 transition-all duration-300",
                 owner === "TA" 
-                  ? "shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5" 
+                  ? "shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 text-black dark:text-black"
                   : "bg-background/80"
               )}
             >

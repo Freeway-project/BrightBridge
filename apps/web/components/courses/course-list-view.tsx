@@ -14,11 +14,10 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Search as SearchIcon, AlertCircle, Filter } from "lucide-react"
-import { StatCard, type StatCardIcon } from "@/components/shared/stat-card"
 import { cn } from "@/lib/utils"
-import type { CourseStatus } from "@coursebridge/workflow"
 import { motion, AnimatePresence } from "framer-motion"
 import { getTab } from "@/lib/courses/tab-utils"
+import type { StatCardIcon } from "@/components/shared/stat-card"
 
 export interface CourseStat {
   label: string
@@ -34,15 +33,23 @@ interface CourseListViewProps {
   issueCounts?: IssueCountMap
 }
 
-const DONE_STATUSES = new Set<CourseStatus>([
-  "submitted_to_admin", "ready_for_instructor", "sent_to_instructor",
-  "instructor_questions", "instructor_approved", "final_approved",
-])
+const SUBJECT_PATTERN = /^([A-Za-z]+)/
 
-export function CourseListView({ initialCourses, stats, issueCounts = {} }: CourseListViewProps) {
+function getCourseSubject(course: CourseSummary): string | null {
+  const match = course.sourceCourseId?.trim().match(SUBJECT_PATTERN)
+  return match?.[1]?.toUpperCase() ?? null
+}
+
+export function CourseListView({ initialCourses, issueCounts = {} }: CourseListViewProps) {
   const [search, setSearch] = useState("")
+  const [subject, setSubject] = useState("all")
   const [term, setTerm] = useState("all")
   const [issueSort, setIssueSort] = useState<"latest" | "replies" | "open">("open")
+
+  const subjects = useMemo(() => {
+    const set = new Set(initialCourses.map(getCourseSubject).filter(Boolean) as string[])
+    return Array.from(set).sort()
+  }, [initialCourses])
 
   const terms = useMemo(() => {
     const set = new Set(initialCourses.map((c) => c.term).filter(Boolean) as string[])
@@ -55,10 +62,11 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
         !search ||
         c.title.toLowerCase().includes(search.toLowerCase()) ||
         (c.sourceCourseId?.toLowerCase().includes(search.toLowerCase()) ?? false)
+      const matchesSubject = subject === "all" || getCourseSubject(c) === subject
       const matchesTerm = term === "all" || c.term === term
-      return matchesSearch && matchesTerm
+      return matchesSearch && matchesSubject && matchesTerm
     })
-  }, [initialCourses, search, term])
+  }, [initialCourses, search, subject, term])
 
   const byTab = useMemo(() => ({
     todo:        filtered.filter((c) => getTab(c) === "todo"),
@@ -74,20 +82,6 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
 
   return (
     <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6 scrollbar-thin">
-      <div className="relative">
-        <div className="absolute -left-24 -top-24 size-64 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute -right-24 -bottom-24 size-64 rounded-full bg-blue-500/5 blur-3xl" />
-        
-        {stats && stats.length > 0 && (
-          <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, i) => (
-              <StatCard key={i} {...stat} index={i} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Search + term filter bar */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -106,6 +100,19 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
         <div className="flex items-center gap-2 sm:ml-auto">
           <div className="h-8 w-px bg-border/40 hidden sm:block" />
           <Filter className="size-4 text-muted-foreground hidden sm:block" />
+          {subjects.length > 0 && (
+            <Select value={subject} onValueChange={setSubject}>
+              <SelectTrigger className="h-9 w-full border-none bg-transparent shadow-none focus:ring-0 sm:w-[150px]">
+                <SelectValue placeholder="All Subjects" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Subjects</SelectItem>
+                {subjects.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           {terms.length > 0 && (
             <Select value={term} onValueChange={setTerm}>
               <SelectTrigger className="h-9 w-full border-none bg-transparent shadow-none focus:ring-0 sm:w-[150px]">
@@ -161,7 +168,7 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
               <CourseGrid 
                 courses={byTab[tab]} 
                 issueCounts={issueCounts} 
-                onClear={() => { setSearch(""); setTerm("all") }} 
+                onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }} 
               />
             </TabsContent>
           ))}
@@ -186,7 +193,7 @@ export function CourseListView({ initialCourses, stats, issueCounts = {} }: Cour
               <CourseGrid 
                 courses={byTab.issues} 
                 issueCounts={issueCounts} 
-                onClear={() => { setSearch(""); setTerm("all") }}
+                onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
                 sortBy={issueSort}
               />
             </div>

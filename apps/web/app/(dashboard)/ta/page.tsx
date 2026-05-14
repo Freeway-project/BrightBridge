@@ -1,11 +1,11 @@
 import { getAccessibleCourses } from "@/lib/courses/service";
-import { CourseListView, type CourseStat } from "@/components/courses/course-list-view";
-import { getTab } from "@/lib/courses/tab-utils";
+import { CourseListView } from "@/components/courses/course-list-view";
 import { TweakableContent } from "@/components/shared/tweakable-content";
 import { TaRefreshWrapper } from "./_components/ta-refresh-wrapper";
 import { getIssueCountsForCoursesAction } from "@/lib/issues/actions";
 import { requireProfile } from "@/lib/auth/context";
 import { GreetingMessage } from "@/components/shared/greeting-message";
+import { TaDashboardInsights } from "@/components/shared/ta-dashboard-insights";
 
 export default async function TADashboardPage() {
   const { courses } = await getAccessibleCourses();
@@ -14,33 +14,6 @@ export default async function TADashboardPage() {
   const courseIds = courses.map(c => c.id)
   const issueCountsMap = await getIssueCountsForCoursesAction(courseIds)
   const issueCounts = Object.fromEntries(issueCountsMap)
-
-  const todoCount       = courses.filter(c => getTab(c) === "todo").length
-  const inProgressCount = courses.filter(c => getTab(c) === "in_progress").length
-  const doneCount       = courses.filter(c => getTab(c) === "done").length
-
-  const stats: CourseStat[] = [
-    {
-      label: "To Do",
-      value: todoCount,
-      icon: "book-open",
-    },
-    {
-      label: "In Progress",
-      value: inProgressCount,
-      icon: "clock",
-    },
-    {
-      label: "Done",
-      value: doneCount,
-      icon: "check-square",
-    },
-    {
-      label: "Issues",
-      value: Object.values(issueCounts).reduce((acc, curr) => acc + curr.open, 0),
-      icon: "alert-triangle",
-    },
-  ];
 
   const firstName = ctx.profile.fullName?.split(" ")[0] || "there";
 
@@ -56,8 +29,10 @@ export default async function TADashboardPage() {
           </div>
         </div>
 
+        <TaDashboardInsights courses={courses} issueCounts={issueCounts} />
+
         <TaRefreshWrapper>
-          <CourseListView initialCourses={courses} stats={stats} issueCounts={issueCounts} />
+          <CourseListView initialCourses={courses} issueCounts={issueCounts} />
         </TaRefreshWrapper>
       </div>
     </TweakableContent>

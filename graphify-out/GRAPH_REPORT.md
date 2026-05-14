@@ -1,12 +1,12 @@
 # Graph Report - BrightBridge  (2026-05-14)
 
 ## Corpus Check
-- 244 files · ~139,429 words
+- 245 files · ~141,515 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 769 nodes · 873 edges · 42 communities detected
-- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 232 edges (avg confidence: 0.8)
+- 782 nodes · 896 edges · 40 communities detected
+- Extraction: 74% EXTRACTED · 26% INFERRED · 0% AMBIGUOUS · INFERRED: 235 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -27,19 +27,19 @@
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
-- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
 - [[_COMMUNITY_Community 24|Community 24]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 31|Community 31]]
 - [[_COMMUNITY_Community 32|Community 32]]
 - [[_COMMUNITY_Community 33|Community 33]]
-- [[_COMMUNITY_Community 34|Community 34]]
 - [[_COMMUNITY_Community 35|Community 35]]
-- [[_COMMUNITY_Community 37|Community 37]]
-- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 38|Community 38]]
 - [[_COMMUNITY_Community 41|Community 41]]
-- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 178|Community 178]]
+- [[_COMMUNITY_Community 179|Community 179]]
 - [[_COMMUNITY_Community 180|Community 180]]
 - [[_COMMUNITY_Community 181|Community 181]]
 - [[_COMMUNITY_Community 182|Community 182]]
@@ -50,11 +50,9 @@
 - [[_COMMUNITY_Community 187|Community 187]]
 - [[_COMMUNITY_Community 188|Community 188]]
 - [[_COMMUNITY_Community 189|Community 189]]
-- [[_COMMUNITY_Community 190|Community 190]]
-- [[_COMMUNITY_Community 191|Community 191]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `requireProfile()` - 34 edges
+1. `requireProfile()` - 35 edges
 2. `getCourseRepository()` - 18 edges
 3. `transitionCourseStatus()` - 13 edges
 4. `getAuthContext()` - 12 edges
@@ -63,7 +61,7 @@
 7. `getProfileRepository()` - 12 edges
 8. `text()` - 11 edges
 9. `getAuthService()` - 11 edges
-10. `CourseWorkspaceLayout()` - 10 edges
+10. `isReadonlyMode()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `assertCanTransition()` --calls--> `transitionCourseStatus()`  [INFERRED]
@@ -80,32 +78,32 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (58): approveReviewAction(), assignTaToCourseAction(), batchAssignTaAction(), requestFixesAction(), resolveEscalationAction(), searchAssignableCoursesAction(), searchCoursesForInstructorAction(), updateCourseDepartmentAction() (+50 more)
+Cohesion: 0.05
+Nodes (33): createInstructorAndAssignAction(), SuperAdminAuditPage(), getAuthContext(), isRole(), getAuthService(), SupabaseAuthService, GET(), switchDevRole() (+25 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (23): createInstructorAndAssignAction(), getAuthService(), SupabaseAuthService, GET(), switchDevRole(), DevRoleSwitcher(), signOut(), signInAsDevEmail() (+15 more)
+Nodes (37): approveReviewAction(), assignTaToCourseAction(), batchAssignTaAction(), requestFixesAction(), searchAssignableCoursesAction(), searchCoursesForInstructorAction(), updateCourseDepartmentAction(), getAdminCourseDetail() (+29 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.11
-Nodes (23): askReviewerMappings(), buildImportRows(), buildMatrixItem(), buildSectionPayloads(), cleanText(), combineNotes(), computePlan(), executeImport() (+15 more)
+Cohesion: 0.07
+Nodes (32): NotFound(), requireProfile(), AuthLayout(), CourseWorkspaceLayout(), IssueLogPage(), getOpenIssuesCountAction(), getSystemMigrationStatus(), isLocalPreviewHost() (+24 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.11
-Nodes (18): collectUrlFixes(), combineNotes(), extractBrightspaceRef(), extractTermCode(), isWeakCourseCode(), joinNotes(), looksLikeCourseRef(), markdownReport() (+10 more)
+Nodes (23): askReviewerMappings(), buildImportRows(), buildMatrixItem(), buildSectionPayloads(), cleanText(), combineNotes(), computePlan(), executeImport() (+15 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.17
-Nodes (17): assertEqual(), assertHasSource(), assertMissingSource(), checkAdminAccess(), checkCommunicationsAccess(), checkInstructorAccess(), checkMissingProfileAccess(), checkTaAccess() (+9 more)
+Cohesion: 0.11
+Nodes (18): collectUrlFixes(), combineNotes(), extractBrightspaceRef(), extractTermCode(), isWeakCourseCode(), joinNotes(), looksLikeCourseRef(), markdownReport() (+10 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.1
-Nodes (15): SuperAdminAuditPage(), getAuthContext(), isRole(), AuthLayout(), SuperAdminCoursesPage(), DashboardLayout(), DashboardPage(), getSystemMigrationStatus() (+7 more)
+Nodes (19): resolveEscalationAction(), postCommentAction(), resolveEscalationAction(), sendEscalationReplyAction(), createEscalationAction(), sendEscalationMessageAction(), getCommentRepository(), getEscalationRepository() (+11 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.1
-Nodes (16): postCommentAction(), resolveEscalationAction(), sendEscalationReplyAction(), createEscalationAction(), sendEscalationMessageAction(), getCommentRepository(), getEscalationRepository(), postCourseComment() (+8 more)
+Cohesion: 0.17
+Nodes (17): assertEqual(), assertHasSource(), assertMissingSource(), checkAdminAccess(), checkCommunicationsAccess(), checkInstructorAccess(), checkMissingProfileAccess(), checkTaAccess() (+9 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.15
@@ -147,21 +145,21 @@ Nodes (5): derive_name_from_email(), name_matches_email(), Analyze LMS Hierarchy
 Cohesion: 0.32
 Nodes (4): normalizeEmail(), normalizeText(), parseCsv(), parseCsvLine()
 
-### Community 22 - "Community 22"
-Cohesion: 0.5
-Nodes (2): assertCanTransition(), canTransition()
-
-### Community 24 - "Community 24"
+### Community 23 - "Community 23"
 Cohesion: 0.7
 Nodes (4): clearUnsavedChanges(), getDirtySources(), hasUnsavedChanges(), setUnsavedChanges()
 
-### Community 25 - "Community 25"
+### Community 24 - "Community 24"
 Cohesion: 0.6
 Nodes (3): clearFilters(), goToPage(), setQuery()
 
-### Community 30 - "Community 30"
+### Community 29 - "Community 29"
 Cohesion: 0.4
 Nodes (5): MetadataForm, ReviewMatrixForm, requireProfile, saveDraft, submitReview
+
+### Community 31 - "Community 31"
+Cohesion: 0.67
+Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
 ### Community 32 - "Community 32"
 Cohesion: 0.67
@@ -171,135 +169,123 @@ Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 Cohesion: 0.67
 Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
 
-### Community 34 - "Community 34"
-Cohesion: 0.67
-Nodes (2): parseDatabaseUrl(), parseSupabaseDatabaseUrl()
-
 ### Community 35 - "Community 35"
-Cohesion: 0.5
-Nodes (1): getOpenIssuesCountAction()
-
-### Community 37 - "Community 37"
-Cohesion: 0.5
-Nodes (2): updateSession(), proxy()
-
-### Community 39 - "Community 39"
 Cohesion: 0.67
 Nodes (2): handleAdvance(), performSave()
 
-### Community 41 - "Community 41"
+### Community 38 - "Community 38"
 Cohesion: 0.83
 Nodes (3): buildPrompt(), POST(), sanitizeLine()
 
-### Community 42 - "Community 42"
+### Community 41 - "Community 41"
 Cohesion: 0.83
 Nodes (3): isProcessAlive(), readLockPid(), stopStaleNextDev()
+
+### Community 48 - "Community 48"
+Cohesion: 1.0
+Nodes (2): getTimeSlot(), GreetingMessage()
 
 ### Community 56 - "Community 56"
 Cohesion: 0.67
 Nodes (3): TADashboardPage, getAccessibleCourses, getCourseRepository
 
-### Community 180 - "Community 180"
+### Community 178 - "Community 178"
 Cohesion: 1.0
 Nodes (1): getAuthContext
 
-### Community 181 - "Community 181"
+### Community 179 - "Community 179"
 Cohesion: 1.0
 Nodes (1): createAdminClient
 
-### Community 182 - "Community 182"
+### Community 180 - "Community 180"
 Cohesion: 1.0
 Nodes (1): CourseRepository
 
-### Community 183 - "Community 183"
+### Community 181 - "Community 181"
 Cohesion: 1.0
 Nodes (1): AdminDashboardPage
 
-### Community 184 - "Community 184"
+### Community 182 - "Community 182"
 Cohesion: 1.0
 Nodes (1): assignTaToCourseAction
 
-### Community 185 - "Community 185"
+### Community 183 - "Community 183"
 Cohesion: 1.0
 Nodes (1): AdminCourseDetailPage
 
-### Community 186 - "Community 186"
+### Community 184 - "Community 184"
 Cohesion: 1.0
 Nodes (1): InstructorDashboardPage
 
-### Community 187 - "Community 187"
+### Community 185 - "Community 185"
 Cohesion: 1.0
 Nodes (1): LoginPage
 
-### Community 188 - "Community 188"
+### Community 186 - "Community 186"
 Cohesion: 1.0
 Nodes (1): AppSidebar
 
-### Community 189 - "Community 189"
+### Community 187 - "Community 187"
 Cohesion: 1.0
 Nodes (1): UsersView
 
-### Community 190 - "Community 190"
+### Community 188 - "Community 188"
 Cohesion: 1.0
 Nodes (1): NotificationProvider
 
-### Community 191 - "Community 191"
+### Community 189 - "Community 189"
 Cohesion: 1.0
 Nodes (1): StatusBadge
 
 ## Knowledge Gaps
 - **20 isolated node(s):** `Analyze LMS Hierarchy CSVs and prepare data for DB insertion.  Sources:   - ADs-`, `Both the first initial AND some part of the surname must appear in the email pre`, `Guess 'Initial. Surname' from a local part like 'wwheeler' → 'W. Wheeler'.`, `getAuthContext`, `submitReview` (+15 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 22`** (5 nodes): `transitions.ts`, `assertCanTransition()`, `canTransition()`, `getAllowedTransitions()`, `transitionAllowsRole()`
+- **Thin community `Community 31`** (4 nodes): `loadEnvFiles()`, `db-migrate-all.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (4 nodes): `loadEnvFiles()`, `db-migrate-all.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 32`** (4 nodes): `loadEnvFiles()`, `db-inspect.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (4 nodes): `loadEnvFiles()`, `db-inspect.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 33`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (4 nodes): `loadEnvFiles()`, `apply-migration.mjs`, `parseDatabaseUrl()`, `parseSupabaseDatabaseUrl()`
+- **Thin community `Community 35`** (4 nodes): `metadata-form.tsx`, `handleAdvance()`, `parseTerm()`, `performSave()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 35`** (4 nodes): `search.ts`, `getOpenIssuesCountAction()`, `getRecentIssuesAction()`, `searchIssuesAction()`
+- **Thin community `Community 48`** (3 nodes): `greeting-message.tsx`, `getTimeSlot()`, `GreetingMessage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 37`** (4 nodes): `middleware.ts`, `proxy.ts`, `updateSession()`, `proxy()`
+- **Thin community `Community 178`** (1 nodes): `getAuthContext`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 39`** (4 nodes): `metadata-form.tsx`, `handleAdvance()`, `parseTerm()`, `performSave()`
+- **Thin community `Community 179`** (1 nodes): `createAdminClient`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 180`** (1 nodes): `getAuthContext`
+- **Thin community `Community 180`** (1 nodes): `CourseRepository`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 181`** (1 nodes): `createAdminClient`
+- **Thin community `Community 181`** (1 nodes): `AdminDashboardPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 182`** (1 nodes): `CourseRepository`
+- **Thin community `Community 182`** (1 nodes): `assignTaToCourseAction`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 183`** (1 nodes): `AdminDashboardPage`
+- **Thin community `Community 183`** (1 nodes): `AdminCourseDetailPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 184`** (1 nodes): `assignTaToCourseAction`
+- **Thin community `Community 184`** (1 nodes): `InstructorDashboardPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 185`** (1 nodes): `AdminCourseDetailPage`
+- **Thin community `Community 185`** (1 nodes): `LoginPage`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 186`** (1 nodes): `InstructorDashboardPage`
+- **Thin community `Community 186`** (1 nodes): `AppSidebar`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 187`** (1 nodes): `LoginPage`
+- **Thin community `Community 187`** (1 nodes): `UsersView`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 188`** (1 nodes): `AppSidebar`
+- **Thin community `Community 188`** (1 nodes): `NotificationProvider`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 189`** (1 nodes): `UsersView`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 190`** (1 nodes): `NotificationProvider`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 191`** (1 nodes): `StatusBadge`
+- **Thin community `Community 189`** (1 nodes): `StatusBadge`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `requireProfile()` connect `Community 0` to `Community 1`, `Community 5`, `Community 6`, `Community 7`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `createAdminClient()` connect `Community 1` to `Community 11`, `Community 4`?**
+- **Why does `requireProfile()` connect `Community 2` to `Community 0`, `Community 1`, `Community 5`, `Community 7`?**
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Why does `createAdminClient()` connect `Community 0` to `Community 11`, `Community 6`?**
   _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `getProfileRepository()` connect `Community 1` to `Community 0`, `Community 5`?**
+- **Why does `getAuthContext()` connect `Community 0` to `Community 1`, `Community 2`?**
   _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Are the 32 inferred relationships involving `requireProfile()` (e.g. with `createIssueAction()` and `updateIssueStatusAction()`) actually correct?**
-  _`requireProfile()` has 32 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 33 inferred relationships involving `requireProfile()` (e.g. with `createIssueAction()` and `updateIssueStatusAction()`) actually correct?**
+  _`requireProfile()` has 33 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 17 inferred relationships involving `getCourseRepository()` (e.g. with `getAdminCourses()` and `getAdminOverviewData()`) actually correct?**
   _`getCourseRepository()` has 17 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 9 inferred relationships involving `transitionCourseStatus()` (e.g. with `startTaReview()` and `submitReview()`) actually correct?**
