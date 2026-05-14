@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "brightbridge",
       cwd: "/mnt/external/BrightBridge/apps/web",
-      script: "npm",
+      script: "/mnt/external/BrightBridge/node_modules/.bin/next",
       args: "start",
 
       env_production: {
