@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import type { Role } from "@coursebridge/workflow";
 import { getAuthContext } from "@/lib/auth/context";
+import { isReadonlyMode } from "@/lib/system-migration";
 
 const ROLE_ROUTES: Record<Role, string> = {
   standard_user: "/ta",
@@ -11,6 +13,12 @@ const ROLE_ROUTES: Record<Role, string> = {
 };
 
 export default async function DashboardPage() {
+  const headerStore = await headers();
+
+  if (isReadonlyMode(headerStore.get("host"))) {
+    redirect("/maintenance");
+  }
+
   const context = await getAuthContext();
 
   if (context.kind === "anonymous") {

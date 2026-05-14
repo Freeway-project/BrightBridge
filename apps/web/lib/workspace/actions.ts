@@ -19,6 +19,8 @@ import {
 } from "./schemas";
 import type { ZodTypeAny } from "zod";
 
+import { isReadonlyMode } from "@/lib/system-migration";
+
 const SECTION_SCHEMAS: Partial<Record<SectionKey, ZodTypeAny>> = {
   course_metadata: metadataSchema,
   review_matrix: reviewMatrixSchema,
@@ -27,6 +29,7 @@ const SECTION_SCHEMAS: Partial<Record<SectionKey, ZodTypeAny>> = {
 };
 
 export async function startTaReview(courseId: string): Promise<void> {
+  if (isReadonlyMode()) return;
   const ctx = await requireProfile();
   try {
     const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
@@ -52,6 +55,9 @@ export async function saveDraft(
   sectionKey: SectionKey,
   data: unknown,
 ): Promise<{ ok: boolean; savedAt: string; error?: string }> {
+  if (isReadonlyMode()) {
+    return { ok: false, savedAt: "", error: "System migration in progress. Saving is disabled to prevent data loss." };
+  }
   const ctx = await requireProfile();
   try {
     const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
@@ -94,6 +100,9 @@ export async function saveDraft(
 }
 
 export async function submitReview(courseId: string): Promise<{ ok: boolean; error?: string }> {
+  if (isReadonlyMode()) {
+    return { ok: false, error: "System migration in progress. Submissions are temporarily disabled." };
+  }
   const ctx = await requireProfile();
   try {
     const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
