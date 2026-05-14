@@ -9,7 +9,7 @@ export const SYSTEM_MIGRATION_CONFIG = {
   MIGRATION_START_DATE: new Date("2026-05-14T20:30:00Z"),
 
   // New domain URL
-  NEW_DOMAIN_URL: process.env.NEXT_PUBLIC_NEW_DOMAIN_URL ?? "https://brightbridge.oracle.example.com",
+  NEW_DOMAIN_URL: "https://lms.harshsaw.ca",
   
   // Informational links or reasons
   REASON: "This domain has moved to the new CourseBridge home.",
