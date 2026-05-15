@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
-const STORAGE_KEY = "cb_seen_thought_modal_v1"
+const STORAGE_KEY = "cb_seen_thought_modal_v2"
 const DISPLAY_DURATION_MS = 10_000
 const TITLE_ID = "one-time-thought-modal-title"
 const DESCRIPTION_ID = "one-time-thought-modal-description"
@@ -67,13 +67,13 @@ export function OneTimeThoughtModal() {
       >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-indigo-300/10" />
         <p className="relative text-xs tracking-[0.2em] text-primary/85 uppercase">
-          Afternoon Momentum
+          Good Morning
         </p>
         <h2 id={TITLE_ID} className="relative mt-4 text-xl leading-relaxed font-semibold md:text-2xl">
-          Every issue resolved, every course reviewed. That is progress. Keep going.
+          I know change is not always easy, but remember—beautiful things also grow in uncomfortable seasons.
         </h2>
         <p id={DESCRIPTION_ID} className="relative mt-4 text-sm text-muted-foreground">
-          You are building something that matters. One update at a time.
+          Wishing you a peaceful and fresh start today.
         </p>
       </div>
     </div>
