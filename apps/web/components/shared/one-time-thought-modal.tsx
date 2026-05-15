@@ -1,81 +1,24 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect } from "react"
+import { toast } from "sonner"
 
 const STORAGE_KEY = "cb_seen_thought_modal_v2"
-const DISPLAY_DURATION_MS = 10_000
-const TITLE_ID = "one-time-thought-modal-title"
-const DESCRIPTION_ID = "one-time-thought-modal-description"
 
 export function OneTimeThoughtModal() {
-  const [isVisible, setIsVisible] = useState(false)
-  const timerRef = useRef<number | null>(null)
-
-  const dismissModal = useCallback(() => {
-    if (timerRef.current) {
-      window.clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
-    setIsVisible(false)
+  useEffect(() => {
     try {
+      if (window.localStorage.getItem(STORAGE_KEY)) return
       window.localStorage.setItem(STORAGE_KEY, "true")
+      toast("Good morning", {
+        description:
+          "I know change is not always easy, but remember—beautiful things also grow in uncomfortable seasons. Wishing you a peaceful and fresh start today.",
+        duration: 10_000,
+      })
     } catch {
       return
     }
   }, [])
 
-  useEffect(() => {
-    try {
-      const hasSeen = window.localStorage.getItem(STORAGE_KEY)
-      if (hasSeen) return
-      setIsVisible(true)
-      timerRef.current = window.setTimeout(() => {
-        dismissModal()
-      }, DISPLAY_DURATION_MS)
-      return () => {
-        if (timerRef.current) {
-          window.clearTimeout(timerRef.current)
-          timerRef.current = null
-        }
-      }
-    } catch {
-      return
-    }
-  }, [dismissModal])
-
-  useEffect(() => {
-    if (!isVisible) return
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        dismissModal()
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isVisible, dismissModal])
-
-  if (!isVisible) return null
-
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/65 px-4 backdrop-blur-sm">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={TITLE_ID}
-        aria-describedby={DESCRIPTION_ID}
-        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-primary/30 bg-card/95 p-8 text-center text-card-foreground shadow-2xl"
-      >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-indigo-300/10" />
-        <p className="relative text-xs tracking-[0.2em] text-primary/85 uppercase">
-          Good Morning
-        </p>
-        <h2 id={TITLE_ID} className="relative mt-4 text-xl leading-relaxed font-semibold md:text-2xl">
-          I know change is not always easy, but remember—beautiful things also grow in uncomfortable seasons.
-        </h2>
-        <p id={DESCRIPTION_ID} className="relative mt-4 text-sm text-muted-foreground">
-          Wishing you a peaceful and fresh start today.
-        </p>
-      </div>
-    </div>
-  )
+  return null
 }
