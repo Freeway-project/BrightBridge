@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { toast } from "sonner"
 
-const STORAGE_KEY = "cb_seen_thought_modal_v2"
+const STORAGE_KEY = "cb_seen_thought_modal_v3"
 
 export function OneTimeThoughtModal() {
   useEffect(() => {
