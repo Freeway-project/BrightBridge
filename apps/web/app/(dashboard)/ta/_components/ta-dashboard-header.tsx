@@ -4,7 +4,6 @@ import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { refreshTAWorkspace } from "@/app/(dashboard)/refresh-actions"
-import { GreetingMessage } from "@/components/shared/greeting-message"
 import { cn } from "@/lib/utils"
 
 interface TaDashboardHeaderProps {
@@ -41,7 +40,6 @@ export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
           <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">
             Hey, <span className="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text text-transparent">{firstName}</span>.
           </h1>
-          <GreetingMessage />
         </div>
       </div>
     </div>
