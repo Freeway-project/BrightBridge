@@ -1,44 +1,23 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ExternalLink, BarChart2, Users, Circle } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { subscribeToOnlineUsers, type OnlineUser } from '@/lib/online-presence'
 
 const dashboardUrl = process.env.NEXT_PUBLIC_POSTHOG_DASHBOARD_URL
-const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.posthog.com'
-
-type OnlineUser = {
-  userId: string
-  name: string | null
-  email: string
-  role: string
-  online_at: string
-}
+const projectId = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID
+const posthogBase = projectId
+  ? `https://us.posthog.com/project/${projectId}`
+  : 'https://us.posthog.com'
 
 function useOnlineUsers() {
   const [users, setUsers] = useState<OnlineUser[]>([])
-  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
 
   useEffect(() => {
-    if (!supabaseRef.current) supabaseRef.current = createClient()
-    const supabase = supabaseRef.current
-
-    const channel = supabase.channel('online_users')
-
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState<OnlineUser>()
-        const list = Object.values(state).flatMap((presences) => presences)
-        setUsers(list)
-      })
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return subscribeToOnlineUsers(setUsers)
   }, [])
 
   return users
@@ -92,15 +71,27 @@ function PostHogGuideCard() {
         <p>Analytics are tracked via PostHog. Users are identified by email, name, and role on every login.</p>
         <div className="flex flex-wrap gap-2">
           <Button asChild size="sm" variant="outline">
-            <a href={posthogHost} target="_blank" rel="noopener noreferrer">
+            <a href={`${posthogBase}/insights`} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="mr-2 h-3.5 w-3.5" />
-              Open PostHog Dashboard
+              Insights
             </a>
           </Button>
           <Button asChild size="sm" variant="outline">
-            <a href={`${posthogHost}/persons`} target="_blank" rel="noopener noreferrer">
+            <a href={`${posthogBase}/persons`} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="mr-2 h-3.5 w-3.5" />
-              View Users in PostHog
+              Users
+            </a>
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <a href={`${posthogBase}/replay`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-3.5 w-3.5" />
+              Session Replay
+            </a>
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <a href={`${posthogBase}/dashboard`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-3.5 w-3.5" />
+              Dashboards
             </a>
           </Button>
         </div>
