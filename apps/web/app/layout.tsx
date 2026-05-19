@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
+import { CSPostHogProvider, PostHogPageview } from "@/components/providers/posthog-provider";
+import { Suspense, type ReactNode } from "react";
 export const metadata: Metadata = {
   title: "CourseBridge",
   description: "Course migration review workflow platform"
@@ -15,20 +15,23 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   const currentVersion = process.env.VERCEL_GIT_COMMIT_SHA || "development";
 
   return (
     <html lang="en" className={cn("font-sans", GeistSans.className)}>
       <body>
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
-<DeploymentDetector initialVersion={currentVersion} />
-        <Toaster closeButton position="top-right" richColors expand visibleToasts={8} />
-        <Analytics />
-        <SpeedInsights />
+        <CSPostHogProvider>
+          <Suspense fallback={null}>
+            <PostHogPageview />
+          </Suspense>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+          <DeploymentDetector initialVersion={currentVersion} />
+          <Toaster closeButton position="top-right" richColors expand visibleToasts={8} />
+        </CSPostHogProvider>
       </body>
     </html>
   );

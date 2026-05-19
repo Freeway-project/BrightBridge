@@ -12,7 +12,7 @@ interface DeploymentDetectorProps {
   initialVersion: string;
 }
 
-const CHECK_INTERVAL = 1000 * 60 * 5; // Check every 5 minutes
+const CHECK_INTERVAL = 1000 * 60 * 15; // Check every 15 minutes
 const UPDATE_APPLIED_FLAG = "coursebridge:update-applied";
 type NotificationMode = "auto" | "force-on" | "force-off";
 // Manual switch for demos/testing:
