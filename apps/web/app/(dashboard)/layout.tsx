@@ -10,6 +10,8 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContentShell } from "@/components/layout/dashboard-content-shell"
 import { MindFreshButton } from "@/components/mindfresh/MindFreshButton"
 import { isReadonlyMode } from "@/lib/system-migration"
+import { PostHogIdentifier } from "@/components/providers/posthog-identifier"
+import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
@@ -38,6 +40,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <TweakProvider>
+      <PostHogIdentifier userId={context.userId} email={context.email ?? ""} name={context.profile.fullName} role={role} />
+      <OnlinePresenceTracker userId={context.userId} name={context.profile.fullName} email={context.email ?? ""} role={role} />
       <NotificationProvider userId={context.userId} role={role}>
         <SidebarProvider defaultOpen={sidebarOpen}>
           <div className="flex h-screen w-full overflow-hidden bg-background">
