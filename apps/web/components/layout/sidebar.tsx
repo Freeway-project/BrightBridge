@@ -115,16 +115,16 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                 onClick={openMemeModal}
                 className={cn(
                   "w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black uppercase tracking-widest text-[10px]",
-                  "bg-gradient-to-r from-primary via-secondary to-primary bg-size-200 animate-pulse",
                   "text-white shadow-lg hover:shadow-2xl transition-all duration-300",
                   "hover:scale-105 hover:brightness-110",
                   "relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer",
                   collapsed && "justify-center"
                 )}
                 style={{
+                  background: "linear-gradient(90deg, #ec4899 0%, #a855f7 50%, #ec4899 100%)",
                   backgroundSize: "200% 200%",
                   animation: "gradient-shift 3s ease-in-out infinite",
-                  boxShadow: "0 0 20px rgba(var(--primary-rgb), 0.6), inset 0 0 20px rgba(255, 255, 255, 0.1)"
+                  boxShadow: "0 0 30px rgba(236, 72, 153, 0.7), 0 0 60px rgba(168, 85, 247, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.15)"
                 }}
                 title="Get a random meme!"
               >

@@ -72,11 +72,11 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl border-0 bg-gradient-to-br from-background via-background to-accent/20 shadow-lg">
+      <DialogContent className="max-w-2xl border-2 border-pink-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-violet-900/60 shadow-2xl shadow-pink-500/40">
         {/* Header */}
         <div className="space-y-3 pb-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-violet-400 to-pink-300 bg-clip-text text-transparent">
               {randomMessage}
             </h2>
           </div>
@@ -89,7 +89,7 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
                 size="sm"
                 onClick={() => switchMode("trending")}
                 disabled={loading}
-                className="gap-1 text-xs"
+                className={`gap-1 text-xs font-bold ${mode === "trending" ? "bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white border-0" : "border-pink-400/50 text-pink-300 hover:bg-pink-500/20"}`}
               >
                 <Flame className="h-3 w-3" />
                 Trending
@@ -99,7 +99,7 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
                 size="sm"
                 onClick={() => switchMode("random")}
                 disabled={loading}
-                className="gap-1 text-xs"
+                className={`gap-1 text-xs font-bold ${mode === "random" ? "bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white border-0" : "border-violet-400/50 text-violet-300 hover:bg-violet-500/20"}`}
               >
                 <Sparkles className="h-3 w-3" />
                 Random
@@ -139,7 +139,7 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
               <div className="flex gap-3">
                 <Button
                   onClick={() => fetchMeme()}
-                  className="gap-2 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
+                  className="gap-2 bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 text-white font-bold"
                 >
                   <RotateCw className="h-4 w-4" />
                   Next
@@ -150,7 +150,7 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
             <Button
               onClick={() => fetchMeme()}
               size="lg"
-              className="bg-gradient-to-r from-primary to-secondary"
+              className="bg-gradient-to-r from-pink-500 via-violet-500 to-pink-500 hover:from-pink-600 hover:via-violet-600 hover:to-pink-600 text-white font-bold"
             >
               <Sparkles className="mr-2 h-5 w-5" />
               Load First Meme
@@ -159,8 +159,8 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border/50 pt-4 text-center">
-          <p className="text-xs text-muted-foreground">
+        <div className="border-t border-pink-500/30 pt-4 text-center">
+          <p className="text-xs text-pink-300/80">
             Click the meme to load another one! 😄
           </p>
         </div>
