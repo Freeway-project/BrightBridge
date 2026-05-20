@@ -19,6 +19,7 @@ graphify-out/cache/
 
 # system
 .DS_Store
+.vscode/
 *.log
 *.tsbuildinfo
 
