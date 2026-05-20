@@ -155,6 +155,38 @@
   --sidebar-ring: #c026d3;
 }
 
+/* ── Blush Theme — Soft pastels, pink, purple & lavender ─ */
+[data-theme="blush"] {
+  --background: #faf8fc;           /* Soft lavender background */
+  --foreground: #5a4a7a;           /* Deep purple text */
+  --card: #f3ecf8;                 /* Light lavender card */
+  --card-foreground: #6b5b7f;      /* Purple text on card */
+  --popover: #f0e5f7;
+  --popover-foreground: #5a4a7a;
+  --primary: #d88ec9;              /* Soft pink */
+  --primary-foreground: #ffffff;
+  --primary-hover: #e0a3d9;
+  --primary-depth: #c472b0;
+  --secondary: #b39ddb;            /* Soft purple */
+  --secondary-foreground: #ffffff;
+  --muted: #e8dff5;
+  --muted-foreground: #9b89b3;     /* Muted purple */
+  --accent: #f5d5e8;               /* Very soft pink */
+  --accent-foreground: #8b6f9e;
+  --border: color-mix(in srgb, #d88ec9 20%, transparent);
+  --border-icy: color-mix(in srgb, #b39ddb 15%, transparent);
+  --input: #f3ecf8;
+  --ring: #d88ec9;
+  --sidebar: #f0e5f7;              /* Soft lavender sidebar */
+  --sidebar-foreground: #5a4a7a;
+  --sidebar-primary: #d88ec9;      /* Soft pink */
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8dff5;
+  --sidebar-accent-foreground: #8b6f9e;
+  --sidebar-border: color-mix(in srgb, #d88ec9 18%, transparent);
+  --sidebar-ring: #d88ec9;
+}
+
 * {
   box-sizing: border-box;
 }

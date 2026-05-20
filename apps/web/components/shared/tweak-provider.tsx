@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react"
 
-export type ThemeId = "ocean" | "sunset" | "monochrome" | "aurora"
+export type ThemeId = "blush" | "ocean" | "sunset" | "monochrome" | "aurora"
 
 type TweakSettings = {
   fontSize: "small" | "medium" | "large"

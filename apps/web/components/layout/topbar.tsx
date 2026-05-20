@@ -22,7 +22,7 @@ interface TopbarProps {
 
 export function Topbar({ title, subtitle, actions, backHref, courseStatus, role }: TopbarProps) {
   const { openMemeModal } = useMemeModal()
-  const isTaOrStaff = role && ["standard_user", "admin_full", "super_admin"].includes(role)
+  const isTaOrStaff = role === "standard_user"
 
   return (
     <header className="sticky top-0 z-40 flex h-12 items-center gap-2 border-b border-sidebar-border bg-background/50 backdrop-blur-xl px-4">
