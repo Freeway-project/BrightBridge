@@ -10,16 +10,16 @@ import type {
 } from "@/lib/repositories/contracts";
 import { getSupabaseAdminClientOrThrow } from "./shared";
 
-type RawMessage = {
+type RawComment = {
   id: string;
-  escalation_id: string;
+  issue_id: string;
   author_id: string;
   body: string;
   created_at: string;
   profiles?: { full_name?: string | null; email?: string | null } | null;
 };
 
-type RawEscalation = {
+type RawIssue = {
   id: string;
   course_id: string;
   created_by: string;
@@ -30,13 +30,13 @@ type RawEscalation = {
   resolved_at: string | null;
   created_at: string;
   profiles?: { full_name?: string | null; email?: string | null } | null;
-  escalation_messages?: RawMessage[];
+  course_issue_comments?: RawComment[];
 };
 
-function mapMessage(row: RawMessage): EscalationMessage {
+function mapComment(row: RawComment): EscalationMessage {
   return {
     id: row.id,
-    escalation_id: row.escalation_id,
+    escalation_id: row.issue_id,
     author_id: row.author_id,
     author_name: row.profiles?.full_name ?? undefined,
     author_email: row.profiles?.email ?? undefined,
@@ -45,7 +45,7 @@ function mapMessage(row: RawMessage): EscalationMessage {
   };
 }
 
-function mapEscalation(row: RawEscalation, messages: EscalationMessage[]): EscalationWithMessages {
+function mapIssue(row: RawIssue, messages: EscalationMessage[]): EscalationWithMessages {
   return {
     id: row.id,
     course_id: row.course_id,
@@ -67,25 +67,28 @@ export function createSupabaseEscalationRepository(): EscalationRepository {
     async getEscalationsForCourse(courseId) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
-        .from("course_escalations")
+        .from("course_issues")
         .select(`
           *,
           profiles:created_by ( full_name, email ),
-          escalation_messages (
+          course_issue_comments (
             *,
             profiles:author_id ( full_name, email )
           )
         `)
         .eq("course_id", courseId)
+        .eq("type", "escalation")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
       return (data ?? []).map((row) => {
-        const r = row as unknown as RawEscalation;
-        const messages = (r.escalation_messages ?? []).map(mapMessage);
+        const r = row as unknown as RawIssue;
+        const messages = (r.course_issue_comments ?? [])
+          .filter((c) => !(c as any).is_system_message)
+          .map(mapComment);
         messages.sort((a, b) => a.created_at.localeCompare(b.created_at));
-        return mapEscalation(r, messages);
+        return mapIssue(r, messages);
       });
     },
 
@@ -156,52 +159,56 @@ export function createSupabaseEscalationRepository(): EscalationRepository {
     async createEscalation(input: CreateEscalationInput) {
       const admin = getSupabaseAdminClientOrThrow();
 
-      const { data: esc, error: escErr } = await admin
-        .from("course_escalations")
+      const { data: issue, error: issueErr } = await admin
+        .from("course_issues")
         .insert({
           course_id: input.courseId,
           created_by: input.createdBy,
           severity: input.severity,
           title: input.title,
+          type: "escalation",
+          phase: "migration",
+          status: "open",
         })
         .select(`*, profiles:created_by ( full_name, email )`)
         .single();
 
-      if (escErr) throw escErr;
+      if (issueErr) throw issueErr;
 
-      const { data: msg, error: msgErr } = await admin
-        .from("escalation_messages")
+      const { data: comment, error: commentErr } = await admin
+        .from("course_issue_comments")
         .insert({
-          escalation_id: esc.id,
+          issue_id: issue.id,
           author_id: input.createdBy,
           body: input.firstMessage,
+          is_system_message: false,
         })
         .select(`*, profiles:author_id ( full_name, email )`)
         .single();
 
-      if (msgErr) throw msgErr;
+      if (commentErr) throw commentErr;
 
-      return mapEscalation(esc as unknown as RawEscalation, [
-        mapMessage(msg as unknown as RawMessage),
+      return mapIssue(issue as unknown as RawIssue, [
+        mapComment(comment as unknown as RawComment),
       ]);
     },
 
     async addMessage(escalationId, authorId, body) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
-        .from("escalation_messages")
-        .insert({ escalation_id: escalationId, author_id: authorId, body })
+        .from("course_issue_comments")
+        .insert({ issue_id: escalationId, author_id: authorId, body, is_system_message: false })
         .select(`*, profiles:author_id ( full_name, email )`)
         .single();
 
       if (error) throw error;
-      return mapMessage(data as unknown as RawMessage);
+      return mapComment(data as unknown as RawComment);
     },
 
     async resolveEscalation(escalationId, resolvedBy) {
       const admin = getSupabaseAdminClientOrThrow();
       const { error } = await admin
-        .from("course_escalations")
+        .from("course_issues")
         .update({ status: "resolved", resolved_by: resolvedBy, resolved_at: new Date().toISOString() })
         .eq("id", escalationId);
 
