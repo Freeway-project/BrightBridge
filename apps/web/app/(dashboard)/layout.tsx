@@ -12,6 +12,7 @@ import { isReadonlyMode } from "@/lib/system-migration"
 import { PostHogIdentifier } from "@/components/providers/posthog-identifier"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
 import { MemeProvider } from "@/components/providers/meme-provider"
+import { getDeploymentVersion } from "@/lib/deployment-version"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
@@ -21,7 +22,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   const context = await getAuthContext()
-  const currentVersion = process.env.VERCEL_GIT_COMMIT_SHA || "development"
+  const currentVersion = getDeploymentVersion()
 
   if (context.kind === "anonymous") {
     redirect("/auth/login")

@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
 import { CSPostHogProvider, PostHogPageview } from "@/components/providers/posthog-provider";
 import { Suspense, type ReactNode } from "react";
+import { getDeploymentVersion } from "@/lib/deployment-version";
 export const metadata: Metadata = {
   title: "CourseBridge",
   description: "Course migration review workflow platform"
@@ -17,7 +18,7 @@ export default function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const currentVersion = process.env.VERCEL_GIT_COMMIT_SHA || "development";
+  const currentVersion = getDeploymentVersion();
 
   return (
     <html lang="en" className={cn("font-sans", GeistSans.className)}>
