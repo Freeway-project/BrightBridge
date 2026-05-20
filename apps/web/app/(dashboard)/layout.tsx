@@ -8,10 +8,10 @@ import { TweakProvider } from "@/components/shared/tweak-provider"
 import { NotificationProvider } from "@/components/providers/notification-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContentShell } from "@/components/layout/dashboard-content-shell"
-import { MindFreshButton } from "@/components/mindfresh/MindFreshButton"
 import { isReadonlyMode } from "@/lib/system-migration"
 import { PostHogIdentifier } from "@/components/providers/posthog-identifier"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
+import { MemeProvider } from "@/components/providers/meme-provider"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
@@ -43,15 +43,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <PostHogIdentifier userId={context.userId} email={context.email ?? ""} name={context.profile.fullName} role={role} />
       <OnlinePresenceTracker userId={context.userId} name={context.profile.fullName} email={context.email ?? ""} role={role} />
       <NotificationProvider userId={context.userId} role={role}>
-        <SidebarProvider defaultOpen={sidebarOpen}>
-          <div className="flex h-screen w-full overflow-hidden bg-background">
-            <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
-            <DashboardContentShell>
-              {children}
-            </DashboardContentShell>
-            <MindFreshButton />
-          </div>
-        </SidebarProvider>
+        <MemeProvider>
+          <SidebarProvider defaultOpen={sidebarOpen}>
+            <div className="flex h-screen w-full overflow-hidden bg-background">
+              <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
+              <DashboardContentShell>
+                {children}
+              </DashboardContentShell>
+            </div>
+          </SidebarProvider>
+        </MemeProvider>
       </NotificationProvider>
     </TweakProvider>
   )

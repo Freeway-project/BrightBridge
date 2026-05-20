@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ReviewSummary } from "./review-summary"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { toast } from "sonner"
-import confetti from "canvas-confetti"
 import { motion, AnimatePresence } from "framer-motion"
+import { CelebrationOverlay } from "@/components/mindfresh/CelebrationOverlay"
 import { cn } from "@/lib/utils"
 
 type SubmitPanelProps = {
@@ -30,6 +30,7 @@ type SubmitPanelProps = {
 export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: SubmitPanelProps) {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
+  const [celebrate, setCelebrate] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   
   const submitAllowedStatuses: CourseStatus[] = ["assigned_to_ta", "ta_review_in_progress", "admin_changes_requested"]
@@ -56,22 +57,18 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
       }
 
       setIsSuccess(true)
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["#818cf8", "#c026d3", "#ec4899"]
-      })
-      
+      setCelebrate(true)
       toast.success("Review submitted successfully!")
-      
-      setTimeout(() => {
-        window.location.href = "/ta"
-      }, 2000)
     })
   }
 
   return (
+    <>
+    <CelebrationOverlay
+      open={celebrate}
+      context="a TA just finished and submitted a course migration review"
+      onDone={() => { setCelebrate(false); window.location.href = "/ta" }}
+    />
     <div className="mx-auto max-w-4xl space-y-10 pb-20">
       <AnimatePresence mode="wait">
         {isSuccess ? (
@@ -233,5 +230,6 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
         )}
       </AnimatePresence>
     </div>
+    </>
   )
 }

@@ -3,7 +3,7 @@ import "server-only"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { fetchReviewProgressForCourses } from "@/lib/courses/service"
 import { getCourseRepository, getReviewRepository } from "@/lib/repositories"
-import type { AdminCourseRow, PaginatedResult, StatusCount, TAWorkload } from "@/lib/repositories/contracts"
+import type { AdminCourseRow, AuditEvent, PaginatedResult, StatusCount, StuckCourse, TAWorkload } from "@/lib/repositories/contracts"
 import { getReviewResponses, type ReviewResponse } from "@/lib/services/review"
 export type { AdminCourseRow } from "@/lib/repositories/contracts"
 export type AdminCoursesPage = PaginatedResult<AdminCourseRow>
@@ -20,6 +20,14 @@ export type AdminOverviewData = {
   taWorkload: TAWorkload[]
 }
 
+export type AdminStatsData = {
+  totalCourses: number
+  statusCounts: StatusCount[]
+  taWorkload: TAWorkload[]
+  stuckCourses: StuckCourse[]
+  auditEvents: AuditEvent[]
+}
+
 export type AdminCoursesPageParams = {
   page?: number
   pageSize?: number
@@ -33,6 +41,19 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
   const rows = await getCourseRepository().listAdminCourses()
   const progressMap = await fetchReviewProgressForCourses(rows.map((row) => row.id))
   return rows.map((row) => ({ ...row, reviewProgress: progressMap.get(row.id) }))
+}
+
+export async function getAdminStatsData(): Promise<AdminStatsData> {
+  const repository = getCourseRepository()
+  const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+  const [totalCourses, statusCounts, taWorkload, stuckCourses, auditEvents] = await Promise.all([
+    repository.countCourses(),
+    repository.listStatusCounts(),
+    repository.listTAWorkload(),
+    repository.listStuckCourses(cutoff),
+    repository.listAuditEvents(200),
+  ])
+  return { totalCourses, statusCounts, taWorkload, stuckCourses, auditEvents }
 }
 
 export async function getAdminOverviewData(): Promise<AdminOverviewData> {

@@ -5,13 +5,34 @@ type RefreshRequest = {
   mode?: MindFreshMode
   mood?: CheckInMood | null
   category?: "quote" | "funny" | "prompt"
+  celebrationContext?: string
 }
 
 type GroqResponse = {
   choices?: Array<{ message?: { content?: string } }>
 }
 
-function buildPrompt(mode: MindFreshMode, mood: CheckInMood | null, category: "quote" | "funny" | "prompt") {
+function buildPrompt(mode: MindFreshMode, mood: CheckInMood | null, category: "quote" | "funny" | "prompt", celebrationContext?: string) {
+  if (celebrationContext) {
+    const styles = [
+      "dry and deadpan, like a tired coworker who is genuinely impressed",
+      "overly dramatic like a sports commentator calling a historic moment",
+      "absurdly calm, like nothing is a big deal but secretly it is",
+      "like a hype person who just saw something incredible",
+      "like a proud parent who is trying to stay cool about it",
+    ]
+    const style = styles[Math.floor(Math.random() * styles.length)]
+    return [
+      `Write one short, funny, celebratory line for this moment: ${celebrationContext}.`,
+      `Tone: ${style}.`,
+      "Constraints:",
+      "- One line only. Max 12 words.",
+      "- No hashtags, no emojis, no quote marks.",
+      "- No corporate speak. No 'well done' or 'great job'.",
+      "- Make it feel human and specific to the context.",
+    ].join("\n")
+  }
+
   const styleByCategory: Record<"quote" | "funny" | "prompt", string> = {
     quote: "grounding, casual, relatable to someone under 25 — not therapy-speak, not motivational poster",
     funny: "genuinely funny to someone under 25 — relatable life humor, no tech or coding jokes, no cringe",
@@ -61,6 +82,7 @@ export async function POST(request: Request) {
   const mode = body.mode ?? "random"
   const mood = body.mood ?? null
   const category = body.category ?? "quote"
+  const celebrationContext = body.celebrationContext
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -71,7 +93,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
-        temperature: 0.9,
+        temperature: 0.95,
         max_tokens: 40,
         messages: [
           {
@@ -80,7 +102,7 @@ export async function POST(request: Request) {
           },
           {
             role: "user",
-            content: buildPrompt(mode, mood, category),
+            content: buildPrompt(mode, mood, category, celebrationContext),
           },
         ],
       }),

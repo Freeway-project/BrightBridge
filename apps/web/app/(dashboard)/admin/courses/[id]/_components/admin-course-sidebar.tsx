@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { CelebrationOverlay } from "@/components/mindfresh/CelebrationOverlay"
 
 interface Props {
   course: AdminCourseRow
@@ -51,6 +52,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
   const [note, setNote] = useState("")
   const [isPending, startTransition] = useTransition()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [celebrate, setCelebrate] = useState(false)
   const router = useRouter()
 
   const openEscalations = escalations.filter((e) => e.status === "open")
@@ -59,7 +61,7 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
     startTransition(async () => {
       await approveReviewAction(course.id)
       toast.success("Course approved")
-      router.push("/admin")
+      setCelebrate(true)
     })
   }
 
@@ -106,6 +108,12 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
   }
 
   return (
+    <>
+    <CelebrationOverlay
+      open={celebrate}
+      context="an admin just approved a course migration review"
+      onDone={() => { setCelebrate(false); router.push("/admin") }}
+    />
     <div className="w-[420px] h-full flex flex-col border-l border-border-icy bg-sidebar/40 transition-all duration-300 relative overflow-hidden backdrop-blur-md">
       {/* Toggle Button */}
       <div className="absolute top-4 right-4 z-10">
@@ -280,5 +288,6 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
         </div>
       </div>
     </div>
+    </>
   )
 }

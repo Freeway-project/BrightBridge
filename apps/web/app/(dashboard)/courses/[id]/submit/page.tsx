@@ -61,7 +61,7 @@ export default async function SubmitPage({ params }: Props) {
 
   return (
     <>
-      <Topbar title="Course Workspace" subtitle="Step 5 of 5 — Submit" courseStatus={course.status} />
+      <Topbar title="Course Workspace" subtitle="Step 5 of 5 — Submit" courseStatus={course.status} role={ctx.profile.role} />
       <main className="flex-1 overflow-y-auto p-6">
         <CourseWorkspaceRefreshWrapper
           courseId={id}
