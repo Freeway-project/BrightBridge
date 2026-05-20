@@ -41,8 +41,10 @@ export function Topbar({ title, subtitle, actions, backHref, courseStatus }: Top
           <StatusBadge status={courseStatus} className="text-[10px]" />
         )}
         {actions}
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell className="size-4" />
+        <Button variant="ghost" size="icon" aria-label="Notifications" asChild>
+          <Link href="/notifications">
+            <Bell className="size-4" />
+          </Link>
         </Button>
       </div>
     </header>
