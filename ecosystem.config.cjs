@@ -9,6 +9,7 @@ module.exports = {
       env_production: {
         NODE_ENV: "production",
         PORT: 3000,
+        TZ: "America/Los_Angeles",
       },
 
       // Logs
