@@ -22,6 +22,7 @@ export async function createEscalationAction(
     });
     revalidatePath(`/courses/${courseId}`);
     revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath("/admin");
     return escalation;
   } catch (err) {
     console.error("[escalation] createEscalationAction:", err);
@@ -39,6 +40,7 @@ export async function sendEscalationMessageAction(
     const message = await addEscalationMessage(escalationId, ctx.userId, body.trim());
     revalidatePath(`/courses/${courseId}`);
     revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath("/admin");
     return message;
   } catch (err) {
     console.error("[escalation] sendEscalationMessageAction:", err);
