@@ -73,40 +73,31 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl border-2 border-pink-500/30 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-violet-900/60 shadow-2xl shadow-pink-500/40">
-        {/* Header */}
-        <div className="space-y-3 pb-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-violet-400 to-pink-300 bg-clip-text text-transparent">
-              {randomMessage}
-            </h2>
+        {/* Header - Mode Toggle */}
+        {meme && (
+          <div className="flex gap-2 pb-2">
+            <Button
+              variant={mode === "trending" ? "default" : "outline"}
+              size="sm"
+              onClick={() => switchMode("trending")}
+              disabled={loading}
+              className={`gap-1 text-xs font-bold ${mode === "trending" ? "bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white border-0" : "border-pink-400/50 text-pink-300 hover:bg-pink-500/20"}`}
+            >
+              <Flame className="h-3 w-3" />
+              Trending
+            </Button>
+            <Button
+              variant={mode === "random" ? "default" : "outline"}
+              size="sm"
+              onClick={() => switchMode("random")}
+              disabled={loading}
+              className={`gap-1 text-xs font-bold ${mode === "random" ? "bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white border-0" : "border-violet-400/50 text-violet-300 hover:bg-violet-500/20"}`}
+            >
+              <Sparkles className="h-3 w-3" />
+              Random
+            </Button>
           </div>
-
-          {/* Mode Toggle */}
-          {meme && (
-            <div className="flex gap-2">
-              <Button
-                variant={mode === "trending" ? "default" : "outline"}
-                size="sm"
-                onClick={() => switchMode("trending")}
-                disabled={loading}
-                className={`gap-1 text-xs font-bold ${mode === "trending" ? "bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white border-0" : "border-pink-400/50 text-pink-300 hover:bg-pink-500/20"}`}
-              >
-                <Flame className="h-3 w-3" />
-                Trending
-              </Button>
-              <Button
-                variant={mode === "random" ? "default" : "outline"}
-                size="sm"
-                onClick={() => switchMode("random")}
-                disabled={loading}
-                className={`gap-1 text-xs font-bold ${mode === "random" ? "bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white border-0" : "border-violet-400/50 text-violet-300 hover:bg-violet-500/20"}`}
-              >
-                <Sparkles className="h-3 w-3" />
-                Random
-              </Button>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Content */}
         <div className="flex flex-col items-center gap-6 py-4">
