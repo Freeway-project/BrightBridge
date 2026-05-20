@@ -3,6 +3,15 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@coursebridge/ui", "@coursebridge/workflow"],
+  async headers() {
+    return [
+      {
+        // Apply no-store to all routes except static assets (content-addressed, safe to cache)
+        source: "/((?!_next/static|_next/image|favicon.ico).*)",
+        headers: [{ key: "Cache-Control", value: "no-store" }],
+      },
+    ];
+  },
 };
 
 export default withSentryConfig(nextConfig, {
