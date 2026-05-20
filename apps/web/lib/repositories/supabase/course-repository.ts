@@ -297,6 +297,9 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const searchMatchingStaffIds = normalizedSearch
         ? await findMatchingStaffProfileIds(normalizedSearch)
         : [];
+      const searchMatchingStaffCourseIds = searchMatchingStaffIds.length > 0
+        ? await findStaffAssignedCourseIds(searchMatchingStaffIds)
+        : [];
 
       let query = admin
         .from("courses")
@@ -334,8 +337,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
           `department.ilike.${term}`,
         ];
 
-        if (!taProfileId && searchMatchingStaffIds.length > 0) {
-          searchPredicates.push(`course_assignments.profile_id.in.(${searchMatchingStaffIds.join(",")})`);
+        if (!taProfileId && searchMatchingStaffCourseIds.length > 0) {
+          searchPredicates.push(`id.in.(${searchMatchingStaffCourseIds.join(",")})`);
         }
 
         query = query.or(searchPredicates.join(","));
@@ -743,6 +746,22 @@ async function findMatchingStaffProfileIds(searchTerm: string): Promise<string[]
   }
 
   return (data ?? []).map((row) => row.id);
+}
+
+async function findStaffAssignedCourseIds(profileIds: string[]): Promise<string[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  const { data, error } = await admin
+    .from("course_assignments")
+    .select("course_id")
+    .eq("role", "staff")
+    .in("profile_id", profileIds)
+    .limit(500);
+
+  if (error) {
+    throw new Error(`findStaffAssignedCourseIds: ${error.message}`);
+  }
+
+  return Array.from(new Set((data ?? []).map((row) => row.course_id)));
 }
 
 function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
