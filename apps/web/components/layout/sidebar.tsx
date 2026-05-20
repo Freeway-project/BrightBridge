@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { LogOut, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
 import { signOut } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
 import { UpdateStatusTab } from "./update-status-tab"
+import { useMemeModal } from "@/components/providers/meme-provider"
 import {
   Sidebar,
   SidebarContent,
@@ -60,6 +61,8 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
   const items = NAV_ITEMS[role]
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
+  const { openMemeModal } = useMemeModal()
+  const isTaOrStaff = role === "standard_user"
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/50 backdrop-blur-xl">
@@ -104,6 +107,33 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isTaOrStaff && (
+          <SidebarGroup className="mt-auto">
+            <SidebarGroupContent>
+              <button
+                onClick={openMemeModal}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black uppercase tracking-widest text-[10px]",
+                  "bg-gradient-to-r from-primary via-secondary to-primary bg-size-200 animate-pulse",
+                  "text-white shadow-lg hover:shadow-2xl transition-all duration-300",
+                  "hover:scale-105 hover:brightness-110",
+                  "relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer",
+                  collapsed && "justify-center"
+                )}
+                style={{
+                  backgroundSize: "200% 200%",
+                  animation: "gradient-shift 3s ease-in-out infinite",
+                  boxShadow: "0 0 20px rgba(var(--primary-rgb), 0.6), inset 0 0 20px rgba(255, 255, 255, 0.1)"
+                }}
+                title="Get a random meme!"
+              >
+                <Sparkles className="size-4 shrink-0" />
+                {!collapsed && <span>Meme Break</span>}
+              </button>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-3">
