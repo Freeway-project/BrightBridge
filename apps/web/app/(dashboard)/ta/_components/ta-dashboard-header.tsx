@@ -2,9 +2,10 @@
 
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, Smile } from "lucide-react"
 import { refreshTAWorkspace } from "@/app/(dashboard)/refresh-actions"
 import { cn } from "@/lib/utils"
+import { useMemeModal } from "@/components/providers/meme-provider"
 
 interface TaDashboardHeaderProps {
   firstName: string
@@ -12,6 +13,7 @@ interface TaDashboardHeaderProps {
 
 export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const { openMemeModal } = useMemeModal()
 
   const handleManualRefresh = useCallback(async () => {
     setIsRefreshing(true)
@@ -36,10 +38,19 @@ export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
           <span className="text-xs font-medium">Refresh</span>
         </Button>
         
-        <div className="flex items-baseline gap-4">
+        <div className="flex items-center gap-3">
           <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">
             Hey, <span className="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text text-transparent">{firstName}</span>.
           </h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openMemeModal}
+            title="Need a laugh? Get a meme!"
+            className="h-10 w-10 ml-2"
+          >
+            <Smile className="size-6" />
+          </Button>
         </div>
       </div>
     </div>
