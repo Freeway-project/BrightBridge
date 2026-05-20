@@ -311,6 +311,30 @@ a {
   }
 }
 
+@keyframes dance {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-2px) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(5deg);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-5deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

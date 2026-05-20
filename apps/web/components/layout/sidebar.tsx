@@ -56,6 +56,21 @@ function BrandLogo() {
   )
 }
 
+const CREATIVE_MESSAGES = [
+  "Hey click!",
+  "Why so serious?",
+  "Time to dance! 💃",
+  "Laugh time! 🎉",
+  "Click me! 🚀",
+  "Smile break 😊",
+  "Fun incoming! ✨",
+  "Brighten up! 🌟",
+  "Meme time! 🎬",
+  "Get laughing! 😂",
+  "Click for joy! 🎪",
+  "Break time! 🎭",
+]
+
 export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) {
   const pathname = usePathname()
   const items = NAV_ITEMS[role]
@@ -63,6 +78,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
   const collapsed = state === "collapsed"
   const { openMemeModal } = useMemeModal()
   const isTaOrStaff = role === "standard_user"
+  const randomMessage = CREATIVE_MESSAGES[Math.floor(Math.random() * CREATIVE_MESSAGES.length)]
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/50 backdrop-blur-xl">
@@ -128,8 +144,14 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                 }}
                 title="Get a random meme!"
               >
-                <Sparkles className="size-4 shrink-0" />
-                {!collapsed && <span>Meme Break</span>}
+                <Sparkles className="size-4 shrink-0" style={{
+                  animation: "dance 0.6s ease-in-out infinite"
+                }} />
+                {!collapsed && <span style={{
+                  animation: "bounce 0.8s ease-in-out infinite"
+                }}>
+                  {randomMessage}
+                </span>}
               </button>
             </SidebarGroupContent>
           </SidebarGroup>
