@@ -3,8 +3,8 @@
 import { useState, useMemo } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Loader2, RotateCw } from "lucide-react"
-import { getRandomMeme } from "@/lib/meme-api"
+import { Loader2, RotateCw, Sparkles, Flame } from "lucide-react"
+import { getRandomMeme, getTrendingMeme } from "@/lib/meme-api"
 
 interface MemeModalProps {
   open: boolean
@@ -37,20 +37,29 @@ const MESSAGES = [
 export function MemeModal({ open, onOpenChange }: MemeModalProps) {
   const [meme, setMeme] = useState<Meme | null>(null)
   const [loading, setLoading] = useState(false)
+  const [mode, setMode] = useState<"trending" | "random">("trending")
 
   const randomMessage = useMemo(() => {
     return MESSAGES[Math.floor(Math.random() * MESSAGES.length)]
   }, [open])
 
-  const fetchMeme = async () => {
+  const fetchMeme = async (fetchMode?: "trending" | "random") => {
     setLoading(true)
     try {
-      const newMeme = await getRandomMeme()
+      const targetMode = fetchMode || mode
+      const newMeme = targetMode === "trending" ? await getTrendingMeme() : await getRandomMeme()
       if (newMeme) {
         setMeme(newMeme)
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const switchMode = async (newMode: "trending" | "random") => {
+    if (newMode !== mode) {
+      setMode(newMode)
+      await fetchMeme(newMode)
     }
   }
 
@@ -64,60 +73,95 @@ export function MemeModal({ open, onOpenChange }: MemeModalProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl border-0 bg-gradient-to-br from-background via-background to-accent/20 shadow-lg">
-        {/* Header with personalized message */}
-        <div className="space-y-2 pb-4">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            {randomMessage}
-          </h2>
-          <p className="text-xs text-muted-foreground">Quick relief for course reviewers</p>
+        {/* Header */}
+        <div className="space-y-3 pb-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              {randomMessage}
+            </h2>
+          </div>
+
+          {/* Mode Toggle */}
+          {meme && (
+            <div className="flex gap-2">
+              <Button
+                variant={mode === "trending" ? "default" : "outline"}
+                size="sm"
+                onClick={() => switchMode("trending")}
+                disabled={loading}
+                className="gap-1 text-xs"
+              >
+                <Flame className="h-3 w-3" />
+                Trending
+              </Button>
+              <Button
+                variant={mode === "random" ? "default" : "outline"}
+                size="sm"
+                onClick={() => switchMode("random")}
+                disabled={loading}
+                className="gap-1 text-xs"
+              >
+                <Sparkles className="h-3 w-3" />
+                Random
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Content */}
         <div className="flex flex-col items-center gap-6 py-4">
           {loading ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">Loading something funny...</p>
+            <div className="flex flex-col items-center justify-center gap-3 py-16">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Loading your laugh...</p>
             </div>
           ) : meme ? (
             <>
-              {/* Meme Image */}
-              <div className="relative w-full max-w-md overflow-hidden rounded-xl bg-muted p-2">
-                <img
-                  src={meme.url}
-                  alt={meme.title}
-                  className="max-h-96 w-full rounded-lg object-contain"
-                />
+              {/* Meme Image - Main Focus */}
+              <div className="w-full max-w-md">
+                <button
+                  onClick={() => fetchMeme()}
+                  className="group relative w-full overflow-hidden rounded-xl bg-muted p-2 transition-all hover:shadow-lg hover:shadow-primary/20"
+                  title="Click to load next meme"
+                >
+                  <img
+                    src={meme.url}
+                    alt="meme"
+                    className="max-h-96 w-full rounded-lg object-contain transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/20 group-hover:opacity-100">
+                    <RotateCw className="h-8 w-8 text-white" />
+                  </div>
+                </button>
               </div>
 
-              {/* Meme Title */}
-              <div className="text-center">
-                <p className="text-sm font-medium text-foreground line-clamp-2 px-4">
-                  {meme.title}
-                </p>
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => fetchMeme()}
+                  className="gap-2 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
+                >
+                  <RotateCw className="h-4 w-4" />
+                  Next
+                </Button>
               </div>
-
-              {/* Action Button */}
-              <Button
-                onClick={fetchMeme}
-                variant="default"
-                className="gap-2 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
-              >
-                <RotateCw className="h-4 w-4" />
-                Next Meme 🎬
-              </Button>
             </>
           ) : (
-            <Button onClick={fetchMeme} size="lg" className="bg-gradient-to-r from-primary to-secondary">
-              Load First Meme ✨
+            <Button
+              onClick={() => fetchMeme()}
+              size="lg"
+              className="bg-gradient-to-r from-primary to-secondary"
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Load First Meme
             </Button>
           )}
         </div>
 
-        {/* Footer message */}
+        {/* Footer */}
         <div className="border-t border-border/50 pt-4 text-center">
           <p className="text-xs text-muted-foreground">
-            Come back anytime you need a quick laugh! 😄
+            Click the meme to load another one! 😄
           </p>
         </div>
       </DialogContent>

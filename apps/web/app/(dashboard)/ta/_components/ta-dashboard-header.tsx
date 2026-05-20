@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { RefreshCw, Smile } from "lucide-react"
+import { RefreshCw, Sparkles } from "lucide-react"
 import { refreshTAWorkspace } from "@/app/(dashboard)/refresh-actions"
 import { cn } from "@/lib/utils"
 import { useMemeModal } from "@/components/providers/meme-provider"
@@ -46,10 +46,10 @@ export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
             variant="ghost"
             size="icon"
             onClick={openMemeModal}
-            title="Need a laugh? Get a meme!"
-            className="h-10 w-10 ml-2"
+            title="Need a laugh? Click for a meme!"
+            className="h-10 w-10 ml-2 hover:text-primary transition-colors"
           >
-            <Smile className="size-6" />
+            <Sparkles className="size-6" />
           </Button>
         </div>
       </div>
