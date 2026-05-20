@@ -4,7 +4,6 @@ import { getCourseById } from "@/lib/services/courses";
 import { notFound } from "next/navigation";
 import { IssueTracker } from "../_components/issues/issue-tracker";
 import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper";
-import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -23,7 +22,6 @@ export default async function IssueLogPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Issues"
-          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <IssueTracker courseId={id} phase="migration" userRole={ctx.profile.role} />
         </CourseWorkspaceRefreshWrapper>

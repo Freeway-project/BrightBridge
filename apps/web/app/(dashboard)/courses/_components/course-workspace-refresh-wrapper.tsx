@@ -2,30 +2,31 @@
 
 import { RefreshHeader } from "@/components/shared/refresh-header"
 import { useAutoRefresh } from "@/lib/workspace/use-auto-refresh"
+import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 
 interface CourseWorkspaceRefreshWrapperProps {
   courseId: string
   title: string
-  refreshCallback: () => Promise<void>
   children: React.ReactNode
 }
 
 export function CourseWorkspaceRefreshWrapper({
-  courseId,
+  courseId: _courseId,
   title,
-  refreshCallback,
   children,
 }: CourseWorkspaceRefreshWrapperProps) {
-  // Create stable callback
-  const stableRefreshCallback = useCallback(refreshCallback, [courseId])
+  const router = useRouter()
+  const refresh = useCallback(async () => {
+    router.refresh()
+  }, [router])
 
   // Auto-refresh every 20 seconds for TA workspace (they see admin feedback)
-  useAutoRefresh(stableRefreshCallback, 20000)
+  useAutoRefresh(refresh, 20000)
 
   return (
     <div className="flex flex-col gap-4">
-      <RefreshHeader onRefresh={stableRefreshCallback} title={title} />
+      <RefreshHeader onRefresh={refresh} title={title} />
       {children}
     </div>
   )

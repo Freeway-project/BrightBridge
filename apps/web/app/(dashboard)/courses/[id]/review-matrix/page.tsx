@@ -8,7 +8,6 @@ import type { ReviewMatrixFormValues } from "@/lib/workspace/schemas";
 import type { IssueLogResponseData } from "@/lib/workspace/types";
 import { CHECKLIST } from "@/lib/workspace/constants";
 import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper";
-import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 const ALL_ITEM_IDS = CHECKLIST.flatMap((s) => s.items.map((i) => i.id));
 const TERM_CODE_SEASONS: Record<string, string> = {
@@ -92,7 +91,6 @@ export default async function ReviewMatrixPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Review Matrix"
-          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <ReviewMatrixForm
             courseId={id}

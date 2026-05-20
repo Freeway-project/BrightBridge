@@ -6,7 +6,6 @@ import { notFound } from "next/navigation";
 import { MetadataForm } from "../_components/metadata-form";
 import type { MetadataFormValues } from "@/lib/workspace/schemas";
 import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper";
-import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -38,7 +37,6 @@ export default async function MetadataPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Metadata Review"
-          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <MetadataForm
             course={course}

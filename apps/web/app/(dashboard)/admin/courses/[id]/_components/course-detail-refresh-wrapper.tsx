@@ -2,7 +2,7 @@
 
 import { RefreshHeader } from "@/components/shared/refresh-header"
 import { useAutoRefresh } from "@/lib/workspace/use-auto-refresh"
-import { refreshAdminCourseDetail } from "@/app/(dashboard)/refresh-actions"
+import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 
 interface CourseDetailRefreshWrapperProps {
@@ -12,22 +12,21 @@ interface CourseDetailRefreshWrapperProps {
 }
 
 export function CourseDetailRefreshWrapper({
-  courseId,
+  courseId: _courseId,
   title,
   children,
 }: CourseDetailRefreshWrapperProps) {
-  // Create stable callback for this course
-  const refreshCallback = useCallback(
-    () => refreshAdminCourseDetail(courseId),
-    [courseId]
-  )
+  const router = useRouter()
+  const refresh = useCallback(async () => {
+    router.refresh()
+  }, [router])
 
   // Auto-refresh every 10 seconds for course detail (shows escalation messages, TA updates)
-  useAutoRefresh(refreshCallback, 10000)
+  useAutoRefresh(refresh, 10000)
 
   return (
     <div className="flex flex-col gap-4">
-      <RefreshHeader onRefresh={refreshCallback} title={title} />
+      <RefreshHeader onRefresh={refresh} title={title} />
       {children}
     </div>
   )

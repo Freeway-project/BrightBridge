@@ -6,7 +6,6 @@ import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review"
 import { getIssuesForCourseAction } from "@/lib/issues"
 import { SubmitPanel } from "../_components/submit-panel"
 import { CourseWorkspaceRefreshWrapper } from "../../_components/course-workspace-refresh-wrapper"
-import { refreshCourseWorkspace } from "@/app/(dashboard)/refresh-actions"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -66,7 +65,6 @@ export default async function SubmitPage({ params }: Props) {
         <CourseWorkspaceRefreshWrapper
           courseId={id}
           title="Submit Review"
-          refreshCallback={refreshCourseWorkspace.bind(null, id)}
         >
           <SubmitPanel courseId={course.id} courseStatus={course.status} sections={sections} reviewData={reviewData} />
         </CourseWorkspaceRefreshWrapper>

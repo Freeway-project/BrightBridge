@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { RefreshCw, Sparkles } from "lucide-react"
-import { refreshTAWorkspace } from "@/app/(dashboard)/refresh-actions"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useMemeModal } from "@/components/providers/meme-provider"
 
@@ -12,17 +12,18 @@ interface TaDashboardHeaderProps {
 }
 
 export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
+  const router = useRouter()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const { openMemeModal } = useMemeModal()
 
   const handleManualRefresh = useCallback(async () => {
     setIsRefreshing(true)
     try {
-      await refreshTAWorkspace()
+      router.refresh()
     } finally {
       setIsRefreshing(false)
     }
-  }, [])
+  }, [router])
 
   return (
     <div className="relative mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
