@@ -5,7 +5,7 @@ interface Meme {
 
 export async function getMeme(): Promise<Meme | null> {
   try {
-    const response = await fetch("https://meme-api.com/gimme", {
+    const response = await fetch("https://api.imgflip.com/get_memes", {
       cache: "no-store",
     })
 
@@ -16,10 +16,12 @@ export async function getMeme(): Promise<Meme | null> {
 
     const data = await response.json()
 
-    if (data.url && data.title) {
+    if (data.success && data.data.memes && data.data.memes.length > 0) {
+      const randomIndex = Math.floor(Math.random() * data.data.memes.length)
+      const meme = data.data.memes[randomIndex]
       return {
-        title: data.title,
-        url: data.url,
+        title: meme.name,
+        url: meme.url,
       }
     }
 
