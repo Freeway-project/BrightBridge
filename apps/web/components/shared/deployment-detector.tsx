@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hasUnsavedChanges } from "@/lib/deployment-sync";
 import { DeploymentNotification, MinimizedUpdatePill } from "./deployment-notification";
@@ -12,7 +11,7 @@ interface DeploymentDetectorProps {
   initialVersion: string;
 }
 
-const CHECK_INTERVAL = 1000 * 60 * 15; // Check every 15 minutes
+const CHECK_INTERVAL = 1000 * 90; // Fallback poll every 90s (SSE is primary detector)
 const UPDATE_APPLIED_FLAG = "coursebridge:update-applied";
 type NotificationMode = "auto" | "force-on" | "force-off";
 // Manual switch for demos/testing:
@@ -53,21 +52,41 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       try {
         const res = await fetch("/api/version", { cache: "no-store" });
         if (!res.ok) return;
-        
+
         const data = await res.json();
-        
+
         if (data.version && data.version !== initialVersion && data.version !== "development") {
           hasNotified.current = true;
           setShowNotification(true);
         }
-      } catch (error) {
+      } catch {
         // Silently fail version checks
       }
     };
 
-    // Initial check after a delay to not compete with app boot
-    const initialTimer = setTimeout(checkVersion, 1000 * 30);
+    // SSE primary detector — connection drop = server restarted = new deploy
+    const es = new EventSource("/api/version/stream");
 
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.version && data.version !== initialVersion && data.version !== "development") {
+          hasNotified.current = true;
+          setShowNotification(true);
+          es.close();
+        }
+      } catch {
+        // Ignore malformed SSE frames
+      }
+    };
+
+    es.onerror = () => {
+      // Server restarted (new deploy) — poll immediately to confirm new version
+      es.close();
+      checkVersion();
+    };
+
+    // Polling fallback in case SSE is blocked by a proxy
     const interval = setInterval(checkVersion, CHECK_INTERVAL);
 
     // Also catch ChunkLoadErrors (reactive check)
@@ -105,7 +124,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     window.addEventListener("coursebridge:open-update-notice", openUpdatePanel);
 
     return () => {
-      clearTimeout(initialTimer);
+      es.close();
       clearInterval(interval);
       window.removeEventListener("error", handleChunkError);
       window.removeEventListener("coursebridge:open-update-notice", openUpdatePanel);

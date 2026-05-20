@@ -13,9 +13,9 @@ interface DeploymentNotificationProps {
 }
 
 const UPDATE_SUMMARY = [
-  "Your draft progress is now safer while you move between pages and tabs.",
-  "Display settings now apply across the main workspace while keeping the left sidebar stable.",
-  "You can check version status and open update notices anytime from the sidebar tab.",
+  "Any unsaved form work is still in your browser — finish it before refreshing.",
+  "All your in-progress reviews, drafts, and uploads are safe until you reload.",
+  "Refresh whenever you're at a good stopping point to pick up the latest changes.",
 ];
 
 export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotificationProps) {
@@ -61,18 +61,18 @@ export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotif
                   <Sparkles className="size-4 animate-pulse" />
                 </div>
                 <span className="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200">
-                  Platform Update
+                  Fresh Deployment
                 </span>
               </div>
 
               <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                CourseBridge upgraded successfully
+                Harsh just shipped something new
               </h2>
               <p className="max-w-[420px] text-sm leading-relaxed text-slate-300">
-                New improvements are ready. Reload now to run on the latest version with safer draft handling and clearer update visibility.
+                A fresh build just landed. Kindly have patience — finish what you&apos;re working on, then reload to pick up the latest changes. Your work is safe until you do.
               </p>
               <details className="mt-1 max-w-[430px] rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-sm text-slate-300">
-                <summary className="cursor-pointer font-medium text-cyan-200">What&apos;s in this update</summary>
+                <summary className="cursor-pointer font-medium text-cyan-200">Before you refresh</summary>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-slate-300">
                   {UPDATE_SUMMARY.map((item) => (
                     <li key={item}>{item}</li>
