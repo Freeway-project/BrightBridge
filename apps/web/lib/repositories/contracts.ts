@@ -314,7 +314,7 @@ export interface ReviewRepository {
 }
 
 export interface CommentRepository {
-  listCourseComments(courseId: string): Promise<CourseComment[]>;
+  listCourseComments(courseId: string, visibility?: "internal" | "instructor_visible"): Promise<CourseComment[]>;
   postCourseComment(input: PostCourseCommentInput): Promise<CourseComment>;
 }
 

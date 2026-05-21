@@ -26,8 +26,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Search, SlidersHorizontal, CheckCircle2, Circle, Loader2 } from "lucide-react"
+import { Search, SlidersHorizontal, CheckCircle2, Circle, Loader2, Send } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 import type { CourseStatus } from "@coursebridge/workflow"
+import { batchApproveToStagingAction } from "../actions"
+import { toast } from "sonner"
 
 type Props = {
   page: AdminCoursesPage
@@ -40,6 +43,8 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [isBatchPending, startBatchTransition] = useTransition()
 
   const search = searchParams.get("search") ?? ""
   const statusFilter = searchParams.get("status") ?? "all"
@@ -58,6 +63,10 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   )
 
   const filteredCourses = page.data
+  const eligibleIds = useMemo(
+    () => filteredCourses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id),
+    [filteredCourses]
+  )
 
   const visibleTaCount = new Set(
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
@@ -73,6 +82,33 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   const provision = filteredCourses.filter((c) => c.status === "final_approved").length
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
+
+  const allEligibleSelected = eligibleIds.length > 0 && eligibleIds.every((id) => selectedIds.has(id))
+
+  function toggleRow(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function toggleAll() {
+    setSelectedIds(allEligibleSelected ? new Set() : new Set(eligibleIds))
+  }
+
+  function handleBatchApprove() {
+    const ids = Array.from(selectedIds)
+    startBatchTransition(async () => {
+      const { succeeded, failed } = await batchApproveToStagingAction(ids)
+      setSelectedIds(new Set())
+      if (failed === 0) {
+        toast.success(`${succeeded} course${succeeded !== 1 ? "s" : ""} moved to staging.`)
+      } else {
+        toast.warning(`${succeeded} moved, ${failed} failed.`)
+      }
+    })
+  }
 
   function clearFilters() {
     setSearchInput("")
@@ -252,11 +288,44 @@ export function AssignedCoursesTable({ page, tas }: Props) {
             </Button>
           </div>
         ) : (
+          <>
+          {/* Floating batch action bar */}
+          {selectedIds.size > 0 && (
+            <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 backdrop-blur">
+              <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                {selectedIds.size} course{selectedIds.size !== 1 ? "s" : ""} selected
+              </span>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setSelectedIds(new Set())}>
+                  Clear
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-7 gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white"
+                  disabled={isBatchPending}
+                  onClick={handleBatchApprove}
+                >
+                  <Send className="size-3" />
+                  {isBatchPending ? "Moving…" : "Move to Staging"}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="min-w-0 max-w-full overflow-x-auto rounded-lg border border-border">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="pl-4 text-xs">Course</TableHead>
+                  <TableHead className="w-10 pl-4">
+                    {eligibleIds.length > 0 && (
+                      <Checkbox
+                        checked={allEligibleSelected}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all eligible"
+                      />
+                    )}
+                  </TableHead>
+                  <TableHead className="text-xs">Course</TableHead>
                   <TableHead className="text-xs">Assigned TA</TableHead>
                   <TableHead className="text-xs">Pipeline</TableHead>
                   <TableHead className="text-xs">Workflow</TableHead>
@@ -270,7 +339,16 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                     className="cursor-pointer border-b border-border/70 hover:bg-muted/40"
                     onClick={() => router.push(`/admin/courses/${course.id}`)}
                   >
-                    <TableCell className="max-w-[min(28rem,100%)] whitespace-normal break-words pl-4 align-top">
+                    <TableCell className="w-10 pl-4 align-middle" onClick={(e) => e.stopPropagation()}>
+                      {course.status === "submitted_to_admin" && (
+                        <Checkbox
+                          checked={selectedIds.has(course.id)}
+                          onCheckedChange={() => toggleRow(course.id)}
+                          aria-label={`Select ${course.title}`}
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell className="max-w-[min(28rem,100%)] whitespace-normal break-words align-top">
                       <div className="space-y-2 py-1">
                         <div>
                           <p className="text-sm font-semibold text-foreground">{course.title}</p>
@@ -335,6 +413,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               </TableBody>
             </Table>
           </div>
+          </>
         )}
         <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="min-w-0 text-xs text-muted-foreground">

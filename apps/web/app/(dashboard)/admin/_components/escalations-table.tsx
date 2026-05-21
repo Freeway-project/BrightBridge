@@ -1,12 +1,12 @@
 "use client"
 
-import { useTransition } from "react"
+import { useTransition, useState, useMemo } from "react"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
 import type { OpenEscalationRow } from "@/lib/services/escalations"
 import { resolveEscalationAction } from "../actions"
 import { Button } from "@/components/ui/button"
-import { AlertTriangle, CheckCircle2, ExternalLink } from "lucide-react"
+import { AlertTriangle, CheckCircle2, ExternalLink, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const SEVERITY_STYLES: Record<string, string> = {
@@ -15,11 +15,47 @@ const SEVERITY_STYLES: Record<string, string> = {
   minor:    "bg-yellow-500/15 text-yellow-700 border-yellow-400/30",
 }
 
+type SortKey = "age" | "raised_by"
+type SortDir = "asc" | "desc"
+
 interface Props {
   escalations: OpenEscalationRow[]
 }
 
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (col !== sortKey) return <ArrowUpDown className="size-3 text-white/40" />
+  return sortDir === "asc"
+    ? <ArrowUp className="size-3 text-white" />
+    : <ArrowDown className="size-3 text-white" />
+}
+
 export function EscalationsTable({ escalations }: Props) {
+  const [sortKey, setSortKey] = useState<SortKey>("age")
+  const [sortDir, setSortDir] = useState<SortDir>("asc")
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc")
+    } else {
+      setSortKey(key)
+      setSortDir("asc")
+    }
+  }
+
+  const sorted = useMemo(() => {
+    return [...escalations].sort((a, b) => {
+      let cmp = 0
+      if (sortKey === "age") {
+        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      } else {
+        const nameA = (a.author_name ?? a.author_email ?? "").toLowerCase()
+        const nameB = (b.author_name ?? b.author_email ?? "").toLowerCase()
+        cmp = nameA.localeCompare(nameB)
+      }
+      return sortDir === "asc" ? cmp : -cmp
+    })
+  }, [escalations, sortKey, sortDir])
+
   if (escalations.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
@@ -30,22 +66,35 @@ export function EscalationsTable({ escalations }: Props) {
     )
   }
 
+  const thClass = "text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+  const sortableThClass = cn(thClass, "cursor-pointer select-none hover:text-foreground transition-colors")
+
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/30">
-            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Course</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Severity</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Issue</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Raised by</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Latest message</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Age</th>
+            <th className={thClass}>Course</th>
+            <th className={thClass}>Severity</th>
+            <th className={thClass}>Issue</th>
+            <th className={sortableThClass} onClick={() => toggleSort("raised_by")}>
+              <span className="inline-flex items-center gap-1">
+                Raised by
+                <SortIcon col="raised_by" sortKey={sortKey} sortDir={sortDir} />
+              </span>
+            </th>
+            <th className={thClass}>Latest message</th>
+            <th className={sortableThClass} onClick={() => toggleSort("age")}>
+              <span className="inline-flex items-center gap-1">
+                Age
+                <SortIcon col="age" sortKey={sortKey} sortDir={sortDir} />
+              </span>
+            </th>
             <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {escalations.map((row) => (
+          {sorted.map((row) => (
             <EscalationRow key={row.id} row={row} />
           ))}
         </tbody>

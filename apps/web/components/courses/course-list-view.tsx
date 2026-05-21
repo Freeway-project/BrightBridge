@@ -69,15 +69,19 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
   }, [initialCourses, search, subject, term])
 
   const byTab = useMemo(() => ({
-    todo:        filtered.filter((c) => getTab(c) === "todo"),
-    in_progress: filtered.filter((c) => getTab(c) === "in_progress"),
-    done:        filtered.filter((c) => getTab(c) === "done"),
-    issues:      filtered.filter((c) => (issueCounts[c.id]?.open ?? 0) > 0),
+    todo:             filtered.filter((c) => getTab(c) === "todo"),
+    in_progress:      filtered.filter((c) => getTab(c) === "in_progress"),
+    done:             filtered.filter((c) => getTab(c) === "done"),
+    staging:          filtered.filter((c) => getTab(c) === "staging"),
+    with_instructor:  filtered.filter((c) => getTab(c) === "with_instructor"),
+    issues:           filtered.filter((c) => (issueCounts[c.id]?.open ?? 0) > 0),
   }), [filtered, issueCounts])
 
   const defaultTab =
-    byTab.in_progress.length > 0 ? "in_progress"
-    : byTab.todo.length > 0      ? "todo"
+    byTab.in_progress.length > 0    ? "in_progress"
+    : byTab.todo.length > 0         ? "todo"
+    : byTab.staging.length > 0      ? "staging"
+    : byTab.with_instructor.length > 0 ? "with_instructor"
     : "done"
 
   return (
@@ -154,6 +158,20 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
             emoji="✅"
           />
           <TabItem
+            value="staging"
+            count={byTab.staging.length}
+            label="Staging"
+            activeColor="text-orange-500 after:bg-orange-500"
+            emoji="🕐"
+          />
+          <TabItem
+            value="with_instructor"
+            count={byTab.with_instructor.length}
+            label="With Instructor"
+            activeColor="text-purple-500 after:bg-purple-500"
+            emoji="📬"
+          />
+          <TabItem
             value="issues"
             count={byTab.issues.length}
             label="Issues"
@@ -163,12 +181,12 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
         </TabsList>
 
         <AnimatePresence mode="wait">
-          {(["todo", "in_progress", "done"] as const).map((tab) => (
+          {(["todo", "in_progress", "done", "staging", "with_instructor"] as const).map((tab) => (
             <TabsContent key={tab} value={tab} className="mt-6 focus-visible:outline-none">
-              <CourseGrid 
-                courses={byTab[tab]} 
-                issueCounts={issueCounts} 
-                onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }} 
+              <CourseGrid
+                courses={byTab[tab]}
+                issueCounts={issueCounts}
+                onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
               />
             </TabsContent>
           ))}

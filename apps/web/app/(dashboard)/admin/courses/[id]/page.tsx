@@ -8,6 +8,7 @@ import { CourseReviewDetail } from "./_components/course-review-detail"
 import { CourseChat } from "./_components/course-chat"
 import { IssueTracker } from "../../../courses/[id]/_components/issues/issue-tracker"
 import { CourseDetailRefreshWrapper } from "./_components/course-detail-refresh-wrapper"
+import { SendToInstructorBanner } from "./_components/send-to-instructor-banner"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -49,6 +50,9 @@ export default async function AdminCourseDetailPage({ params }: Props) {
               title="Course Review"
             >
               <div className="space-y-[var(--card-spacing,1.5rem)]">
+                {course.status === "ready_for_instructor" && (
+                  <SendToInstructorBanner courseId={id} />
+                )}
                 <CourseReviewDetail
                   course={course}
                   responses={responses}

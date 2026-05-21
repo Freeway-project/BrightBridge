@@ -6,6 +6,10 @@ export async function getCourseComments(courseId: string): Promise<CourseComment
   return getCommentRepository().listCourseComments(courseId)
 }
 
+export async function getSharedComments(courseId: string): Promise<CourseComment[]> {
+  return getCommentRepository().listCourseComments(courseId, "instructor_visible")
+}
+
 export async function postCourseComment({
   courseId,
   authorId,

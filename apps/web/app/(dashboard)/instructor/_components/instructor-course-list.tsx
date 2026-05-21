@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { GraduationCap, Search } from "lucide-react"
+import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { StatCard } from "@/components/shared/stat-card"
@@ -66,8 +67,9 @@ export function InstructorCourseList({ courses }: Props) {
       ) : (
         <div className="space-y-2">
           {filtered.map((course) => (
-            <div
+            <Link
               key={course.id}
+              href={`/instructor/courses/${course.id}`}
               className="flex items-center justify-between p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
             >
               <div className="min-w-0 flex-1">
@@ -77,7 +79,7 @@ export function InstructorCourseList({ courses }: Props) {
                 </p>
               </div>
               <StatusBadge status={course.status} className="ml-4 shrink-0" />
-            </div>
+            </Link>
           ))}
         </div>
       )}

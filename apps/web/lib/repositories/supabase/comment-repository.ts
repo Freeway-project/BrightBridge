@@ -5,9 +5,9 @@ import { getSupabaseAdminClientOrThrow } from "./shared";
 
 export function createSupabaseCommentRepository(): CommentRepository {
   return {
-    async listCourseComments(courseId) {
+    async listCourseComments(courseId, visibility) {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin
+      let query = admin
         .from("course_comments")
         .select(`
           *,
@@ -19,6 +19,9 @@ export function createSupabaseCommentRepository(): CommentRepository {
         `)
         .eq("course_id", courseId)
         .order("created_at", { ascending: true });
+      if (visibility) query = query.eq("visibility", visibility);
+
+      const { data, error } = await query;
 
       if (error) {
         throw error;

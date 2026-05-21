@@ -381,3 +381,39 @@ export async function resolveEscalationAction(escalationId: string, courseId: st
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath(`/courses/${courseId}`);
 }
+
+export async function batchApproveToStagingAction(courseIds: string[]): Promise<{ succeeded: number; failed: number }> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
+
+  let succeeded = 0;
+  let failed = 0;
+  for (const courseId of courseIds) {
+    try {
+      await transitionCourseStatus({ courseId, toStatus: "ready_for_instructor", note: "Batch approved to staging." });
+      succeeded++;
+    } catch {
+      failed++;
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/ta");
+  return { succeeded, failed };
+}
+
+export async function sendToInstructorAction(courseId: string): Promise<void> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  await transitionCourseStatus({
+    courseId,
+    toStatus: "sent_to_instructor",
+    note: "Sent to instructor by communications.",
+  });
+  revalidatePath("/admin");
+  revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath("/communications");
+  revalidatePath(`/communications/courses/${courseId}`);
+  revalidatePath("/ta");
+  revalidatePath("/instructor");
+}
