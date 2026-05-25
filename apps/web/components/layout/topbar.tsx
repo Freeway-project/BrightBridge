@@ -61,7 +61,7 @@ export function Topbar({ title, subtitle, actions, backHref, courseStatus, role 
             <Smile className="size-4" />
           </Button>
         )}
-        <Button variant="ghost" size="icon" aria-label="Notifications" asChild>
+        <Button variant="ghost" size="icon" aria-label="Notifications" asChild className="text-yellow-400 hover:text-yellow-300">
           <Link href="/notifications">
             <Bell className="size-4" />
           </Link>

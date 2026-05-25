@@ -8,6 +8,7 @@ import { DeploymentDetector } from "@/components/shared/deployment-detector";
 import { CSPostHogProvider, PostHogPageview } from "@/components/providers/posthog-provider";
 import { Suspense, type ReactNode } from "react";
 import { getDeploymentVersion } from "@/lib/deployment-version";
+
 export const metadata: Metadata = {
   title: "CourseBridge",
   description: "Course migration review workflow platform"
@@ -31,7 +32,22 @@ export default function RootLayout({
             {children}
           </TooltipProvider>
           <DeploymentDetector initialVersion={currentVersion} />
-          <Toaster closeButton position="top-right" richColors expand visibleToasts={8} />
+          <Toaster
+            closeButton
+            position="top-right"
+            expand
+            visibleToasts={8}
+            toastOptions={{
+              classNames: {
+                toast: "cb-toast",
+                title: "cb-toast-title",
+                description: "cb-toast-description",
+                actionButton: "cb-toast-action",
+                cancelButton: "cb-toast-cancel",
+                closeButton: "cb-toast-close"
+              }
+            }}
+          />
         </CSPostHogProvider>
       </body>
     </html>

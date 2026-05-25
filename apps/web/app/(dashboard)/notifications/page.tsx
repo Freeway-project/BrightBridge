@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, CheckCircle2, CircleAlert, Clock, ExternalLink, MessageSquare, TriangleAlert } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, MessageSquare, TriangleAlert } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Topbar } from "@/components/layout/topbar";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,7 @@ export default async function NotificationsPage() {
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
           <div className="grid gap-3 sm:grid-cols-3">
-            <SummaryCard label="Pending" value={pendingCount} icon={CircleAlert} />
+            <SummaryCard label="Pending" value={pendingCount} icon={CircleAlert} emphasize />
             <SummaryCard label="All Notifications" value={notifications.length} icon={Bell} />
             <SummaryCard label="Cleared" value={recent.length} icon={CheckCircle2} />
           </div>
@@ -42,8 +42,11 @@ export default async function NotificationsPage() {
           <Card className="border-border/70 shadow-sm">
             <CardHeader className="border-b border-border/70 px-4 py-3">
               <CardTitle className="flex items-center justify-between gap-3 text-sm">
-                <span>Pending attention</span>
-                <Badge variant="secondary">{pending.length}</Badge>
+                <span className="inline-flex items-center gap-2">
+                  <BellRing className="size-4 text-yellow-400" />
+                  Pending attention
+                </span>
+                <Badge className="border-yellow-400/30 bg-yellow-500/15 text-yellow-200">{pending.length}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -80,16 +83,18 @@ function SummaryCard({
   label,
   value,
   icon: Icon,
+  emphasize = false,
 }: {
   label: string;
   value: number;
   icon: typeof Bell;
+  emphasize?: boolean;
 }) {
   return (
-    <Card className="border-border/70 shadow-sm">
+    <Card className={cn("border-border/70 shadow-sm", emphasize && "border-yellow-400/25 bg-yellow-500/5")}>
       <CardContent className="flex items-center gap-3 p-4">
-        <div className="flex size-9 items-center justify-center rounded-md border border-border bg-muted/40">
-          <Icon className="size-4 text-muted-foreground" />
+        <div className={cn("flex size-9 items-center justify-center rounded-md border border-border bg-muted/40", emphasize && "border-yellow-400/30 bg-yellow-500/10")}>
+          <Icon className={cn("size-4 text-muted-foreground", emphasize && "text-yellow-400")} />
         </div>
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -122,7 +127,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-sm font-semibold leading-5 text-foreground">{item.title}</h2>
-            {item.pending && <Badge className="h-5 px-1.5 text-[10px]">Pending</Badge>}
+            {item.pending && <Badge className="h-5 border-yellow-400/25 bg-yellow-500/10 px-1.5 text-[10px] text-yellow-200">Pending</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">{item.description}</p>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">

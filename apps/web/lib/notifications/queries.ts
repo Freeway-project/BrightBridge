@@ -39,7 +39,7 @@ type IssueRow = {
   created_at: string;
   updated_at: string;
   courses: { title: string | null } | { title: string | null }[] | null;
-  created_by_profile: { full_name: string | null } | { full_name: string | null }[] | null;
+  created_by_profile: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
 };
 
 type CommentRow = {
@@ -60,7 +60,7 @@ type CommentRow = {
         courses: { title: string | null } | { title: string | null }[] | null;
       }>
     | null;
-  author: { full_name: string | null } | { full_name: string | null }[] | null;
+  author: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
 };
 
 const ADMIN_ROLES: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
@@ -165,7 +165,7 @@ async function getRelevantIssues(courseIds: string[] | null): Promise<IssueRow[]
       `
       id, course_id, title, type, severity, status, created_at, updated_at,
       courses ( title ),
-      created_by_profile:created_by ( full_name )
+      created_by_profile:created_by ( full_name, role )
     `,
     )
     .order("updated_at", { ascending: false })
@@ -192,7 +192,7 @@ async function getRecentComments(courseIds: string[] | null, currentUserId: stri
     .select(
       `
       id, issue_id, author_id, body, created_at,
-      author:author_id ( full_name ),
+      author:author_id ( full_name, role ),
       course_issues!inner (
         course_id,
         title,
@@ -218,34 +218,61 @@ async function getRecentComments(courseIds: string[] | null, currentUserId: stri
   return (data ?? []) as unknown as CommentRow[];
 }
 
+function formatAuthorName(fullName: string | null | undefined, role: string | null | undefined): string {
+  if (fullName && fullName.trim() !== "") return fullName;
+  if (role) {
+    if (role === "standard_user") return "Staff Member";
+    if (role === "super_admin" || role === "admin_full") return "Administrator";
+    if (role === "admin_viewer") return "Viewer";
+    if (role === "instructor") return "Instructor";
+    if (role === "communications") return "Communications Team";
+  }
+  return "Team Member";
+}
+
 function courseToNotification(course: CourseRow, role: Role): NotificationItem {
   const label = getCourseStatusLabel(course.status);
   const action = getCourseActionLabel(course.status, role);
 
+  let tone: NotificationTone = "default";
+  if (course.status === "admin_changes_requested" || course.status === "instructor_questions") {
+    tone = "warning";
+  } else if (course.status === "final_approved" || course.status === "instructor_approved" || course.status === "ready_for_instructor") {
+    tone = "success";
+  }
+
   return {
     id: `course-${course.id}-${course.status}`,
     kind: "course_action",
-    tone: course.status === "admin_changes_requested" || course.status === "instructor_questions" ? "warning" : "default",
+    tone,
     title: action,
     description: `${course.title} is currently ${label.toLowerCase()}.`,
     courseTitle: course.title,
     meta: [label, course.department, course.term].filter(Boolean).join(" · "),
     href: getCourseHref(course.id, role),
     createdAt: course.updated_at,
-    pending: true,
+    pending: course.status !== "final_approved" && course.status !== "instructor_approved" && course.status !== "ready_for_instructor",
   };
 }
 
 function issueToNotification(issue: IssueRow, role: Role): NotificationItem {
   const courseTitle = firstRelation(issue.courses)?.title ?? null;
-  const authorName = firstRelation(issue.created_by_profile)?.full_name;
+  const authorProfile = firstRelation(issue.created_by_profile);
+  const authorName = formatAuthorName(authorProfile?.full_name, authorProfile?.role);
+
+  let tone: NotificationTone = "warning";
+  if (issue.status === "resolved") {
+    tone = "success";
+  } else if (issue.severity === "critical") {
+    tone = "danger";
+  }
 
   return {
     id: `issue-${issue.id}`,
     kind: "issue",
-    tone: issue.severity === "critical" ? "danger" : "warning",
+    tone,
     title: issue.title,
-    description: `${formatIssueType(issue.type)} opened by ${authorName ?? "Someone"}.`,
+    description: `${formatIssueType(issue.type)} opened by ${authorName}.`,
     courseTitle,
     meta: `${formatSeverity(issue.severity)} · ${formatIssueStatus(issue.status)}`,
     href: getIssueHref(issue.course_id, role),
@@ -257,7 +284,8 @@ function issueToNotification(issue: IssueRow, role: Role): NotificationItem {
 function commentToNotification(comment: CommentRow, role: Role): NotificationItem {
   const issue = firstRelation(comment.course_issues);
   const courseTitle = firstRelation(issue?.courses)?.title ?? null;
-  const authorName = firstRelation(comment.author)?.full_name;
+  const authorProfile = firstRelation(comment.author);
+  const authorName = formatAuthorName(authorProfile?.full_name, authorProfile?.role);
   const preview = comment.body.length > 120 ? `${comment.body.slice(0, 120)}...` : comment.body;
 
   return {
@@ -267,7 +295,7 @@ function commentToNotification(comment: CommentRow, role: Role): NotificationIte
     title: `New comment on ${issue?.title ?? "an issue"}`,
     description: preview,
     courseTitle,
-    meta: `By ${authorName ?? "Someone"}`,
+    meta: `By ${authorName}`,
     href: getIssueHref(issue?.course_id ?? "", role),
     createdAt: comment.created_at,
     pending: true,

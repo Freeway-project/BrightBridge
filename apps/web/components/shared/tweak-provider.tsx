@@ -17,6 +17,7 @@ type TweakContextType = {
 const TweakContext = createContext<TweakContextType | undefined>(undefined)
 
 const STORAGE_KEY = "coursebridge-display-settings"
+const MODE_STORAGE_KEY = "theme-mode"
 
 const FONT_SIZE_MAP: Record<TweakSettings["fontSize"], string> = {
   small: "14px",
@@ -40,6 +41,16 @@ export function TweakProvider({ children }: { children: React.ReactNode }) {
         setSettingsState({ ...DEFAULT_SETTINGS, ...parsed })
       } catch (e) {
         console.error("Failed to load tweak settings", e)
+      }
+    }
+
+    const savedMode = localStorage.getItem(MODE_STORAGE_KEY)
+    if (savedMode === "light") {
+      document.documentElement.classList.remove("dark")
+    } else {
+      document.documentElement.classList.add("dark")
+      if (!savedMode) {
+        localStorage.setItem(MODE_STORAGE_KEY, "dark")
       }
     }
   }, [])

@@ -353,3 +353,73 @@ a {
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--border) 68%, white 32%);
   }
 }
+
+/* Animated theme toggle view-transition scope */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-magicui-theme-vt="active"]::view-transition-group(root) {
+  animation-duration: var(--magicui-theme-toggle-vt-duration);
+}
+
+html[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  clip-path: var(--magicui-theme-vt-clip-from);
+}
+
+/* Sonner toast skin aligned with palette variables */
+.cb-toast {
+  border-radius: var(--radius-xl) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent) !important;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--card) 88%, black 12%) 0%,
+    color-mix(in srgb, var(--background) 88%, var(--primary) 12%) 100%
+  ) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 14px 40px color-mix(in srgb, var(--primary) 22%, transparent) !important;
+}
+
+.cb-toast[data-type="success"] {
+  border-color: color-mix(in srgb, var(--success) 55%, transparent) !important;
+}
+
+.cb-toast[data-type="error"] {
+  border-color: color-mix(in srgb, var(--destructive) 60%, transparent) !important;
+}
+
+.cb-toast[data-type="warning"] {
+  border-color: color-mix(in srgb, var(--warning) 60%, transparent) !important;
+}
+
+.cb-toast-title {
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+
+.cb-toast-description {
+  font-size: 0.78rem !important;
+  color: color-mix(in srgb, var(--foreground) 78%, transparent) !important;
+  line-height: 1.45 !important;
+}
+
+.cb-toast-action,
+.cb-toast-cancel {
+  border-radius: var(--radius-md) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+
+.cb-toast-action {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
+.cb-toast-close {
+  border-color: color-mix(in srgb, var(--border) 75%, transparent) !important;
+  background: color-mix(in srgb, var(--background) 90%, transparent) !important;
+  color: var(--foreground) !important;
+}

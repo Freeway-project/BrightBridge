@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { AlertTriangle, Send, MessageSquare } from "lucide-react"
+import { AlertTriangle, Send, MessageSquare, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -34,7 +34,7 @@ interface Props {
 
 type TimelineItem =
   | { type: "comment"; id: string; date: string; authorName: string; authorId: string; body: string }
-  | { type: "escalation"; id: string; date: string; authorName: string; authorId: string; body: string; title: string; severity: string; status: string; messages: EscalationWithMessages["messages"] }
+  | { type: "escalation"; id: string; date: string; authorName: string; authorId: string; body: string; title: string; severity: string; status: string; resolved_at: string | null; resolutionNote: string | null; messages: EscalationWithMessages["messages"] }
 
 export function CourseConversation({ courseId, currentUserId, comments, escalations }: Props) {
   const [activeTab, setActiveTab] = useState<"chat" | "escalate">("chat")
@@ -62,6 +62,8 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
         title: e.title,
         severity: e.severity,
         status: e.status,
+        resolved_at: e.resolved_at,
+        resolutionNote: e.resolutionNote ?? null,
         messages: e.messages,
       })),
     ]
@@ -143,6 +145,20 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
                       {item.status}
                     </span>
                   </div>
+                  {item.status === "resolved" && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20">
+                      <CheckCircle2 className="size-3.5 text-green-600" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-green-700">
+                        Resolved{item.resolved_at ? ` • ${formatDistanceToNow(new Date(item.resolved_at), { addSuffix: true })}` : ""}
+                      </span>
+                    </div>
+                  )}
+                  {item.resolutionNote && (
+                    <div className="flex gap-2 px-3 py-2 rounded-xl bg-green-500/5 border border-green-500/15 text-xs text-green-800">
+                      <span className="font-bold shrink-0">Admin note:</span>
+                      <span>{item.resolutionNote}</span>
+                    </div>
+                  )}
                   {item.messages.map((msg) => {
                     const isMe = msg.author_id === currentUserId
                     return (
