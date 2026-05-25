@@ -131,15 +131,18 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
-    <div className="mx-auto max-w-2xl space-y-7">
+    <div className="mx-auto max-w-3xl space-y-8">
       {/* Page header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-tight">Course Metadata</h2>
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">Course Metadata</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Review and confirm course details before proceeding</p>
+        </div>
         <SaveBadge status={status} />
       </div>
 
       {errorMsg && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-destructive">
           {errorMsg}
         </div>
       )}
@@ -167,7 +170,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
                   }}
                   value={termSeason}
                 >
-                  <SelectTrigger className="w-[130px] h-9 rounded-xl border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
+                  <SelectTrigger className="w-[140px] h-11 rounded-xl border-border bg-background/60 hover:bg-background/80 transition-all text-sm">
                     <SelectValue placeholder="Season" />
                   </SelectTrigger>
                   <SelectContent>
@@ -188,7 +191,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
               }}
               value={termYear}
             >
-              <SelectTrigger className="w-[100px] h-9 rounded-xl border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
+              <SelectTrigger className="w-[110px] h-11 rounded-xl border-border bg-background/60 hover:bg-background/80 transition-all text-sm">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -243,11 +246,11 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 
       {/* ── Notes ─────────────────────────────────────── */}
       <Section label="Notes">
-        <div className="px-4 py-3">
+        <div className="px-5 py-5">
           <Textarea
             rows={5}
             placeholder="Add any migration notes, observations, or context here…"
-            className="resize-none rounded-xl border-white/20 bg-white/[0.03] hover:bg-white/[0.05] focus-visible:border-white/40 focus-visible:ring-2 focus-visible:ring-white/10 text-sm transition-all duration-200"
+            className="resize-none rounded-xl border-border bg-background/60 hover:bg-background/80 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10 text-sm transition-all duration-200"
             {...form.register("migration_notes")}
           />
           <FieldError message={form.formState.errors.migration_notes?.message} />
@@ -281,13 +284,11 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section className="relative space-y-2 group/sec">
-      {/* Shifting Gradient Tint Bar on Left Side */}
       <div className="absolute left-[1px] top-6 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/sec:opacity-100 group-hover/sec:w-[4px] transition-all duration-300" />
-      
       <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
         {label}
       </p>
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-card/45 backdrop-blur-xl shadow-2xl shadow-black/20 divide-y divide-white/5 pl-[3px]">
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg divide-y divide-border/40 pl-[3px]">
         {children}
       </div>
     </section>
@@ -296,9 +297,9 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 
 function InfoRow({ label, value, copyable }: { label: string; value: string; copyable?: boolean }) {
   return (
-    <div className="flex items-center gap-4 px-4 py-3">
-      <span className="w-28 shrink-0 text-xs font-medium text-muted-foreground">{label}</span>
-      <span className="flex-1 truncate text-sm font-medium text-foreground/80">{value}</span>
+    <div className="flex items-center gap-6 px-6 py-4">
+      <span className="w-36 shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="flex-1 truncate text-sm font-medium text-foreground">{value}</span>
       {copyable && <CopyButton value={value} label={label} />}
     </div>
   )
@@ -306,9 +307,9 @@ function InfoRow({ label, value, copyable }: { label: string; value: string; cop
 
 function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-4 px-4 py-3">
-      <span className="w-28 shrink-0 pt-2 text-xs font-medium text-muted-foreground">{label}</span>
-      <div className="flex-1 space-y-1">{children}</div>
+    <div className="flex items-start gap-6 px-6 py-5">
+      <span className="w-36 shrink-0 pt-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <div className="flex-1 space-y-1.5">{children}</div>
     </div>
   )
 }
@@ -318,9 +319,9 @@ function CleanInput(props: React.ComponentProps<"input">) {
     <input
       {...props}
       className={cn(
-        "w-full h-9 rounded-xl border border-white/20 bg-white/[0.03] hover:bg-white/[0.05] px-3 text-sm text-foreground placeholder:text-muted-foreground/50",
+        "w-full h-11 rounded-xl border border-border bg-background/60 hover:bg-background/80 px-4 text-sm text-foreground placeholder:text-muted-foreground/50",
         "outline-none transition-all duration-200",
-        "focus:bg-white/[0.01] focus:border-white/40 focus:ring-2 focus:ring-white/10",
+        "focus:bg-background focus:border-primary/50 focus:ring-2 focus:ring-primary/10",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         props.className,
       )}

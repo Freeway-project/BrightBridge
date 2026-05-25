@@ -158,9 +158,15 @@ export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
     colorTimer.current = setInterval(() => {
       setColorIndex((i) => (i + 1) % UPDATE_APPLIED_COLORS.length)
     }, 600)
+
+    // Let bubbles play for 5 s, THEN call onDone to open the modal
+    const dismiss = window.setTimeout(onDone, 5000)
+
     return () => {
       if (colorTimer.current) clearInterval(colorTimer.current)
+      window.clearTimeout(dismiss)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -180,7 +186,6 @@ export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.85, opacity: 0 }}
-          onAnimationComplete={onDone}
           className="flex flex-col items-center gap-3 select-none"
         >
           <span

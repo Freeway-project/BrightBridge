@@ -47,7 +47,7 @@ export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
             variant="ghost"
             size="icon"
             onClick={openMemeModal}
-            title="Need a laugh? Click for a meme!"
+            title="Need a reset? Click for a refreshing quote!"
             className="h-10 w-10 ml-2 hover:text-primary transition-colors"
           >
             <Sparkles className="size-6" />

@@ -65,8 +65,8 @@ const CREATIVE_MESSAGES = [
   "Smile break 😊",
   "Fun incoming! ✨",
   "Brighten up! 🌟",
-  "Meme time! 🎬",
-  "Get laughing! 😂",
+  "Quote time! ✨",
+  "Stay grounded! 🌿",
   "Click for joy! 🎪",
   "Break time! 🎭",
 ]
@@ -142,7 +142,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                   animation: "gradient-shift 3s ease-in-out infinite",
                   boxShadow: "0 0 30px rgba(236, 72, 153, 0.7), 0 0 60px rgba(168, 85, 247, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.15)"
                 }}
-                title="Get a random meme!"
+                title="Get a refreshing quote!"
               >
                 <Sparkles className="size-4 shrink-0" style={{
                   animation: "dance 0.6s ease-in-out infinite"

@@ -37,8 +37,9 @@ export function Pointer({
   className,
   style,
   children,
+  global: isGlobal = false,
   ...props
-}: HTMLMotionProps<"div">): React.ReactNode {
+}: HTMLMotionProps<"div"> & { global?: boolean }): React.ReactNode {
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const [isActive, setIsActive] = useState<boolean>(false)
@@ -55,10 +56,8 @@ export function Pointer({
   }, [])
 
   useEffect(() => {
-    const parentElement =
-      typeof window !== "undefined"
-        ? (containerRef.current?.parentElement ?? null)
-        : null
+    // When used globally, attach to document so pointer-events-none parents don't block events
+    const target: EventTarget = isGlobal ? document : (containerRef.current?.parentElement ?? document)
 
     const handleMouseMove = (e: MouseEvent) => {
       x.set(e.clientX)
@@ -76,22 +75,23 @@ export function Pointer({
       setIsActive(false)
     }
 
-    if (parentElement) {
-      parentElement.style.cursor = "none"
-      parentElement.addEventListener("mousemove", handleMouseMove)
-      parentElement.addEventListener("mouseenter", handleMouseEnter)
-      parentElement.addEventListener("mouseleave", handleMouseLeave)
+    if (!isGlobal && target instanceof HTMLElement) {
+      target.style.cursor = "none"
     }
 
+    target.addEventListener("mousemove", handleMouseMove as EventListener)
+    target.addEventListener("mouseenter", handleMouseEnter as EventListener)
+    target.addEventListener("mouseleave", handleMouseLeave as EventListener)
+
     return () => {
-      if (parentElement) {
-        parentElement.style.cursor = ""
-        parentElement.removeEventListener("mousemove", handleMouseMove)
-        parentElement.removeEventListener("mouseenter", handleMouseEnter)
-        parentElement.removeEventListener("mouseleave", handleMouseLeave)
+      if (!isGlobal && target instanceof HTMLElement) {
+        target.style.cursor = ""
       }
+      target.removeEventListener("mousemove", handleMouseMove as EventListener)
+      target.removeEventListener("mouseenter", handleMouseEnter as EventListener)
+      target.removeEventListener("mouseleave", handleMouseLeave as EventListener)
     }
-  }, [x, y])
+  }, [x, y, isGlobal])
 
   return (
     <>
@@ -114,7 +114,7 @@ export function Pointer({
               <AnimatePresence mode="wait">
                 <motion.span
                   key={emoji}
-                  className={cn("block select-none text-2xl leading-none", className)}
+                  className={cn("block select-none text-4xl leading-none", className)}
                   initial={{ scale: 0, rotate: -30, opacity: 0 }}
                   animate={{ scale: 1, rotate: 0, opacity: 1 }}
                   exit={{ scale: 0, rotate: 30, opacity: 0 }}

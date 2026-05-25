@@ -55,9 +55,9 @@ export function Topbar({ title, subtitle, actions, backHref, courseStatus, role 
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Icebreaker meme"
+            aria-label="Refreshing quote"
             onClick={openMemeModal}
-            title="Need a laugh? Get a meme!"
+            title="Need a reset? Get a refreshing quote!"
           >
             <Smile className="size-4" />
           </Button>
