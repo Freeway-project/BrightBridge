@@ -21,7 +21,7 @@ import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, Loader2 } from "lucide-react"
+import { CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -247,7 +247,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           <Textarea
             rows={5}
             placeholder="Add any migration notes, observations, or context here…"
-            className="resize-none rounded-xl border-white/10 bg-white/[0.02] hover:bg-white/[0.04] focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/10 text-sm transition-all duration-200"
+            className="resize-none rounded-xl border-white/20 bg-white/[0.03] hover:bg-white/[0.05] focus-visible:border-white/40 focus-visible:ring-2 focus-visible:ring-white/10 text-sm transition-all duration-200"
             {...form.register("migration_notes")}
           />
           <FieldError message={form.formState.errors.migration_notes?.message} />
@@ -260,12 +260,15 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           disabled={status === "saving"}
           onClick={() => void handleAdvance()}
           type="button"
-          className="h-10 rounded-xl px-6 text-sm font-semibold"
+          className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {status === "saving" ? (
-            <><Loader2 className="size-3.5 animate-spin mr-2" />Saving…</>
+            <><Loader2 className="size-4 animate-spin" /> Saving…</>
           ) : (
-            "Save & Next →"
+            <>
+              Save & Next
+              <ArrowRight className="size-4" />
+            </>
           )}
         </Button>
       </div>
@@ -277,11 +280,14 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-2">
-      <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+    <section className="relative space-y-2 group/sec">
+      {/* Shifting Gradient Tint Bar on Left Side */}
+      <div className="absolute left-[1px] top-6 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/sec:opacity-100 group-hover/sec:w-[4px] transition-all duration-300" />
+      
+      <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
         {label}
       </p>
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 divide-y divide-white/5">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 divide-y divide-white/5 pl-[3px]">
         {children}
       </div>
     </section>
@@ -312,9 +318,9 @@ function CleanInput(props: React.ComponentProps<"input">) {
     <input
       {...props}
       className={cn(
-        "w-full h-9 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] px-3 text-sm text-foreground placeholder:text-muted-foreground/50",
+        "w-full h-9 rounded-xl border border-white/20 bg-white/[0.03] hover:bg-white/[0.05] px-3 text-sm text-foreground placeholder:text-muted-foreground/50",
         "outline-none transition-all duration-200",
-        "focus:bg-white/[0.01] focus:border-primary/40 focus:ring-2 focus:ring-primary/10",
+        "focus:bg-white/[0.01] focus:border-white/40 focus:ring-2 focus:ring-white/10",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         props.className,
       )}
