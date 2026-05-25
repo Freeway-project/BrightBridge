@@ -27,7 +27,7 @@ function playNotificationTone(type: "info" | "success" | "warning" = "info") {
   if (typeof window === "undefined") return
 
   try {
-    audioContext ??= new window.AudioContext()
+    audioContext ??= new (window.AudioContext || (window as any).webkitAudioContext)()
     if (audioContext.state === "suspended") {
       void audioContext.resume()
     }
@@ -72,6 +72,39 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
   const router = useRouter()
   const seenIds = useRef(new Set<string>())
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
+
+  // Pre-enable AudioContext on user interaction to bypass browser autoplay restrictions
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const initAudio = () => {
+      try {
+        audioContext ??= new (window.AudioContext || (window as any).webkitAudioContext)()
+        if (audioContext.state === "suspended") {
+          void audioContext.resume()
+        }
+      } catch (e) {
+        // best-effort
+      }
+    }
+
+    const handleInteraction = () => {
+      initAudio()
+      cleanup()
+    }
+
+    const cleanup = () => {
+      window.removeEventListener("click", handleInteraction)
+      window.removeEventListener("keydown", handleInteraction)
+      window.removeEventListener("touchstart", handleInteraction)
+    }
+
+    window.addEventListener("click", handleInteraction)
+    window.addEventListener("keydown", handleInteraction)
+    window.addEventListener("touchstart", handleInteraction)
+
+    return cleanup
+  }, [])
 
   useEffect(() => {
     if (!userId) return
