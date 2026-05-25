@@ -74,7 +74,16 @@ export default async function CourseWorkspaceLayout({
         reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
         instructorName={instructor?.fullName ?? instructor?.email ?? null}
       />
-      <TweakableContent className="flex flex-1 flex-col overflow-hidden">
+      <TweakableContent className="relative flex flex-1 flex-col overflow-hidden bg-[#07030e]/20">
+        {/* Animated Background blobs for Apple glassmorphism */}
+        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+          {/* Cyan Blob */}
+          <div className="absolute -top-[10%] left-[5%] w-[40%] h-[50%] rounded-full bg-cyan-500/8 dark:bg-cyan-500/4 blur-[120px] animate-pulse" style={{ animationDuration: "12s" }} />
+          {/* Violet Blob */}
+          <div className="absolute top-[30%] -right-[5%] w-[45%] h-[55%] rounded-full bg-violet-600/12 dark:bg-violet-600/5 blur-[150px] animate-pulse" style={{ animationDuration: "18s" }} />
+          {/* Fuchsia Blob */}
+          <div className="absolute -bottom-[15%] left-[20%] w-[35%] h-[45%] rounded-full bg-fuchsia-500/8 dark:bg-fuchsia-500/3 blur-[130px] animate-pulse" style={{ animationDuration: "15s" }} />
+        </div>
         {children}
       </TweakableContent>
       <ScreenMeteors />

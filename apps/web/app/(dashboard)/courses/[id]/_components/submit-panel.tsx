@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { CheckCircle2, Circle, Send, Sparkles, AlertCircle } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { submitReview } from "@/lib/workspace/actions"
@@ -10,7 +10,6 @@ import { ReviewSummary } from "./review-summary"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
-import { CelebrationOverlay } from "@/components/mindfresh/CelebrationOverlay"
 import { cn } from "@/lib/utils"
 
 type SubmitPanelProps = {
@@ -30,13 +29,20 @@ type SubmitPanelProps = {
 export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: SubmitPanelProps) {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
-  const [celebrate, setCelebrate] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   
   const submitAllowedStatuses: CourseStatus[] = ["assigned_to_ta", "ta_review_in_progress", "admin_changes_requested"]
   const isStatusSubmittable = submitAllowedStatuses.includes(courseStatus)
   const blockers = sections.filter((section) => section.required && !section.complete)
   const disabled = blockers.length > 0 || isPending || !isStatusSubmittable || isSuccess
+
+  useEffect(() => {
+    if (!isSuccess) return
+    const timeout = window.setTimeout(() => {
+      window.location.href = "/ta"
+    }, 1200)
+    return () => window.clearTimeout(timeout)
+  }, [isSuccess])
 
   const handleSubmit = () => {
     if (!isStatusSubmittable) {
@@ -57,18 +63,12 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
       }
 
       setIsSuccess(true)
-      setCelebrate(true)
       toast.success("Review submitted successfully!")
     })
   }
 
   return (
     <>
-    <CelebrationOverlay
-      open={celebrate}
-      context="a TA just finished and submitted a course migration review"
-      onDone={() => { setCelebrate(false); window.location.href = "/ta" }}
-    />
     <div className="mx-auto max-w-4xl space-y-10 pb-20">
       <AnimatePresence mode="wait">
         {isSuccess ? (

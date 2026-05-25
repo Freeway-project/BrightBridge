@@ -8,7 +8,6 @@ import type { CourseRow } from "@/lib/services/courses"
 import { saveDraft } from "@/lib/workspace/actions"
 import { metadataSchema, type MetadataFormValues } from "@/lib/workspace/schemas"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -21,8 +20,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
-import { FormFieldWrapper } from "./form-field-wrapper"
-import { GlowingEffect } from "@/components/ui/glowing-effect"
+import { cn } from "@/lib/utils"
+import { CheckCircle2, Loader2 } from "lucide-react"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -44,7 +43,7 @@ function parseTerm(term: string): { season: string; year: string } {
 }
 
 export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
-  const dirtySource = `metadata-form:${course.id}`;
+  const dirtySource = `metadata-form:${course.id}`
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const router = useRouter()
   const parsed = parseTerm(defaultValues.term ?? "")
@@ -58,49 +57,43 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
     resolver: zodResolver(metadataSchema),
     defaultValues,
   })
-
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
-    setUnsavedChanges(dirtySource, form.formState.isDirty);
-    return () => clearUnsavedChanges(dirtySource);
-  }, [dirtySource, form.formState.isDirty]);
+    setUnsavedChanges(dirtySource, form.formState.isDirty)
+    return () => clearUnsavedChanges(dirtySource)
+  }, [dirtySource, form.formState.isDirty])
 
-  // Restore from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem(`coursebridge:${course.id}:local-draft:course_metadata`);
-    if (!stored) return;
+    const stored = localStorage.getItem(`coursebridge:${course.id}:local-draft:course_metadata`)
+    if (!stored) return
     try {
-      const parsed = JSON.parse(stored) as Partial<MetadataFormValues>;
-      form.reset({ ...defaultValues, ...parsed }, { keepDefaultValues: false });
+      const parsed = JSON.parse(stored) as Partial<MetadataFormValues>
+      form.reset({ ...defaultValues, ...parsed }, { keepDefaultValues: false })
       if (parsed.term) {
-        const { season, year } = parseTerm(parsed.term);
-        setTermSeason(season);
-        setTermYear(year);
+        const { season, year } = parseTerm(parsed.term)
+        setTermSeason(season)
+        setTermYear(year)
       }
-      // Mark as having unsaved changes since localStorage has a draft
-      setUnsavedChanges(dirtySource, true);
+      setUnsavedChanges(dirtySource, true)
     } catch {
-      localStorage.removeItem(`coursebridge:${course.id}:local-draft:course_metadata`);
+      localStorage.removeItem(`coursebridge:${course.id}:local-draft:course_metadata`)
     }
-  }, []); // run once on mount
+  }, []) // eslint-disable-line
 
-  // Write to localStorage on every change
   useEffect(() => {
     const sub = form.watch((values) => {
       localStorage.setItem(
         `coursebridge:${course.id}:local-draft:course_metadata`,
         JSON.stringify(values),
-      );
-    });
-    return () => sub.unsubscribe();
-  }, [form, course.id]);
+      )
+    })
+    return () => sub.unsubscribe()
+  }, [form, course.id])
 
-  // Save only — called manually via "Save & Next" button
   async function performSave() {
     const valid = await form.trigger()
     if (!valid) return false
-
     setStatus("saving")
     setErrorMsg(null)
     try {
@@ -127,12 +120,9 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
     }
   }
 
-  // Navigate to next step after saving
   async function handleAdvance() {
     const ok = await performSave()
-    if (ok) {
-      router.push(`/courses/${course.id}/review-matrix`)
-    }
+    if (ok) router.push(`/courses/${course.id}/review-matrix`)
   }
 
   const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
@@ -141,160 +131,224 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
-    <div className="relative mx-auto max-w-3xl rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
-      <GlowingEffect
-        blur={0}
-        spread={28}
-        glow
-        disabled={false}
-        proximity={72}
-        inactiveZone={0.65}
-        borderWidth={1}
-      />
-      <Card className="relative border-0 bg-background/90 shadow-none ring-0">
-      <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-base">Course Metadata</CardTitle>
-          <SaveState status={status} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        {errorMsg ? (
-          <p className="mb-5 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
-            {errorMsg}
-          </p>
-        ) : null}
-        <form className="space-y-5">
-          <div className="grid gap-4 md:grid-cols-2">
-            <ReadOnlyField label="Course ID" value={course.id} />
-            <ReadOnlyField label="Course Title" value={course.title} />
-            <ReadOnlyField label="Reviewer" value={reviewerName} />
-            <ReadOnlyField label="Review Date" value={new Date().toLocaleDateString("en-US")} />
-          </div>
+    <div className="mx-auto max-w-2xl space-y-7">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold tracking-tight">Course Metadata</h2>
+        <SaveBadge status={status} />
+      </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-1.5 text-sm font-medium">
-              Term
-              <div className="flex gap-2">
-                <Controller
-                  control={form.control}
-                  name="term"
-                  render={({ field }) => (
-                    <Select
-                      onValueChange={(season) => {
-                        setTermSeason(season)
-                        field.onChange(`${season} ${termYear}`.trim())
-                      }}
-                      value={termSeason}
-                    >
-                      <SelectTrigger className="w-[130px]">
-                        <SelectValue placeholder="Season" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SEASONS.map((s) => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+      {errorMsg && (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+          {errorMsg}
+        </div>
+      )}
+
+      {/* ── Course Information ────────────────────────── */}
+      <Section label="Course Information">
+        <InfoRow label="Course ID" value={course.id} copyable />
+        <InfoRow label="Course Title" value={course.title} copyable />
+        <InfoRow label="Reviewer" value={reviewerName} />
+        <InfoRow label="Review Date" value={new Date().toLocaleDateString("en-US")} />
+      </Section>
+
+      {/* ── Term & Sections ───────────────────────────── */}
+      <Section label="Term">
+        <FieldRow label="Season & Year">
+          <div className="flex gap-2">
+            <Controller
+              control={form.control}
+              name="term"
+              render={({ field }) => (
                 <Select
-                  onValueChange={(year) => {
-                    setTermYear(year)
-                    form.setValue("term", `${termSeason} ${year}`.trim(), {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
+                  onValueChange={(season) => {
+                    setTermSeason(season)
+                    field.onChange(`${season} ${termYear}`.trim())
                   }}
-                  value={termYear}
+                  value={termSeason}
                 >
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder="Year" />
+                  <SelectTrigger className="w-[130px] h-9 rounded-xl border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
+                    <SelectValue placeholder="Season" />
                   </SelectTrigger>
                   <SelectContent>
-                    {YEARS.map((y) => (
-                      <SelectItem key={y} value={y}>{y}</SelectItem>
+                    {SEASONS.map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <FieldError message={form.formState.errors.term?.message} />
-            </label>
-
-            <label className="grid gap-1.5 text-sm font-medium">
-              Section Numbers
-              <Input
-                onChange={(event) =>
-                  form.setValue(
-                    "section_numbers",
-                    event.target.value
-                      .split(",")
-                      .map((value) => value.trim())
-                      .filter(Boolean),
-                    { shouldDirty: true, shouldValidate: true },
-                  )
-                }
-                placeholder="001, 002"
-                value={sectionText}
-              />
-            </label>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormFieldWrapper
-              label="Brightspace URL"
-              value={brightspaceUrl}
-              error={form.formState.errors.brightspace_url?.message}
+              )}
+            />
+            <Select
+              onValueChange={(year) => {
+                setTermYear(year)
+                form.setValue("term", `${termSeason} ${year}`.trim(), {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }}
+              value={termYear}
             >
-              <Input placeholder="https://..." {...form.register("brightspace_url")} />
-            </FormFieldWrapper>
-            <FormFieldWrapper
-              label="Moodle URL"
-              value={moodleUrl}
-              error={form.formState.errors.moodle_url?.message}
-            >
-              <Input placeholder="https://..." {...form.register("moodle_url")} />
-            </FormFieldWrapper>
+              <SelectTrigger className="w-[100px] h-9 rounded-xl border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {YEARS.map((y) => (
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+          <FieldError message={form.formState.errors.term?.message} />
+        </FieldRow>
+        <FieldRow label="Section Numbers">
+          <CleanInput
+            onChange={(e) =>
+              form.setValue(
+                "section_numbers",
+                e.target.value.split(",").map((v) => v.trim()).filter(Boolean),
+                { shouldDirty: true, shouldValidate: true },
+              )
+            }
+            placeholder="001, 002, 003"
+            value={sectionText}
+          />
+        </FieldRow>
+      </Section>
 
-          <label className="grid gap-1.5 text-sm font-medium">
-            Migration Notes
-            <Textarea rows={6} {...form.register("migration_notes")} />
-            <FieldError message={form.formState.errors.migration_notes?.message} />
-          </label>
-
-          <div className="flex justify-end">
-            <Button disabled={status === "saving"} onClick={() => void handleAdvance()} type="button">
-              Save & Next →
-            </Button>
+      {/* ── Links ─────────────────────────────────────── */}
+      <Section label="Links">
+        <FieldRow label="Brightspace URL">
+          <div className="flex items-center gap-2">
+            <CleanInput
+              placeholder="https://..."
+              className="flex-1"
+              {...form.register("brightspace_url")}
+            />
+            {brightspaceUrl?.trim() && <CopyButton value={brightspaceUrl} label="Brightspace URL" />}
           </div>
-        </form>
-      </CardContent>
-      </Card>
+          <FieldError message={form.formState.errors.brightspace_url?.message} />
+        </FieldRow>
+        <FieldRow label="Moodle URL">
+          <div className="flex items-center gap-2">
+            <CleanInput
+              placeholder="https://..."
+              className="flex-1"
+              {...form.register("moodle_url")}
+            />
+            {moodleUrl?.trim() && <CopyButton value={moodleUrl} label="Moodle URL" />}
+          </div>
+          <FieldError message={form.formState.errors.moodle_url?.message} />
+        </FieldRow>
+      </Section>
+
+      {/* ── Notes ─────────────────────────────────────── */}
+      <Section label="Notes">
+        <div className="px-4 py-3">
+          <Textarea
+            rows={5}
+            placeholder="Add any migration notes, observations, or context here…"
+            className="resize-none rounded-xl border-white/10 bg-white/[0.02] hover:bg-white/[0.04] focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/10 text-sm transition-all duration-200"
+            {...form.register("migration_notes")}
+          />
+          <FieldError message={form.formState.errors.migration_notes?.message} />
+        </div>
+      </Section>
+
+      {/* ── Action ────────────────────────────────────── */}
+      <div className="flex justify-end pt-1">
+        <Button
+          disabled={status === "saving"}
+          onClick={() => void handleAdvance()}
+          type="button"
+          className="h-10 rounded-xl px-6 text-sm font-semibold"
+        >
+          {status === "saving" ? (
+            <><Loader2 className="size-3.5 animate-spin mr-2" />Saving…</>
+          ) : (
+            "Save & Next →"
+          )}
+        </Button>
+      </div>
     </div>
   )
 }
 
-function ReadOnlyField({ label, value }: { label: string; value: string }) {
+// ── Small Primitives ──────────────────────────────────
+
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="grid gap-1.5 text-sm font-medium">
-      {label}
-      <div className="flex gap-2 items-center">
-        <Input readOnly value={value} className="flex-1" />
-        <CopyButton value={value} label={label} />
+    <section className="space-y-2">
+      <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+        {label}
+      </p>
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 divide-y divide-white/5">
+        {children}
       </div>
-    </label>
+    </section>
+  )
+}
+
+function InfoRow({ label, value, copyable }: { label: string; value: string; copyable?: boolean }) {
+  return (
+    <div className="flex items-center gap-4 px-4 py-3">
+      <span className="w-28 shrink-0 text-xs font-medium text-muted-foreground">{label}</span>
+      <span className="flex-1 truncate text-sm font-medium text-foreground/80">{value}</span>
+      {copyable && <CopyButton value={value} label={label} />}
+    </div>
+  )
+}
+
+function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-4 px-4 py-3">
+      <span className="w-28 shrink-0 pt-2 text-xs font-medium text-muted-foreground">{label}</span>
+      <div className="flex-1 space-y-1">{children}</div>
+    </div>
+  )
+}
+
+function CleanInput(props: React.ComponentProps<"input">) {
+  return (
+    <input
+      {...props}
+      className={cn(
+        "w-full h-9 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] px-3 text-sm text-foreground placeholder:text-muted-foreground/50",
+        "outline-none transition-all duration-200",
+        "focus:bg-white/[0.01] focus:border-primary/40 focus:ring-2 focus:ring-primary/10",
+        "disabled:opacity-50 disabled:cursor-not-allowed",
+        props.className,
+      )}
+    />
   )
 }
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
-  return <p className="text-xs text-destructive">{message}</p>
+  return <p className="text-[11px] text-destructive">{message}</p>
 }
 
-function SaveState({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
-  if (status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
-  if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
-  if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Auto-saves while you type</p>
+function SaveBadge({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
+  if (status === "saving")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground">
+        <Loader2 className="size-3 animate-spin" /> Saving…
+      </span>
+    )
+  if (status === "saved")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-600">
+        <CheckCircle2 className="size-3" /> Saved
+      </span>
+    )
+  if (status === "error")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-[11px] font-medium text-destructive">
+        Save failed
+      </span>
+    )
+  return (
+    <span className="rounded-full bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground/60">
+      Auto-saves
+    </span>
+  )
 }

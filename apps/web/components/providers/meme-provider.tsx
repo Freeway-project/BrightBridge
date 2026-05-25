@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode } from "react"
+import { createContext, useContext, useEffect, useState, ReactNode } from "react"
 import { MemeModal } from "@/components/meme-modal"
 
 interface MemeContextType {
@@ -13,6 +13,12 @@ export function MemeProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
 
   const openMemeModal = () => setOpen(true)
+
+  useEffect(() => {
+    const handler = () => setOpen(true)
+    window.addEventListener("coursebridge:open-meme-modal", handler)
+    return () => window.removeEventListener("coursebridge:open-meme-modal", handler)
+  }, [])
 
   return (
     <MemeContext.Provider value={{ openMemeModal }}>
