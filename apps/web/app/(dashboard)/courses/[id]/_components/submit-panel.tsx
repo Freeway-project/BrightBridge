@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { CheckCircle2, Circle, Send, Sparkles, AlertCircle } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { submitReview } from "@/lib/workspace/actions"
@@ -10,7 +10,6 @@ import { ReviewSummary } from "./review-summary"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
-import { CelebrationOverlay } from "@/components/mindfresh/CelebrationOverlay"
 import { cn } from "@/lib/utils"
 
 type SubmitPanelProps = {
@@ -30,13 +29,20 @@ type SubmitPanelProps = {
 export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: SubmitPanelProps) {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
-  const [celebrate, setCelebrate] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   
   const submitAllowedStatuses: CourseStatus[] = ["assigned_to_ta", "ta_review_in_progress", "admin_changes_requested"]
   const isStatusSubmittable = submitAllowedStatuses.includes(courseStatus)
   const blockers = sections.filter((section) => section.required && !section.complete)
   const disabled = blockers.length > 0 || isPending || !isStatusSubmittable || isSuccess
+
+  useEffect(() => {
+    if (!isSuccess) return
+    const timeout = window.setTimeout(() => {
+      window.location.href = "/ta"
+    }, 1200)
+    return () => window.clearTimeout(timeout)
+  }, [isSuccess])
 
   const handleSubmit = () => {
     if (!isStatusSubmittable) {
@@ -57,18 +63,12 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
       }
 
       setIsSuccess(true)
-      setCelebrate(true)
       toast.success("Review submitted successfully!")
     })
   }
 
   return (
     <>
-    <CelebrationOverlay
-      open={celebrate}
-      context="a TA just finished and submitted a course migration review"
-      onDone={() => { setCelebrate(false); window.location.href = "/ta" }}
-    />
     <div className="mx-auto max-w-4xl space-y-10 pb-20">
       <AnimatePresence mode="wait">
         {isSuccess ? (
@@ -116,7 +116,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                 <h2 className="text-xl font-bold tracking-tight">Final Submission</h2>
               </div>
 
-              <div className="relative rounded-3xl border border-border/70 bg-card/40 p-1.5 shadow-2xl backdrop-blur-xl transition-all hover:border-primary/30">
+              <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-1.5 shadow-2xl shadow-black/30 transition-all hover:border-primary/30">
                 <GlowingEffect
                   blur={0}
                   spread={40}
@@ -126,7 +126,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                   inactiveZone={0.65}
                   borderWidth={1}
                 />
-                <Card className="relative overflow-hidden border-0 bg-background/80 shadow-none ring-0">
+                <Card className="relative overflow-hidden border-0 bg-black/45 backdrop-blur-xl shadow-none ring-0">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg font-black uppercase tracking-widest text-muted-foreground/60">
                       Checklist & Verification
@@ -138,12 +138,12 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                         <div 
                           key={section.key}
                           className={cn(
-                            "group flex items-center justify-between gap-4 rounded-xl border p-4 transition-all duration-300",
+                            "group flex items-center justify-between gap-4 rounded-xl border p-4 transition-all duration-300 shadow-sm",
                             section.complete 
-                              ? "border-emerald-500/20 bg-emerald-500/[0.03] text-emerald-400" 
+                              ? "border-emerald-500/30 bg-emerald-500/[0.04] text-emerald-400 shadow-emerald-950/10" 
                               : section.required 
-                                ? "border-amber-500/20 bg-amber-500/[0.03] text-amber-500" 
-                                : "border-border/60 bg-muted/20 text-muted-foreground"
+                                ? "border-amber-500/30 bg-amber-500/[0.04] text-amber-500 shadow-amber-950/10" 
+                                : "border-white/5 bg-white/[0.01] hover:bg-white/[0.02] text-muted-foreground/80"
                           )}
                         >
                           <div className="flex items-center gap-3">

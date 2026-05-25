@@ -4,16 +4,14 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { ChevronDown, Plus } from "lucide-react"
+import { ChevronDown, Plus, CheckCircle2, Loader2 } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
   reviewMatrixSchema,
   type ReviewMatrixFormValues,
 } from "@/lib/workspace/schemas"
 import type { Issue, IssueLogResponseData, ReviewMatrixStatus } from "@/lib/workspace/types"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Collapsible,
   CollapsibleContent,
@@ -27,18 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
-import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { CHECKLIST } from "@/lib/workspace/constants"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
+import { cn } from "@/lib/utils"
 
 type ReviewMatrixFormProps = {
   courseId: string
@@ -46,13 +36,21 @@ type ReviewMatrixFormProps = {
   initialIssues: Issue[]
 }
 
-const STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string }[] = [
-  { value: "pass", label: "Pass" },
-  { value: "fix_needed", label: "Fix Needed" },
-  { value: "missing", label: "Missing" },
-  { value: "escalate", label: "Escalate" },
-  { value: "na", label: "N/A" },
+const STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string; color: string }[] = [
+  { value: "pass",       label: "Pass",       color: "text-emerald-500" },
+  { value: "fix_needed", label: "Fix Needed", color: "text-amber-500"   },
+  { value: "missing",    label: "Missing",    color: "text-red-500"     },
+  { value: "escalate",   label: "Escalate",   color: "text-orange-500"  },
+  { value: "na",         label: "N/A",        color: "text-muted-foreground" },
 ]
+
+const STATUS_DOT: Record<ReviewMatrixStatus, string> = {
+  pass:       "bg-emerald-500",
+  fix_needed: "bg-amber-500",
+  missing:    "bg-red-500",
+  escalate:   "bg-orange-500",
+  na:         "bg-muted-foreground/30",
+}
 
 const NEEDS_ISSUE = new Set<ReviewMatrixStatus>(["fix_needed", "missing", "escalate"])
 
@@ -61,7 +59,7 @@ export function ReviewMatrixForm({
   defaultValues,
   initialIssues,
 }: ReviewMatrixFormProps) {
-  const dirtySource = `review-matrix-form:${courseId}`;
+  const dirtySource = `review-matrix-form:${courseId}`
   const localDraftKey = `coursebridge:${courseId}:local-draft:review_matrix`
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [issues, setIssues] = useState(initialIssues)
@@ -77,18 +75,14 @@ export function ReviewMatrixForm({
     resolver: zodResolver(reviewMatrixSchema),
     defaultValues,
   })
-
-  // Single subscription for the whole items array — replaces per-row form.watch() calls
   const watchedItems = useWatch({ control: form.control, name: "items" })
 
   useEffect(() => {
-    // Restore elapsed from localStorage on mount
     const stored = window.localStorage.getItem(timerStorageKey)
     if (stored) {
       const parsed = Number.parseInt(stored, 10)
       if (Number.isFinite(parsed)) elapsedRef.current = parsed
     }
-    // Keep ref in sync as timer ticks
     function onTick(e: Event) {
       const { storageKey, elapsed } = (e as CustomEvent<{ storageKey: string; elapsed: number }>).detail
       if (storageKey === timerStorageKey) elapsedRef.current = elapsed
@@ -119,14 +113,13 @@ export function ReviewMatrixForm({
   }, [form, localDraftKey])
 
   useEffect(() => {
-    setUnsavedChanges(dirtySource, form.formState.isDirty);
-    return () => clearUnsavedChanges(dirtySource);
-  }, [dirtySource, form.formState.isDirty]);
+    setUnsavedChanges(dirtySource, form.formState.isDirty)
+    return () => clearUnsavedChanges(dirtySource)
+  }, [dirtySource, form.formState.isDirty])
 
   async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
-
     setStatus("saving")
     setErrorMsg(null)
     startTransition(async () => {
@@ -148,9 +141,7 @@ export function ReviewMatrixForm({
         window.dispatchEvent(new CustomEvent("coursebridge:form-saved"))
         localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
-        if (advance) {
-          router.push(`/courses/${courseId}/syllabus-gradebook`)
-        }
+        if (advance) router.push(`/courses/${courseId}/syllabus-gradebook`)
       } catch (err) {
         setStatus("error")
         setErrorMsg(err instanceof Error ? err.message : "An unexpected error occurred.")
@@ -179,7 +170,6 @@ export function ReviewMatrixForm({
           setErrorMsg(res.error || "Failed to save draft.")
           setStatus("error")
           setTimeout(() => window.location.reload(), 2000)
-          return
         }
       } catch (err) {
         setStatus("error")
@@ -189,159 +179,230 @@ export function ReviewMatrixForm({
   }
 
   return (
-    <div className="relative rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
-      <GlowingEffect
-        blur={0}
-        spread={28}
-        glow
-        disabled={false}
-        proximity={72}
-        inactiveZone={0.65}
-        borderWidth={1}
-      />
-      <Card className="relative border-0 bg-background/90 shadow-none ring-0">
-      <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <div className="space-y-2">
-            <CardTitle className="text-base">Review Matrix</CardTitle>
-            <ReviewTimer storageKey={timerStorageKey} label="Review Matrix Time" compact />
-          </div>
-          <SaveState isPending={isPending} status={status} />
+    <div className="mx-auto max-w-5xl space-y-7">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Review Matrix</h2>
+          <ReviewTimer storageKey={timerStorageKey} label="Time on this section" compact />
         </div>
-      </CardHeader>
-      <CardContent>
-        {errorMsg ? (
-          <p className="mb-5 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
-            {errorMsg}
-          </p>
-        ) : null}
-        <form className="space-y-3">
-          <div className="grid gap-3 rounded-lg border border-border/70 bg-muted/20 p-3 md:grid-cols-3">
-            <label className="grid gap-1.5 text-sm font-medium">
-              Subject
-              <Input placeholder="BUAD" {...form.register("subject")} />
-            </label>
-            <label className="grid gap-1.5 text-sm font-medium">
-              Season
-              <Input placeholder="Fall" {...form.register("season")} />
-            </label>
-            <label className="grid gap-1.5 text-sm font-medium">
-              Year
-              <Input placeholder="2026" {...form.register("year")} />
-            </label>
-          </div>
+        <SaveBadge isPending={isPending} status={status} />
+      </div>
 
-          {CHECKLIST.map((section) => (
-            <Collapsible defaultOpen key={section.title}>
-              <div className="rounded-lg border border-border">
-                <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium">
-                  {section.title}
-                  <ChevronDown className="size-4 text-muted-foreground" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[42%]">Item</TableHead>
-                        <TableHead className="w-[150px]">Status</TableHead>
-                        <TableHead>Notes</TableHead>
-                        <TableHead>Direct Link</TableHead>
-                        <TableHead className="w-[136px] text-right">Issue</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+      {errorMsg && (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+          {errorMsg}
+        </div>
+      )}
+
+      {/* Course info strip */}
+      <section className="space-y-1.5">
+        <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+          Course Details
+        </p>
+        <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 p-4 md:grid-cols-3">
+          <FieldStack label="Subject">
+            <CleanInput placeholder="BUAD" {...form.register("subject")} />
+          </FieldStack>
+          <FieldStack label="Season">
+            <CleanInput placeholder="Fall" {...form.register("season")} />
+          </FieldStack>
+          <FieldStack label="Year">
+            <CleanInput placeholder="2026" {...form.register("year")} />
+          </FieldStack>
+        </div>
+      </section>
+
+      {/* Checklist sections */}
+      <section className="space-y-1.5">
+        <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+          Checklist
+        </p>
+        <div className="space-y-3">
+          {CHECKLIST.map((section) => {
+            const sectionItems = section.items
+            const sectionStatuses = sectionItems.map((item) => {
+              const index = defaultValues.items.findIndex((v) => v.item_id === item.id)
+              return (watchedItems[index]?.status ?? "na") as ReviewMatrixStatus
+            })
+            const passCount = sectionStatuses.filter((s) => s === "pass" || s === "na").length
+            const totalCount = sectionItems.length
+
+            return (
+              <Collapsible defaultOpen key={section.title}>
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20">
+                  <CollapsibleTrigger className="group flex w-full items-center justify-between px-5 py-4 text-left">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-semibold text-foreground">{section.title}</span>
+                      <span className="text-[10px] font-medium text-muted-foreground/60">
+                        {passCount}/{totalCount} reviewed
+                      </span>
+                    </div>
+                    <ChevronDown className="size-4 text-muted-foreground/60 transition-transform group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="border-t border-white/5 bg-black/10 overflow-x-auto">
+                      {/* Column headers */}
+                      <div className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 border-b border-white/5 bg-white/[0.01] px-5 py-2">
+                        {["Item", "Status", "Notes", "Direct Link", ""].map((h) => (
+                          <span key={h} className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">{h}</span>
+                        ))}
+                      </div>
+                      {/* Rows */}
                       {section.items.map((item) => {
-                        const index = defaultValues.items.findIndex((value) => value.item_id === item.id)
+                        const index = defaultValues.items.findIndex((v) => v.item_id === item.id)
                         const statusValue = (watchedItems[index]?.status ?? "na") as ReviewMatrixStatus
                         const needsIssue = NEEDS_ISSUE.has(statusValue)
 
                         return (
-                          <TableRow key={item.id}>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <Badge variant="outline">{item.id}</Badge>
-                                <p className="text-sm">{item.label}</p>
-                              </div>
-                            </TableCell>
-                            <TableCell>
+                          <div
+                            key={item.id}
+                            className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 items-center border-b border-white/5 px-5 py-3 last:border-0 hover:bg-white/[0.02] transition-colors"
+                          >
+                            {/* Item */}
+                            <div className="space-y-0.5 pr-3">
+                              <span className="inline-block rounded-md bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground/70">
+                                {item.id}
+                              </span>
+                              <p className="text-[13px] text-foreground/80 leading-snug">{item.label}</p>
+                            </div>
+                            {/* Status */}
+                            <div className="pr-3">
                               <Controller
                                 control={form.control}
                                 name={`items.${index}.status`}
                                 render={({ field }) => (
                                   <Select onValueChange={field.onChange} value={field.value}>
-                                    <SelectTrigger className="w-full">
-                                      <SelectValue />
+                                    <SelectTrigger className="h-8 w-full rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[field.value as ReviewMatrixStatus] ?? "bg-muted")} />
+                                        <SelectValue />
+                                      </div>
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {STATUS_OPTIONS.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                          {option.label}
+                                      {STATUS_OPTIONS.map((opt) => (
+                                        <SelectItem key={opt.value} value={opt.value}>
+                                          <div className="flex items-center gap-2">
+                                            <span className={cn("size-1.5 rounded-full", STATUS_DOT[opt.value])} />
+                                            <span className={opt.color}>{opt.label}</span>
+                                          </div>
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
                                   </Select>
                                 )}
                               />
-                            </TableCell>
-                            <TableCell>
+                            </div>
+                            {/* Notes */}
+                            <div className="pr-3">
                               <Input
                                 placeholder="Optional"
+                                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
                                 {...form.register(`items.${index}.notes`)}
                               />
-                            </TableCell>
-                            <TableCell>
-                              <Input placeholder="https://..." {...form.register(`items.${index}.direct_link`)} />
-                            </TableCell>
-                            <TableCell className="text-right align-middle">
+                            </div>
+                            {/* Direct Link */}
+                            <div className="pr-3">
+                              <Input
+                                placeholder="https://…"
+                                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                                {...form.register(`items.${index}.direct_link`)}
+                              />
+                            </div>
+                            {/* Issue */}
+                            <div className="flex justify-end">
                               {needsIssue ? (
                                 <Button
                                   onClick={() => addIssue(item.id, item.label)}
                                   size="sm"
                                   type="button"
                                   variant="outline"
-                                  className="h-8 min-w-[92px] shrink-0 border-primary/30 bg-background text-foreground hover:bg-primary/10"
+                                  className="h-7 rounded-lg border-primary/30 px-3 text-[11px] font-semibold hover:bg-primary/10"
                                 >
-                                  <Plus className="size-4" />
+                                  <Plus className="size-3 mr-1" />
                                   Issue
                                 </Button>
                               ) : (
-                                <span className="inline-block w-[92px] text-center text-xs text-muted-foreground">—</span>
+                                <span className="text-center text-xs text-muted-foreground/30">—</span>
                               )}
-                            </TableCell>
-                          </TableRow>
+                            </div>
+                          </div>
                         )
                       })}
-                    </TableBody>
-                  </Table>
-                  </div>
-                </CollapsibleContent>
-              </div>
-          </Collapsible>
-          ))}
+                    </div>
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
+            )
+          })}
+        </div>
+      </section>
 
-          <div className="flex justify-end pt-2">
-            <Button disabled={isPending} onClick={() => void handleSave(true)} type="button">
-              Save draft
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-      </Card>
+      {/* Action */}
+      <div className="flex justify-end pt-1">
+        <Button
+          disabled={isPending}
+          onClick={() => void handleSave(true)}
+          type="button"
+          className="h-10 rounded-xl px-6 text-sm font-semibold"
+        >
+          {isPending ? (
+            <><Loader2 className="size-3.5 animate-spin mr-2" />Saving…</>
+          ) : (
+            "Save & Next →"
+          )}
+        </Button>
+      </div>
     </div>
   )
 }
 
+function FieldStack({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="space-y-1.5">
+      <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wide">{label}</span>
+      {children}
+    </label>
+  )
+}
 
-function SaveState({
-  isPending,
-  status,
-}: {
-  isPending: boolean
-  status: "idle" | "saving" | "saved" | "error"
-}) {
-  if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
-  if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
-  if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Saved locally until you click Save draft</p>
+function CleanInput(props: React.ComponentProps<"input">) {
+  return (
+    <input
+      {...props}
+      className={cn(
+        "w-full h-9 rounded-xl border border-border/40 bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground/50",
+        "outline-none transition-[border-color,box-shadow]",
+        "focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
+        "disabled:opacity-50 disabled:cursor-not-allowed",
+        props.className,
+      )}
+    />
+  )
+}
+
+function SaveBadge({ isPending, status }: { isPending: boolean; status: "idle" | "saving" | "saved" | "error" }) {
+  if (isPending || status === "saving")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground">
+        <Loader2 className="size-3 animate-spin" /> Saving…
+      </span>
+    )
+  if (status === "saved")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-600">
+        <CheckCircle2 className="size-3" /> Saved
+      </span>
+    )
+  if (status === "error")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-[11px] font-medium text-destructive">
+        Save failed
+      </span>
+    )
+  return (
+    <span className="rounded-full bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground/60">
+      Saved locally
+    </span>
+  )
 }

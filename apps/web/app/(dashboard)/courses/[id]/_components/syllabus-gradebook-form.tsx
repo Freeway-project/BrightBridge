@@ -4,15 +4,14 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
+import { CheckCircle2, Loader2 } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
   syllabusGradebookSchema,
   type SyllabusGradebookFormValues,
 } from "@/lib/workspace/schemas"
 import type { ReviewMatrixStatus, SyllabusRowStatus } from "@/lib/workspace/types"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -21,36 +20,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ReviewTimer, useStoredTimerValue } from "./review-timer"
-import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { SYLLABUS_ITEMS_LIST as SYLLABUS_ITEMS, GRADEBOOK_ITEMS_LIST as GRADEBOOK_ITEMS } from "@/lib/workspace/constants"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
+import { cn } from "@/lib/utils"
 
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
 }
 
-const SYLLABUS_STATUS_OPTIONS: { value: SyllabusRowStatus; label: string }[] = [
-  { value: "pending", label: "Pending" },
-  { value: "confirmed", label: "Confirmed" },
-  { value: "fix_needed", label: "Fix Needed" },
+const SYLLABUS_STATUS_OPTIONS: { value: SyllabusRowStatus; label: string; color: string }[] = [
+  { value: "pending",    label: "Pending",    color: "text-muted-foreground" },
+  { value: "confirmed",  label: "Confirmed",  color: "text-emerald-500"      },
+  { value: "fix_needed", label: "Fix Needed", color: "text-amber-500"        },
 ]
 
-const REVIEW_STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string }[] = [
-  { value: "pass", label: "Pass" },
-  { value: "fix_needed", label: "Fix Needed" },
-  { value: "missing", label: "Missing" },
-  { value: "escalate", label: "Escalate" },
-  { value: "na", label: "N/A" },
+const REVIEW_STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string; color: string }[] = [
+  { value: "pass",       label: "Pass",       color: "text-emerald-500"      },
+  { value: "fix_needed", label: "Fix Needed", color: "text-amber-500"        },
+  { value: "missing",    label: "Missing",    color: "text-red-500"          },
+  { value: "escalate",   label: "Escalate",   color: "text-orange-500"       },
+  { value: "na",         label: "N/A",        color: "text-muted-foreground" },
 ]
 
-export function SyllabusGradebookForm({
-  courseId,
-  defaultValues,
-}: SyllabusGradebookFormProps) {
-  const dirtySource = `syllabus-gradebook-form:${courseId}`;
+const SYLLABUS_DOT: Record<SyllabusRowStatus, string> = {
+  pending:    "bg-muted-foreground/30",
+  confirmed:  "bg-emerald-500",
+  fix_needed: "bg-amber-500",
+}
+
+const REVIEW_DOT: Record<ReviewMatrixStatus, string> = {
+  pass:       "bg-emerald-500",
+  fix_needed: "bg-amber-500",
+  missing:    "bg-red-500",
+  escalate:   "bg-orange-500",
+  na:         "bg-muted-foreground/30",
+}
+
+export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGradebookFormProps) {
+  const dirtySource = `syllabus-gradebook-form:${courseId}`
   const localDraftKey = `coursebridge:${courseId}:local-draft:syllabus_review`
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [isPending, startTransition] = useTransition()
@@ -81,9 +90,9 @@ export function SyllabusGradebookForm({
   }, [timerStorageKey])
 
   useEffect(() => {
-    setUnsavedChanges(dirtySource, form.formState.isDirty);
-    return () => clearUnsavedChanges(dirtySource);
-  }, [dirtySource, form.formState.isDirty]);
+    setUnsavedChanges(dirtySource, form.formState.isDirty)
+    return () => clearUnsavedChanges(dirtySource)
+  }, [dirtySource, form.formState.isDirty])
 
   useEffect(() => {
     const stored = localStorage.getItem(localDraftKey)
@@ -107,7 +116,6 @@ export function SyllabusGradebookForm({
   async function handleSave(advance = false) {
     const valid = await form.trigger()
     if (!valid) return
-
     setStatus("saving")
     startTransition(async () => {
       try {
@@ -116,19 +124,14 @@ export function SyllabusGradebookForm({
           time_spent_seconds: elapsedRef.current,
           overall_time_spent_seconds: overallElapsed,
         })
-        if (!res.ok) {
-          setStatus("error")
-          return
-        }
+        if (!res.ok) { setStatus("error"); return }
         setStatus("saved")
         setTimeout(() => setStatus("idle"), 2500)
         localStorage.setItem(`coursebridge:${courseId}:form-done:syllabus_review`, "1")
         window.dispatchEvent(new CustomEvent("coursebridge:form-saved"))
         localStorage.removeItem(localDraftKey)
         form.reset(form.getValues())
-        if (advance) {
-          router.push(`/courses/${courseId}/issue-log`)
-        }
+        if (advance) router.push(`/courses/${courseId}/issue-log`)
       } catch {
         setStatus("error")
       }
@@ -136,150 +139,205 @@ export function SyllabusGradebookForm({
   }
 
   return (
-    <div className="relative rounded-2xl border border-border/70 bg-card/70 p-1.5 shadow-sm">
-      <GlowingEffect
-        blur={0}
-        spread={28}
-        glow
-        disabled={false}
-        proximity={72}
-        inactiveZone={0.65}
-        borderWidth={1}
-      />
-      <Card className="relative border-0 bg-background/90 shadow-none ring-0">
-      <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <div className="space-y-2">
-            <CardTitle className="text-base">Syllabus & Gradebook</CardTitle>
-            <ReviewTimer storageKey={timerStorageKey} label="Syllabus & Gradebook Time" compact />
-          </div>
-          <SaveState isPending={isPending} status={status} />
+    <div className="mx-auto max-w-5xl space-y-7">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Syllabus & Gradebook</h2>
+          <ReviewTimer storageKey={timerStorageKey} label="Time on this section" compact />
         </div>
-      </CardHeader>
-      <CardContent>
-        <form className="space-y-6">
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Syllabus Review</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="w-[160px]">TA Status</TableHead>
-                  <TableHead className="w-[150px]">Admin Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {SYLLABUS_ITEMS.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <Badge variant="outline">{item.id}</Badge>
-                      <p className="mt-1 text-sm">{item.label}</p>
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={form.control}
-                        name={`syllabus_items.${index}.ta_status`}
-                        render={({ field }) => (
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {SYLLABUS_STATUS_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">Pending Admin</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Input {...form.register(`syllabus_items.${index}.notes`)} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </section>
+        <SaveBadge isPending={isPending} status={status} />
+      </div>
 
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Gradebook Review</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="w-[160px]">Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead>Direct Link</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {GRADEBOOK_ITEMS.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <Badge variant="outline">{item.id}</Badge>
-                      <p className="mt-1 text-sm">{item.label}</p>
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={form.control}
-                        name={`gradebook_items.${index}.status`}
-                        render={({ field }) => (
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {REVIEW_STATUS_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input {...form.register(`gradebook_items.${index}.notes`)} />
-                    </TableCell>
-                    <TableCell>
-                      <Input placeholder="https://..." {...form.register(`gradebook_items.${index}.direct_link`)} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </section>
-
-          <div className="flex justify-end">
-            <Button disabled={isPending} onClick={() => void handleSave(true)} type="button">
-              Save draft
-            </Button>
+      {/* Syllabus Review */}
+      <ReviewTable
+        label="Syllabus Review"
+        columns={["Item", "TA Status", "Admin Status", "Notes"]}
+      >
+        {SYLLABUS_ITEMS.map((item, index) => (
+          <div
+            key={item.id}
+            className="grid grid-cols-[2fr_140px_130px_1.5fr] items-center border-b border-white/5 px-5 py-3 last:border-0 hover:bg-white/[0.02] transition-colors"
+          >
+            <div className="space-y-0.5 pr-3">
+              <span className="inline-block rounded-md bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground/70">
+                {item.id}
+              </span>
+              <p className="text-[13px] text-foreground/80 leading-snug">{item.label}</p>
+            </div>
+            <div className="pr-3">
+              <Controller
+                control={form.control}
+                name={`syllabus_items.${index}.ta_status`}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-8 w-full rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200">
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn("size-1.5 rounded-full shrink-0", SYLLABUS_DOT[field.value as SyllabusRowStatus] ?? "bg-muted")} />
+                        <SelectValue />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SYLLABUS_STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          <div className="flex items-center gap-2">
+                            <span className={cn("size-1.5 rounded-full", SYLLABUS_DOT[opt.value])} />
+                            <span className={opt.color}>{opt.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="pr-3">
+              <span className="inline-flex items-center rounded-full bg-muted/40 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground/60">
+                Pending Admin
+              </span>
+            </div>
+            <div>
+              <Input
+                placeholder="Notes…"
+                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                {...form.register(`syllabus_items.${index}.notes`)}
+              />
+            </div>
           </div>
-        </form>
-      </CardContent>
-      </Card>
+        ))}
+      </ReviewTable>
+
+      {/* Gradebook Review */}
+      <ReviewTable
+        label="Gradebook Review"
+        columns={["Item", "Status", "Notes", "Direct Link"]}
+      >
+        {GRADEBOOK_ITEMS.map((item, index) => (
+          <div
+            key={item.id}
+            className="grid grid-cols-[2fr_140px_1.5fr_1.5fr] items-center border-b border-white/5 px-5 py-3 last:border-0 hover:bg-white/[0.02] transition-colors"
+          >
+            <div className="space-y-0.5 pr-3">
+              <span className="inline-block rounded-md bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground/70">
+                {item.id}
+              </span>
+              <p className="text-[13px] text-foreground/80 leading-snug">{item.label}</p>
+            </div>
+            <div className="pr-3">
+              <Controller
+                control={form.control}
+                name={`gradebook_items.${index}.status`}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-8 w-full rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200">
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn("size-1.5 rounded-full shrink-0", REVIEW_DOT[field.value as ReviewMatrixStatus] ?? "bg-muted")} />
+                        <SelectValue />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REVIEW_STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          <div className="flex items-center gap-2">
+                            <span className={cn("size-1.5 rounded-full", REVIEW_DOT[opt.value])} />
+                            <span className={opt.color}>{opt.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="pr-3">
+              <Input
+                placeholder="Notes…"
+                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                {...form.register(`gradebook_items.${index}.notes`)}
+              />
+            </div>
+            <div>
+              <Input
+                placeholder="https://…"
+                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                {...form.register(`gradebook_items.${index}.direct_link`)}
+              />
+            </div>
+          </div>
+        ))}
+      </ReviewTable>
+
+      {/* Action */}
+      <div className="flex justify-end pt-1">
+        <Button
+          disabled={isPending}
+          onClick={() => void handleSave(true)}
+          type="button"
+          className="h-10 rounded-xl px-6 text-sm font-semibold"
+        >
+          {isPending ? (
+            <><Loader2 className="size-3.5 animate-spin mr-2" />Saving…</>
+          ) : (
+            "Save & Next →"
+          )}
+        </Button>
+      </div>
     </div>
   )
 }
 
-
-function SaveState({
-  isPending,
-  status,
+function ReviewTable({
+  label,
+  columns,
+  children,
 }: {
-  isPending: boolean
-  status: "idle" | "saving" | "saved" | "error"
+  label: string
+  columns: string[]
+  children: React.ReactNode
 }) {
-  if (isPending || status === "saving") return <p className="text-xs text-muted-foreground">Saving...</p>
-  if (status === "saved") return <p className="text-xs text-green-600">Saved</p>
-  if (status === "error") return <p className="text-xs text-destructive">Save failed</p>
-  return <p className="text-xs text-muted-foreground">Saved locally until you click Save draft</p>
+  return (
+    <section className="space-y-1.5">
+      <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+        {label}
+      </p>
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20">
+        {/* Column headers */}
+        <div
+          className="grid items-center border-b border-white/5 bg-white/[0.01] px-5 py-2"
+          style={{ gridTemplateColumns: columns.length === 4 ? "2fr 140px 1.5fr 1.5fr" : "2fr 140px 130px 1.5fr" }}
+        >
+          {columns.map((h) => (
+            <span key={h} className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">{h}</span>
+          ))}
+        </div>
+        {children}
+      </div>
+    </section>
+  )
+}
+
+function SaveBadge({ isPending, status }: { isPending: boolean; status: "idle" | "saving" | "saved" | "error" }) {
+  if (isPending || status === "saving")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground">
+        <Loader2 className="size-3 animate-spin" /> Saving…
+      </span>
+    )
+  if (status === "saved")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-600">
+        <CheckCircle2 className="size-3" /> Saved
+      </span>
+    )
+  if (status === "error")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-[11px] font-medium text-destructive">
+        Save failed
+      </span>
+    )
+  return (
+    <span className="rounded-full bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground/60">
+      Saved locally
+    </span>
+  )
 }

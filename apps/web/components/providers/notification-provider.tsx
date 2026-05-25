@@ -35,22 +35,32 @@ function playNotificationTone(type: "info" | "success" | "warning" = "info") {
     const now = audioContext.currentTime
     const osc = audioContext.createOscillator()
     const gain = audioContext.createGain()
-    const freqMap: Record<typeof type, number> = { info: 740, success: 660, warning: 520 }
+    const chirpMap: Record<typeof type, { start: number; peak: number; tail: number }> = {
+      info: { start: 1200, peak: 2100, tail: 1550 },
+      success: { start: 1300, peak: 2400, tail: 1800 },
+      warning: { start: 900, peak: 1700, tail: 1200 },
+    }
 
-    osc.type = "sine"
-    osc.frequency.setValueAtTime(freqMap[type], now)
+    const preset = chirpMap[type]
+    osc.type = "triangle"
+    osc.frequency.setValueAtTime(preset.start, now)
+    osc.frequency.exponentialRampToValueAtTime(preset.peak, now + 0.055)
+    osc.frequency.exponentialRampToValueAtTime(preset.tail, now + 0.12)
+
     gain.gain.setValueAtTime(0.0001, now)
-    gain.gain.exponentialRampToValueAtTime(0.025, now + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.022, now + 0.018)
+    gain.gain.exponentialRampToValueAtTime(0.006, now + 0.07)
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16)
 
     osc.connect(gain)
     gain.connect(audioContext.destination)
     osc.start(now)
-    osc.stop(now + 0.18)
+    osc.stop(now + 0.17)
   } catch {
     // Best-effort UI enhancement only.
   }
 }
+
 
 interface NotificationProviderProps {
   children: React.ReactNode
