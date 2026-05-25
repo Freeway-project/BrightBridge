@@ -65,6 +65,24 @@ export async function resolveEscalationAction(escalationId: string, courseId: st
   const profile = await requireProfile()
   try {
     await resolveEscalation(escalationId, profile.userId, resolutionNote)
+
+    // If the course is sitting with admin (submitted_to_admin), return it to the TA
+    // so they can acknowledge the resolution and resubmit.
+    try {
+      const { getCourseRepository } = await import("@/lib/repositories")
+      const { transitionCourseStatus } = await import("@/lib/courses/service")
+      const course = await getCourseRepository().getCourseSummaryById(courseId)
+      if (course.status === "submitted_to_admin") {
+        await transitionCourseStatus({
+          courseId,
+          toStatus: "admin_changes_requested",
+          note: "Escalation resolved — returned to TA for resubmission.",
+        })
+      }
+    } catch {
+      // Non-fatal: escalation is resolved even if the course status transition fails.
+    }
+
     revalidatePath(`/admin/courses/${courseId}`)
     revalidatePath(`/admin`)
     revalidatePath(`/courses/${courseId}`)
