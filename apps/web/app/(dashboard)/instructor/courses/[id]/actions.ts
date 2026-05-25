@@ -32,7 +32,7 @@ export async function instructorRaiseQuestionAction(
     title: questionTitle.trim(),
     type: "question",
     severity: "minor",
-    description: questionDescription?.trim() || null,
+    description: questionDescription?.trim() || undefined,
   })
 
   // Transition course status so admin is visibly blocked

@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { instructorApproveAction, instructorRaiseQuestionAction } from "../actions"
 
@@ -70,18 +69,16 @@ export function InstructorCourseActions({ courseId, status }: Props) {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="q-title">Question <span className="text-destructive">*</span></Label>
+              <p className="text-sm font-medium">Question <span className="text-destructive">*</span></p>
               <Input
-                id="q-title"
                 placeholder="What is your question?"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="q-desc">Details <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <p className="text-sm font-medium text-muted-foreground">Details <span className="text-xs">(optional)</span></p>
               <Textarea
-                id="q-desc"
                 placeholder="Add context, location in the course, etc."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
