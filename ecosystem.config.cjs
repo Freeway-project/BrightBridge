@@ -29,5 +29,18 @@ module.exports = {
       wait_ready: true,
       listen_timeout: 10000,
     },
+    {
+      name: "brightbridge-autodeploy",
+      script: "/mnt/external/BrightBridge/scripts/autodeploy.sh",
+      interpreter: "/bin/bash",
+
+      // Never auto-restart on crash — avoids rapid-fire deploy loops
+      autorestart: false,
+
+      error_file: "/var/log/pm2/brightbridge-autodeploy-error.log",
+      out_file:   "/var/log/pm2/brightbridge-autodeploy-out.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
+      merge_logs: true,
+    },
   ],
 };
