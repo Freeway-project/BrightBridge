@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireProfile } from '@/lib/auth/context'
 import { createClient } from '@supabase/supabase-js'
 import { CourseIssue, IssueComment, CreateIssueInput, AddCommentInput, IssueStatus } from './types'
+import { transitionCourseStatus } from '@/lib/courses/service'
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 

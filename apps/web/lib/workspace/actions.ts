@@ -105,7 +105,7 @@ export async function saveDraft(
   }
 }
 
-export async function submitReview(courseId: string): Promise<{ ok: boolean; error?: string }> {
+export async function submitReview(courseId: string, note?: string): Promise<{ ok: boolean; error?: string }> {
   if (await isCurrentHostReadonly()) {
     return { ok: false, error: "System migration in progress. Submissions are temporarily disabled." };
   }
@@ -147,7 +147,7 @@ export async function submitReview(courseId: string): Promise<{ ok: boolean; err
       to: "submitted_to_admin",
       actorId: ctx.userId,
       actorRole: ctx.profile.role,
-      note: "TA submitted review",
+      note: note?.trim() || "TA submitted review",
     });
 
     revalidatePath("/ta");
