@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
+import { GlobalPointer } from "@/components/shared/global-pointer";
 import { CSPostHogProvider, PostHogPageview } from "@/components/providers/posthog-provider";
 import { Suspense, type ReactNode } from "react";
 import { getDeploymentVersion } from "@/lib/deployment-version";
@@ -32,6 +33,7 @@ export default function RootLayout({
             {children}
           </TooltipProvider>
           <DeploymentDetector initialVersion={currentVersion} />
+          <GlobalPointer />
           <Toaster
             closeButton
             position="top-right"
