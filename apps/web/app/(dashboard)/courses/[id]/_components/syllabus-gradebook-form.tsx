@@ -143,7 +143,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Syllabus & Gradebook</h2>
+          <h2 className="text-xl font-bold tracking-tight">Syllabus & Gradebook</h2>
           <ReviewTimer storageKey={timerStorageKey} label="Time on this section" compact />
         </div>
         <SaveBadge isPending={isPending} status={status} />
@@ -215,7 +215,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
         {GRADEBOOK_ITEMS.map((item, index) => (
           <div
             key={item.id}
-            className="grid grid-cols-[2fr_140px_1.5fr_1.5fr] items-center border-b border-white/5 px-5 py-3 last:border-0 hover:bg-white/[0.02] transition-colors"
+            className="grid grid-cols-[2fr_140px_1.5fr_1.5fr] items-center border-b border-border/40 px-5 py-3.5 last:border-0 hover:bg-muted/20 transition-colors"
           >
             <div className="space-y-0.5 pr-3">
               <span className="inline-block rounded-md bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground/70">
@@ -229,7 +229,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
                 name={`gradebook_items.${index}.status`}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="h-8 w-full rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200">
+                    <SelectTrigger className="h-9 w-full rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200">
                       <div className="flex items-center gap-1.5">
                         <span className={cn("size-1.5 rounded-full shrink-0", REVIEW_DOT[field.value as ReviewMatrixStatus] ?? "bg-muted")} />
                         <SelectValue />
@@ -252,14 +252,14 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
             <div className="pr-3">
               <Input
                 placeholder="Notes…"
-                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                className="h-9 rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200"
                 {...form.register(`gradebook_items.${index}.notes`)}
               />
             </div>
             <div>
               <Input
                 placeholder="https://…"
-                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                className="h-9 rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200"
                 {...form.register(`gradebook_items.${index}.direct_link`)}
               />
             </div>
@@ -303,12 +303,12 @@ function ReviewTable({
       <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
         {label}
       </p>
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-card/45 backdrop-blur-xl shadow-2xl shadow-black/20 pl-[3px]">
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg pl-[3px]">
         {/* Shifting Gradient Tint Bar on Left Side */}
         <div className="absolute left-[1px] top-6 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/tbl:opacity-100 group-hover/tbl:w-[4px] transition-all duration-300" />
         {/* Column headers */}
         <div
-          className="grid items-center border-b border-white/5 bg-white/[0.01] px-5 py-2"
+          className="grid items-center border-b border-border/40 bg-muted/20 px-5 py-2"
           style={{ gridTemplateColumns: columns.length === 4 ? "2fr 140px 1.5fr 1.5fr" : "2fr 140px 130px 1.5fr" }}
         >
           {columns.map((h) => (

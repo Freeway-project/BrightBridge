@@ -183,7 +183,7 @@ export function ReviewMatrixForm({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Review Matrix</h2>
+          <h2 className="text-xl font-bold tracking-tight">Review Matrix</h2>
           <ReviewTimer storageKey={timerStorageKey} label="Time on this section" compact />
         </div>
         <SaveBadge isPending={isPending} status={status} />
@@ -200,7 +200,7 @@ export function ReviewMatrixForm({
         <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
           Course Details
         </p>
-        <div className="grid gap-3 rounded-2xl border border-white/10 bg-card/45 backdrop-blur-xl shadow-2xl shadow-black/20 p-4 md:grid-cols-3">
+        <div className="grid gap-3 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg p-5 md:grid-cols-3">
           <FieldStack label="Subject">
             <CleanInput placeholder="BUAD" {...form.register("subject")} />
           </FieldStack>
@@ -230,7 +230,7 @@ export function ReviewMatrixForm({
 
             return (
               <Collapsible defaultOpen key={section.title} className="group/coll relative">
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-card/45 backdrop-blur-xl shadow-2xl shadow-black/20 pl-[3px]">
+                <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg pl-[3px]">
                   {/* Shifting Gradient Tint Bar on Left Side */}
                   <div className="absolute left-[1px] top-0 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/coll:opacity-100 group-hover/coll:w-[4px] transition-all duration-300" />
                   <CollapsibleTrigger className="group flex w-full items-center justify-between px-5 py-4 text-left">
@@ -243,9 +243,9 @@ export function ReviewMatrixForm({
                     <ChevronDown className="size-4 text-muted-foreground/60 transition-transform group-data-[state=open]:rotate-180" />
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="border-t border-white/5 bg-black/10 overflow-x-auto">
+                    <div className="border-t border-border/40 bg-background/30 overflow-x-auto">
                       {/* Column headers */}
-                      <div className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 border-b border-white/5 bg-white/[0.01] px-5 py-2">
+                      <div className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 border-b border-border/40 bg-muted/20 px-5 py-2">
                         {["Item", "Status", "Notes", "Direct Link", ""].map((h) => (
                           <span key={h} className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">{h}</span>
                         ))}
@@ -259,7 +259,7 @@ export function ReviewMatrixForm({
                         return (
                           <div
                             key={item.id}
-                            className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 items-center border-b border-white/5 px-5 py-3 last:border-0 hover:bg-white/[0.02] transition-colors"
+                            className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 items-center border-b border-border/40 px-5 py-3.5 last:border-0 hover:bg-muted/20 transition-colors"
                           >
                             {/* Item */}
                             <div className="space-y-0.5 pr-3">
@@ -275,7 +275,7 @@ export function ReviewMatrixForm({
                                 name={`items.${index}.status`}
                                 render={({ field }) => (
                                   <Select onValueChange={field.onChange} value={field.value}>
-                                    <SelectTrigger className="h-8 w-full rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200">
+                                    <SelectTrigger className="h-9 w-full rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200">
                                       <div className="flex items-center gap-1.5">
                                         <span className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[field.value as ReviewMatrixStatus] ?? "bg-muted")} />
                                         <SelectValue />
@@ -299,7 +299,7 @@ export function ReviewMatrixForm({
                             <div className="pr-3">
                               <Input
                                 placeholder="Optional"
-                                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                                className="h-9 rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200"
                                 {...form.register(`items.${index}.notes`)}
                               />
                             </div>
@@ -307,7 +307,7 @@ export function ReviewMatrixForm({
                             <div className="pr-3">
                               <Input
                                 placeholder="https://…"
-                                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                                className="h-9 rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200"
                                 {...form.register(`items.${index}.direct_link`)}
                               />
                             </div>
@@ -376,7 +376,7 @@ function CleanInput(props: React.ComponentProps<"input">) {
     <input
       {...props}
       className={cn(
-        "w-full h-9 rounded-xl border border-border/40 bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground/50",
+        "w-full h-10 rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground placeholder:text-muted-foreground/50",
         "outline-none transition-[border-color,box-shadow]",
         "focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
         "disabled:opacity-50 disabled:cursor-not-allowed",
