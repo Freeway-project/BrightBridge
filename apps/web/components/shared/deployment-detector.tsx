@@ -1,135 +1,129 @@
-"use client";
+"use client"
 
-import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { hasUnsavedChanges } from "@/lib/deployment-sync";
-import { DeploymentNotification, MinimizedUpdatePill } from "./deployment-notification";
-import { AnimatePresence } from "motion/react";
+import { useEffect, useRef, useState } from "react"
+import { hasUnsavedChanges } from "@/lib/deployment-sync"
+import { DeploymentNotification, MinimizedUpdatePill, UpdateAppliedOverlay } from "./deployment-notification"
+import { AnimatePresence } from "motion/react"
 
 interface DeploymentDetectorProps {
-  initialVersion: string;
+  initialVersion: string
 }
 
-const CHECK_INTERVAL = 1000 * 90; // Fallback poll every 90s (SSE is primary detector)
-const UPDATE_APPLIED_FLAG = "coursebridge:update-applied";
-type NotificationMode = "auto" | "force-on" | "force-off";
-// Manual switch for demos/testing:
-// - "auto": current API-version behavior
-// - "force-on": always show notification UI
-// - "force-off": never show notification UI
-const NOTIFICATION_MODE: NotificationMode = "auto";
+const CHECK_INTERVAL = 1000 * 90
+const UPDATE_APPLIED_FLAG = "coursebridge:update-applied"
 
 export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) {
-  const [showNotification, setShowNotification] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const hasNotified = useRef(false);
-  const hasChunkWarning = useRef(false);
+  const [showNotification, setShowNotification] = useState(false)
+  const [isMinimized, setIsMinimized] = useState(false)
+  const [showUpdatedOverlay, setShowUpdatedOverlay] = useState(false)
+  const hasNotified = useRef(false)
+  const hasChunkWarning = useRef(false)
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.sessionStorage.getItem(UPDATE_APPLIED_FLAG) === "1") {
-      window.sessionStorage.removeItem(UPDATE_APPLIED_FLAG);
-      toast.success("Deployment applied", {
-        description: "You are now running the latest CourseBridge update.",
-        duration: 5000,
-        position: "bottom-left",
-      });
+      window.sessionStorage.removeItem(UPDATE_APPLIED_FLAG)
+      setShowUpdatedOverlay(true)
+      const timeout = window.setTimeout(() => setShowUpdatedOverlay(false), 1200)
+      return () => window.clearTimeout(timeout)
     }
 
-    if (NOTIFICATION_MODE === "force-off") return;
-    if (NOTIFICATION_MODE === "force-on") {
-      setShowNotification(true);
-      setIsMinimized(false);
-      return;
-    }
-
-    // Don't run in development or if already notified
-    if (initialVersion === "development" || initialVersion === "dev") return;
+    if (initialVersion === "development" || initialVersion === "dev") return
 
     const checkVersion = async () => {
-      if (hasNotified.current) return;
+      if (hasNotified.current) return
 
       try {
-        const res = await fetch("/api/version", { cache: "no-store" });
-        if (!res.ok) return;
+        const res = await fetch("/api/version", { cache: "no-store" })
+        if (!res.ok) return
 
-        const data = await res.json();
-
+        const data = await res.json()
         if (data.version && data.version !== initialVersion && data.version !== "development") {
-          hasNotified.current = true;
-          setShowNotification(true);
+          hasNotified.current = true
+          setShowNotification(true)
         }
       } catch {
-        // Silently fail version checks
+        // Ignore connectivity/version errors.
       }
-    };
+    }
 
-    // SSE primary detector — connection drop = server restarted = new deploy
-    const es = new EventSource("/api/version/stream");
+    const es = new EventSource("/api/version/stream")
 
     es.onmessage = (e) => {
       try {
-        const data = JSON.parse(e.data);
+        const data = JSON.parse(e.data)
         if (data.version && data.version !== initialVersion && data.version !== "development") {
-          hasNotified.current = true;
-          setShowNotification(true);
-          es.close();
+          hasNotified.current = true
+          setShowNotification(true)
+          es.close()
         }
       } catch {
-        // Ignore malformed SSE frames
+        // Ignore malformed SSE frames.
       }
-    };
+    }
 
     es.onerror = () => {
-      // Server restarted (new deploy) — poll immediately to confirm new version
-      es.close();
-      checkVersion();
-    };
+      es.close()
+      void checkVersion()
+    }
 
-    // Polling fallback in case SSE is blocked by a proxy
-    const interval = setInterval(checkVersion, CHECK_INTERVAL);
+    const interval = setInterval(() => void checkVersion(), CHECK_INTERVAL)
 
-    // Also catch ChunkLoadErrors (reactive check)
     const handleChunkError = (e: ErrorEvent) => {
       if (
-        e.message?.includes("Loading chunk") || 
+        e.message?.includes("Loading chunk") ||
         e.message?.includes("CSS chunk") ||
-        e.message?.includes("SyntaxError: Unexpected token '<'") // Often means HTML returned instead of JS chunk
+        e.message?.includes("SyntaxError: Unexpected token '<'")
       ) {
         if (!hasUnsavedChanges()) {
-          window.location.reload();
-          return;
+          window.location.reload()
+          return
         }
 
-        if (hasChunkWarning.current) return;
-        hasChunkWarning.current = true;
-        toast.warning("Update Ready", {
-          description: "Save your draft first, then click Refresh.",
-          duration: Infinity,
-          position: "bottom-left",
-          action: (
-            <Button size="sm" onClick={() => window.location.reload()} className="ml-auto">
-              Refresh
-            </Button>
-          ),
-        });
-      }
-    };
+        if (hasChunkWarning.current) return
+        hasChunkWarning.current = true
 
-    window.addEventListener("error", handleChunkError);
+        // Keep existing prompt for unsafe auto-refresh cases.
+        const id = "chunk-refresh-warning"
+        window.dispatchEvent(new CustomEvent("coursebridge:chunk-warning", { detail: { id } }))
+      }
+    }
+
+    window.addEventListener("error", handleChunkError)
     const openUpdatePanel = () => {
-      setIsMinimized(false);
-      setShowNotification(true);
-    };
-    window.addEventListener("coursebridge:open-update-notice", openUpdatePanel);
+      setIsMinimized(false)
+      setShowNotification(true)
+    }
+    window.addEventListener("coursebridge:open-update-notice", openUpdatePanel)
 
     return () => {
-      es.close();
-      clearInterval(interval);
-      window.removeEventListener("error", handleChunkError);
-      window.removeEventListener("coursebridge:open-update-notice", openUpdatePanel);
-    };
-  }, [initialVersion]);
+      es.close()
+      clearInterval(interval)
+      window.removeEventListener("error", handleChunkError)
+      window.removeEventListener("coursebridge:open-update-notice", openUpdatePanel)
+    }
+  }, [initialVersion])
+
+  useEffect(() => {
+    const handler = () => {
+      if (!hasUnsavedChanges()) {
+        window.location.reload()
+        return
+      }
+      const actionBar = document.createElement("div")
+      actionBar.className = "fixed bottom-4 left-1/2 z-[120] -translate-x-1/2 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground shadow-xl"
+      actionBar.innerHTML = "Update ready. Save your draft, then refresh."
+      const btn = document.createElement("button")
+      btn.className = "ml-2 rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground"
+      btn.textContent = "Refresh"
+      btn.onclick = () => window.location.reload()
+      actionBar.appendChild(btn)
+      document.body.appendChild(actionBar)
+      window.setTimeout(() => actionBar.remove(), 6000)
+    }
+
+    window.addEventListener("coursebridge:chunk-warning", handler)
+    return () => window.removeEventListener("coursebridge:chunk-warning", handler)
+  }, [])
 
   return (
     <>
@@ -138,13 +132,13 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
           <DeploymentNotification
             onRefresh={() => {
               if (typeof window !== "undefined") {
-                window.sessionStorage.setItem(UPDATE_APPLIED_FLAG, "1");
+                window.sessionStorage.setItem(UPDATE_APPLIED_FLAG, "1")
               }
-              window.location.reload();
+              window.location.reload()
             }}
             onDismiss={() => {
-              setShowNotification(false);
-              setIsMinimized(true);
+              setShowNotification(false)
+              setIsMinimized(true)
             }}
           />
         )}
@@ -152,14 +146,18 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
 
       <AnimatePresence>
         {isMinimized && (
-          <MinimizedUpdatePill 
+          <MinimizedUpdatePill
             onClick={() => {
-              setIsMinimized(false);
-              setShowNotification(true);
-            }} 
+              setIsMinimized(false)
+              setShowNotification(true)
+            }}
           />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {showUpdatedOverlay && <UpdateAppliedOverlay onDone={() => setShowUpdatedOverlay(false)} />}
+      </AnimatePresence>
     </>
-  );
+  )
 }
