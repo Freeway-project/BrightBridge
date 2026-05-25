@@ -56,7 +56,7 @@ export function StagePipeline({ statusCounts, totalCourses }: Props) {
               type="category"
               dataKey="label"
               width={160}
-              tick={{ fontSize: 10, fontWeight: 600, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 10, fontWeight: 600, fill: "var(--muted-foreground)" }}
               tickLine={false}
               axisLine={false}
             />
@@ -79,7 +79,7 @@ export function StagePipeline({ statusCounts, totalCourses }: Props) {
               <LabelList
                 dataKey="count"
                 position="right"
-                style={{ fontSize: 10, fontWeight: 700, fill: "hsl(var(--muted-foreground))" }}
+                style={{ fontSize: 10, fontWeight: 700, fill: "var(--muted-foreground)" }}
               />
             </Bar>
           </BarChart>

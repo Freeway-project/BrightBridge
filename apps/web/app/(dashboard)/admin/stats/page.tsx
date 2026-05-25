@@ -8,6 +8,7 @@ import { WorkloadChart } from "@/components/admin/stats/workload-chart"
 import { ActivityTrend } from "@/components/admin/stats/activity-trend"
 import { StuckCoursesList } from "@/components/admin/stats/stuck-courses-list"
 import { CompletionFunnel } from "@/components/admin/stats/completion-funnel"
+import { StatusPieChart } from "@/components/admin/stats/status-pie"
 
 export default async function AdminStatsPage() {
   const context = await requireProfile()
@@ -37,11 +38,14 @@ export default async function AdminStatsPage() {
             <ActivityTrend auditEvents={data.auditEvents} />
           </div>
 
-          {/* Stuck courses + Funnel side by side */}
+          {/* Pie + Funnel side by side */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <StuckCoursesList stuckCourses={data.stuckCourses} />
+            <StatusPieChart statusCounts={data.statusCounts} totalCourses={data.totalCourses} />
             <CompletionFunnel statusCounts={data.statusCounts} totalCourses={data.totalCourses} />
           </div>
+
+          {/* Stuck courses full width */}
+          <StuckCoursesList stuckCourses={data.stuckCourses} />
         </div>
       </TweakableContent>
     </>
