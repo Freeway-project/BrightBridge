@@ -1,7 +1,26 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import { motion } from "motion/react"
 import { RefreshCw } from "lucide-react"
+import { AnimatedBubbleParticles } from "@/components/ui/animated-bubble-particles"
+
+const AUTO_UPDATE_COLORS = [
+  "#818cf8", // violet
+  "#ec4899", // pink
+  "#f59e0b", // amber
+  "#38bdf8", // sky
+  "#a78bfa", // purple
+  "#34d399", // emerald
+  "#fb7185", // rose
+]
+
+const UPDATE_APPLIED_COLORS = [
+  "#34d399", // emerald
+  "#6ee7b7", // light emerald
+  "#38bdf8", // sky
+  "#a3e635", // lime
+]
 
 interface DeploymentNotificationProps {
   onRefresh: () => void
@@ -74,76 +93,109 @@ export function MinimizedUpdatePill({ onClick }: { onClick: () => void }) {
 }
 
 export function AutoUpdateOverlay({ onDone }: { onDone: () => void }) {
+  const [colorIndex, setColorIndex] = useState(0)
+  const [dots, setDots] = useState(".")
+  const colorTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const dotsTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    colorTimer.current = setInterval(() => {
+      setColorIndex((i) => (i + 1) % AUTO_UPDATE_COLORS.length)
+    }, 800)
+    dotsTimer.current = setInterval(() => {
+      setDots((d) => (d.length >= 3 ? "." : d + "."))
+    }, 400)
+
+    // Auto-dismiss after 5 s then call onDone to trigger reload
+    const dismiss = window.setTimeout(onDone, 5000)
+
+    return () => {
+      if (colorTimer.current) clearInterval(colorTimer.current)
+      if (dotsTimer.current) clearInterval(dotsTimer.current)
+      window.clearTimeout(dismiss)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[120]">
-      <motion.div
-        initial={{ y: "-100%" }}
-        animate={{ y: ["-100%", "0%", "0%", "-100%"] }}
-        transition={{
-          duration: 4.2,
-          times: [0, 0.18, 0.82, 1],
-          ease: ["easeOut", "linear", "easeIn", "easeIn"],
-        }}
-        onAnimationComplete={onDone}
-        className="relative flex items-center justify-center gap-5 overflow-hidden bg-black/90 px-8 py-4 backdrop-blur-xl"
-        style={{
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 4px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
-        }}
+    <div className="pointer-events-none fixed inset-0 z-[120]">
+      <AnimatedBubbleParticles
+        particleColor={AUTO_UPDATE_COLORS[colorIndex]}
+        particleSize={34}
+        spawnInterval={150}
+        blurStrength={13}
+        enableGooEffect
+        width="100vw"
+        height="100vh"
+        className="bg-black/75 backdrop-blur-sm"
+        zIndex={120}
       >
-        {/* subtle gradient shimmer */}
-        <motion.div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
-            backgroundSize: "200% 100%",
-          }}
-          animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-        />
-
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
-          className="relative shrink-0 text-white/80"
-        >
-          <RefreshCw className="size-4" />
-        </motion.div>
-
-        <div className="flex flex-col items-center gap-0.5">
-          <span className="text-sm font-bold tracking-wide text-white">Updating…</span>
-          <span className="text-[11px] italic text-white/50">"Change is the only constant"</span>
+        <div className="flex flex-col items-center gap-4 select-none">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
+            style={{ color: AUTO_UPDATE_COLORS[colorIndex], transition: "color 0.8s ease" }}
+          >
+            <RefreshCw className="size-7" />
+          </motion.div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xl font-bold tracking-tight text-white">
+              Updating{dots}
+            </span>
+            <span className="text-xs italic text-white/45">"Change is the only constant"</span>
+          </div>
         </div>
-      </motion.div>
+      </AnimatedBubbleParticles>
     </div>
   )
 }
 
 export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
-  return (
-    <div className="pointer-events-none fixed inset-0 z-[110] overflow-hidden">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/28"
-      />
+  const [colorIndex, setColorIndex] = useState(0)
+  const colorTimer = useRef<ReturnType<typeof setInterval> | null>(null)
 
-      <motion.div
-        initial={{ y: "-20%" }}
-        animate={{ y: "110%" }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
-        onAnimationComplete={onDone}
-        className="absolute inset-x-0 h-28"
+  useEffect(() => {
+    colorTimer.current = setInterval(() => {
+      setColorIndex((i) => (i + 1) % UPDATE_APPLIED_COLORS.length)
+    }, 600)
+    return () => {
+      if (colorTimer.current) clearInterval(colorTimer.current)
+    }
+  }, [])
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[110]">
+      <AnimatedBubbleParticles
+        particleColor={UPDATE_APPLIED_COLORS[colorIndex]}
+        particleSize={28}
+        spawnInterval={120}
+        blurStrength={11}
+        enableGooEffect
+        width="100vw"
+        height="100vh"
+        className="bg-black/60 backdrop-blur-sm"
+        zIndex={110}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-200/80 to-transparent shadow-[0_0_80px_25px_rgba(125,211,252,0.55)]" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="rounded-full border border-cyan-200/60 bg-black/35 px-4 py-1 text-xs font-semibold tracking-[0.14em] text-cyan-100">
-            UPDATING...
+        <motion.div
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.85, opacity: 0 }}
+          onAnimationComplete={onDone}
+          className="flex flex-col items-center gap-3 select-none"
+        >
+          <span
+            className="rounded-full px-5 py-2 text-sm font-bold tracking-widest text-white uppercase"
+            style={{
+              background: UPDATE_APPLIED_COLORS[colorIndex],
+              boxShadow: `0 0 30px ${UPDATE_APPLIED_COLORS[colorIndex]}88`,
+              transition: "background 0.6s ease, box-shadow 0.6s ease",
+            }}
+          >
+            ✓ Updated
           </span>
-        </div>
-      </motion.div>
+          <span className="text-xs text-white/50">Running the latest build</span>
+        </motion.div>
+      </AnimatedBubbleParticles>
     </div>
   )
 }
