@@ -40,6 +40,7 @@ if [ "$SKIP_PULL" = false ]; then
     log "Currently on '$CURRENT_BRANCH' — switching to main"
     git checkout main
   fi
+  git checkout -- .
   git pull origin main
   log "Git pull complete. $(git log -1 --oneline)"
 fi
