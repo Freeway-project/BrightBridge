@@ -294,6 +294,7 @@ export interface CourseRepository {
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
   listSubmissionHistory(courseId: string): Promise<SubmissionEvent[]>;
+  listQuestionRoundHistory(courseId: string): Promise<SubmissionEvent[]>;
   listRecentAssignments(limit: number): Promise<AssignmentLog[]>;
   listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
   listInstructorCourses(profileId: string): Promise<InstructorCourse[]>;

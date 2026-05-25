@@ -10,7 +10,8 @@ import { IssueTracker } from "../../../courses/[id]/_components/issues/issue-tra
 import { CourseDetailRefreshWrapper } from "./_components/course-detail-refresh-wrapper"
 import { SendToInstructorBanner } from "./_components/send-to-instructor-banner"
 import { ResubmitBanner } from "./_components/resubmit-banner"
-import { getSubmissionHistory } from "@/lib/courses/service"
+import { QuestionRoundBanner } from "./_components/question-round-banner"
+import { getSubmissionHistory, getQuestionRoundHistory } from "@/lib/courses/service"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -21,10 +22,11 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, comments, submissionHistory] = await Promise.all([
+  const [detail, comments, submissionHistory, questionRounds] = await Promise.all([
     getAdminCourseDetail(id),
     getCourseComments(id),
     getSubmissionHistory(id),
+    getQuestionRoundHistory(id),
   ])
   
   if (!detail) notFound()
@@ -58,6 +60,9 @@ export default async function AdminCourseDetailPage({ params }: Props) {
                 )}
                 {course.status === "submitted_to_admin" && (
                   <ResubmitBanner submissions={submissionHistory} />
+                )}
+                {course.status === "instructor_questions" && (
+                  <QuestionRoundBanner rounds={questionRounds} />
                 )}
                 <CourseReviewDetail
                   course={course}

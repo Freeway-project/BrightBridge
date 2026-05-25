@@ -243,6 +243,10 @@ export async function getSubmissionHistory(courseId: string) {
   return getCourseRepository().listSubmissionHistory(courseId);
 }
 
+export async function getQuestionRoundHistory(courseId: string) {
+  return getCourseRepository().listQuestionRoundHistory(courseId);
+}
+
 function cleanOptionalText(value: string | null | undefined) {
   const cleaned = value?.trim();
   return cleaned ? cleaned : null;
