@@ -116,7 +116,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                 <h2 className="text-xl font-bold tracking-tight">Final Submission</h2>
               </div>
 
-              <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-1.5 shadow-2xl shadow-black/30 transition-all hover:border-primary/30">
+              <div className="relative rounded-3xl border border-white/10 bg-card/25 backdrop-blur-2xl p-1.5 shadow-2xl shadow-black/30 transition-all hover:border-primary/30">
                 <GlowingEffect
                   blur={0}
                   spread={40}
@@ -126,7 +126,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                   inactiveZone={0.65}
                   borderWidth={1}
                 />
-                <Card className="relative overflow-hidden border-0 bg-black/45 backdrop-blur-xl shadow-none ring-0">
+                <Card className="relative overflow-hidden border-0 bg-card/45 backdrop-blur-xl shadow-none ring-0">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg font-black uppercase tracking-widest text-muted-foreground/60">
                       Checklist & Verification

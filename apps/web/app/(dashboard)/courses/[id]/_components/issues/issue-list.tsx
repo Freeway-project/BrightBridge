@@ -67,7 +67,7 @@ export function IssueList({ issues, loading = false, phase, onIssuesChange, canR
 
   return (
     <div className="flex gap-4 h-full">
-      <div className="flex-1 flex flex-col gap-4 min-w-0 bg-white/[0.03] backdrop-blur-xl rounded-2xl p-5 border border-white/10 shadow-2xl shadow-black/20">
+      <div className="flex-1 flex flex-col gap-4 min-w-0 bg-card/45 backdrop-blur-xl rounded-2xl p-5 border border-white/10 shadow-2xl shadow-black/20">
         {/* Filter Section Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/5">
           <h4 className="text-sm font-semibold text-foreground/80">Filter Issues</h4>

@@ -377,6 +377,23 @@ export async function requestFixesAction(courseId: string, note: string): Promis
 export async function resolveEscalationAction(escalationId: string, courseId: string, resolutionNote?: string): Promise<void> {
   const ctx = await requireProfile();
   await resolveEscalation(escalationId, ctx.userId, resolutionNote);
+
+  // If the course is still with admin (submitted_to_admin), send it back to the TA
+  // so they can acknowledge the resolution and resubmit.
+  try {
+    const { getCourseRepository } = await import("@/lib/repositories");
+    const course = await getCourseRepository().getCourseSummaryById(courseId);
+    if (course.status === "submitted_to_admin") {
+      await transitionCourseStatus({
+        courseId,
+        toStatus: "admin_changes_requested",
+        note: "Escalation resolved — returned to TA for resubmission.",
+      });
+    }
+  } catch {
+    // Non-fatal: escalation resolved even if course status transition fails.
+  }
+
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath(`/courses/${courseId}`);

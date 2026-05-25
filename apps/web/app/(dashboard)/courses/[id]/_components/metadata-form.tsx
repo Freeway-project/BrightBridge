@@ -287,7 +287,7 @@ function Section({ label, children }: { label: string; children: React.ReactNode
       <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
         {label}
       </p>
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 divide-y divide-white/5 pl-[3px]">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-card/45 backdrop-blur-xl shadow-2xl shadow-black/20 divide-y divide-white/5 pl-[3px]">
         {children}
       </div>
     </section>

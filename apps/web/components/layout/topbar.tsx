@@ -1,10 +1,11 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { Bell, ChevronLeft, Smile } from "lucide-react"
+import { ChevronLeft, Smile } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { NotificationBell } from "./notification-bell"
 import { StatusBadge } from "@/components/courses/status-badge"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { useMemeModal } from "@/components/providers/meme-provider"
@@ -61,11 +62,7 @@ export function Topbar({ title, subtitle, actions, backHref, courseStatus, role 
             <Smile className="size-4" />
           </Button>
         )}
-        <Button variant="ghost" size="icon" aria-label="Notifications" asChild className="text-yellow-400 hover:text-yellow-300">
-          <Link href="/notifications">
-            <Bell className="size-4" />
-          </Link>
-        </Button>
+        <NotificationBell />
       </div>
     </header>
   )
