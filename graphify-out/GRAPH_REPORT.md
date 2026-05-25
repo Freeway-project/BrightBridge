@@ -1,7 +1,7 @@
 # Graph Report - BrightBridge  (2026-05-25)
 
 ## Corpus Check
-- 289 files · ~157,775 words
+- 289 files · ~157,777 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
