@@ -24,6 +24,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
   const [showUpdatedOverlay, setShowUpdatedOverlay] = useState(false)
   const [showAutoUpdate, setShowAutoUpdate] = useState(false)
   const [showWhatsNew, setShowWhatsNew] = useState(false)
+  const [openUpdateNoticeAfterOverlay, setOpenUpdateNoticeAfterOverlay] = useState(false)
   const hasNotified = useRef(false)
   const hasChunkWarning = useRef(false)
 
@@ -41,8 +42,6 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     if (typeof window !== "undefined" && window.sessionStorage.getItem(UPDATE_APPLIED_FLAG) === "1") {
       window.sessionStorage.removeItem(UPDATE_APPLIED_FLAG)
       setShowUpdatedOverlay(true)
-      const timeout = window.setTimeout(() => setShowUpdatedOverlay(false), 1200)
-      return () => window.clearTimeout(timeout)
     }
 
     if (initialVersion === "development" || initialVersion === "dev") return
@@ -106,7 +105,8 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     window.addEventListener("error", handleChunkError)
     const openUpdatePanel = () => {
       setIsMinimized(false)
-      setShowNotification(true)
+      setShowUpdatedOverlay(true)
+      setOpenUpdateNoticeAfterOverlay(true)
     }
     window.addEventListener("coursebridge:open-update-notice", openUpdatePanel)
 
@@ -191,6 +191,11 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
           <UpdateAppliedOverlay
             onDone={() => {
               setShowUpdatedOverlay(false)
+              if (openUpdateNoticeAfterOverlay) {
+                setOpenUpdateNoticeAfterOverlay(false)
+                setShowNotification(true)
+                return
+              }
               // Show What's New once per browser session
               const SEEN_KEY = "coursebridge:whats-new-seen"
               if (typeof window !== "undefined" && !window.sessionStorage.getItem(SEEN_KEY)) {
