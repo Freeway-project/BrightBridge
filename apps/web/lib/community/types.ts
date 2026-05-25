@@ -1,6 +1,24 @@
 import type { Role } from "@coursebridge/workflow"
 
 export type BillboardPriority = "info" | "warn" | "urgent"
+export type CommunityAttachmentStatus = "pending" | "ready" | "deleted"
+export type CommunityAttachmentTargetType = "chat" | "billboard"
+
+export type CommunityAttachment = {
+  id: string
+  chatMessageId: string | null
+  billboardPostId: string | null
+  bucketName: string
+  objectPath: string
+  originalFilename: string
+  contentType: string
+  byteSize: number
+  status: CommunityAttachmentStatus
+  uploadedBy: string
+  createdAt: string
+  updatedAt: string
+  signedUrl: string | null
+}
 
 export type GlobalChatMessage = {
   id: string

@@ -503,15 +503,15 @@ function WorkflowPipeline({ status }: { status: CourseStatus }) {
 
 function PhasePill({ label, state }: { label: string; state: PhaseState }) {
   const styles = {
-    done:   "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/20",
-    active: "bg-orange-500/15 text-orange-600 border-orange-400/30",
-    idle:   "bg-muted text-muted-foreground border-border",
+    done:   "bg-transparent text-green-600 dark:text-green-400 border-green-500/40",
+    active: "bg-transparent text-orange-500 dark:text-orange-400 border-orange-500/40",
+    idle:   "bg-transparent text-muted-foreground border-border/40",
   }[state]
 
   const Icon = state === "done" ? CheckCircle2 : state === "active" ? Loader2 : Circle
 
   return (
-    <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5", styles)}>
+    <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5 transition-all duration-300", styles)}>
       <Icon className={cn("size-2.5 shrink-0", state === "active" && "animate-spin")} />
       <span className="text-[10px] font-medium">{label}</span>
     </div>
