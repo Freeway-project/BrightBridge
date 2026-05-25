@@ -1,6 +1,7 @@
 "use client"
 
 import { useTweaks, type ThemeId } from "@/components/shared/tweak-provider"
+import { AnimatedThemeToggler, runThemeTransition } from "@/components/ui/animated-theme-toggler"
 import { cn } from "@/lib/utils"
 
 const THEMES: { id: ThemeId; label: string; swatch: string; ring: string }[] = [
@@ -14,6 +15,17 @@ const THEMES: { id: ThemeId; label: string; swatch: string; ring: string }[] = [
 export function ThemeSwitcher() {
   const { settings, setSettings } = useTweaks()
 
+  function handleThemeClick(e: React.MouseEvent<HTMLButtonElement>, id: ThemeId) {
+    if (id === settings.theme) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = rect.left + rect.width / 2
+    const y = rect.top + rect.height / 2
+    runThemeTransition(x, y, () => {
+      document.documentElement.setAttribute("data-theme", id)
+      setSettings({ theme: id })
+    }, { variant: "circle", duration: 400 })
+  }
+
   return (
     <div className="space-y-2">
       <label className="flex items-center gap-2 text-xs font-medium text-foreground/70">
@@ -24,7 +36,7 @@ export function ThemeSwitcher() {
         {THEMES.map((t) => (
           <button
             key={t.id}
-            onClick={() => setSettings({ theme: t.id })}
+            onClick={(e) => handleThemeClick(e, t.id)}
             className={cn(
               "flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all",
               "hover:bg-white/5",
@@ -47,6 +59,9 @@ export function ThemeSwitcher() {
             </span>
           </button>
         ))}
+      </div>
+      <div className="pt-1">
+        <AnimatedThemeToggler variant="diamond" className="w-full justify-center" />
       </div>
     </div>
   )

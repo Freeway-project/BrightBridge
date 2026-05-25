@@ -102,7 +102,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
                       href={item.href}
                       className={cn("flex w-full items-center gap-2", collapsed && "justify-center")}
                     >
-                      <item.icon className={cn("size-4 shrink-0 transition-transform", active && "scale-110")} />
+                      <item.icon className={cn("size-4 shrink-0 transition-transform", active && "scale-110", item.href === "/notifications" && !active && "text-yellow-400", item.href === "/notifications" && active && "text-yellow-300")} />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>

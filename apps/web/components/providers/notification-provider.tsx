@@ -21,6 +21,37 @@ const TYPE_LABEL: Record<string, string> = {
   general:    "Note",
 }
 
+let audioContext: AudioContext | null = null
+
+function playNotificationTone(type: "info" | "success" | "warning" = "info") {
+  if (typeof window === "undefined") return
+
+  try {
+    audioContext ??= new window.AudioContext()
+    if (audioContext.state === "suspended") {
+      void audioContext.resume()
+    }
+
+    const now = audioContext.currentTime
+    const osc = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+    const freqMap: Record<typeof type, number> = { info: 740, success: 660, warning: 520 }
+
+    osc.type = "sine"
+    osc.frequency.setValueAtTime(freqMap[type], now)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.025, now + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16)
+
+    osc.connect(gain)
+    gain.connect(audioContext.destination)
+    osc.start(now)
+    osc.stop(now + 0.18)
+  } catch {
+    // Best-effort UI enhancement only.
+  }
+}
+
 interface NotificationProviderProps {
   children: React.ReactNode
   userId: string
@@ -57,13 +88,23 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
     async function getAuthorName(authorId: string): Promise<string> {
       const { data } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, role")
         .eq("id", authorId)
         .single()
-      return data?.full_name ?? "Someone"
+      
+      if (data?.full_name && data.full_name.trim() !== "") {
+        return data.full_name
+      }
+      if (data?.role) {
+        if (data.role === "standard_user") return "Staff Member"
+        if (data.role === "super_admin" || data.role === "admin_full") return "Administrator"
+        if (data.role === "admin_viewer") return "Viewer"
+        if (data.role === "instructor") return "Instructor"
+        if (data.role === "communications") return "Communications Team"
+      }
+      return "Team Member"
     }
 
-    // ── New Issue Created ────────────────────────────────────────────
     const issueInsertChannel = supabase
       .channel("public:course_issues:insert")
       .on(
@@ -95,18 +136,18 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
                 </p>
                 <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
                 {payload.new.description && (
-                  <p className="text-xs italic">&quot;{payload.new.description.substring(0, 80)}{payload.new.description.length > 80 ? '…' : ''}&quot;</p>
+                  <p className="text-xs italic text-muted-foreground">&quot;{payload.new.description.substring(0, 100)}{payload.new.description.length > 100 ? "…" : ""}&quot;</p>
                 )}
               </div>
             ),
             duration: Infinity,
-            action: { label: "View Issue →", onClick: () => router.push(href) },
+            action: { label: "Open Issue", onClick: () => router.push(href) },
           })
+          playNotificationTone("warning")
         }
       )
       .subscribe()
 
-    // ── Issue Status Changed ─────────────────────────────────────────
     const issueUpdateChannel = supabase
       .channel("public:course_issues:update")
       .on(
@@ -124,62 +165,64 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
               ? `/courses/${payload.new.course_id}`
               : `/courses/${payload.new.course_id}/issues`
 
-          const statusMap: Record<string, { icon: string; label: string; color: string }> = {
-            resolved: { icon: "✅", label: "Resolved", color: "text-green-600" },
-            in_review: { icon: "🔄", label: "In Review", color: "text-blue-600" },
-            open: { icon: "↩️", label: "Reopened", color: "text-yellow-600" },
+          const statusMap: Record<string, { icon: string; label: string }> = {
+            resolved: { icon: "✅", label: "Resolved" },
+            in_review: { icon: "🔄", label: "In Review" },
+            open: { icon: "↩️", label: "Reopened" },
           }
 
-          const status = statusMap[payload.new.status] || { icon: "📌", label: "Updated", color: "text-primary" }
+          const status = statusMap[payload.new.status] || { icon: "📌", label: "Updated" }
 
           if (payload.new.status === "resolved") {
-            toast.success(`${status.icon} Issue Resolved`, {
+            toast.success(`${status.icon} Issue ${status.label}`, {
               description: (
                 <div className="space-y-2">
                   <p className="font-semibold">{payload.new.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    Status changed: open → <span className="font-semibold text-green-600">resolved</span>
+                    Status changed: open → <span className="font-semibold text-success">resolved</span>
                   </p>
                   <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
                 </div>
               ),
               duration: Infinity,
-              action: { label: "View Details >", onClick: () => router.push(href) },
+              action: { label: "View Details", onClick: () => router.push(href) },
             })
+            playNotificationTone("success")
           } else if (payload.new.status === "in_review") {
-            toast.info(`${status.icon} Issue In Review`, {
+            toast.info(`${status.icon} Issue ${status.label}`, {
               description: (
                 <div className="space-y-2">
                   <p className="font-semibold">{payload.new.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    Status changed: <span className="text-yellow-600">open</span> → <span className="font-semibold text-blue-600">in review</span>
+                    Status changed: <span className="text-warning">open</span> → <span className="font-semibold text-info">in review</span>
                   </p>
                   <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
                 </div>
               ),
               duration: Infinity,
-              action: { label: "View Details >", onClick: () => router.push(href) },
+              action: { label: "View Details", onClick: () => router.push(href) },
             })
+            playNotificationTone("info")
           } else if (payload.new.status === "open") {
-            toast.warning(`${status.icon} Issue Reopened`, {
+            toast.warning(`${status.icon} Issue ${status.label}`, {
               description: (
                 <div className="space-y-2">
                   <p className="font-semibold">{payload.new.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    Status changed: <span className="text-green-600">resolved</span> → <span className="font-semibold text-yellow-600">open</span>
+                    Status changed: <span className="text-success">resolved</span> → <span className="font-semibold text-warning">open</span>
                   </p>
                   <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
                 </div>
               ),
               duration: Infinity,
-              action: { label: "View Details >", onClick: () => router.push(href) },
+              action: { label: "View Details", onClick: () => router.push(href) },
             })
+            playNotificationTone("warning")
           }
         }
       )
       .subscribe()
 
-    // ── New Comment on Issue ─────────────────────────────────────────
     const commentChannel = supabase
       .channel("public:course_issue_comments:insert")
       .on(
@@ -210,26 +253,24 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
               : `/courses/${issue.course_id}/issues`
 
           const body: string = payload.new.body
-          const preview = body.length > 80 ? `${body.substring(0, 80)}…` : body
+          const preview = body.length > 100 ? `${body.substring(0, 100)}…` : body
 
           toast.info("💬 New Comment", {
             description: (
               <div className="space-y-2">
                 <p className="font-semibold">{issue.title}</p>
-                <p className="text-xs text-muted-foreground italic">&quot;{preview}&quot;</p>
-                <p className="text-xs text-muted-foreground">
-                  By {authorName} on {courseTitle}
-                </p>
+                <p className="text-xs italic text-muted-foreground">&quot;{preview}&quot;</p>
+                <p className="text-xs text-muted-foreground">By {authorName} on {courseTitle}</p>
               </div>
             ),
             duration: Infinity,
-            action: { label: "Reply →", onClick: () => router.push(href) },
+            action: { label: "Reply", onClick: () => router.push(href) },
           })
+          playNotificationTone("info")
         }
       )
       .subscribe()
 
-    // ── Course Assignment → TA ───────────────────────────────────────
     const assignmentChannel = supabase
       .channel("public:course_assignments:insert")
       .on(
@@ -242,13 +283,14 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
           const courseTitle = await getCourseCode(payload.new.course_id)
 
           toast.success("📚 Course Assigned to You", {
-            description: `You've been assigned to review "${courseTitle}" — start when ready`,
+            description: `You were assigned \"${courseTitle}\". Open it when you are ready.`,
             duration: Infinity,
             action: {
-              label: "Open Review →",
+              label: "Open Review",
               onClick: () => router.push(`/courses/${payload.new.course_id}/metadata`),
             },
           })
+          playNotificationTone("success")
         }
       )
       .subscribe()
