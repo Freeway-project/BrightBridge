@@ -157,7 +157,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
         {SYLLABUS_ITEMS.map((item, index) => (
           <div
             key={item.id}
-            className="grid grid-cols-[2fr_140px_130px_1.5fr] items-center border-b border-white/5 px-5 py-3 last:border-0 hover:bg-white/[0.02] transition-colors"
+            className="grid grid-cols-[2fr_140px_130px_1.5fr] items-center border-b border-border/40 px-5 py-3.5 last:border-0 hover:bg-muted/20 transition-colors"
           >
             <div className="space-y-0.5 pr-3">
               <span className="inline-block rounded-md bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground/70">
@@ -171,7 +171,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
                 name={`syllabus_items.${index}.ta_status`}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="h-8 w-full rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200">
+                    <SelectTrigger className="h-9 w-full rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200">
                       <div className="flex items-center gap-1.5">
                         <span className={cn("size-1.5 rounded-full shrink-0", SYLLABUS_DOT[field.value as SyllabusRowStatus] ?? "bg-muted")} />
                         <SelectValue />
@@ -199,7 +199,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
             <div>
               <Input
                 placeholder="Notes…"
-                className="h-8 rounded-lg border-white/10 bg-white/[0.02] hover:bg-white/[0.04] text-xs transition-all duration-200"
+                className="h-9 rounded-lg border-border bg-background/60 hover:bg-background/80 text-xs transition-all duration-200"
                 {...form.register(`syllabus_items.${index}.notes`)}
               />
             </div>
