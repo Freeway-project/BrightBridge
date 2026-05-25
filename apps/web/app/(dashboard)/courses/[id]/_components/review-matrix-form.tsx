@@ -200,7 +200,7 @@ export function ReviewMatrixForm({
         <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
           Course Details
         </p>
-        <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 p-4 md:grid-cols-3">
+        <div className="grid gap-3 rounded-2xl border border-white/10 bg-card/45 backdrop-blur-xl shadow-2xl shadow-black/20 p-4 md:grid-cols-3">
           <FieldStack label="Subject">
             <CleanInput placeholder="BUAD" {...form.register("subject")} />
           </FieldStack>
@@ -230,7 +230,7 @@ export function ReviewMatrixForm({
 
             return (
               <Collapsible defaultOpen key={section.title} className="group/coll relative">
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 pl-[3px]">
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-card/45 backdrop-blur-xl shadow-2xl shadow-black/20 pl-[3px]">
                   {/* Shifting Gradient Tint Bar on Left Side */}
                   <div className="absolute left-[1px] top-0 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/coll:opacity-100 group-hover/coll:w-[4px] transition-all duration-300" />
                   <CollapsibleTrigger className="group flex w-full items-center justify-between px-5 py-4 text-left">
