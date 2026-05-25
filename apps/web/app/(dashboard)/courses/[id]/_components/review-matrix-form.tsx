@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { ChevronDown, Plus, CheckCircle2, Loader2 } from "lucide-react"
+import { ChevronDown, Plus, CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
   reviewMatrixSchema,
@@ -229,8 +229,10 @@ export function ReviewMatrixForm({
             const totalCount = sectionItems.length
 
             return (
-              <Collapsible defaultOpen key={section.title}>
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20">
+              <Collapsible defaultOpen key={section.title} className="group/coll relative">
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 pl-[3px]">
+                  {/* Shifting Gradient Tint Bar on Left Side */}
+                  <div className="absolute left-[1px] top-0 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/coll:opacity-100 group-hover/coll:w-[4px] transition-all duration-300" />
                   <CollapsibleTrigger className="group flex w-full items-center justify-between px-5 py-4 text-left">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold text-foreground">{section.title}</span>
@@ -344,12 +346,15 @@ export function ReviewMatrixForm({
           disabled={isPending}
           onClick={() => void handleSave(true)}
           type="button"
-          className="h-10 rounded-xl px-6 text-sm font-semibold"
+          className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {isPending ? (
-            <><Loader2 className="size-3.5 animate-spin mr-2" />Saving…</>
+            <><Loader2 className="size-4 animate-spin" /> Saving…</>
           ) : (
-            "Save & Next →"
+            <>
+              Save & Next
+              <ArrowRight className="size-4" />
+            </>
           )}
         </Button>
       </div>

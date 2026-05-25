@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { CheckCircle2, Loader2 } from "lucide-react"
+import { CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
   syllabusGradebookSchema,
@@ -273,12 +273,15 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
           disabled={isPending}
           onClick={() => void handleSave(true)}
           type="button"
-          className="h-10 rounded-xl px-6 text-sm font-semibold"
+          className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {isPending ? (
-            <><Loader2 className="size-3.5 animate-spin mr-2" />Saving…</>
+            <><Loader2 className="size-4 animate-spin" /> Saving…</>
           ) : (
-            "Save & Next →"
+            <>
+              Save & Next
+              <ArrowRight className="size-4" />
+            </>
           )}
         </Button>
       </div>
@@ -296,11 +299,13 @@ function ReviewTable({
   children: React.ReactNode
 }) {
   return (
-    <section className="space-y-1.5">
-      <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/50">
+    <section className="relative space-y-2 group/tbl">
+      <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
         {label}
       </p>
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl shadow-black/20 pl-[3px]">
+        {/* Shifting Gradient Tint Bar on Left Side */}
+        <div className="absolute left-[1px] top-6 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/tbl:opacity-100 group-hover/tbl:w-[4px] transition-all duration-300" />
         {/* Column headers */}
         <div
           className="grid items-center border-b border-white/5 bg-white/[0.01] px-5 py-2"
