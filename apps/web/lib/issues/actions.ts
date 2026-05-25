@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireProfile } from '@/lib/auth/context'
 import { createClient } from '@supabase/supabase-js'
 import { CourseIssue, IssueComment, CreateIssueInput, AddCommentInput, IssueStatus } from './types'
+import { transitionCourseStatus } from '@/lib/courses/service'
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
@@ -83,7 +84,32 @@ export async function createIssueAction(
       console.error('[createIssueAction] Comment insert error:', commentError.error)
     }
 
+    // If instructor creates a provision-phase issue while course is sent_to_instructor,
+    // auto-transition to instructor_questions so admin is visibly blocked
+    if (phase === 'provision') {
+      const { data: course } = await supabase
+        .from('courses')
+        .select('status')
+        .eq('id', courseId)
+        .single()
+
+      if (course?.status === 'sent_to_instructor') {
+        try {
+          await transitionCourseStatus({
+            courseId,
+            toStatus: 'instructor_questions',
+            note: `Instructor raised a question: ${input.title.trim()}`,
+          })
+        } catch {
+          // Non-fatal: issue is already created; status transition failure shouldn't block
+        }
+      }
+    }
+
     revalidatePath(`/courses/${courseId}/issue-log`)
+    revalidatePath(`/instructor/courses/${courseId}`)
+    revalidatePath(`/admin/courses/${courseId}`)
+    revalidatePath('/admin')
     return data as CourseIssue
   } catch (err) {
     console.error('[createIssueAction] Error:', err)

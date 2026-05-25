@@ -23,7 +23,7 @@ export default async function IssueLogPage({ params }: Props) {
           courseId={id}
           title="Issues"
         >
-          <IssueTracker courseId={id} phase="migration" userRole={ctx.profile.role} />
+          <IssueTracker courseId={id} phase="migration" userRole={ctx.profile.role} courseStatus={course.status} />
         </CourseWorkspaceRefreshWrapper>
       </main>
     </>

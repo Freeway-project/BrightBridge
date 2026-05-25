@@ -16,7 +16,7 @@ import type { CourseSummary, ReviewProgress, SectionProgress, CourseAssignmentRe
 const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
 const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
 
-export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse } from "@/lib/repositories/contracts";
+export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse, SubmissionEvent } from "@/lib/repositories/contracts";
 
 const LEADERSHIP_TITLES = new Set(["dean", "assistant_dean", "dept_head", "chair"]);
 
@@ -237,6 +237,14 @@ async function insertStatusEvent({
     actorRole: actor.role,
     note: cleanOptionalText(note)
   });
+}
+
+export async function getSubmissionHistory(courseId: string) {
+  return getCourseRepository().listSubmissionHistory(courseId);
+}
+
+export async function getQuestionRoundHistory(courseId: string) {
+  return getCourseRepository().listQuestionRoundHistory(courseId);
 }
 
 function cleanOptionalText(value: string | null | undefined) {

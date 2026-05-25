@@ -8,6 +8,7 @@ import {
   MinimizedUpdatePill,
   UpdateAppliedOverlay,
 } from "./deployment-notification"
+import { WhatsNewModal } from "./whats-new-modal"
 import { AnimatePresence } from "motion/react"
 
 interface DeploymentDetectorProps {
@@ -22,6 +23,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
   const [isMinimized, setIsMinimized] = useState(false)
   const [showUpdatedOverlay, setShowUpdatedOverlay] = useState(false)
   const [showAutoUpdate, setShowAutoUpdate] = useState(false)
+  const [showWhatsNew, setShowWhatsNew] = useState(false)
   const hasNotified = useRef(false)
   const hasChunkWarning = useRef(false)
 
@@ -185,8 +187,25 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       </AnimatePresence>
 
       <AnimatePresence>
-        {showUpdatedOverlay && <UpdateAppliedOverlay onDone={() => setShowUpdatedOverlay(false)} />}
+        {showUpdatedOverlay && (
+          <UpdateAppliedOverlay
+            onDone={() => {
+              setShowUpdatedOverlay(false)
+              // Show What's New once per browser session
+              const SEEN_KEY = "coursebridge:whats-new-seen"
+              if (typeof window !== "undefined" && !window.sessionStorage.getItem(SEEN_KEY)) {
+                window.sessionStorage.setItem(SEEN_KEY, "1")
+                setShowWhatsNew(true)
+              }
+            }}
+          />
+        )}
       </AnimatePresence>
+
+      <WhatsNewModal
+        open={showWhatsNew}
+        onClose={() => setShowWhatsNew(false)}
+      />
     </>
   )
 }

@@ -13,15 +13,6 @@ export function getTab(course: CourseSummary): CourseTab {
   if (STAGING_STATUSES.has(status)) return "staging"
   if (WITH_INSTRUCTOR_STATUSES.has(status)) return "with_instructor"
   if (TODO_STATUSES.has(status)) return "todo"
-  if (IN_PROGRESS_STATUSES.has(status)) {
-    if (status === "ta_review_in_progress") {
-      const hasAnyWork =
-        reviewProgress?.courseMetadata.exists ||
-        reviewProgress?.reviewMatrix.exists ||
-        reviewProgress?.syllabusReview.exists
-      if (!hasAnyWork) return "todo"
-    }
-    return "in_progress"
-  }
+  if (IN_PROGRESS_STATUSES.has(status)) return "in_progress"
   return "done"
 }

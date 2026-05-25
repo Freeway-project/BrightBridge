@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useState, useTransition } from "react"
-import { CheckCircle2, Circle, Send, Sparkles, AlertCircle } from "lucide-react"
+import { CheckCircle2, Circle, Send, Sparkles, AlertCircle, RefreshCw } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { submitReview } from "@/lib/workspace/actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
 import { ReviewSummary } from "./review-summary"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { toast } from "sonner"
@@ -30,11 +31,14 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  
+  const [resubmitNote, setResubmitNote] = useState("")
+
+  const isResubmit = courseStatus === "admin_changes_requested"
   const submitAllowedStatuses: CourseStatus[] = ["assigned_to_ta", "ta_review_in_progress", "admin_changes_requested"]
   const isStatusSubmittable = submitAllowedStatuses.includes(courseStatus)
   const blockers = sections.filter((section) => section.required && !section.complete)
-  const disabled = blockers.length > 0 || isPending || !isStatusSubmittable || isSuccess
+  const resubmitNoteRequired = isResubmit && resubmitNote.trim().length === 0
+  const disabled = blockers.length > 0 || isPending || !isStatusSubmittable || isSuccess || resubmitNoteRequired
 
   useEffect(() => {
     if (!isSuccess) return
@@ -54,7 +58,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
 
     startTransition(async () => {
       setErrorMsg(null)
-      const res = await submitReview(courseId)
+      const res = await submitReview(courseId, isResubmit ? resubmitNote.trim() : undefined)
       if (!res?.ok) {
         const message = res?.error || "Failed to submit."
         setErrorMsg(message)
@@ -166,6 +170,25 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                       ))}
                     </div>
 
+                    {isResubmit && (
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-400">
+                          <RefreshCw className="mt-0.5 size-5 shrink-0" />
+                          <div>
+                            <p className="text-sm font-bold">Admin Requested Changes</p>
+                            <p className="text-xs font-medium opacity-90">Describe what you fixed before resubmitting so the admin knows what changed.</p>
+                          </div>
+                        </div>
+                        <Textarea
+                          placeholder="What did you fix or update? (required)"
+                          value={resubmitNote}
+                          onChange={(e) => setResubmitNote(e.target.value)}
+                          rows={3}
+                          className="resize-none rounded-xl border-amber-500/30 bg-amber-500/5 text-sm placeholder:text-muted-foreground/50 focus-visible:ring-amber-500/40"
+                        />
+                      </div>
+                    )}
+
                     <div className="space-y-4">
                       {blockers.length > 0 && (
                         <motion.div 
@@ -209,11 +232,18 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData }: Su
                         size="lg"
                         className={cn(
                           "h-14 min-w-[200px] rounded-2xl px-8 text-base font-black uppercase tracking-[0.15em] transition-all duration-500",
-                          !disabled && "bg-gradient-to-r from-blue-600 to-violet-600 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 active:scale-95"
+                          !disabled && isResubmit
+                            ? "bg-gradient-to-r from-amber-500 to-orange-500 shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:-translate-y-1 active:scale-95"
+                            : !disabled && "bg-gradient-to-r from-blue-600 to-violet-600 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 active:scale-95"
                         )}
                       >
                         {isPending ? (
-                          "Submitting..."
+                          isResubmit ? "Resubmitting..." : "Submitting..."
+                        ) : isResubmit ? (
+                          <>
+                            Resubmit to Admin
+                            <RefreshCw className="ml-2 size-5" />
+                          </>
                         ) : (
                           <>
                             Submit Review

@@ -27,6 +27,7 @@ type CourseRow = {
   department: string | null;
   status: CourseStatus;
   updated_at: string;
+  submission_count?: number;
 };
 
 type IssueRow = {
@@ -153,7 +154,32 @@ async function getRelevantCourses(courseIds: string[] | null, role: Role): Promi
     throw new Error(`Could not load notification courses: ${error.message}`);
   }
 
-  return (data ?? []) as CourseRow[];
+  const courses = (data ?? []) as CourseRow[];
+
+  // For submitted_to_admin courses, count how many times each was submitted
+  const submittedIds = courses
+    .filter((c) => c.status === "submitted_to_admin")
+    .map((c) => c.id);
+
+  if (submittedIds.length > 0) {
+    const { data: events } = await admin
+      .from("course_status_events")
+      .select("course_id")
+      .in("course_id", submittedIds)
+      .eq("to_status", "submitted_to_admin");
+
+    const countMap = new Map<string, number>();
+    for (const ev of events ?? []) {
+      countMap.set(ev.course_id, (countMap.get(ev.course_id) ?? 0) + 1);
+    }
+    for (const course of courses) {
+      if (countMap.has(course.id)) {
+        course.submission_count = countMap.get(course.id);
+      }
+    }
+  }
+
+  return courses;
 }
 
 async function getRelevantIssues(courseIds: string[] | null): Promise<IssueRow[]> {
@@ -232,7 +258,7 @@ function formatAuthorName(fullName: string | null | undefined, role: string | nu
 
 function courseToNotification(course: CourseRow, role: Role): NotificationItem {
   const label = getCourseStatusLabel(course.status);
-  const action = getCourseActionLabel(course.status, role);
+  const action = getCourseActionLabel(course.status, role, course.submission_count);
 
   let tone: NotificationTone = "default";
   if (course.status === "admin_changes_requested" || course.status === "instructor_questions") {
@@ -309,9 +335,13 @@ function getPendingStatuses(role: Role): CourseStatus[] {
   return [];
 }
 
-function getCourseActionLabel(status: CourseStatus, role: Role) {
+function getCourseActionLabel(status: CourseStatus, role: Role, submissionCount?: number) {
   if (status === "course_created") return "Course needs staff assignment";
-  if (status === "submitted_to_admin") return "Course is ready for admin review";
+  if (status === "submitted_to_admin") {
+    return submissionCount && submissionCount > 1
+      ? "Course resubmitted by TA"
+      : "Course is ready for admin review";
+  }
   if (status === "instructor_approved") return "Course is ready for final approval";
   if (status === "sent_to_instructor") return "Course is waiting for instructor review";
   if (status === "instructor_questions") return role === "instructor" ? "Questions need follow-up" : "Instructor questions need review";
