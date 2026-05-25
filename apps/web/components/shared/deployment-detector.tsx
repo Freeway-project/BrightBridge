@@ -2,22 +2,38 @@
 
 import { useEffect, useRef, useState } from "react"
 import { hasUnsavedChanges } from "@/lib/deployment-sync"
-import { DeploymentNotification, MinimizedUpdatePill, UpdateAppliedOverlay } from "./deployment-notification"
+import {
+  AutoUpdateOverlay,
+  DeploymentNotification,
+  MinimizedUpdatePill,
+  UpdateAppliedOverlay,
+} from "./deployment-notification"
 import { AnimatePresence } from "motion/react"
 
 interface DeploymentDetectorProps {
   initialVersion: string
 }
 
-const CHECK_INTERVAL = 1000 * 90
+const CHECK_INTERVAL = 1000 * 60 * 3 // 3 minutes
 const UPDATE_APPLIED_FLAG = "coursebridge:update-applied"
 
 export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) {
   const [showNotification, setShowNotification] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [showUpdatedOverlay, setShowUpdatedOverlay] = useState(false)
+  const [showAutoUpdate, setShowAutoUpdate] = useState(false)
   const hasNotified = useRef(false)
   const hasChunkWarning = useRef(false)
+
+  const triggerUpdateDetected = () => {
+    if (hasNotified.current) return
+    hasNotified.current = true
+    if (hasUnsavedChanges()) {
+      setShowNotification(true)
+    } else {
+      setShowAutoUpdate(true)
+    }
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.sessionStorage.getItem(UPDATE_APPLIED_FLAG) === "1") {
@@ -38,8 +54,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
 
         const data = await res.json()
         if (data.version && data.version !== initialVersion && data.version !== "development") {
-          hasNotified.current = true
-          setShowNotification(true)
+          triggerUpdateDetected()
         }
       } catch {
         // Ignore connectivity/version errors.
@@ -52,8 +67,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       try {
         const data = JSON.parse(e.data)
         if (data.version && data.version !== initialVersion && data.version !== "development") {
-          hasNotified.current = true
-          setShowNotification(true)
+          triggerUpdateDetected()
           es.close()
         }
       } catch {
@@ -82,7 +96,6 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
         if (hasChunkWarning.current) return
         hasChunkWarning.current = true
 
-        // Keep existing prompt for unsafe auto-refresh cases.
         const id = "chunk-refresh-warning"
         window.dispatchEvent(new CustomEvent("coursebridge:chunk-warning", { detail: { id } }))
       }
@@ -101,6 +114,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       window.removeEventListener("error", handleChunkError)
       window.removeEventListener("coursebridge:open-update-notice", openUpdatePanel)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialVersion])
 
   useEffect(() => {
@@ -110,10 +124,12 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
         return
       }
       const actionBar = document.createElement("div")
-      actionBar.className = "fixed bottom-4 left-1/2 z-[120] -translate-x-1/2 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground shadow-xl"
+      actionBar.className =
+        "fixed bottom-4 left-1/2 z-[120] -translate-x-1/2 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground shadow-xl"
       actionBar.innerHTML = "Update ready. Save your draft, then refresh."
       const btn = document.createElement("button")
-      btn.className = "ml-2 rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground"
+      btn.className =
+        "ml-2 rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground"
       btn.textContent = "Refresh"
       btn.onclick = () => window.location.reload()
       actionBar.appendChild(btn)
@@ -150,6 +166,19 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
             onClick={() => {
               setIsMinimized(false)
               setShowNotification(true)
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAutoUpdate && (
+          <AutoUpdateOverlay
+            onDone={() => {
+              if (typeof window !== "undefined") {
+                window.sessionStorage.setItem(UPDATE_APPLIED_FLAG, "1")
+              }
+              window.location.reload()
             }}
           />
         )}

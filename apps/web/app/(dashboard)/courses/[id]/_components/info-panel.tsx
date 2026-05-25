@@ -63,26 +63,31 @@ export function InfoPanel({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7 rounded-full hover:bg-white/5"
+          className="size-7 rounded-full hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all"
           onClick={() => setIsCollapsed(false)}
           title="Expand sidebar"
         >
           <ChevronLeft className="size-4" />
         </Button>
         <div className="h-px w-5 bg-border-icy" />
-        <Layout className="size-4 text-muted-foreground/25" />
+        <Layout className="size-4 text-muted-foreground/30 animate-pulse" />
       </aside>
     )
   }
 
   return (
     <aside className="hidden w-[320px] shrink-0 border-l border-border-icy bg-sidebar/40 lg:block transition-all duration-300 relative overflow-hidden backdrop-blur-md">
-      <div className="flex flex-col h-full overflow-hidden">
-        <div className="absolute top-3 right-3 z-10">
+      <div className="flex flex-col h-full overflow-hidden bg-sidebar/20">
+        {/* Dedicated Glass Header for InfoPanel */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border-icy bg-white/[0.02] backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <Layout className="size-3.5 text-muted-foreground/80" />
+            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-foreground/80">Workspace Info</span>
+          </div>
           <Button
             variant="ghost"
             size="icon"
-            className="size-7 rounded-full hover:bg-white/5 border border-border-icy"
+            className="size-7 rounded-full hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all"
             onClick={() => setIsCollapsed(true)}
             title="Collapse sidebar"
           >

@@ -73,6 +73,53 @@ export function MinimizedUpdatePill({ onClick }: { onClick: () => void }) {
   )
 }
 
+export function AutoUpdateOverlay({ onDone }: { onDone: () => void }) {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-[120]">
+      <motion.div
+        initial={{ y: "-100%" }}
+        animate={{ y: ["-100%", "0%", "0%", "-100%"] }}
+        transition={{
+          duration: 4.2,
+          times: [0, 0.18, 0.82, 1],
+          ease: ["easeOut", "linear", "easeIn", "easeIn"],
+        }}
+        onAnimationComplete={onDone}
+        className="relative flex items-center justify-center gap-5 overflow-hidden bg-black/90 px-8 py-4 backdrop-blur-xl"
+        style={{
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 4px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
+        }}
+      >
+        {/* subtle gradient shimmer */}
+        <motion.div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)",
+            backgroundSize: "200% 100%",
+          }}
+          animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+        />
+
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
+          className="relative shrink-0 text-white/80"
+        >
+          <RefreshCw className="size-4" />
+        </motion.div>
+
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-sm font-bold tracking-wide text-white">Updating…</span>
+          <span className="text-[11px] italic text-white/50">"Change is the only constant"</span>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
   return (
     <div className="pointer-events-none fixed inset-0 z-[110] overflow-hidden">
