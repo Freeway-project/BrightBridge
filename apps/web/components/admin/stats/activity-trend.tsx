@@ -34,19 +34,19 @@ export function ActivityTrend({ auditEvents }: Props) {
           <AreaChart data={days} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
             <defs>
               <linearGradient id="activityGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.35} />
                 <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 9, fill: "var(--muted-foreground)" }}
               tickLine={false}
               axisLine={false}
               interval={4}
             />
             <YAxis
-              tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 9, fill: "var(--muted-foreground)" }}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}

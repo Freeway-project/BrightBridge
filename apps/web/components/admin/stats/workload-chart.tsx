@@ -41,7 +41,7 @@ export function WorkloadChart({ taWorkload }: Props) {
           <BarChart data={data} margin={{ left: 0, right: 8, top: 4, bottom: 32 }}>
             <XAxis
               dataKey="name"
-              tick={{ fontSize: 9, fontWeight: 700, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 9, fontWeight: 700, fill: "var(--muted-foreground)" }}
               tickLine={false}
               axisLine={false}
               angle={-35}
@@ -49,7 +49,7 @@ export function WorkloadChart({ taWorkload }: Props) {
               interval={0}
             />
             <YAxis
-              tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 9, fill: "var(--muted-foreground)" }}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
@@ -73,8 +73,8 @@ export function WorkloadChart({ taWorkload }: Props) {
               wrapperStyle={{ fontSize: 9, fontWeight: 700, paddingTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}
               formatter={(value) => (value === "active" ? "Active" : "Needs Fixes")}
             />
-            <Bar dataKey="active" fill="#3b82f6" fillOpacity={0.8} radius={[4, 4, 0, 0]} maxBarSize={18} />
-            <Bar dataKey="fixes" fill="#ef4444" fillOpacity={0.8} radius={[4, 4, 0, 0]} maxBarSize={18} />
+            <Bar dataKey="active" fill="#3b82f6" fillOpacity={0.85} radius={[4, 4, 0, 0]} maxBarSize={18} />
+            <Bar dataKey="fixes" fill="#ef4444" fillOpacity={0.85} radius={[4, 4, 0, 0]} maxBarSize={18} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

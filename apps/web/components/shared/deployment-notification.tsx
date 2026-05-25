@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "motion/react"
-import { CheckCircle2, RefreshCw } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 
 interface DeploymentNotificationProps {
   onRefresh: () => void
@@ -75,24 +75,26 @@ export function MinimizedUpdatePill({ onClick }: { onClick: () => void }) {
 
 export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
   return (
-    <div className="pointer-events-none fixed inset-0 z-[110] flex items-center justify-center px-4">
+    <div className="pointer-events-none fixed inset-0 z-[110] overflow-hidden">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/35"
+        className="absolute inset-0 bg-black/28"
       />
+
       <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.24 }}
+        initial={{ y: "-20%" }}
+        animate={{ y: "110%" }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
         onAnimationComplete={onDone}
-        className="relative rounded-2xl border border-emerald-400/30 bg-card/95 px-5 py-4 shadow-[0_20px_90px_rgba(16,185,129,0.35)]"
+        className="absolute inset-x-0 h-28"
       >
-        <div className="flex items-center gap-2 text-emerald-400">
-          <CheckCircle2 className="size-4" />
-          <span className="text-sm font-semibold">Updated</span>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-200/80 to-transparent shadow-[0_0_80px_25px_rgba(125,211,252,0.55)]" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="rounded-full border border-cyan-200/60 bg-black/35 px-4 py-1 text-xs font-semibold tracking-[0.14em] text-cyan-100">
+            UPDATING...
+          </span>
         </div>
       </motion.div>
     </div>

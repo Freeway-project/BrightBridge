@@ -23,6 +23,8 @@ type InfoPanelProps = {
   comments: any[]
 }
 
+const INFO_PANEL_COLLAPSED_KEY = "coursebridge:course-review-info-panel-collapsed"
+
 export function InfoPanel({
   courseId,
   courseStatus,
@@ -34,6 +36,15 @@ export function InfoPanel({
 }: InfoPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [formattedDate, setFormattedDate] = useState<string | null>(null)
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(INFO_PANEL_COLLAPSED_KEY)
+    if (saved === "1") setIsCollapsed(true)
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem(INFO_PANEL_COLLAPSED_KEY, isCollapsed ? "1" : "0")
+  }, [isCollapsed])
 
   useEffect(() => {
     if (lastSavedAt) {
@@ -48,33 +59,30 @@ export function InfoPanel({
 
   if (isCollapsed) {
     return (
-      <aside className="hidden w-12 shrink-0 border-l border-border-icy bg-sidebar/40 xl:flex flex-col items-center py-4 gap-4 transition-all duration-300 backdrop-blur-sm">
+      <aside className="hidden w-10 shrink-0 border-l border-border-icy bg-sidebar/40 lg:flex flex-col items-center py-3 gap-3 transition-all duration-300 backdrop-blur-sm">
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 rounded-full hover:bg-white/5"
+          className="size-7 rounded-full hover:bg-white/5"
           onClick={() => setIsCollapsed(false)}
           title="Expand sidebar"
         >
           <ChevronLeft className="size-4" />
         </Button>
-        <div className="h-px w-6 bg-border-icy" />
-        <div className="flex flex-col gap-6 py-2">
-          <Layout className="size-5 text-muted-foreground/20" />
-        </div>
+        <div className="h-px w-5 bg-border-icy" />
+        <Layout className="size-4 text-muted-foreground/25" />
       </aside>
     )
   }
 
   return (
-    <aside className="hidden w-[420px] shrink-0 border-l border-border-icy bg-sidebar/40 xl:block transition-all duration-300 relative overflow-hidden backdrop-blur-md">
+    <aside className="hidden w-[320px] shrink-0 border-l border-border-icy bg-sidebar/40 lg:block transition-all duration-300 relative overflow-hidden backdrop-blur-md">
       <div className="flex flex-col h-full overflow-hidden">
-        {/* Toggle Button */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-3 right-3 z-10">
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 rounded-full hover:bg-white/5 border border-border-icy"
+            className="size-7 rounded-full hover:bg-white/5 border border-border-icy"
             onClick={() => setIsCollapsed(true)}
             title="Collapse sidebar"
           >
@@ -82,18 +90,18 @@ export function InfoPanel({
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-border/20">
-          <div className="flex flex-col gap-8 pb-10">
+        <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-border/20">
+          <div className="flex flex-col gap-6 pb-8">
             <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">
                   Review Progress
                 </p>
                 <div className="flex items-center gap-2">
-                   <div className="h-1 w-16 rounded-full bg-primary/10 overflow-hidden">
-                      <div 
-                         className="h-full bg-primary transition-all duration-1000" 
-                         style={{ width: `${(progress.filter(p => p.complete).length / progress.length) * 100}%` }} 
+                   <div className="h-1 w-14 rounded-full bg-primary/10 overflow-hidden">
+                      <div
+                         className="h-full bg-primary transition-all duration-1000"
+                         style={{ width: `${(progress.filter(p => p.complete).length / progress.length) * 100}%` }}
                       />
                    </div>
                    <p className="text-[10px] font-black text-primary">
@@ -122,7 +130,7 @@ export function InfoPanel({
               </div>
             </section>
 
-            <div className="pt-6 border-t border-border-icy flex flex-col gap-6">
+            <div className="pt-5 border-t border-border-icy flex flex-col gap-5">
               <section className="space-y-3 px-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">
                   Audit Activity
@@ -145,7 +153,7 @@ export function InfoPanel({
                     Active Channel
                   </p>
                 </div>
-                <div className="min-h-[400px] border border-border-icy rounded-2xl overflow-hidden bg-background/40">
+                <div className="min-h-[360px] border border-border-icy rounded-2xl overflow-hidden bg-background/40">
                   <CourseConversation
                     courseId={courseId}
                     currentUserId={reviewerId}
