@@ -45,7 +45,7 @@ function mapComment(row: RawComment): EscalationMessage {
   };
 }
 
-function mapIssue(row: RawIssue, messages: EscalationMessage[]): EscalationWithMessages {
+function mapIssue(row: RawIssue, messages: EscalationMessage[], resolutionNote?: string | null): EscalationWithMessages {
   return {
     id: row.id,
     course_id: row.course_id,
@@ -58,6 +58,7 @@ function mapIssue(row: RawIssue, messages: EscalationMessage[]): EscalationWithM
     created_at: row.created_at,
     author_name: row.profiles?.full_name ?? undefined,
     author_email: row.profiles?.email ?? undefined,
+    resolutionNote: resolutionNote ?? null,
     messages,
   };
 }
@@ -84,11 +85,16 @@ export function createSupabaseEscalationRepository(): EscalationRepository {
 
       return (data ?? []).map((row) => {
         const r = row as unknown as RawIssue;
-        const messages = (r.course_issue_comments ?? [])
+        const allComments = r.course_issue_comments ?? [];
+        const messages = allComments
           .filter((c) => !(c as any).is_system_message)
           .map(mapComment);
         messages.sort((a, b) => a.created_at.localeCompare(b.created_at));
-        return mapIssue(r, messages);
+        const systemNotes = allComments
+          .filter((c) => (c as any).is_system_message)
+          .sort((a, b) => b.created_at.localeCompare(a.created_at));
+        const resolutionNote = systemNotes[0]?.body ?? null;
+        return mapIssue(r, messages, resolutionNote);
       });
     },
 
@@ -205,7 +211,7 @@ export function createSupabaseEscalationRepository(): EscalationRepository {
       return mapComment(data as unknown as RawComment);
     },
 
-    async resolveEscalation(escalationId, resolvedBy) {
+    async resolveEscalation(escalationId, resolvedBy, resolutionNote?: string) {
       const admin = getSupabaseAdminClientOrThrow();
       const { error } = await admin
         .from("course_issues")
@@ -213,6 +219,17 @@ export function createSupabaseEscalationRepository(): EscalationRepository {
         .eq("id", escalationId);
 
       if (error) throw error;
+
+      if (resolutionNote?.trim()) {
+        await admin
+          .from("course_issue_comments")
+          .insert({
+            issue_id: escalationId,
+            author_id: resolvedBy,
+            body: resolutionNote.trim(),
+            is_system_message: true,
+          });
+      }
     },
 
     async countOpenEscalations() {

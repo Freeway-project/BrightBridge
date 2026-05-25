@@ -374,9 +374,9 @@ export async function requestFixesAction(courseId: string, note: string): Promis
   redirect("/admin");
 }
 
-export async function resolveEscalationAction(escalationId: string, courseId: string): Promise<void> {
+export async function resolveEscalationAction(escalationId: string, courseId: string, resolutionNote?: string): Promise<void> {
   const ctx = await requireProfile();
-  await resolveEscalation(escalationId, ctx.userId);
+  await resolveEscalation(escalationId, ctx.userId, resolutionNote);
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath(`/courses/${courseId}`);

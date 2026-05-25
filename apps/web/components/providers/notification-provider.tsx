@@ -82,7 +82,9 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
           const typeLabel = TYPE_LABEL[payload.new.type] ?? "Issue"
           const href = IS_ADMIN(role)
             ? `/admin/courses/${payload.new.course_id}`
-            : `/courses/${payload.new.course_id}/issues`
+            : payload.new.type === "escalation"
+              ? `/courses/${payload.new.course_id}`
+              : `/courses/${payload.new.course_id}/issues`
 
           toast.warning(`${icon} New ${typeLabel}`, {
             description: (
@@ -118,7 +120,9 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
           const courseTitle = await getCourseCode(payload.new.course_id)
           const href = IS_ADMIN(role)
             ? `/admin/courses/${payload.new.course_id}`
-            : `/courses/${payload.new.course_id}/issues`
+            : payload.new.type === "escalation"
+              ? `/courses/${payload.new.course_id}`
+              : `/courses/${payload.new.course_id}/issues`
 
           const statusMap: Record<string, { icon: string; label: string; color: string }> = {
             resolved: { icon: "✅", label: "Resolved", color: "text-green-600" },
@@ -188,7 +192,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
 
           const { data: issue } = await supabase
             .from("course_issues")
-            .select("course_id, title")
+            .select("course_id, title, type")
             .eq("id", payload.new.issue_id)
             .single()
 
@@ -201,7 +205,9 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
 
           const href = IS_ADMIN(role)
             ? `/admin/courses/${issue.course_id}`
-            : `/courses/${issue.course_id}/issues`
+            : issue.type === "escalation"
+              ? `/courses/${issue.course_id}`
+              : `/courses/${issue.course_id}/issues`
 
           const body: string = payload.new.body
           const preview = body.length > 80 ? `${body.substring(0, 80)}…` : body

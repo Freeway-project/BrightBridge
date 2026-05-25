@@ -53,9 +53,16 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
   const [isPending, startTransition] = useTransition()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
+  const [resolveState, setResolveState] = useState<Record<string, { open: boolean; note: string }>>({})
   const router = useRouter()
 
   const openEscalations = escalations.filter((e) => e.status === "open")
+
+  function isResolveOpen(id: string) { return resolveState[id]?.open ?? false }
+  function getResolveNote(id: string) { return resolveState[id]?.note ?? "" }
+  function openResolve(id: string) { setResolveState(s => ({ ...s, [id]: { open: true, note: s[id]?.note ?? "" } })) }
+  function cancelResolve(id: string) { setResolveState(s => ({ ...s, [id]: { open: false, note: "" } })) }
+  function setEscalationNote(id: string, value: string) { setResolveState(s => ({ ...s, [id]: { ...s[id], note: value } })) }
 
   function handleApprove() {
     startTransition(async () => {
@@ -270,16 +277,54 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Active Resolve Controls</h3>
               <div className="space-y-2">
                 {openEscalations.map(e => (
-                  <div key={e.id} className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/10 group hover:bg-red-500/10 transition-colors">
-                    <span className="text-xs font-bold truncate flex-1 pr-2 text-foreground/80">{e.title}</span>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-8 px-3 text-[9px] uppercase font-black tracking-widest text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white transition-all rounded-lg"
-                      onClick={() => resolveEscalationAction(e.id, course.id)}
-                    >
-                      Resolve
-                    </Button>
+                  <div key={e.id} className="p-3 rounded-xl bg-red-500/5 border border-red-500/10 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold truncate flex-1 pr-2 text-foreground/80">{e.title}</span>
+                      {!isResolveOpen(e.id) && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-3 text-[9px] uppercase font-black tracking-widest text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white transition-all rounded-lg"
+                          onClick={() => openResolve(e.id)}
+                        >
+                          Resolve
+                        </Button>
+                      )}
+                    </div>
+                    {isResolveOpen(e.id) && (
+                      <div className="space-y-2">
+                        <textarea
+                          className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs resize-none h-14 focus:outline-none focus:border-green-500"
+                          placeholder="Resolution note for TA (optional)..."
+                          value={getResolveNote(e.id)}
+                          onChange={(ev) => setEscalationNote(e.id, ev.target.value)}
+                        />
+                        <div className="flex gap-1.5">
+                          <Button
+                            size="sm"
+                            className="h-7 flex-1 text-[9px] uppercase font-black tracking-widest bg-green-600 hover:bg-green-700 text-white rounded-lg"
+                            disabled={isPending}
+                            onClick={() => {
+                              startTransition(async () => {
+                                await resolveEscalationAction(e.id, course.id, getResolveNote(e.id).trim() || undefined)
+                                cancelResolve(e.id)
+                              })
+                            }}
+                          >
+                            {isPending ? "Saving…" : "Confirm"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-[9px] uppercase font-black tracking-widest rounded-lg"
+                            disabled={isPending}
+                            onClick={() => cancelResolve(e.id)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

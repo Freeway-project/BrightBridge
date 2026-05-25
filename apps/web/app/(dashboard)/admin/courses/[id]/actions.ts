@@ -61,10 +61,10 @@ export async function sendEscalationReplyAction(
   }
 }
 
-export async function resolveEscalationAction(escalationId: string, courseId: string) {
+export async function resolveEscalationAction(escalationId: string, courseId: string, resolutionNote?: string) {
   const profile = await requireProfile()
   try {
-    await resolveEscalation(escalationId, profile.userId)
+    await resolveEscalation(escalationId, profile.userId, resolutionNote)
     revalidatePath(`/admin/courses/${courseId}`)
     revalidatePath(`/admin`)
     revalidatePath(`/courses/${courseId}`)

@@ -46,6 +46,6 @@ export async function addEscalationMessage(
   return getEscalationRepository().addMessage(escalationId, authorId, body);
 }
 
-export async function resolveEscalation(escalationId: string, resolvedBy: string): Promise<void> {
-  return getEscalationRepository().resolveEscalation(escalationId, resolvedBy);
+export async function resolveEscalation(escalationId: string, resolvedBy: string, resolutionNote?: string): Promise<void> {
+  return getEscalationRepository().resolveEscalation(escalationId, resolvedBy, resolutionNote);
 }

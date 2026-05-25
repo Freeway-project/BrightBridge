@@ -335,6 +335,7 @@ export type CourseEscalation = {
   created_at: string;
   author_name?: string;
   author_email?: string;
+  resolutionNote?: string | null;
 };
 
 export type EscalationMessage = {
@@ -371,7 +372,7 @@ export interface EscalationRepository {
   getOpenEscalations(): Promise<OpenEscalationRow[]>;
   createEscalation(input: CreateEscalationInput): Promise<EscalationWithMessages>;
   addMessage(escalationId: string, authorId: string, body: string): Promise<EscalationMessage>;
-  resolveEscalation(escalationId: string, resolvedBy: string): Promise<void>;
+  resolveEscalation(escalationId: string, resolvedBy: string, resolutionNote?: string): Promise<void>;
   countOpenEscalations(): Promise<number>;
 }
 

@@ -105,10 +105,14 @@ export function EscalationsTable({ escalations }: Props) {
 
 function EscalationRow({ row }: { row: OpenEscalationRow }) {
   const [isPending, startTransition] = useTransition()
+  const [isResolving, setIsResolving] = useState(false)
+  const [note, setNote] = useState("")
 
   function handleResolve() {
     startTransition(async () => {
-      await resolveEscalationAction(row.id, row.course_id)
+      await resolveEscalationAction(row.id, row.course_id, note.trim() || undefined)
+      setIsResolving(false)
+      setNote("")
     })
   }
 
@@ -155,15 +159,34 @@ function EscalationRow({ row }: { row: OpenEscalationRow }) {
               View
             </Link>
           </Button>
-          <Button
-            size="sm"
-            className="h-7 px-2 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
-            disabled={isPending}
-            onClick={handleResolve}
-          >
-            <CheckCircle2 className="size-3" />
-            Resolve
-          </Button>
+          {!isResolving ? (
+            <Button
+              size="sm"
+              className="h-7 px-2 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
+              disabled={isPending}
+              onClick={() => setIsResolving(true)}
+            >
+              <CheckCircle2 className="size-3" />
+              Resolve
+            </Button>
+          ) : (
+            <div className="flex flex-col gap-2 min-w-[220px]">
+              <textarea
+                className="w-full rounded border border-border bg-background px-2 py-1 text-xs resize-none h-14 focus:outline-none focus:border-green-500"
+                placeholder="Resolution note for TA (optional)..."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+              <div className="flex gap-1">
+                <Button size="sm" className="h-7 flex-1 text-xs bg-green-600 hover:bg-green-700 text-white" disabled={isPending} onClick={handleResolve}>
+                  {isPending ? "Saving…" : "Confirm"}
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" disabled={isPending} onClick={() => { setIsResolving(false); setNote("") }}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </td>
     </tr>
