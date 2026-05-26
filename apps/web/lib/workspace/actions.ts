@@ -124,21 +124,20 @@ export async function submitReview(courseId: string, note?: string): Promise<{ o
       return { ok: true };
     }
 
-    const fromStatus =
-      course.status === "assigned_to_ta" || course.status === "admin_changes_requested"
-        ? "ta_review_in_progress"
-        : course.status;
-
-    if (course.status !== fromStatus) {
+    // assigned_to_ta needs an intermediate hop to ta_review_in_progress first
+    // (startTaReview normally handles this, but guard against the edge case).
+    if (course.status === "assigned_to_ta") {
       await transitionCourseStatus({
         courseId,
-        from: course.status,
-        to: fromStatus,
+        from: "assigned_to_ta",
+        to: "ta_review_in_progress",
         actorId: ctx.userId,
         actorRole: ctx.profile.role,
         note: "TA review started",
       });
     }
+
+    const fromStatus = course.status === "assigned_to_ta" ? "ta_review_in_progress" : course.status;
 
     await markAllResponsesSubmitted(courseId);
     await transitionCourseStatus({

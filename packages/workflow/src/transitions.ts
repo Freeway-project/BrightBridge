@@ -52,6 +52,11 @@ export const COURSE_TRANSITIONS = [
     roles: ["standard_user", "admin_full", "super_admin"]
   },
   {
+    from: "admin_changes_requested",
+    to: "submitted_to_admin",
+    roles: ["standard_user", "super_admin"]
+  },
+  {
     from: "ready_for_instructor",
     to: "sent_to_instructor",
     roles: ["admin_viewer", "admin_full", "super_admin"]
