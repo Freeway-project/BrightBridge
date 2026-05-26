@@ -10,7 +10,8 @@ import {
   upsertReviewResponse,
   markAllResponsesSubmitted,
 } from "@/lib/services/review";
-import { transitionCourseStatus, getCourseById } from "@/lib/services/courses";
+import { getCourseById } from "@/lib/services/courses";
+import { transitionCourseStatus } from "@/lib/courses/service";
 import type { SectionKey } from "./types";
 import {
   metadataSchema,
@@ -44,10 +45,7 @@ export async function startTaReview(courseId: string): Promise<void> {
     if (course.status === "assigned_to_ta") {
       await transitionCourseStatus({
         courseId,
-        from: "assigned_to_ta",
-        to: "ta_review_in_progress",
-        actorId: ctx.userId,
-        actorRole: ctx.profile.role,
+        toStatus: "ta_review_in_progress",
         note: "TA opened workspace",
       });
     }
@@ -124,18 +122,15 @@ export async function submitReview(courseId: string, note?: string): Promise<{ o
       return { ok: true };
     }
 
-    const fromStatus =
-      course.status === "assigned_to_ta" || course.status === "admin_changes_requested"
-        ? "ta_review_in_progress"
-        : course.status;
+    // assigned_to_ta and admin_changes_requested have no direct path to submitted_to_admin —
+    // the state machine requires passing through ta_review_in_progress first.
+    const needsHop =
+      course.status === "assigned_to_ta" || course.status === "admin_changes_requested";
 
-    if (course.status !== fromStatus) {
+    if (needsHop) {
       await transitionCourseStatus({
         courseId,
-        from: course.status,
-        to: fromStatus,
-        actorId: ctx.userId,
-        actorRole: ctx.profile.role,
+        toStatus: "ta_review_in_progress",
         note: "TA review started",
       });
     }
@@ -143,10 +138,7 @@ export async function submitReview(courseId: string, note?: string): Promise<{ o
     await markAllResponsesSubmitted(courseId);
     await transitionCourseStatus({
       courseId,
-      from: fromStatus,
-      to: "submitted_to_admin",
-      actorId: ctx.userId,
-      actorRole: ctx.profile.role,
+      toStatus: "submitted_to_admin",
       note: note?.trim() || "TA submitted review",
     });
 
