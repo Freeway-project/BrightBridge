@@ -7,7 +7,6 @@ import {
   type CourseStatus,
   type Role,
   type AssignmentRole,
-  type EffectiveRole
 } from "@coursebridge/workflow";
 import { getAuthContext, requireAnyRole, requireProfile, type AppProfile } from "@/lib/auth/context";
 import { getCourseRepository, getProfileRepository, getReviewRepository, getHierarchyRepository } from "@/lib/repositories";
@@ -168,13 +167,10 @@ export async function transitionCourseStatus(input: TransitionCourseStatusInput)
     context.profile.id
   );
 
-  const effectiveRole: EffectiveRole =
-    context.profile.role === "standard_user"
-      ? (assignment?.role ?? "standard_user")
-      : context.profile.role;
-
+  // Workflow transitions are gated on the profile role, not the assignment role.
+  // "staff" is an assignment-level label, not a workflow permission level.
   assertCanTransition({
-    role: effectiveRole,
+    role: context.profile.role,
     from: fromStatus,
     to: input.toStatus
   });
