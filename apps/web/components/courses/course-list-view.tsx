@@ -71,6 +71,7 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
   const byTab = useMemo(() => ({
     todo:             filtered.filter((c) => getTab(c) === "todo"),
     in_progress:      filtered.filter((c) => getTab(c) === "in_progress"),
+    pending_admin:    filtered.filter((c) => getTab(c) === "pending_admin"),
     done:             filtered.filter((c) => getTab(c) === "done"),
     staging:          filtered.filter((c) => getTab(c) === "staging"),
     with_instructor:  filtered.filter((c) => getTab(c) === "with_instructor"),
@@ -78,9 +79,10 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
   }), [filtered, issueCounts])
 
   const defaultTab =
-    byTab.in_progress.length > 0    ? "in_progress"
-    : byTab.todo.length > 0         ? "todo"
-    : byTab.staging.length > 0      ? "staging"
+    byTab.in_progress.length > 0       ? "in_progress"
+    : byTab.pending_admin.length > 0   ? "pending_admin"
+    : byTab.todo.length > 0            ? "todo"
+    : byTab.staging.length > 0         ? "staging"
     : byTab.with_instructor.length > 0 ? "with_instructor"
     : "done"
 
@@ -151,6 +153,13 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
             emoji="⚙️"
           />
           <TabItem
+            value="pending_admin"
+            count={byTab.pending_admin.length}
+            label="Pending Admin"
+            activeColor="text-cyan-500 after:bg-cyan-500"
+            emoji="⏳"
+          />
+          <TabItem
             value="done"
             count={byTab.done.length}
             label="Done"
@@ -181,7 +190,7 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
         </TabsList>
 
         <AnimatePresence mode="wait">
-          {(["todo", "in_progress", "done", "staging", "with_instructor"] as const).map((tab) => (
+          {(["todo", "in_progress", "pending_admin", "done", "staging", "with_instructor"] as const).map((tab) => (
             <TabsContent key={tab} value={tab} className="mt-6 focus-visible:outline-none">
               <CourseGrid
                 courses={byTab[tab]}
