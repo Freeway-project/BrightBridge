@@ -60,22 +60,31 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       }
     }
 
-    // SSE Stream for immediate notification
-    const es = new EventSource("/api/version/stream")
+    // Use a robust reconnecting SSE or aggressive fallback when disconnected
+    let es: EventSource | null = new EventSource("/api/version/stream")
+    
     es.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data)
         if (data.version && data.version !== initialVersion && data.version !== "development") {
           triggerUpdate()
-          es.close()
+          if (es) {
+            es.close()
+            es = null
+          }
         }
       } catch {
         // Ignore malformed frames
       }
     }
+    
     es.onerror = () => {
-      es.close()
-      void checkVersion()
+      // The server likely just went down for a PM2 restart.
+      // We do NOT close the EventSource, so the browser will auto-reconnect!
+      // But we also manually check a few times while it's restarting to be safe.
+      setTimeout(() => void checkVersion(), 4000)
+      setTimeout(() => void checkVersion(), 10000)
+      setTimeout(() => void checkVersion(), 20000)
     }
 
     const interval = setInterval(() => void checkVersion(), CHECK_INTERVAL)
@@ -96,7 +105,9 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     ;(window as any).__triggerUpdate = triggerUpdate;
 
     return () => {
-      es.close()
+      if (es) {
+        es.close()
+      }
       clearInterval(interval)
       window.removeEventListener("error", handleChunkError)
     }
