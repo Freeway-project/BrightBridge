@@ -434,16 +434,3 @@ export async function sendToInstructorAction(courseId: string): Promise<void> {
   revalidatePath("/ta");
   revalidatePath("/instructor");
 }
-
-export async function grantFinalApprovalAction(courseId: string): Promise<void> {
-  const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "super_admin"]);
-  await transitionCourseStatus({
-    courseId,
-    toStatus: "final_approved",
-    note: "Final approval granted by admin.",
-  });
-  revalidatePath("/admin");
-  revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath("/instructor");
-}

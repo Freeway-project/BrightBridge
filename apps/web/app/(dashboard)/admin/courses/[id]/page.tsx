@@ -11,7 +11,6 @@ import { CourseDetailRefreshWrapper } from "./_components/course-detail-refresh-
 import { SendToInstructorBanner } from "./_components/send-to-instructor-banner"
 import { ResubmitBanner } from "./_components/resubmit-banner"
 import { QuestionRoundBanner } from "./_components/question-round-banner"
-import { FinalApprovalBanner } from "./_components/final-approval-banner"
 import { getSubmissionHistory, getQuestionRoundHistory } from "@/lib/courses/service"
 
 interface Props {
@@ -64,9 +63,6 @@ export default async function AdminCourseDetailPage({ params }: Props) {
                 )}
                 {course.status === "instructor_questions" && (
                   <QuestionRoundBanner rounds={questionRounds} />
-                )}
-                {course.status === "instructor_approved" && (
-                  <FinalApprovalBanner courseId={id} />
                 )}
                 <CourseReviewDetail
                   course={course}
