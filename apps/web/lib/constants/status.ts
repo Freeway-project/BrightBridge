@@ -19,9 +19,10 @@ export const STATUS_BADGE_CLASS: Record<CourseStatus, string> = {
 export const TA_COURSE_ACTIONS: Partial<Record<CourseStatus, {
   label: string
   variant: "default" | "outline" | "ghost" | "destructive"
+  href?: string
 }>> = {
   assigned_to_ta:          { label: "Start Review",  variant: "outline" },
   ta_review_in_progress:   { label: "Continue →",    variant: "default" },
   submitted_to_admin:      { label: "View",          variant: "ghost" },
-  admin_changes_requested: { label: "Fix Issues →",  variant: "destructive" },
+  admin_changes_requested: { label: "Fix Issues →",  variant: "destructive", href: "submit" },
 }

@@ -12,9 +12,10 @@ export function CourseActionButton({ status, courseId }: CourseActionButtonProps
   const action = TA_COURSE_ACTIONS[status]
   if (!action) return null
 
+  const segment = action.href ?? "metadata"
   return (
     <Button variant={action.variant} size="sm" asChild>
-      <Link href={`/courses/${courseId}/metadata`}>{action.label}</Link>
+      <Link href={`/courses/${courseId}/${segment}`}>{action.label}</Link>
     </Button>
   )
 }
