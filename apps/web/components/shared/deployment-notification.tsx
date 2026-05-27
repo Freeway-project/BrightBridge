@@ -94,24 +94,18 @@ export function MinimizedUpdatePill({ onClick }: { onClick: () => void }) {
 
 export function AutoUpdateOverlay({ onDone }: { onDone: () => void }) {
   const [colorIndex, setColorIndex] = useState(0)
-  const [dots, setDots] = useState(".")
   const colorTimer = useRef<ReturnType<typeof setInterval> | null>(null)
-  const dotsTimer = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     colorTimer.current = setInterval(() => {
       setColorIndex((i) => (i + 1) % AUTO_UPDATE_COLORS.length)
     }, 800)
-    dotsTimer.current = setInterval(() => {
-      setDots((d) => (d.length >= 3 ? "." : d + "."))
-    }, 400)
 
     // Auto-dismiss after 5 s then call onDone to trigger reload
     const dismiss = window.setTimeout(onDone, 5000)
 
     return () => {
       if (colorTimer.current) clearInterval(colorTimer.current)
-      if (dotsTimer.current) clearInterval(dotsTimer.current)
       window.clearTimeout(dismiss)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,23 +123,7 @@ export function AutoUpdateOverlay({ onDone }: { onDone: () => void }) {
         height="100vh"
         className="bg-black/75 backdrop-blur-sm"
         zIndex={120}
-      >
-        <div className="flex flex-col items-center gap-4 select-none">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
-            style={{ color: AUTO_UPDATE_COLORS[colorIndex], transition: "color 0.8s ease" }}
-          >
-            <RefreshCw className="size-7" />
-          </motion.div>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xl font-bold tracking-tight text-white">
-              Updating{dots}
-            </span>
-            <span className="text-xs italic text-white/45">"Change is the only constant"</span>
-          </div>
-        </div>
-      </AnimatedBubbleParticles>
+      />
     </div>
   )
 }
@@ -181,26 +159,7 @@ export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
         height="100vh"
         className="bg-black/60 backdrop-blur-sm"
         zIndex={110}
-      >
-        <motion.div
-          initial={{ scale: 0.85, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.85, opacity: 0 }}
-          className="flex flex-col items-center gap-3 select-none"
-        >
-          <span
-            className="rounded-full px-5 py-2 text-sm font-bold tracking-widest text-white uppercase"
-            style={{
-              background: UPDATE_APPLIED_COLORS[colorIndex],
-              boxShadow: `0 0 30px ${UPDATE_APPLIED_COLORS[colorIndex]}88`,
-              transition: "background 0.6s ease, box-shadow 0.6s ease",
-            }}
-          >
-            ✓ Updated
-          </span>
-          <span className="text-xs text-white/50">Running the latest build</span>
-        </motion.div>
-      </AnimatedBubbleParticles>
+      />
     </div>
   )
 }
