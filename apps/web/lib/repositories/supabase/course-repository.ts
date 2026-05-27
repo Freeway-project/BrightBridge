@@ -641,6 +641,35 @@ export function createSupabaseCourseRepository(): CourseRepository {
       });
     },
 
+    async listChangeRequestHistory(courseId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("course_status_events")
+        .select(`id, note, created_at, profiles!course_status_events_actor_id_fkey ( full_name, email )`)
+        .eq("course_id", courseId)
+        .eq("to_status", "admin_changes_requested")
+        .order("created_at", { ascending: true });
+
+      if (error) throw new Error(`change request history: ${error.message}`);
+
+      return (data ?? []).map((row) => {
+        const r = row as unknown as {
+          id: string;
+          note: string | null;
+          created_at: string;
+          profiles?: { full_name: string | null; email: string } | Array<{ full_name: string | null; email: string }> | null;
+        };
+        const actor = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
+        return {
+          id: r.id,
+          actorName: actor?.full_name ?? null,
+          actorEmail: actor?.email ?? "",
+          note: r.note,
+          createdAt: r.created_at,
+        } satisfies import("@/lib/repositories/contracts").SubmissionEvent;
+      });
+    },
+
     async listQuestionRoundHistory(courseId) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin

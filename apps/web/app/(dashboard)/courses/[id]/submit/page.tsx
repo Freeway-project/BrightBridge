@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
 import { requireProfile } from "@/lib/auth/context"
 import { getCourseById } from "@/lib/services/courses"
+import { getChangeRequestHistory } from "@/lib/courses/service"
 import { getReviewResponse, getReviewSectionByKey } from "@/lib/services/review"
 import { getIssuesForCourseAction } from "@/lib/issues"
 import { SubmitPanel } from "../_components/submit-panel"
@@ -24,7 +25,7 @@ export default async function SubmitPage({ params }: Props) {
     { key: "syllabus_review", label: "Syllabus & Gradebook", required: false },
   ] as const
 
-  const [reviewSections, issues] = await Promise.all([
+  const [reviewSections, issues, changeRequests] = await Promise.all([
     Promise.all(
       sectionDefs.map(async (definition) => {
         const section = await getReviewSectionByKey(definition.key)
@@ -37,7 +38,12 @@ export default async function SubmitPage({ params }: Props) {
       }),
     ),
     getIssuesForCourseAction(id, { phase: "migration" }),
+    course.status === "admin_changes_requested"
+      ? getChangeRequestHistory(id)
+      : Promise.resolve([]),
   ])
+
+  const latestChangeRequest = changeRequests[changeRequests.length - 1] ?? null
 
   const sections = [
     ...reviewSections,
@@ -66,7 +72,13 @@ export default async function SubmitPage({ params }: Props) {
           courseId={id}
           title="Submit Review"
         >
-          <SubmitPanel courseId={course.id} courseStatus={course.status} sections={sections} reviewData={reviewData} />
+          <SubmitPanel
+            courseId={course.id}
+            courseStatus={course.status}
+            sections={sections}
+            reviewData={reviewData}
+            latestChangeRequest={latestChangeRequest}
+          />
         </CourseWorkspaceRefreshWrapper>
       </main>
     </>

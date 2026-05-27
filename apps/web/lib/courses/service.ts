@@ -239,6 +239,10 @@ export async function getSubmissionHistory(courseId: string) {
   return getCourseRepository().listSubmissionHistory(courseId);
 }
 
+export async function getChangeRequestHistory(courseId: string) {
+  return getCourseRepository().listChangeRequestHistory(courseId);
+}
+
 export async function getQuestionRoundHistory(courseId: string) {
   return getCourseRepository().listQuestionRoundHistory(courseId);
 }
