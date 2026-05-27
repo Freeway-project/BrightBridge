@@ -457,6 +457,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
             })
           }
           playNotificationTone(tone)
+          router.refresh()
         }
       )
       .subscribe()
