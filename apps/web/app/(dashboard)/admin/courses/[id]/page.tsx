@@ -63,7 +63,10 @@ export default async function AdminCourseDetailPage({ params }: Props) {
                   <ResubmitBanner submissions={submissionHistory} />
                 )}
                 {course.status === "instructor_questions" && (
-                  <QuestionRoundBanner rounds={questionRounds} />
+                  <>
+                    <QuestionRoundBanner rounds={questionRounds} />
+                    <SendToInstructorBanner courseId={id} variant="resend" />
+                  </>
                 )}
                 {course.status === "instructor_approved" && (
                   <FinalApprovalBanner courseId={id} />
