@@ -76,6 +76,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   const staging = filteredCourses.filter((c) => {
     const s = c.status
     return s === "submitted_to_admin" || s === "admin_changes_requested" ||
+           s === "waiting_on_admin" || s === "staging_in_progress" ||
            s === "ready_for_instructor" || s === "sent_to_instructor" || s === "instructor_questions" || s === "instructor_approved"
   }).length
   const needsAction = filteredCourses.filter((c) => c.status === "submitted_to_admin" || c.status === "instructor_approved").length
@@ -224,6 +225,8 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                 <SelectItem value="ta_review_in_progress">Migration — TA reviewing</SelectItem>
                 <SelectItem value="submitted_to_admin">Staging — waiting on admin</SelectItem>
                 <SelectItem value="admin_changes_requested">Staging — fixes requested</SelectItem>
+                <SelectItem value="waiting_on_admin">Staging — admin building shell</SelectItem>
+                <SelectItem value="staging_in_progress">Staging — TA finalizing</SelectItem>
                 <SelectItem value="ready_for_instructor">Staging — ready to send</SelectItem>
                 <SelectItem value="sent_to_instructor">Staging — instructor reviewing</SelectItem>
                 <SelectItem value="instructor_questions">Staging — instructor questions</SelectItem>
@@ -468,12 +471,14 @@ type PhaseState = "done" | "active" | "idle"
 
 const MIGRATION_DONE = new Set<CourseStatus>([
   "submitted_to_admin","admin_changes_requested",
+  "waiting_on_admin","staging_in_progress",
   "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved","final_approved"
 ])
 const MIGRATION_ACTIVE = new Set<CourseStatus>(["assigned_to_ta", "ta_review_in_progress"])
 const STAGING_DONE = new Set<CourseStatus>(["final_approved"])
 const STAGING_ACTIVE = new Set<CourseStatus>([
   "submitted_to_admin","admin_changes_requested",
+  "waiting_on_admin","staging_in_progress",
   "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved"
 ])
 const PROVISION_DONE = new Set<CourseStatus>(["final_approved"])
@@ -577,6 +582,10 @@ function getStatusHint(status: AdminCourseRow["status"]) {
       return "Staging — awaiting admin review."
     case "admin_changes_requested":
       return "Staging — fixes sent back to TA."
+    case "waiting_on_admin":
+      return "Staging — admin building the staging shell."
+    case "staging_in_progress":
+      return "Staging — TA finalizing the course."
     case "ready_for_instructor":
       return "Staging — ready to send to instructor."
     case "sent_to_instructor":

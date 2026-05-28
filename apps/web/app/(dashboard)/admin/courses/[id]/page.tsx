@@ -9,6 +9,7 @@ import { CourseChat } from "./_components/course-chat"
 import { IssueTracker } from "../../../courses/[id]/_components/issues/issue-tracker"
 import { CourseDetailRefreshWrapper } from "./_components/course-detail-refresh-wrapper"
 import { SendToInstructorBanner } from "./_components/send-to-instructor-banner"
+import { StagingShellBanner } from "./_components/staging-shell-banner"
 import { ResubmitBanner } from "./_components/resubmit-banner"
 import { QuestionRoundBanner } from "./_components/question-round-banner"
 import { FinalApprovalBanner } from "./_components/final-approval-banner"
@@ -56,6 +57,9 @@ export default async function AdminCourseDetailPage({ params }: Props) {
               title="Course Review"
             >
               <div className="space-y-[var(--card-spacing,1.5rem)]">
+                {course.status === "waiting_on_admin" && (
+                  <StagingShellBanner courseId={id} />
+                )}
                 {course.status === "ready_for_instructor" && (
                   <SendToInstructorBanner courseId={id} />
                 )}

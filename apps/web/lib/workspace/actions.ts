@@ -165,3 +165,53 @@ export async function submitReview(courseId: string, note?: string): Promise<{ o
     return { ok: false, error: "Failed to submit review. Please try again." };
   }
 }
+
+export async function markStagingComplete(courseId: string): Promise<{ ok: boolean; error?: string }> {
+  if (await isCurrentHostReadonly()) {
+    return { ok: false, error: "System migration in progress. This action is temporarily disabled." };
+  }
+  const ctx = await requireProfile();
+  try {
+    const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
+    if (!course) {
+      return { ok: false, error: "Course not found or assignment was revoked. Refreshing..." };
+    }
+
+    // Idempotency guard: tolerate repeat clicks once the course has moved on.
+    if (course.status === "ready_for_instructor") {
+      revalidatePath("/ta");
+      revalidatePath(`/courses/${courseId}`);
+      return { ok: true };
+    }
+
+    await transitionCourseStatus({
+      courseId,
+      toStatus: "ready_for_instructor",
+      note: "TA finalized staging — ready for instructor.",
+    });
+
+    revalidatePath("/ta");
+    revalidatePath(`/courses/${courseId}`);
+    revalidatePath("/admin");
+    revalidatePath("/communications");
+    return { ok: true };
+  } catch (error) {
+    console.error("markStagingComplete failed", {
+      courseId,
+      actorId: ctx.userId,
+      actorRole: ctx.profile.role,
+      error,
+    });
+    Sentry.withScope((scope) => {
+      scope.setTag("area", "ta_workspace");
+      scope.setTag("action", "mark_staging_complete");
+      scope.setContext("mark_staging_complete", {
+        actorId: ctx.userId,
+        actorRole: ctx.profile.role,
+        courseId,
+      });
+      Sentry.captureException(error instanceof Error ? error : new Error("markStagingComplete failed"));
+    });
+    return { ok: false, error: "Failed to finalize staging. Please try again." };
+  }
+}

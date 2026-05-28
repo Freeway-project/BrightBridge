@@ -411,14 +411,23 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
                 href: `/courses/${courseId}/submit`,
                 actionLabel: "View Feedback",
               }
-            } else if (toStatus === "ready_for_instructor") {
+            } else if (toStatus === "waiting_on_admin") {
               const courseTitle = await getCourseCode(courseId)
               spec = {
                 icon: "🎉", title: "Review Approved",
-                description: `${courseTitle} — your review was approved by admin.`,
+                description: `${courseTitle} — approved by admin, who is now building the staging shell.`,
                 tone: "success",
                 href: `/courses/${courseId}/metadata`,
                 actionLabel: "View",
+              }
+            } else if (toStatus === "staging_in_progress") {
+              const courseTitle = await getCourseCode(courseId)
+              spec = {
+                icon: "🛠️", title: "Ready to Finalize",
+                description: `${courseTitle} — the staging shell is ready. Finalize the course to send it on.`,
+                tone: "info",
+                href: `/courses/${courseId}/metadata`,
+                actionLabel: "Finalize",
               }
             }
           } else if (role === "instructor") {

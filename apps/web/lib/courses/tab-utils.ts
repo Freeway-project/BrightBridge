@@ -2,8 +2,8 @@ import type { CourseSummary } from "./service"
 import type { CourseStatus } from "@coursebridge/workflow"
 
 const TODO_STATUSES = new Set<CourseStatus>(["course_created", "assigned_to_ta"])
-const IN_PROGRESS_STATUSES = new Set<CourseStatus>(["ta_review_in_progress", "admin_changes_requested"])
-const PENDING_ADMIN_STATUSES = new Set<CourseStatus>(["submitted_to_admin"])
+const IN_PROGRESS_STATUSES = new Set<CourseStatus>(["ta_review_in_progress", "admin_changes_requested", "staging_in_progress"])
+const PENDING_ADMIN_STATUSES = new Set<CourseStatus>(["submitted_to_admin", "waiting_on_admin"])
 const STAGING_STATUSES = new Set<CourseStatus>(["ready_for_instructor"])
 const WITH_INSTRUCTOR_STATUSES = new Set<CourseStatus>(["sent_to_instructor", "instructor_questions", "instructor_approved"])
 

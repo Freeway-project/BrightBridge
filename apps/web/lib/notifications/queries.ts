@@ -69,6 +69,7 @@ const STAFF_PENDING_STATUSES = new Set<CourseStatus>([
   "assigned_to_ta",
   "ta_review_in_progress",
   "admin_changes_requested",
+  "staging_in_progress",
 ]);
 const INSTRUCTOR_PENDING_STATUSES = new Set<CourseStatus>([
   "sent_to_instructor",
@@ -77,6 +78,7 @@ const INSTRUCTOR_PENDING_STATUSES = new Set<CourseStatus>([
 const ADMIN_PENDING_STATUSES = new Set<CourseStatus>([
   "course_created",
   "submitted_to_admin",
+  "waiting_on_admin",
   "instructor_questions",
   "instructor_approved",
 ]);

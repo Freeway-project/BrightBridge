@@ -9,7 +9,7 @@ interface Props {
 const FUNNEL_STAGES = [
   { label: "Created", statuses: ["course_created", "assigned_to_ta"] },
   { label: "TA Review", statuses: ["ta_review_in_progress", "submitted_to_admin", "admin_changes_requested"] },
-  { label: "Admin", statuses: ["ready_for_instructor"] },
+  { label: "Admin", statuses: ["waiting_on_admin", "staging_in_progress", "ready_for_instructor"] },
   { label: "Instructor", statuses: ["sent_to_instructor", "instructor_questions", "instructor_approved"] },
   { label: "Approved", statuses: ["final_approved"] },
 ] as const

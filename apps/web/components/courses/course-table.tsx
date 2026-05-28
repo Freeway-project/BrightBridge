@@ -74,6 +74,12 @@ function NextStepBadge({ course }: { course: CourseRow }) {
   if (status === "admin_changes_requested") {
     label = "Fix Requested"
     classes = "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+  } else if (status === "staging_in_progress") {
+    label = "Finalize Staging"
+    classes = "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+  } else if (status === "waiting_on_admin") {
+    label = "Waiting on Admin"
+    classes = "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
   } else if (
     [
       "submitted_to_admin",

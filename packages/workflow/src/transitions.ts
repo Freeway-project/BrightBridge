@@ -43,13 +43,23 @@ export const COURSE_TRANSITIONS = [
   },
   {
     from: "submitted_to_admin",
-    to: "ready_for_instructor",
+    to: "waiting_on_admin",
     roles: ["admin_full", "super_admin"]
   },
   {
     from: "admin_changes_requested",
     to: "ta_review_in_progress",
     roles: ["standard_user", "admin_full", "super_admin"]
+  },
+  {
+    from: "waiting_on_admin",
+    to: "staging_in_progress",
+    roles: ["admin_full", "super_admin"]
+  },
+  {
+    from: "staging_in_progress",
+    to: "ready_for_instructor",
+    roles: ["standard_user", "super_admin"]
   },
   {
     from: "ready_for_instructor",

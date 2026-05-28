@@ -11,6 +11,8 @@ const STATUS_COLORS: Record<string, string> = {
   ta_review_in_progress:    "#3b82f6",
   submitted_to_admin:       "#3b82f6",
   admin_changes_requested:  "#f97316",
+  waiting_on_admin:         "#8b5cf6",
+  staging_in_progress:      "#8b5cf6",
   ready_for_instructor:     "#8b5cf6",
   sent_to_instructor:       "#f59e0b",
   instructor_questions:     "#f59e0b",
@@ -35,7 +37,8 @@ export function StagePipeline({ statusCounts, totalCourses }: Props) {
     .sort((a, b) => {
       const order = [
         "course_created", "assigned_to_ta", "ta_review_in_progress",
-        "submitted_to_admin", "admin_changes_requested", "ready_for_instructor",
+        "submitted_to_admin", "admin_changes_requested",
+        "waiting_on_admin", "staging_in_progress", "ready_for_instructor",
         "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved",
       ]
       return order.indexOf(a.status) - order.indexOf(b.status)
