@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { BookOpen, UserCheck, ShieldCheck, GraduationCap, ArrowRight, CheckCircle2, Clock, AlertTriangle, Send } from "lucide-react"
+import { BookOpen, UserCheck, ShieldCheck, GraduationCap, ArrowRight, CheckCircle2, Clock, AlertTriangle, Send, Server, Layers } from "lucide-react"
 
 export default function GuidePage() {
   return (
@@ -74,19 +74,48 @@ export default function GuidePage() {
                       <div className="space-y-1">
                         <h4 className="font-semibold text-foreground">Phase 3: Quality Control</h4>
                         <p className="text-sm text-muted-foreground">
-                          TA submits the review. An Admin performs a quality check. 
-                          They can either request changes or approve it for the instructor.
+                          TA submits the review. An Admin performs a quality check.
+                          They can either request changes, or approve it to move into staging.
                         </p>
                       </div>
                     </div>
 
-                    {/* Phase 4 */}
+                    {/* Phase 4: Staging Setup (NEW) */}
+                    <div className="relative flex items-start gap-6">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 ring-8 ring-background">
+                        <Server className="size-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-semibold text-foreground">Phase 4: Staging Setup</h4>
+                        <p className="text-sm text-muted-foreground">
+                          On approval the course enters <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Waiting on Admin</Badge>
+                          while an Admin builds the staging shell, then pushes it back to the TA.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Phase 5: Staging in Process (NEW) */}
+                    <div className="relative flex items-start gap-6">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 ring-8 ring-background">
+                        <Layers className="size-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-semibold text-foreground">Phase 5: Staging in Process</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Status <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Staging in Process</Badge>.
+                          The TA finalizes the course in staging and writes the <strong>Issues Summary</strong> (editable by TA and Admin),
+                          then marks <strong>Course Complete</strong> to send it on to the instructor.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Phase 6 */}
                     <div className="relative flex items-start gap-6">
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-background">
                         <GraduationCap className="size-5" />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="font-semibold text-foreground">Phase 4: Instructor Sign-off</h4>
+                        <h4 className="font-semibold text-foreground">Phase 6: Instructor Sign-off</h4>
                         <p className="text-sm text-muted-foreground">
                           The course is sent to the Instructor. They review the TA's findings and provide final SME approval.
                         </p>
@@ -99,7 +128,7 @@ export default function GuidePage() {
                         <CheckCircle2 className="size-5" />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="font-semibold text-foreground">Phase 5: Finalization</h4>
+                        <h4 className="font-semibold text-foreground">Phase 7: Finalization</h4>
                         <p className="text-sm text-muted-foreground">
                           Admin performs a final review and marks the course as <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200">Final Approved</Badge>.
                         </p>
@@ -150,6 +179,18 @@ export default function GuidePage() {
                             <Badge variant="outline" className="text-destructive border-destructive/20 bg-destructive/5">Admin Changes Requested</Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">QA failed. TA needs to review and fix issues.</p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Waiting on Admin</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Approved. Admin is building the staging shell before handing back to the TA.</p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Staging in Process</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">TA is finalizing the course in staging and writing the Issues Summary.</p>
                         </div>
                       </div>
                     </div>
