@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
   useCallback,
+  useMemo,
 } from "react"
 import { cn } from "@/lib/utils"
 
@@ -65,6 +66,23 @@ const AnimatedBubbleParticles: React.FC<AnimatedBubbleParticlesProps> = ({
 
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
+  // Keep the latest color in a ref so cycling it spawns new-colored bubbles
+  // without tearing down the animation effect (which would wipe the field).
+  const particleColorRef = useRef(particleColor)
+  useEffect(() => {
+    particleColorRef.current = particleColor
+  }, [particleColor])
+
+  // Stabilize object-literal props so the spawn callbacks don't change every render.
+  const frictionRange = useMemo(
+    () => ({ min: friction.min, max: friction.max }),
+    [friction.min, friction.max]
+  )
+  const scaleRangeStable = useMemo(
+    () => ({ min: scaleRange.min, max: scaleRange.max }),
+    [scaleRange.min, scaleRange.max]
+  )
+
   const createParticleElement = useCallback(() => {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
     svg.style.cssText =
@@ -79,10 +97,10 @@ const AnimatedBubbleParticles: React.FC<AnimatedBubbleParticlesProps> = ({
     circle.setAttribute("cx", "33.7")
     circle.setAttribute("cy", "33.7")
     circle.setAttribute("r", "33.7")
-    circle.setAttribute("fill", particleColor)
+    circle.setAttribute("fill", particleColorRef.current)
     svg.appendChild(circle)
     return svg
-  }, [particleSize, particleColor])
+  }, [particleSize])
 
   const createParticle = useCallback((): ParticleConfig => {
     const element = createParticleElement()
@@ -93,15 +111,15 @@ const AnimatedBubbleParticles: React.FC<AnimatedBubbleParticlesProps> = ({
     const x = Math.random() * dimensions.width
     const y = dimensions.height + 100
     const steps = dimensions.height / 2
-    const frictionValue = friction.min + Math.random() * (friction.max - friction.min)
-    const scale = scaleRange.min + Math.random() * (scaleRange.max - scaleRange.min)
+    const frictionValue = frictionRange.min + Math.random() * (frictionRange.max - frictionRange.min)
+    const scale = scaleRangeStable.min + Math.random() * (scaleRangeStable.max - scaleRangeStable.min)
     const siner = (dimensions.width / 2.5) * Math.random()
     const rotationDirection = Math.random() > 0.5 ? "+" : "-"
 
     element.style.transform = "translateX(" + x + "px) translateY(" + y + "px)"
 
     return { x, y, vx: 0, vy: 0, scale, rotation: 0, rotationDirection, siner, steps, friction: frictionValue, element }
-  }, [createParticleElement, dimensions, friction, scaleRange])
+  }, [createParticleElement, dimensions, frictionRange, scaleRangeStable])
 
   const updateParticle = (particle: ParticleConfig): boolean => {
     particle.y -= particle.friction
