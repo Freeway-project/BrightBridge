@@ -1,10 +1,153 @@
 import { Topbar } from "@/components/layout/topbar"
 import { TweakableContent } from "@/components/shared/tweakable-content"
+import { MermaidDiagram } from "@/components/shared/mermaid-diagram"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { BookOpen, UserCheck, ShieldCheck, GraduationCap, ArrowRight, CheckCircle2, Clock, AlertTriangle, Send, Server, Layers } from "lucide-react"
+
+const WORKFLOW_DIAGRAMS: { title: string; description: string; chart: string }[] = [
+  {
+    title: "Big Picture",
+    description: "The whole course journey, including the new staging phase.",
+    chart: `flowchart TD
+    A(["Course Created"]) --> B["Assigned to TA"]
+    B --> C["TA Reviewing"]
+    C --> D["Submitted to Admin"]
+    D -->|Admin requests fixes| F["Changes Requested"]
+    F -->|TA fixes & resubmits| C
+    D -->|Admin approves| W["Waiting on Admin<br/>(builds staging shell)"]
+    W -->|Shell ready, pushed to TA| SG["Staging in Process<br/>(TA finalizes + Issues Summary)"]
+    SG -->|Course Complete / ready to send| E["Ready for Instructor"]
+    E -->|Comms sends email| G["Sent to Instructor"]
+    G -->|Instructor asks a question| H["Instructor Has Questions"]
+    G -->|Instructor approves| I["Instructor Approved"]
+    H -->|Admin/Comms responds & resends| G
+    I -->|Admin gives final sign-off| J(["Final Approved"])
+
+    classDef ta fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    classDef admin fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef comms fill:#fef9c3,stroke:#ca8a04,color:#713f12;
+    classDef instr fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
+    classDef done fill:#e9d5ff,stroke:#9333ea,color:#581c87;
+    classDef new fill:#fde68a,stroke:#d97706,color:#78350f;
+    class B,C,D,F ta;
+    class E admin;
+    class G comms;
+    class H,I instr;
+    class A,J done;
+    class W,SG new;`,
+  },
+  {
+    title: "Staging Phase",
+    description: "The new phase that sits between Admin approval and the Instructor handoff.",
+    chart: `flowchart LR
+    D(["Submitted to Admin"]) -->|Admin approves| W["Waiting on Admin<br/>admin builds the staging shell"]
+    W -->|Shell ready, push back to TA| S["Staging in Process<br/>TA finalizes the course<br/>+ writes the Issues Summary"]
+    S -->|"Course Complete / ready to send email"| R(["Ready for Instructor"])
+    R -->|Comms or Admin sends the email| I(["Sent to Instructor"])
+
+    note["Issues Summary box (Issues tab):<br/>editable by TA and Admin,<br/>finalized here, rides along to the instructor."]
+
+    classDef new fill:#fde68a,stroke:#d97706,color:#78350f;
+    classDef n fill:#f1f5f9,stroke:#64748b,color:#334155;
+    class W,S new;
+    class note n;`,
+  },
+  {
+    title: "TA Journey",
+    description: "First the review workspace, then the staging pass.",
+    chart: `flowchart TD
+    subgraph PASS1["First pass — Review"]
+        S1["1. Course Info<br/>(term, links, notes)"] --> S2["2. Review Checklist<br/>(item-by-item checks)"]
+        S2 --> S3["3. Syllabus & Grades<br/>(verify these moved correctly)"]
+        S3 --> S4["4. Issues<br/>(log problems + Issues Summary box)"]
+        S4 --> S5["5. Submit<br/>(send to Admin)"]
+    end
+    S5 --> OUT(["Submitted to Admin"])
+
+    OUT -.->|Admin approves & builds staging shell| PASS2
+
+    subgraph PASS2["Second pass — Staging in Process"]
+        T1["TA finalizes the course in staging"] --> T2["TA updates the Issues Summary"]
+        T2 --> T3["Mark Course Complete<br/>(ready to send email)"]
+    end
+    T3 --> RDY(["Ready for Instructor"])
+
+    classDef ta fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    classDef new fill:#fde68a,stroke:#d97706,color:#78350f;
+    class S1,S2,S3,S4,S5 ta;
+    class T1,T2,T3 new;`,
+  },
+  {
+    title: "Admin Journey",
+    description: "Review decision, then staging shell, then final sign-off.",
+    chart: `flowchart TD
+    IN["Course submitted by TA"] --> REVIEW{"Admin reviews<br/>the TA's work"}
+    REVIEW -->|Needs work| FIX["Request Fixes<br/>(writes a note for the TA)"]
+    FIX --> BACK["Goes back to TA"]
+    REVIEW -->|Looks good| WAIT["Approve → Waiting on Admin"]
+    WAIT --> SHELL["Admin builds the staging shell"]
+    SHELL --> PUSH["Push back to TA → Staging in Process"]
+
+    PUSH --> LATER["...TA finishes staging, instructor approves..."]
+    LATER --> FINAL["Admin gives Final Sign-off"]
+
+    extra["Admin also: assigns courses to TAs/instructors,<br/>sees the Overview dashboard, handles escalations,<br/>and can edit the Issues Summary."]
+
+    classDef admin fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef new fill:#fde68a,stroke:#d97706,color:#78350f;
+    classDef n fill:#f1f5f9,stroke:#64748b,color:#334155;
+    class REVIEW,APP,FIX,FINAL admin;
+    class WAIT,SHELL,PUSH new;
+    class extra n;`,
+  },
+  {
+    title: "Communications Journey",
+    description: "Hands the package to the instructor.",
+    chart: `flowchart LR
+    R(["Ready for Instructor"]) --> SEND["Comms reviews the package<br/>and sends it to the Instructor"]
+    SEND --> S(["Sent to Instructor"])
+    S -.->|If instructor asks a question| Q["Instructor Has Questions"]
+    Q -.->|Comms/Admin responds & resends| S
+
+    classDef comms fill:#fef9c3,stroke:#ca8a04,color:#713f12;
+    classDef instr fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
+    class SEND comms;
+    class Q instr;`,
+  },
+  {
+    title: "Instructor Journey",
+    description: "How the course owner reviews their migrated course.",
+    chart: `flowchart TD
+    IN(["Sent to Instructor"]) --> LOOK{"Instructor reviews<br/>their migrated course"}
+    LOOK -->|Has a question| Q["Raise a Question<br/>(creates a tracked issue)"]
+    LOOK -->|All good| APP["Approve"]
+    Q --> WAIT["Waits for Admin/Comms reply,<br/>then it's resent"]
+    WAIT -.-> LOOK
+    APP --> FINAL(["Admin gives final sign-off"])
+
+    classDef instr fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
+    classDef done fill:#e9d5ff,stroke:#9333ea,color:#581c87;
+    class LOOK,Q,APP instr;
+    class FINAL done;`,
+  },
+  {
+    title: "Escalations",
+    description: "A side conversation for flagged problems.",
+    chart: `flowchart LR
+    C["Someone raises an escalation<br/>(Critical / Major / Minor)"] --> O(("Open"))
+    O --> T["People reply in the thread"]
+    T --> O
+    O -->|Admin resolves with a note| R(("Resolved"))
+
+    note["An escalation is a SIDE conversation.<br/>Resolving it does NOT move the course by itself —<br/>a person still drives the course through the steps."]
+
+    classDef n fill:#fee2e2,stroke:#dc2626,color:#7f1d1d;
+    class note n;`,
+  },
+]
 
 export default function GuidePage() {
   return (
@@ -21,8 +164,9 @@ export default function GuidePage() {
           </div>
 
           <Tabs defaultValue="workflow" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="workflow">Workflow Lifecycle</TabsTrigger>
+              <TabsTrigger value="diagrams">Diagrams</TabsTrigger>
               <TabsTrigger value="statuses">Status Meanings</TabsTrigger>
               <TabsTrigger value="roles">Roles & Tabs</TabsTrigger>
             </TabsList>
@@ -137,6 +281,20 @@ export default function GuidePage() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="diagrams" className="mt-6 space-y-6">
+              {WORKFLOW_DIAGRAMS.map((d) => (
+                <Card key={d.title}>
+                  <CardHeader>
+                    <CardTitle>{d.title}</CardTitle>
+                    <CardDescription>{d.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <MermaidDiagram chart={d.chart} />
+                  </CardContent>
+                </Card>
+              ))}
             </TabsContent>
 
             <TabsContent value="statuses" className="mt-6">
