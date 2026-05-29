@@ -262,6 +262,10 @@ function deriveNextAction(status: CourseStatus): {
       return { action: "Approve or request changes", owner: "Admin", tone: "info" }
     case "admin_changes_requested":
       return { action: "Address requested changes", owner: "TA", tone: "warning" }
+    case "waiting_on_admin":
+      return { action: "Build staging shell", owner: "Admin", tone: "info" }
+    case "staging_in_progress":
+      return { action: "Finalize course", owner: "TA", tone: "info" }
     case "ready_for_instructor":
       return { action: "Send to instructor", owner: "Admin/Viewer", tone: "info" }
     case "sent_to_instructor":

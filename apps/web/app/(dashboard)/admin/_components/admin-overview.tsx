@@ -10,7 +10,8 @@ import type { AdminOverviewData } from "@/lib/admin/queries"
 
 const STATUS_ORDER: CourseStatus[] = [
   "course_created", "assigned_to_ta", "ta_review_in_progress",
-  "submitted_to_admin", "admin_changes_requested", "ready_for_instructor",
+  "submitted_to_admin", "admin_changes_requested",
+  "waiting_on_admin", "staging_in_progress", "ready_for_instructor",
   "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved",
 ]
 
@@ -19,14 +20,16 @@ export function AdminOverview({ data }: { data: AdminOverviewData }) {
 
   const countByStatus = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
   
-  const inProgress = 
-    (countByStatus["assigned_to_ta"] ?? 0) + 
-    (countByStatus["ta_review_in_progress"] ?? 0) + 
-    (countByStatus["admin_changes_requested"] ?? 0)
-    
-  const pendingAdmin = 
-    (countByStatus["submitted_to_admin"] ?? 0) + 
-    (countByStatus["ready_for_instructor"] ?? 0) + 
+  const inProgress =
+    (countByStatus["assigned_to_ta"] ?? 0) +
+    (countByStatus["ta_review_in_progress"] ?? 0) +
+    (countByStatus["admin_changes_requested"] ?? 0) +
+    (countByStatus["staging_in_progress"] ?? 0)
+
+  const pendingAdmin =
+    (countByStatus["submitted_to_admin"] ?? 0) +
+    (countByStatus["waiting_on_admin"] ?? 0) +
+    (countByStatus["ready_for_instructor"] ?? 0) +
     (countByStatus["instructor_approved"] ?? 0)
     
   const withInstructor = 

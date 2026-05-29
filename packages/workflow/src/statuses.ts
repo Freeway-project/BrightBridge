@@ -4,6 +4,8 @@ export const COURSE_STATUSES = [
   "ta_review_in_progress",
   "submitted_to_admin",
   "admin_changes_requested",
+  "waiting_on_admin",
+  "staging_in_progress",
   "ready_for_instructor",
   "sent_to_instructor",
   "instructor_questions",
@@ -19,6 +21,8 @@ export const COURSE_STATUS_LABELS: Record<CourseStatus, string> = {
   ta_review_in_progress: "TA Review In Progress",
   submitted_to_admin: "Submitted to Admin",
   admin_changes_requested: "Admin Changes Requested",
+  waiting_on_admin: "Waiting on Admin",
+  staging_in_progress: "Staging in Process",
   ready_for_instructor: "Ready for Instructor",
   sent_to_instructor: "Sent to Instructor",
   instructor_questions: "Instructor Questions",
@@ -54,5 +58,8 @@ export function getPipelineStage(status: CourseStatus): PipelineStage {
   ) {
     return "migration"
   }
+  // submitted_to_admin, admin_changes_requested, waiting_on_admin,
+  // staging_in_progress, ready_for_instructor, sent_to_instructor,
+  // instructor_questions, instructor_approved
   return "staging"
 }

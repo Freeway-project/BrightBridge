@@ -29,7 +29,7 @@ export function DepartmentMonitor({ courses }: Props) {
     ["instructor_approved", "final_approved"].includes(c.status)
   ).length
   const inProgress = courses.filter((c) =>
-    ["ta_review_in_progress", "submitted_to_admin", "admin_changes_requested", "ready_for_instructor"].includes(c.status)
+    ["ta_review_in_progress", "submitted_to_admin", "admin_changes_requested", "waiting_on_admin", "staging_in_progress", "ready_for_instructor"].includes(c.status)
   ).length
 
   return (

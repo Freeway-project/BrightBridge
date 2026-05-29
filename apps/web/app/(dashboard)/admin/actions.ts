@@ -355,12 +355,28 @@ export async function createInstructorAndAssignAction(
 export async function approveReviewAction(courseId: string): Promise<void> {
   await transitionCourseStatus({
     courseId,
-    toStatus: "ready_for_instructor",
-    note: "Approved by admin.",
+    toStatus: "waiting_on_admin",
+    note: "Approved by admin — building staging shell.",
   });
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath("/ta");
+  revalidatePath(`/courses/${courseId}`);
   redirect("/admin");
+}
+
+export async function markStagingReadyAction(courseId: string): Promise<void> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
+  await transitionCourseStatus({
+    courseId,
+    toStatus: "staging_in_progress",
+    note: "Staging shell ready — pushed to TA to finalize.",
+  });
+  revalidatePath("/admin");
+  revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath("/ta");
+  revalidatePath(`/courses/${courseId}`);
 }
 
 export async function requestFixesAction(courseId: string, note: string): Promise<void> {
@@ -391,7 +407,7 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
   let failed = 0;
   for (const courseId of courseIds) {
     try {
-      await transitionCourseStatus({ courseId, toStatus: "ready_for_instructor", note: "Batch approved to staging." });
+      await transitionCourseStatus({ courseId, toStatus: "waiting_on_admin", note: "Batch approved to staging." });
       succeeded++;
     } catch {
       failed++;

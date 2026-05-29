@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 const STAGE_GROUPS = [
   { label: "Created",    statuses: ["course_created", "assigned_to_ta"],                                                    color: "#64748b" },
   { label: "TA Review",  statuses: ["ta_review_in_progress", "submitted_to_admin", "admin_changes_requested"],              color: "#3b82f6" },
-  { label: "Admin",      statuses: ["ready_for_instructor"],                                                                color: "#8b5cf6" },
+  { label: "Admin",      statuses: ["waiting_on_admin", "staging_in_progress", "ready_for_instructor"],                      color: "#8b5cf6" },
   { label: "Instructor", statuses: ["sent_to_instructor", "instructor_questions", "instructor_approved"],                   color: "#f59e0b" },
   { label: "Approved",   statuses: ["final_approved"],                                                                      color: "#10b981" },
 ]
