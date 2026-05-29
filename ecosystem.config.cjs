@@ -10,6 +10,10 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 3000,
         TZ: "America/Los_Angeles",
+        // A single request's unhandled rejection (e.g. a transient
+        // ChunkLoadError mid-deploy) must not take down the whole server.
+        // Log it and keep serving instead of crash-looping.
+        NODE_OPTIONS: "--unhandled-rejections=warn",
       },
 
       // Logs
