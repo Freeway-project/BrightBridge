@@ -7,6 +7,7 @@ import {
   Building2,
   Users,
   FileText,
+  FileCode2,
   Clock,
   HelpCircle,
   Bell,
@@ -24,12 +25,14 @@ export interface NavItem {
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
   standard_user: [
     { label: "My Courses",  href: "/ta",        icon: BookOpen },
+    { label: "Converter",   href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
   ],
   admin_full: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
+    { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
