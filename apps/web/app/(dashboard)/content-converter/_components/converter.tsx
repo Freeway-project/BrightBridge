@@ -17,7 +17,7 @@ import {
   TEMPLATE_DESCRIPTIONS,
   TEMPLATE_LABELS,
   type ConverterTemplate,
-} from "@/lib/content-converter/templates"
+} from "@/lib/content-converter/templates.shared"
 import { Check, CheckCircle2, Copy, Download, FileText, Loader2, Sparkles, UploadCloud } from "lucide-react"
 
 const MAMMOTH_CDN = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"

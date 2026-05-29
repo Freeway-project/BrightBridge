@@ -78,6 +78,26 @@ export function createSupabaseProfileRepository(): ProfileRepository {
         .range(from, to);
 
       if (error) {
+        // PGRST103: requested range is past the last row (e.g. ?page=99 on a
+        // shrinking table). Return an empty page with the real total instead of
+        // throwing, so the page renders and pagination can clamp itself.
+        if (error.code === "PGRST103") {
+          let countQuery = admin
+            .from("profiles")
+            .select("id", { count: "exact", head: true });
+          if (search) {
+            countQuery = countQuery.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,role.ilike.%${search}%`);
+          }
+          const { count: total } = await countQuery;
+          const safeTotal = total ?? 0;
+          return {
+            data: [],
+            total: safeTotal,
+            page,
+            pageSize,
+            totalPages: Math.ceil(safeTotal / pageSize),
+          };
+        }
         throw new Error(formatPostgrestError("profiles list", error));
       }
 

@@ -9,41 +9,16 @@ import "server-only"
  * receives finished HTML back.
  */
 
-export type ConverterTemplate =
-  | "syllabus"
-  | "introduction"
-  | "content"
-  | "video"
-  | "discussion"
-  | "assignment"
-  | "quiz"
-  | "conclusion"
-
-export const TEMPLATE_LABELS: Record<ConverterTemplate, string> = {
-  syllabus: "Course Syllabus",
-  introduction: "Module Introduction",
-  content: "Content Page",
-  video: "Video Lecture",
-  discussion: "Discussion",
-  assignment: "Assignment",
-  quiz: "Quiz",
-  conclusion: "Conclusion",
-}
-
-export const TEMPLATE_DESCRIPTIONS: Record<ConverterTemplate, string> = {
-  syllabus: "Interactive accordion layout with instructor info, schedule, evaluation, and policies.",
-  introduction: "Module introduction with learning outcomes, recommended materials, and assessment callout.",
-  content: "General-purpose content page with headings, text blocks, and a callout box.",
-  video: "Video lecture page with an embedded video player and a follow-up activity section.",
-  discussion: "Discussion prompt page with instructions and a discussion link placeholder.",
-  assignment: "Assignment instructions page with details and a submission link placeholder.",
-  quiz: "Quiz instructions page with details and a quiz link placeholder.",
-  conclusion: "Module wrap-up page summarising learning and directing students to the next step.",
-}
-
-export function isConverterTemplate(value: unknown): value is ConverterTemplate {
-  return typeof value === "string" && value in TEMPLATE_LABELS
-}
+// Client-safe metadata lives in ./templates.shared (no `server-only`) so the
+// browser UI can import it too. Imported here for internal use and re-exported
+// for server-side callers that import from this module.
+import type { ConverterTemplate } from "./templates.shared"
+export {
+  TEMPLATE_LABELS,
+  TEMPLATE_DESCRIPTIONS,
+  isConverterTemplate,
+} from "./templates.shared"
+export type { ConverterTemplate }
 
 // -- Non-syllabus templates ----------------------------------------------------
 // The template HTML is passed directly to Claude, which fills in the placeholders
