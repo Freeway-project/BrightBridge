@@ -15,6 +15,13 @@ export const maxDuration = 120
 
 const CLAUDE_MODEL = "claude-sonnet-4-20250514"
 
+// The Anthropic API always requires a max_tokens ceiling — there is no
+// "unlimited" value. We set it high enough that the token cap is never what
+// truncates a converted document; in practice the binding limit is this route's
+// maxDuration (120s) on a non-streaming request. For genuinely huge documents,
+// switch callClaude to streaming and raise maxDuration.
+const MAX_OUTPUT_TOKENS = 16000
+
 // Mirror of the page-level guard. The server holds the Anthropic key, so the
 // route must independently verify the caller — a logged-out or unauthorized
 // request must never be able to spend the key.
@@ -161,8 +168,7 @@ export async function POST(request: Request) {
   const started = performance.now()
   try {
     const messages = buildMessages(template, extra, kind, body.data, body.text)
-    const maxTokens = template === "syllabus" ? 6000 : 4000
-    const response = await callClaude(apiKey, messages, maxTokens)
+    const response = await callClaude(apiKey, messages, MAX_OUTPUT_TOKENS)
     const html = extractHtml(template, response)
     logUsage({ userId, role, template, kind, outcome: "success", ms: Math.round(performance.now() - started) })
     return NextResponse.json({ html })
