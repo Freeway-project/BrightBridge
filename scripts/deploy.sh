@@ -71,6 +71,15 @@ log "Building..."
 npm run build
 
 # ---------------------------------------------------------------------------
+# 4b. Write deploy marker (watched at runtime for live update detection)
+# ---------------------------------------------------------------------------
+# Write in place (redirect, not mv) so the running server's fs.watch — which
+# tracks the file's inode — fires reliably. Doing this right before the reload
+# means a still-alive old process pushes the new version to connected clients.
+log "Writing deploy marker..."
+git rev-parse HEAD > "$REPO_ROOT/apps/web/.deployment-version"
+
+# ---------------------------------------------------------------------------
 # 5. Reload PM2
 # ---------------------------------------------------------------------------
 if pm2 id brightbridge &>/dev/null; then
