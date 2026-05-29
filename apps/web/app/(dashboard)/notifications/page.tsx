@@ -24,7 +24,7 @@ const TONE_STYLES = {
 };
 
 export default async function NotificationsPage() {
-  const { notifications, pendingCount } = await getNotificationsPageData();
+  const { notifications, pendingCount, error } = await getNotificationsPageData();
   const pending = notifications.filter((item) => item.pending);
   const recent = notifications.filter((item) => !item.pending);
 
@@ -33,6 +33,17 @@ export default async function NotificationsPage() {
       <Topbar title="Notifications" subtitle="Pending work, issue updates, and recent activity" />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+          {error && (
+            <div className="flex items-start gap-3 rounded-md border border-orange-400/30 bg-orange-500/5 p-4 text-sm">
+              <CircleAlert className="mt-0.5 size-4 shrink-0 text-orange-400" />
+              <div>
+                <p className="font-medium text-foreground">Couldn&apos;t load notifications</p>
+                <p className="text-muted-foreground">
+                  There was a temporary problem reaching the server. Refresh the page to try again.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="grid gap-3 sm:grid-cols-3">
             <SummaryCard label="Pending" value={pendingCount} icon={CircleAlert} emphasize />
             <SummaryCard label="All Notifications" value={notifications.length} icon={Bell} />

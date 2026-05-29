@@ -81,41 +81,53 @@ const ADMIN_PENDING_STATUSES = new Set<CourseStatus>([
   "instructor_approved",
 ]);
 
-export async function getNotificationsPageData() {
+export type NotificationsPageData = {
+  notifications: NotificationItem[];
+  pendingCount: number;
+  role: Role;
+  /** True when the data could not be loaded (e.g. a transient Supabase/network failure). */
+  error: boolean;
+};
+
+export async function getNotificationsPageData(): Promise<NotificationsPageData> {
   const context = await requireProfile();
   const admin = getSupabaseAdminClientOrThrow();
   const role = context.profile.role;
   const isAdmin = ADMIN_ROLES.includes(role);
 
-  const accessibleCourseIds = isAdmin
-    ? null
-    : await getAssignedCourseIds(context.profile.id, role);
+  try {
+    const accessibleCourseIds = isAdmin
+      ? null
+      : await getAssignedCourseIds(context.profile.id, role);
 
-  if (accessibleCourseIds && accessibleCourseIds.length === 0) {
+    if (accessibleCourseIds && accessibleCourseIds.length === 0) {
+      return { notifications: [], pendingCount: 0, role, error: false };
+    }
+
+    const [courses, issues, comments] = await Promise.all([
+      getRelevantCourses(accessibleCourseIds, role),
+      getRelevantIssues(accessibleCourseIds),
+      getRecentComments(accessibleCourseIds, context.profile.id),
+    ]);
+
+    const notifications = [
+      ...courses.map((course) => courseToNotification(course, role)),
+      ...issues.map((issue) => issueToNotification(issue, role)),
+      ...comments.map((comment) => commentToNotification(comment, role)),
+    ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+
     return {
-      notifications: [] as NotificationItem[],
-      pendingCount: 0,
+      notifications,
+      pendingCount: notifications.filter((item) => item.pending).length,
       role,
+      error: false,
     };
+  } catch (err) {
+    // A transient Supabase/network failure ("fetch failed") should degrade to an
+    // empty state rather than crash the entire notifications page with a 500.
+    console.error("Could not load notifications page data:", err);
+    return { notifications: [], pendingCount: 0, role, error: true };
   }
-
-  const [courses, issues, comments] = await Promise.all([
-    getRelevantCourses(accessibleCourseIds, role),
-    getRelevantIssues(accessibleCourseIds),
-    getRecentComments(accessibleCourseIds, context.profile.id),
-  ]);
-
-  const notifications = [
-    ...courses.map((course) => courseToNotification(course, role)),
-    ...issues.map((issue) => issueToNotification(issue, role)),
-    ...comments.map((comment) => commentToNotification(comment, role)),
-  ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
-
-  return {
-    notifications,
-    pendingCount: notifications.filter((item) => item.pending).length,
-    role,
-  };
 
   async function getAssignedCourseIds(profileId: string, profileRole: Role) {
     const assignmentRole = profileRole === "instructor" ? "instructor" : "staff";
