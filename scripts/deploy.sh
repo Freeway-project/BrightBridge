@@ -79,11 +79,20 @@ fi
 # 4. Build into the staging dir
 # ---------------------------------------------------------------------------
 log "Building into $BUILD_DIR..."
-NEXT_DIST_DIR="$DIST_NAME" npm run build
+# TURBO_FORCE bypasses the turbo cache for this build. Without it, a cache HIT
+# restores outputs to turbo's recorded dir (.next), NOT $DIST_NAME, so the
+# staged dir is never materialized and the swap below fails (mv: cannot stat
+# .next-build) — leaving the server with no .next. Always build fresh.
+NEXT_DIST_DIR="$DIST_NAME" TURBO_FORCE=true npm run build
 
 # ---------------------------------------------------------------------------
 # 4a. Atomically swap the staged build into place
 # ---------------------------------------------------------------------------
+# Guard: never move the live build aside unless the new one actually exists,
+# otherwise a failed/cache-skipped build would leave the server with no .next.
+if [ ! -d "$REPO_ROOT/$BUILD_DIR" ]; then
+  fail "Staged build dir $BUILD_DIR was not produced — aborting before touching live $LIVE_DIR."
+fi
 # Rename (not copy) so it's near-instant. The old process keeps its open file
 # handles to the old inodes (now at .next-old) until PM2 reload swaps it out.
 log "Swapping staged build into $LIVE_DIR..."
