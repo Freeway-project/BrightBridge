@@ -29,6 +29,10 @@ export async function GET() {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
+      // We sit behind nginx (proxy_buffering defaults to on), which would buffer
+      // this SSE stream and delay deploy detection. This header tells nginx to
+      // stream it straight through — no nginx config change needed.
+      "X-Accel-Buffering": "no",
     },
   });
 }
