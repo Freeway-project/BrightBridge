@@ -133,9 +133,22 @@ export function ContentConverter() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
-      const json = (await res.json()) as { html?: string; error?: string }
+
+      // The route always replies with JSON, but a gateway in front (nginx) can
+      // return an HTML error page — a 504 on a slow conversion or a 413 on a
+      // large upload. Parsing that as JSON throws a cryptic "unexpected token",
+      // so read text first and turn non-JSON responses into a clear message.
+      const raw = await res.text()
+      let json: { html?: string; error?: string }
+      try {
+        json = raw ? JSON.parse(raw) : {}
+      } catch {
+        if (res.status === 413) throw new Error("Document is too large to upload. Try a smaller file.")
+        if (res.status === 504) throw new Error("Conversion timed out. Try a shorter document or fewer pages.")
+        throw new Error(`Server returned an unexpected response (HTTP ${res.status}). Please try again.`)
+      }
       if (!res.ok || !json.html) {
-        throw new Error(json.error || "Conversion failed")
+        throw new Error(json.error || `Conversion failed (HTTP ${res.status})`)
       }
 
       setProgress(95)
