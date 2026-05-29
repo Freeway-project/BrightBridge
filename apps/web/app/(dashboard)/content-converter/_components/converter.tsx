@@ -18,7 +18,7 @@ import {
   TEMPLATE_LABELS,
   type ConverterTemplate,
 } from "@/lib/content-converter/templates"
-import { CheckCircle2, Download, FileText, Loader2, Sparkles, UploadCloud } from "lucide-react"
+import { Check, CheckCircle2, Copy, Download, FileText, Loader2, Sparkles, UploadCloud } from "lucide-react"
 
 const MAMMOTH_CDN = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"
 const ACCEPTED = [".pdf", ".doc", ".docx"]
@@ -84,6 +84,7 @@ export function ContentConverter() {
   const [html, setHtml] = useState("")
   const [tab, setTab] = useState<OutputTab>("preview")
   const [dragOver, setDragOver] = useState(false)
+  const [copied, setCopied] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const log = useCallback((type: LogType, msg: string) => {
@@ -164,6 +165,18 @@ export function ContentConverter() {
     URL.revokeObjectURL(url)
     log("ok", "Downloaded.")
   }, [html, template, log])
+
+  const copy = useCallback(async () => {
+    if (!html) return
+    try {
+      await navigator.clipboard.writeText(html)
+      setCopied(true)
+      log("ok", "Copied HTML to clipboard.")
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      log("err", "Could not copy to clipboard.")
+    }
+  }, [html, log])
 
   return (
     <div className="space-y-1">
@@ -323,10 +336,16 @@ export function ContentConverter() {
               </button>
             </div>
             {html && (
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={download}>
-                <Download className="size-3.5" />
-                Download HTML
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={copy}>
+                  {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                  {copied ? "Copied" : "Copy HTML"}
+                </Button>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={download}>
+                  <Download className="size-3.5" />
+                  Download HTML
+                </Button>
+              </div>
             )}
           </CardHeader>
           <CardContent className="relative flex-1 p-0">
