@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { AutoUpdateOverlay, UpdateAppliedOverlay } from "./deployment-notification"
 import { AnimatePresence } from "motion/react"
+import { SthitaprajnaModal } from "./sthitaprajna-modal"
 
 interface DeploymentDetectorProps {
   initialVersion: string
@@ -14,6 +15,7 @@ const UPDATE_APPLIED_FLAG = "coursebridge:update-applied"
 export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) {
   const [showAutoUpdate, setShowAutoUpdate] = useState(false)
   const [showUpdatedOverlay, setShowUpdatedOverlay] = useState(false)
+  const [showSthitaprajna, setShowSthitaprajna] = useState(false)
   const updatePending = useRef(false)
 
   // 1. Check if we just refreshed after an update
@@ -133,10 +135,17 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
           <UpdateAppliedOverlay
             onDone={() => {
               setShowUpdatedOverlay(false)
+              // Wait a tiny moment after bubbles fade before showing Sthitaprajna
+              setTimeout(() => setShowSthitaprajna(true), 300)
             }}
           />
         )}
       </AnimatePresence>
+
+      <SthitaprajnaModal 
+        isOpen={showSthitaprajna} 
+        onClose={() => setShowSthitaprajna(false)} 
+      />
     </>
   )
 }

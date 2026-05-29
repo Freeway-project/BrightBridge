@@ -8,7 +8,7 @@ import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
 import { signOut } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
-import { UpdateStatusTab } from "./update-status-tab"
+
 import { useMemeModal } from "@/components/providers/meme-provider"
 import {
   Sidebar,
@@ -169,7 +169,6 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
             </div>
           )}
           <DisplaySettings />
-          {!collapsed && <UpdateStatusTab initialVersion={initialVersion} />}
           <form action={signOut}>
             <button
               type="submit"
