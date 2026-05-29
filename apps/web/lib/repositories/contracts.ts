@@ -90,6 +90,7 @@ export type AdminCourseListFilters = {
 
 export type SuperAdminCourseRow = {
   id: string;
+  code: string | null;
   title: string;
   status: CourseStatus;
   term: string | null;

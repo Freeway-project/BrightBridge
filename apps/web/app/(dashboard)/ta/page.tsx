@@ -25,7 +25,11 @@ export default async function TADashboardPage() {
         <TaDashboardInsights courses={courses} issueCounts={issueCounts} />
 
         <TaRefreshWrapper>
-          <CourseListView initialCourses={courses} issueCounts={issueCounts} />
+          <CourseListView
+            initialCourses={courses}
+            issueCounts={issueCounts}
+            canExport={ctx.profile.role === "admin_full" || ctx.profile.role === "super_admin"}
+          />
         </TaRefreshWrapper>
       </div>
     </TweakableContent>

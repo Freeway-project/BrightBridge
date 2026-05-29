@@ -31,6 +31,8 @@ interface CourseListViewProps {
   initialCourses: CourseSummary[]
   stats?: CourseStat[]
   issueCounts?: IssueCountMap
+  /** Show Excel/PDF export buttons on cards — admin/super_admin only (export routes are gated). */
+  canExport?: boolean
 }
 
 const SUBJECT_PATTERN = /^([A-Za-z]+)/
@@ -40,7 +42,7 @@ function getCourseSubject(course: CourseSummary): string | null {
   return match?.[1]?.toUpperCase() ?? null
 }
 
-export function CourseListView({ initialCourses, issueCounts = {} }: CourseListViewProps) {
+export function CourseListView({ initialCourses, issueCounts = {}, canExport = false }: CourseListViewProps) {
   const [search, setSearch] = useState("")
   const [subject, setSubject] = useState("all")
   const [term, setTerm] = useState("all")
@@ -195,6 +197,7 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
               <CourseGrid
                 courses={byTab[tab]}
                 issueCounts={issueCounts}
+                canExport={canExport}
                 onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
               />
             </TabsContent>
@@ -217,9 +220,10 @@ export function CourseListView({ initialCourses, issueCounts = {} }: CourseListV
                   </Select>
                 </div>
               )}
-              <CourseGrid 
-                courses={byTab.issues} 
-                issueCounts={issueCounts} 
+              <CourseGrid
+                courses={byTab.issues}
+                issueCounts={issueCounts}
+                canExport={canExport}
                 onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
                 sortBy={issueSort}
               />
@@ -265,16 +269,18 @@ function TabItem({
   )
 }
 
-function CourseGrid({ 
-  courses, 
-  issueCounts, 
+function CourseGrid({
+  courses,
+  issueCounts,
   onClear,
   sortBy = "latest",
-}: { 
+  canExport = false,
+}: {
   courses: CourseSummary[]
   issueCounts: IssueCountMap
   onClear: () => void
   sortBy?: "latest" | "replies" | "open"
+  canExport?: boolean
 }) {
   const sortedCourses = useMemo(() => {
     const arr = [...courses]
@@ -309,7 +315,7 @@ function CourseGrid({
   return (
     <div className="grid grid-cols-1 gap-4 sm:gap-6">
       {sortedCourses.map((course, i) => (
-        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i} />
+        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i} canExport={canExport} />
       ))}
     </div>
   )

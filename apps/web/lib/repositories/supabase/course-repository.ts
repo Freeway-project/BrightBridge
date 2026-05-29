@@ -426,7 +426,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       let query = admin
         .from("courses")
         .select(`
-          id, title, status, term, department, org_unit_id, created_at, updated_at,
+          id, source_course_id, target_course_id, title, status, term, department, org_unit_id, created_at, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( full_name, email )
@@ -451,6 +451,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const rows = (data ?? []).map((row) => {
         const course = row as unknown as {
           id: string;
+          source_course_id: string | null;
+          target_course_id: string | null;
           title: string;
           status: string;
           term: string | null;
@@ -472,6 +474,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
         return {
           id: course.id,
+          code: course.source_course_id ?? course.target_course_id ?? null,
           title: course.title,
           status: toCourseStatus(course.status),
           term: course.term,

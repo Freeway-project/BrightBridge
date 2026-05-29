@@ -5,7 +5,7 @@ import { StatusBadge } from "./status-badge"
 import { type CourseStatus } from "@coursebridge/workflow"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowRight, Clock, AlertCircle, CheckCircle2, ChevronRight } from "lucide-react"
+import { ArrowRight, Clock, AlertCircle, CheckCircle2, ChevronRight, FileDown, FileSpreadsheet } from "lucide-react"
 import type { ReviewProgress } from "@/lib/courses/service"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
@@ -23,9 +23,11 @@ interface CourseCardProps {
   }
   issueCounts?: { open: number; resolved: number }
   index?: number
+  /** Excel/PDF export routes are admin/super_admin only — gate the buttons to match. */
+  canExport?: boolean
 }
 
-export function CourseCard({ course, issueCounts, index = 0 }: CourseCardProps) {
+export function CourseCard({ course, issueCounts, index = 0, canExport = false }: CourseCardProps) {
   const { action, owner, tone } = deriveNextAction(course.status)
 
   return (
@@ -114,17 +116,43 @@ export function CourseCard({ course, issueCounts, index = 0 }: CourseCardProps) 
               </div>
             </div>
 
-            <Button
-              variant={owner === "TA" ? "default" : "outline"}
-              size="sm"
-              asChild
-              className="shrink-0 !text-black"
-            >
-              <Link href={`/courses/${course.id}/metadata`}>
-                {owner === "TA" ? "Continue Review" : "View Progress"}
-                <ArrowRight className={cn("ml-2 size-4 transition-transform group-hover/card:translate-x-1")} />
-              </Link>
-            </Button>
+            <div className="flex shrink-0 items-center gap-2">
+              {canExport && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <a href={`/api/courses/${course.id}/xlsx`}>
+                      <FileSpreadsheet className="mr-2 size-4" />
+                      Excel
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <a href={`/print/courses/${course.id}`} target="_blank" rel="noopener noreferrer">
+                      <FileDown className="mr-2 size-4" />
+                      PDF
+                    </a>
+                  </Button>
+                </>
+              )}
+              <Button
+                variant={owner === "TA" ? "default" : "outline"}
+                size="sm"
+                asChild
+                className="!text-black"
+              >
+                <Link href={`/courses/${course.id}/metadata`}>
+                  {owner === "TA" ? "Continue Review" : "View Progress"}
+                  <ArrowRight className={cn("ml-2 size-4 transition-transform group-hover/card:translate-x-1")} />
+                </Link>
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
