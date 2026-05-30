@@ -10,6 +10,7 @@ import {
 import { requireAnyRole, requireProfile } from "@/lib/auth/context";
 import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
 import { resolveEscalation } from "@/lib/services/escalations";
+import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow";
 
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
@@ -446,4 +447,35 @@ export async function grantFinalApprovalAction(courseId: string): Promise<void> 
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/instructor");
+}
+
+/**
+ * Generic click-to-advance used by the courses board. `transitionCourseStatus`
+ * itself enforces the allowed-transition graph and the actor's role
+ * (assertCanTransition) and course access (assertCanActOnCourse), so this is
+ * safe for any (courseId, toStatus) — an illegal move throws and is reported.
+ */
+export async function transitionCourseAction(
+  courseId: string,
+  toStatus: CourseStatus,
+): Promise<{ ok: boolean; error?: string }> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
+  try {
+    await transitionCourseStatus({
+      courseId,
+      toStatus,
+      note: `Moved to "${getCourseStatusLabel(toStatus)}" from the courses board.`,
+    });
+    revalidatePath("/admin");
+    revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath("/ta");
+    revalidatePath(`/courses/${courseId}`);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Could not move the course.",
+    };
+  }
 }

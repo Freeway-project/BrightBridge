@@ -88,6 +88,10 @@ export type AdminCourseListFilters = {
   assignedOnly?: boolean;
 };
 
+export type AssignedCourseListFilters = {
+  statuses?: readonly CourseStatus[];
+};
+
 export type SuperAdminCourseRow = {
   id: string;
   code: string | null;
@@ -267,7 +271,11 @@ export type AssignmentLog = {
 
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
-  listAssignedCourses(userId: string, assignmentRole: AssignmentRole): Promise<CourseSummary[]>;
+  listAssignedCourses(
+    userId: string,
+    assignmentRole: AssignmentRole,
+    filters?: AssignedCourseListFilters,
+  ): Promise<CourseSummary[]>;
   getAssignedCourseById(
     courseId: string,
     userId: string,

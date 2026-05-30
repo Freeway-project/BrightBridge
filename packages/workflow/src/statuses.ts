@@ -15,6 +15,13 @@ export const COURSE_STATUSES = [
 
 export type CourseStatus = (typeof COURSE_STATUSES)[number];
 
+export const STAFF_ACTIONABLE_COURSE_STATUSES = [
+  "assigned_to_ta",
+  "ta_review_in_progress",
+  "admin_changes_requested",
+  "staging_in_progress",
+] as const satisfies readonly CourseStatus[];
+
 export const COURSE_STATUS_LABELS: Record<CourseStatus, string> = {
   course_created: "Course Created",
   assigned_to_ta: "Assigned to TA",

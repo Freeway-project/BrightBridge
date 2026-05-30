@@ -9,6 +9,7 @@ export {
 export {
   COURSE_STATUS_LABELS,
   COURSE_STATUSES,
+  STAFF_ACTIONABLE_COURSE_STATUSES,
   getCourseStatusLabel,
   getPipelineStage,
   isFinalStatus,

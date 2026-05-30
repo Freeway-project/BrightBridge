@@ -63,16 +63,21 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return (data ?? []).map((row) => toCourseSummary(row as CourseRow));
     },
 
-    async listAssignedCourses(userId, assignmentRole) {
+    async listAssignedCourses(userId, assignmentRole, filters = {}) {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin
+      let query = admin
         .from("courses")
         .select(
           "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,course_assignments!inner(profile_id,role)"
         )
         .eq("course_assignments.profile_id", userId)
-        .eq("course_assignments.role", assignmentRole)
-        .order("updated_at", { ascending: false });
+        .eq("course_assignments.role", assignmentRole);
+
+      if (filters.statuses?.length) {
+        query = query.in("status", [...filters.statuses]);
+      }
+
+      const { data, error } = await query.order("updated_at", { ascending: false });
 
       if (error) {
         throw new Error(`getAssignedCourses: ${error.message}`);

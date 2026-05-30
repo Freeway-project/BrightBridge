@@ -1,7 +1,8 @@
 import { Topbar } from "@/components/layout/topbar"
 import { COURSE_STATUSES, type CourseStatus } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
-import { getAdminCoursesPage, getAdminOverviewData } from "@/lib/admin/queries"
+import { getAdminCoursesPage, getAdminOverviewData, type AdminCourseRow } from "@/lib/admin/queries"
+import { CoursesBoard, type BoardColumn } from "./_components/courses-board"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { getOpenEscalations } from "@/lib/services/escalations"
 import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
@@ -57,6 +58,42 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getLatestMigrationReport(),
   ])
 
+  // ---- Workflow board data (All Courses tab) -----------------------------
+  // ~6 columns grouping the 12 statuses into the key workflow steps. Counts
+  // come from the (cheap) status-count aggregate; cards are a recent slice per
+  // status, capped per column — the List view handles full browsing/search.
+  const BOARD_COLUMNS: { key: string; label: string; statuses: CourseStatus[] }[] = [
+    { key: "migration", label: "Migration", statuses: ["course_created", "assigned_to_ta", "ta_review_in_progress"] },
+    { key: "submitted", label: "Submitted to Admin", statuses: ["submitted_to_admin", "admin_changes_requested"] },
+    { key: "building", label: "Building Shell", statuses: ["waiting_on_admin"] },
+    { key: "finalizing", label: "TA Finalizing", statuses: ["staging_in_progress"] },
+    { key: "instructor", label: "Ready / With Instructor", statuses: ["ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved"] },
+    { key: "provision", label: "Provision", statuses: ["final_approved"] },
+  ]
+  const countByStatus = new Map<CourseStatus, number>(overviewData.statusCounts.map((s) => [s.status, s.count]))
+  const repo = getCourseRepository()
+  const cardStatuses = COURSE_STATUSES.filter((s) => (countByStatus.get(s) ?? 0) > 0)
+  const cardPages = await Promise.all(cardStatuses.map((s) => repo.listAdminCoursesPage(1, 15, { status: s })))
+  const rowsByStatus = new Map<CourseStatus, AdminCourseRow[]>()
+  cardStatuses.forEach((s, i) => rowsByStatus.set(s, cardPages[i].data))
+  const boardColumns: BoardColumn[] = BOARD_COLUMNS.map((col) => ({
+    key: col.key,
+    label: col.label,
+    count: col.statuses.reduce((n, s) => n + (countByStatus.get(s) ?? 0), 0),
+    cards: col.statuses
+      .flatMap((s) => rowsByStatus.get(s) ?? [])
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        sourceCourseId: r.sourceCourseId,
+        taName: r.ta?.name ?? null,
+        status: r.status,
+        updatedAt: r.updatedAt,
+      }))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .slice(0, 18),
+  }))
+
   return (
     <>
       <FeatureAnnouncementToast role={context.profile.role} />
@@ -67,7 +104,13 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             unassignedCount={unassignedPage.total}
             openEscalationsCount={openEscalations.length}
             overviewPanel={<AdminOverview data={overviewData} />}
-            coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
+            coursesPanel={
+              <CoursesBoard
+                columns={boardColumns}
+                role={context.profile.role}
+                listView={<AssignedCoursesTable page={coursesPage} tas={tas} />}
+              />
+            }
             assignPanel={
               <AdminAssignmentPanel
                 courses={unassignedPage.data.filter(c => c.ta === null)}
