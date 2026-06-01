@@ -7,6 +7,8 @@ const FONT_SCALE_MAP = {
   small: 0.875,
   medium: 1,
   large: 1.125,
+  xl: 1.25,
+  xxl: 1.4,
 } as const
 
 type DashboardContentShellProps = {

@@ -7,7 +7,8 @@
 :root {
   --base-font-size: 16px;
   --card-spacing: 1rem;
-  
+  --reading-leading: 1.65;
+
   /* Monochrome Palette (Default) */
   --background: #0d0d0d;           /* Near-black graphite */
   --foreground: #f5f5f5;           /* Bright off-white */
@@ -343,9 +344,33 @@ a {
   body {
     @apply bg-background text-foreground;
     font-size: var(--base-font-size);
+    line-height: var(--reading-leading, 1.65);
   }
   html {
     @apply font-sans;
+  }
+
+  /*
+   * Instructor-scoped accessibility surface: larger text, bigger tap targets,
+   * and reading spacing driven by the TweakProvider variables. Scoped so the
+   * denser admin/TA UI is unaffected.
+   */
+  .instructor-surface {
+    font-size: calc(var(--base-font-size) * 1.0625);
+  }
+  .instructor-surface :is(button, [role="tab"], a[role="button"]) {
+    min-height: 2.5rem;
+  }
+  .instructor-surface :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]) {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+  .instructor-surface [role="tab"] {
+    font-size: 1.05rem;
+  }
+  .instructor-surface p,
+  .instructor-surface li {
+    line-height: var(--reading-leading, 1.65);
   }
 
   [data-slot="input"],
