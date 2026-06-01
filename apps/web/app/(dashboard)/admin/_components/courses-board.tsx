@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation"
 import {
   getAllowedTransitions,
   getCourseStatusLabel,
+  WORKFLOW_PHASES,
   type CourseStatus,
   type EffectiveRole,
+  type PipelineStage,
 } from "@coursebridge/workflow"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { transitionCourseAction } from "../actions"
 
@@ -26,6 +29,7 @@ export type BoardCard = {
 export type BoardColumn = {
   key: string
   label: string
+  phase: PipelineStage
   count: number
   cards: BoardCard[]
 }
@@ -58,16 +62,43 @@ export function CoursesBoard({ columns, role, listView }: Props) {
         </div>
       </div>
 
-      {view === "list" ? (
-        listView
-      ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {columns.map((col) => (
-            <Column key={col.key} column={col} role={role} />
-          ))}
-        </div>
-      )}
+      {view === "list" ? listView : <BoardView columns={columns} role={role} />}
     </div>
+  )
+}
+
+/** Board view: phase tabs (Migration · Staging · Provision), each showing its kanban columns. */
+function BoardView({ columns, role }: { columns: BoardColumn[]; role: EffectiveRole }) {
+  const phases = WORKFLOW_PHASES.map((p) => {
+    const phaseColumns = columns.filter((c) => c.phase === p.key)
+    return { key: p.key, label: p.label, columns: phaseColumns, count: phaseColumns.reduce((n, c) => n + c.count, 0) }
+  })
+  const defaultPhase = (phases.find((p) => p.count > 0) ?? phases[0]).key
+
+  return (
+    <Tabs defaultValue={defaultPhase} className="w-full">
+      <TabsList variant="line">
+        {phases.map((p) => (
+          <TabsTrigger key={p.key} value={p.key} className="gap-1.5">
+            {p.label}
+            {p.count > 0 && (
+              <span className="flex size-4 items-center justify-center rounded-full bg-current/10 text-[9px] font-black">
+                {p.count.toLocaleString()}
+              </span>
+            )}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {phases.map((p) => (
+        <TabsContent key={p.key} value={p.key} className="mt-4 focus-visible:outline-none">
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {p.columns.map((col) => (
+              <Column key={col.key} column={col} role={role} />
+            ))}
+          </div>
+        </TabsContent>
+      ))}
+    </Tabs>
   )
 }
 
