@@ -197,6 +197,46 @@ export async function transitionCourseStatus(input: TransitionCourseStatusInput)
   return updatedCourse;
 }
 
+/**
+ * Auto-advances a course to "instructor_viewing" the moment the instructor
+ * opens their emailed review link. System-initiated: the clicker has no normal
+ * session yet (the link itself is the authorization), so this bypasses
+ * requireProfile and records the status event with the instructor as actor.
+ * Idempotent — only transitions from "sent_to_instructor", so re-opening the
+ * dashboard or opening after the instructor already responded is a no-op.
+ */
+export async function markInstructorViewingByLink(input: {
+  courseId: string;
+  instructorProfileId: string;
+}) {
+  const repo = getCourseRepository();
+  const course = await repo.getCourseSummaryById(input.courseId);
+
+  if (course.status !== "sent_to_instructor") {
+    return course;
+  }
+
+  // Sanity-check the move is legal for an instructor before applying it.
+  assertCanTransition({
+    role: "instructor",
+    from: "sent_to_instructor",
+    to: "instructor_viewing"
+  });
+
+  const updatedCourse = await repo.updateCourseStatus(input.courseId, "instructor_viewing");
+
+  await repo.insertStatusEvent({
+    courseId: input.courseId,
+    fromStatus: "sent_to_instructor",
+    toStatus: "instructor_viewing",
+    actorId: input.instructorProfileId,
+    actorRole: "instructor",
+    note: "Instructor opened the review link."
+  });
+
+  return updatedCourse;
+}
+
 async function assertCanActOnCourse({
   courseId,
   profile,

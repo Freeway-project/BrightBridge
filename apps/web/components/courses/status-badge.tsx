@@ -18,6 +18,7 @@ const DOT_COLORS: Record<CourseStatus, string> = {
   staging_in_progress:     "bg-blue-500",
   ready_for_instructor:    "bg-blue-500",
   sent_to_instructor:      "bg-blue-500",
+  instructor_viewing:      "bg-indigo-500",
   instructor_questions:    "bg-orange-500",
   instructor_approved:     "bg-blue-500",
   // Provision

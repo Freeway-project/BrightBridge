@@ -33,7 +33,7 @@ export async function GET(
 
   try {
     const auth = getAuthService();
-    await ensureInstructorIdentity(invite.email);
+    const instructorProfileId = await ensureInstructorIdentity(invite.email);
 
     const hashedToken = await auth.generateMagicLinkHashedToken(invite.email);
     const { error } = await auth.verifyMagicLink(hashedToken);
@@ -43,6 +43,14 @@ export async function GET(
     }
 
     await markInviteAccepted(invite.id);
+
+    // Auto-advance the course to "instructor_viewing" on first open.
+    try {
+      const { markInstructorViewingByLink } = await import("@/lib/courses/service");
+      await markInstructorViewingByLink({ courseId: invite.courseId, instructorProfileId });
+    } catch (statusError) {
+      console.error("[auth/invite] Failed to mark instructor viewing:", statusError);
+    }
   } catch (error) {
     console.error("[auth/invite] Failed to establish instructor session:", error);
     return NextResponse.redirect(expiredUrl);

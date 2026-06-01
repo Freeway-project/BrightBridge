@@ -382,6 +382,15 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
                 href: `/admin/courses/${courseId}`,
                 actionLabel: "View",
               }
+            } else if (toStatus === "instructor_viewing") {
+              const courseTitle = await getCourseCode(courseId)
+              spec = {
+                icon: "👀", title: "Instructor Reviewing",
+                description: `${courseTitle} — the instructor opened the review.`,
+                tone: "info",
+                href: `/admin/courses/${courseId}`,
+                actionLabel: "View",
+              }
             } else if (toStatus === "instructor_approved") {
               const courseTitle = await getCourseCode(courseId)
               spec = {

@@ -50,7 +50,7 @@ export default async function CommsCourseDetailPage({ params }: Props) {
               {course.status === "ready_for_instructor" && (
                 <SendToInstructorBanner courseId={id} />
               )}
-              {course.status === "sent_to_instructor" && (
+              {(course.status === "sent_to_instructor" || course.status === "instructor_viewing") && (
                 <ResendInviteBanner courseId={id} />
               )}
               {course.status === "instructor_questions" && (

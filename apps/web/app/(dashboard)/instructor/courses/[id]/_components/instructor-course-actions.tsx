@@ -26,7 +26,7 @@ export function InstructorCourseActions({ courseId, status }: Props) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
 
-  if (status !== "sent_to_instructor") return null
+  if (status !== "sent_to_instructor" && status !== "instructor_viewing") return null
 
   const handleRaiseQuestion = () => {
     if (!title.trim()) return
