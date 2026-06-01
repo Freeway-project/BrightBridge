@@ -8,6 +8,7 @@ export const COURSE_STATUSES = [
   "staging_in_progress",
   "ready_for_instructor",
   "sent_to_instructor",
+  "instructor_viewing",
   "instructor_questions",
   "instructor_approved",
   "final_approved"
@@ -32,6 +33,7 @@ export const COURSE_STATUS_LABELS: Record<CourseStatus, string> = {
   staging_in_progress: "Staging in Process",
   ready_for_instructor: "Ready for Instructor",
   sent_to_instructor: "Sent to Instructor",
+  instructor_viewing: "Instructor Viewing",
   instructor_questions: "Instructor Questions",
   instructor_approved: "Instructor Approved",
   final_approved: "Final Approved"
@@ -48,6 +50,7 @@ export function isFinalStatus(status: CourseStatus) {
 export function isInstructorVisibleStatus(status: CourseStatus) {
   return (
     status === "sent_to_instructor" ||
+    status === "instructor_viewing" ||
     status === "instructor_questions" ||
     status === "instructor_approved" ||
     status === "final_approved"
@@ -104,7 +107,7 @@ export const WORKFLOW_PHASES: WorkflowPhase[] = [
       { key: "admin_review", label: "Admin Review", statuses: ["submitted_to_admin", "admin_changes_requested"] },
       { key: "shell_build", label: "Shell Build", statuses: ["waiting_on_admin", "staging_in_progress"] },
       { key: "ready_to_send", label: "Ready to Send", statuses: ["ready_for_instructor"] },
-      { key: "with_instructor", label: "With Instructor", statuses: ["sent_to_instructor", "instructor_questions", "instructor_approved"] },
+      { key: "with_instructor", label: "With Instructor", statuses: ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved"] },
     ],
   },
   {
@@ -127,6 +130,6 @@ export function getPipelineStage(status: CourseStatus): PipelineStage {
   }
   // submitted_to_admin, admin_changes_requested, waiting_on_admin,
   // staging_in_progress, ready_for_instructor, sent_to_instructor,
-  // instructor_questions, instructor_approved
+  // instructor_viewing, instructor_questions, instructor_approved
   return "staging"
 }

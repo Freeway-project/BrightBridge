@@ -5,7 +5,7 @@ import { getAdminCourseDetail } from "@/lib/admin/queries"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CourseReviewDetail } from "@/app/(dashboard)/admin/courses/[id]/_components/course-review-detail"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
-import { SendToInstructorBanner } from "@/app/(dashboard)/admin/courses/[id]/_components/send-to-instructor-banner"
+import { ResendInviteBanner, SendToInstructorBanner } from "@/app/(dashboard)/admin/courses/[id]/_components/send-to-instructor-banner"
 import { QuestionRoundBanner } from "@/app/(dashboard)/admin/courses/[id]/_components/question-round-banner"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
@@ -49,6 +49,9 @@ export default async function CommsCourseDetailPage({ params }: Props) {
             <div className="space-y-[var(--card-spacing,1.5rem)]">
               {course.status === "ready_for_instructor" && (
                 <SendToInstructorBanner courseId={id} />
+              )}
+              {(course.status === "sent_to_instructor" || course.status === "instructor_viewing") && (
+                <ResendInviteBanner courseId={id} />
               )}
               {course.status === "instructor_questions" && (
                 <>

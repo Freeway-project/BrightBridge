@@ -12,6 +12,7 @@ export const STATUS_BADGE_CLASS: Record<CourseStatus, string> = {
   staging_in_progress:     "bg-amber-500/15 text-amber-400 border-amber-500/20",
   ready_for_instructor:    "bg-blue-500/15 text-blue-400 border-blue-500/20",
   sent_to_instructor:      "bg-blue-500/15 text-blue-400 border-blue-500/20",
+  instructor_viewing:      "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
   instructor_questions:    "bg-orange-500/15 text-orange-400 border-orange-500/20",
   instructor_approved:     "bg-blue-500/15 text-blue-400 border-blue-500/20",
   // Provision

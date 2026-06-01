@@ -420,6 +420,22 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
   return { succeeded, failed };
 }
 
+/**
+ * Generates and emails a fresh magic-link invite to every instructor assigned
+ * to the course. Best-effort — failures are logged inside issueInstructorInvites
+ * and never throw, so they can't roll back a status transition.
+ */
+async function emailInstructorInvites(courseId: string, createdBy: string): Promise<void> {
+  try {
+    const { issueInstructorInvites } = await import("@/lib/invites/send");
+    const detail = await getAdminCourseDetail(courseId);
+    const courseTitle = detail?.course.title ?? "your migrated course";
+    await issueInstructorInvites({ courseId, courseTitle, createdBy });
+  } catch (error) {
+    console.error(`[sendToInstructor] Failed to issue instructor invites for course ${courseId}:`, error);
+  }
+}
+
 export async function sendToInstructorAction(courseId: string): Promise<void> {
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
@@ -428,12 +444,24 @@ export async function sendToInstructorAction(courseId: string): Promise<void> {
     toStatus: "sent_to_instructor",
     note: "Sent to instructor by communications.",
   });
+  await emailInstructorInvites(courseId, ctx.userId);
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/communications");
   revalidatePath(`/communications/courses/${courseId}`);
   revalidatePath("/ta");
   revalidatePath("/instructor");
+}
+
+/**
+ * Re-issues the instructor magic-link invite without changing course status.
+ * Used by the "Resend invite" affordance once a course is already with the
+ * instructor.
+ */
+export async function resendInstructorInviteAction(courseId: string): Promise<void> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  await emailInstructorInvites(courseId, ctx.userId);
 }
 
 export async function grantFinalApprovalAction(courseId: string): Promise<void> {
