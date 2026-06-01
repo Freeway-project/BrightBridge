@@ -3,6 +3,7 @@ node_modules/
 
 # build output
 .next/
+.next-build/
 out/
 dist/
 coverage/
