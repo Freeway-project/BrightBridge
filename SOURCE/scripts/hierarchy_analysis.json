@@ -1,0 +1,792 @@
+{
+  "admin_full": [
+    {
+      "email": "tesson@okanagan.bc.ca",
+      "full_name": "Tom Esson",
+      "role": "admin_full"
+    },
+    {
+      "email": "twhite@okanagan.bc.ca",
+      "full_name": "Tricia White",
+      "role": "admin_full"
+    },
+    {
+      "email": "pmartin@okanagan.bc.ca",
+      "full_name": "Paul Martin",
+      "role": "admin_full"
+    },
+    {
+      "email": "ahartwell@okanagan.bc.ca",
+      "full_name": "Amber Hartwell",
+      "role": "admin_full"
+    },
+    {
+      "email": "chutchinson@okanagan.bc.ca",
+      "full_name": "Chantale Hutchinson",
+      "role": "admin_full"
+    },
+    {
+      "email": "bhalsall@okanagan.bc.ca",
+      "full_name": "Ben Halsall",
+      "role": "admin_full"
+    }
+  ],
+  "admin_viewer": [
+    {
+      "email": "jperry@okanagan.bc.ca",
+      "full_name": "Jordan Perry",
+      "role": "admin_viewer"
+    },
+    {
+      "email": "nfassina@okanagan.bc.ca",
+      "full_name": "Neil Fassina",
+      "role": "admin_viewer"
+    },
+    {
+      "email": "slenci@okanagan.bc.ca",
+      "full_name": "Sam Lenci",
+      "role": "admin_viewer"
+    },
+    {
+      "email": "dwilson@okanagan.bc.ca",
+      "full_name": "Dianna Wilson",
+      "role": "admin_viewer"
+    },
+    {
+      "email": "mweiss@okanagan.bc.ca",
+      "full_name": "Mike Weiss",
+      "role": "admin_viewer"
+    },
+    {
+      "email": "mtam@okanagan.bc.ca",
+      "full_name": "May Tam",
+      "role": "admin_viewer"
+    }
+  ],
+  "vps": [
+    {
+      "email": "hvalladares@okanagan.bc.ca",
+      "full_name": "Halia Valladares Montemayor",
+      "role": "standard_user",
+      "title": "vp",
+      "school": "Science & Technology"
+    },
+    {
+      "email": "jbaker@okanagan.bc.ca",
+      "full_name": "Joe Baker",
+      "role": "standard_user",
+      "title": "vp",
+      "school": "Hall School of Business and Entrepreneurship"
+    },
+    {
+      "email": "chartigan@okanagan.bc.ca",
+      "full_name": "Caitlin Hartigan",
+      "role": "standard_user",
+      "title": "vp",
+      "school": "Trades & Apprenticeship"
+    },
+    {
+      "email": "janderson@okanagan.bc.ca",
+      "full_name": "Judith Anderson",
+      "role": "standard_user",
+      "title": "vp",
+      "school": "Arts & Foundational Programs"
+    }
+  ],
+  "ads": [
+    {
+      "email": "screma@okanagan.bc.ca",
+      "full_name": "Steve Crema",
+      "role": "standard_user",
+      "title": "associate_dean",
+      "school": "Science & Technology"
+    },
+    {
+      "email": "csjolander@okanagan.bc.ca",
+      "full_name": "Christine Sjolander",
+      "role": "standard_user",
+      "title": "associate_dean",
+      "school": "Hall School of Business and Entrepreneurship"
+    },
+    {
+      "email": "aweighill@okanagan.bc.ca",
+      "full_name": "Agnes Weighill",
+      "role": "standard_user",
+      "title": "associate_dean",
+      "school": "Hall School of Business and Entrepreneurship"
+    },
+    {
+      "email": "dmarques@okanagan.bc.ca",
+      "full_name": "Danny Marques",
+      "role": "standard_user",
+      "title": "associate_dean",
+      "school": "Trades & Apprenticeship"
+    },
+    {
+      "email": "ttarlit@okanagan.bc.ca",
+      "full_name": "Tanya Tarlit",
+      "role": "standard_user",
+      "title": "associate_dean",
+      "school": "Trades & Apprenticeship"
+    },
+    {
+      "email": "apulvermacher@okanagan.bc.ca",
+      "full_name": "Andrew Pulvermacher",
+      "role": "standard_user",
+      "title": "associate_dean",
+      "school": "Arts & Foundational Programs"
+    },
+    {
+      "email": "cnewitt@okanagan.bc.ca",
+      "full_name": "Chris Newitt",
+      "role": "standard_user",
+      "title": "associate_dean",
+      "school": "Arts & Foundational Programs"
+    }
+  ],
+  "chairs": [
+    {
+      "email": "jwwood@okanagan.bc.ca",
+      "full_name": "James Wood",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Animation",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "mallory@okanagan.bc.ca",
+      "full_name": "Leanne Mallory",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Anthropology",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "jkorcok@okanagan.bc.ca",
+      "full_name": "Jasmine Korcok",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Biology",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "mmartin@okanagan.bc.ca",
+      "full_name": "Morgan Martin",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Biology",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "afontenla@okanagan.bc.ca",
+      "full_name": "Adrian Fontenla",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Business Administration",
+      "supervisor_ad_emails": [
+        "aweighill@okanagan.bc.ca",
+        "csjolander@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "jgarrett@okanagan.bc.ca",
+      "full_name": "Jillian Garrett",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Communications",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "ykhmelevsky@okanagan.bc.ca",
+      "full_name": "Youry Khmelevsky",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Computer Science",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "lreed@okanagan.bc.ca",
+      "full_name": "Lozelle Reed",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Economics",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "kbradshaw@okanagan.bc.ca",
+      "full_name": "Kevin Bradshaw",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Electronic Engineering Technology",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "jkennedy@okanagan.bc.ca",
+      "full_name": "Jake Kennedy",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "English",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "tredding@okanagan.bc.ca",
+      "full_name": "Todd Redding",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Geography",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "cclarkson@okanagan.bc.ca",
+      "full_name": "Christopher Clarkson",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "History",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "tberg@okanagan.bc.ca",
+      "full_name": "Troy Berg",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Infrastructure & Computer Tech",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "nbowman@okanagan.bc.ca",
+      "full_name": "Norah Bowman",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Interdisciplinary Studies",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "wwheeler@okanagan.bc.ca",
+      "full_name": "W. Wheeler",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Kinesiology",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "bpenfound@okanagan.bc.ca",
+      "full_name": "B. Penfound",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Mathematics and Statistics",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "jlaumer@okanagan.bc.ca",
+      "full_name": "J. Laumer",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Mech Engineering",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "lmaley@okanagan.bc.ca",
+      "full_name": "L. Maley",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Mechanical Engineering Technology",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "dboutillier@okanagan.bc.ca",
+      "full_name": "D. Boutillier",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Philosophy",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "tbridges@okanagan.bc.ca",
+      "full_name": "T. Bridges",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Physics & Astronomy",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "akilic@okanagan.bc.ca",
+      "full_name": "A. Kilic",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Political Science",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "ldahl@okanagan.bc.ca",
+      "full_name": "L. Dahl",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Psychology",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "plefebvre@okanagan.bc.ca",
+      "full_name": "P. Lefebvre",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Sociology",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "alubyk@okanagan.bc.ca",
+      "full_name": "A. Lubyk",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Sustainable Building Technology",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca",
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "sacton@okanagan.bc.ca",
+      "full_name": "S. Acton",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Water Engineering Technology",
+      "supervisor_ad_emails": [
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "nbefus@okanagan.bc.ca",
+      "full_name": "Natasha Befus",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Adult Upgrading",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca",
+        "screma@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "koudendag@okanagan.bc.ca",
+      "full_name": "Kelsey Oudendag",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Early Childhood Education",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca",
+        "csjolander@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "athiessen@okanagan.bc.ca",
+      "full_name": "Andrea Thiessen",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Early Childhood Education",
+      "supervisor_ad_emails": [
+        "apulvermacher@okanagan.bc.ca",
+        "aweighill@okanagan.bc.ca",
+        "cnewitt@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca",
+        "ttarlit@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "bridgeley@okanagan.bc.ca",
+      "full_name": "Brenda Ridgeley-Ketchell",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Pharmacy Technician Department",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca",
+        "csjolander@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "mgardner@okanagan.bc.ca",
+      "full_name": "Melissa Gardner",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Pharmacy Technician Department",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "aweighill@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "twalker@okanagan.bc.ca",
+      "full_name": "T. Walker",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Paralegal",
+      "supervisor_ad_emails": [
+        "apulvermacher@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "tbecker@okanagan.bc.ca",
+      "full_name": "Terry Becker",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Paralegal",
+      "supervisor_ad_emails": [
+        "cnewitt@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "nlesage@okanagan.bc.ca",
+      "full_name": "Nina Lesage",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Certified Dental Assistant",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "kbrochu@okanagan.bc.ca",
+      "full_name": "Clinton Brochu",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Construction Trades",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "valbrecht@okanagan.bc.ca",
+      "full_name": "Vivian Albrecht",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "English as a Second Language",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "dsusheski@okanagan.bc.ca",
+      "full_name": "Dana Susheski",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "HSD- Practical Nursing",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "tnoble@okanagan.bc.ca",
+      "full_name": "Tracy Noble",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Health Care Assistant",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "sberg@okanagan.bc.ca",
+      "full_name": "Shelley Berg",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Human Service Work",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "jpals@okanagan.bc.ca",
+      "full_name": "Jevon Pals",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Mechanical Building Trades",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "dnoble@okanagan.bc.ca",
+      "full_name": "Douglas Noble",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Motor Vehicle Trades",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "bhall@okanagan.bc.ca",
+      "full_name": "Brian Hall",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Therapist Assistant",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    },
+    {
+      "email": "cwalker@okanagan.bc.ca",
+      "full_name": "Curtis Walker",
+      "role": "standard_user",
+      "title": "dept_head",
+      "dept": "Welding",
+      "supervisor_ad_emails": [
+        "ttarlit@okanagan.bc.ca",
+        "dmarques@okanagan.bc.ca"
+      ]
+    }
+  ],
+  "schools": [
+    "Arts & Foundational Programs",
+    "Hall School of Business and Entrepreneurship",
+    "Science & Technology",
+    "Trades & Apprenticeship"
+  ],
+  "departments": [
+    [
+      "Animation",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Anthropology",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Biology",
+      "Science & Technology"
+    ],
+    [
+      "Business Administration",
+      "Hall School of Business and Entrepreneurship"
+    ],
+    [
+      "Chemistry",
+      "Science & Technology"
+    ],
+    [
+      "Communications",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Computer Science",
+      "Science & Technology"
+    ],
+    [
+      "Economics",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Electronic Engineering Technology",
+      "Science & Technology"
+    ],
+    [
+      "English",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Geography",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "History",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Infrastructure & Computer Tech",
+      "Science & Technology"
+    ],
+    [
+      "Interdisciplinary Studies",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Kinesiology",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Mathematics and Statistics",
+      "Science & Technology"
+    ],
+    [
+      "Mech Engineering",
+      "Science & Technology"
+    ],
+    [
+      "Mechanical Engineering Technology",
+      "Science & Technology"
+    ],
+    [
+      "Philosophy",
+      "Science & Technology"
+    ],
+    [
+      "Physics & Astronomy",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Political Science",
+      "Science & Technology"
+    ],
+    [
+      "Psychology",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Sociology",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Sustainable Building Technology",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Water Engineering Technology",
+      "Science & Technology"
+    ],
+    [
+      "Paralegal",
+      "Arts & Foundational Programs"
+    ],
+    [
+      "Certified Dental Assistant",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Construction Trades",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Culinary & Pastry Arts",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "HSD- Practical Nursing",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Health Care Assistant",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Human Service Work",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Mechanical Building Trades",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Motor Vehicle Trades",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Office Administration",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Therapist Assistant",
+      "Trades & Apprenticeship"
+    ],
+    [
+      "Welding",
+      "Trades & Apprenticeship"
+    ]
+  ],
+  "school_to_vp": {
+    "Science & Technology": "hvalladares@okanagan.bc.ca",
+    "Hall School of Business and Entrepreneurship": "jbaker@okanagan.bc.ca",
+    "Trades & Apprenticeship": "chartigan@okanagan.bc.ca",
+    "Arts & Foundational Programs": "janderson@okanagan.bc.ca"
+  },
+  "data_issues": [
+    "Row 26: CSV name 'Wendy Lind' does not match email 'wwheeler@okanagan.bc.ca' \u2014 using email-derived name 'W. Wheeler'",
+    "Row 27: CSV name 'Wendy Lind' does not match email 'wwheeler@okanagan.bc.ca' \u2014 using email-derived name 'W. Wheeler'",
+    "Row 28: CSV name 'Bryan Carter' does not match email 'bpenfound@okanagan.bc.ca' \u2014 using email-derived name 'B. Penfound'",
+    "Row 29: CSV name 'Jonathan Penfound' does not match email 'jlaumer@okanagan.bc.ca' \u2014 using email-derived name 'J. Laumer'",
+    "Row 30: CSV name 'Logan Laumer' does not match email 'lmaley@okanagan.bc.ca' \u2014 using email-derived name 'L. Maley'",
+    "Row 31: CSV name 'David Maley' does not match email 'dboutillier@okanagan.bc.ca' \u2014 using email-derived name 'D. Boutillier'",
+    "Row 32: CSV name 'Terry Boutillier' does not match email 'tbridges@okanagan.bc.ca' \u2014 using email-derived name 'T. Bridges'",
+    "Row 33: CSV name 'Terry Boutillier' does not match email 'tbridges@okanagan.bc.ca' \u2014 using email-derived name 'T. Bridges'",
+    "Row 34: CSV name 'Ayla Bridges' does not match email 'akilic@okanagan.bc.ca' \u2014 using email-derived name 'A. Kilic'",
+    "Row 35: CSV name 'Leora Kilic' does not match email 'ldahl@okanagan.bc.ca' \u2014 using email-derived name 'L. Dahl'",
+    "Row 36: CSV name 'Leora Kilic' does not match email 'ldahl@okanagan.bc.ca' \u2014 using email-derived name 'L. Dahl'",
+    "Row 37: CSV name 'Priscillia Dahl' does not match email 'plefebvre@okanagan.bc.ca' \u2014 using email-derived name 'P. Lefebvre'",
+    "Row 38: CSV name 'Priscillia Dahl' does not match email 'plefebvre@okanagan.bc.ca' \u2014 using email-derived name 'P. Lefebvre'",
+    "Row 39: CSV name 'Ashley Lefebvre' does not match email 'alubyk@okanagan.bc.ca' \u2014 using email-derived name 'A. Lubyk'",
+    "Row 40: CSV name 'Ashley Lefebvre' does not match email 'alubyk@okanagan.bc.ca' \u2014 using email-derived name 'A. Lubyk'",
+    "Row 41: CSV name 'Sydney Lubyk' does not match email 'sacton@okanagan.bc.ca' \u2014 using email-derived name 'S. Acton'",
+    "Row 42: CSV name 'Natasha Acton' does not match email 'nbefus@okanagan.bc.ca' \u2014 using email-derived name 'N. Befus'",
+    "Row 44: CSV name 'Andrea Oudendag' does not match email 'athiessen@okanagan.bc.ca' \u2014 using email-derived name 'A. Thiessen'",
+    "Row 45: CSV name 'Vivian Thiessen' does not match email 'athiessen@okanagan.bc.ca' \u2014 using email-derived name 'A. Thiessen'",
+    "Row 46: CSV name 'Vivian Thiessen' does not match email 'athiessen@okanagan.bc.ca' \u2014 using email-derived name 'A. Thiessen'",
+    "Row 47: CSV name 'Melissa Ridgeley-Ketchell' does not match email 'bridgeley@okanagan.bc.ca' \u2014 using email-derived name 'B. Ridgeley'",
+    "Row 48: CSV name 'Melissa Ridgeley-Ketchell' does not match email 'mgardner@okanagan.bc.ca' \u2014 using email-derived name 'M. Gardner'",
+    "Row 49: CSV name 'Terry Becker' does not match email 'twalker@okanagan.bc.ca' \u2014 using email-derived name 'T. Walker'"
+  ]
+}

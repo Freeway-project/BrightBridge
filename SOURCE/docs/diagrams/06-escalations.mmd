@@ -1,0 +1,11 @@
+%% Escalations — a side conversation for flagged problems
+flowchart LR
+    C["Someone raises an escalation<br/>(Critical / Major / Minor)"] --> O(("Open"))
+    O --> T["People reply in the thread"]
+    T --> O
+    O -->|Admin resolves with a note| R(("Resolved"))
+
+    note["An escalation is a SIDE conversation.<br/>Resolving it does NOT move the course by itself —<br/>a person still drives the course through the steps."]
+
+    classDef n fill:#fee2e2,stroke:#dc2626,color:#7f1d1d;
+    class note n;
