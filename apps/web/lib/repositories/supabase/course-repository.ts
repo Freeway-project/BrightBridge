@@ -374,7 +374,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(`
-          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at, instructor_summary_notes,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -397,6 +397,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         org_unit_id: string | null;
         status: string;
         updated_at: string;
+        instructor_summary_notes: string | null;
         course_assignments?: Array<{
           role: string;
           profiles?: AssignmentProfile | AssignmentProfile[] | null;
@@ -415,6 +416,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         orgUnitId: course.org_unit_id,
         status: toCourseStatus(course.status),
         updatedAt: course.updated_at,
+        instructorSummaryNotes: course.instructor_summary_notes ?? null,
         ta: staffProfile
           ? {
               id: staffProfile.id,
@@ -889,6 +891,7 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
       orgUnitId: course.org_unit_id,
       status: toCourseStatus(course.status),
       updatedAt: course.updated_at,
+      instructorSummaryNotes: null,
       ta: staffProfile
         ? {
             id: staffProfile.id,

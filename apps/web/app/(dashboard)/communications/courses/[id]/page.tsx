@@ -5,6 +5,7 @@ import { getAdminCourseDetail } from "@/lib/admin/queries"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CourseReviewDetail } from "@/app/(dashboard)/admin/courses/[id]/_components/course-review-detail"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
+import { FinalSummaryEditor } from "@/components/shared/final-summary-editor"
 import { ResendInviteBanner, SendToInstructorBanner } from "@/app/(dashboard)/admin/courses/[id]/_components/send-to-instructor-banner"
 import { QuestionRoundBanner } from "@/app/(dashboard)/admin/courses/[id]/_components/question-round-banner"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
@@ -68,12 +69,15 @@ export default async function CommsCourseDetailPage({ params }: Props) {
           </TabsContent>
 
           <TabsContent value="issues" className="flex-1 overflow-y-auto p-6">
-            <div className="bg-card border border-border rounded-lg p-6 flex-1 overflow-y-auto">
-              <IssueTracker
-                courseId={id}
-                phase="migration"
-                userRole={context.profile.role}
-              />
+            <div className="flex flex-col gap-6">
+              <FinalSummaryEditor courseId={id} initialNotes={course.instructorSummaryNotes} editable={false} />
+              <div className="bg-card border border-border rounded-lg p-6 flex-1 overflow-y-auto">
+                <IssueTracker
+                  courseId={id}
+                  phase="migration"
+                  userRole={context.profile.role}
+                />
+              </div>
             </div>
           </TabsContent>
 

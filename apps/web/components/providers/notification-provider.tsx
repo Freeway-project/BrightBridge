@@ -163,12 +163,15 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
           ])
 
           const icon = SEVERITY_ICON[payload.new.severity] ?? "⚠️"
-          const typeLabel = TYPE_LABEL[payload.new.type] ?? "Issue"
+          const isQuestion = payload.new.type === "question"
+          const typeLabel = isQuestion && role === "standard_user"
+            ? "Instructor Question"
+            : TYPE_LABEL[payload.new.type] ?? "Issue"
           const href = IS_ADMIN(role)
             ? `/admin/courses/${payload.new.course_id}`
             : payload.new.type === "escalation"
               ? `/courses/${payload.new.course_id}`
-              : `/courses/${payload.new.course_id}/issues`
+              : `/courses/${payload.new.course_id}/issue-log`
 
           toast.warning(`${icon} New ${typeLabel}`, {
             description: (

@@ -51,7 +51,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               <TabsTrigger value="questions" className="text-base">Questions</TabsTrigger>
               <TabsTrigger value="discussion" className="text-base">Discussion</TabsTrigger>
             </TabsList>
-            <InstructorCourseActions courseId={id} status={course.status} />
+            <InstructorCourseActions courseId={id} status={course.status} finalSummary={course.instructorSummaryNotes} />
           </div>
 
           {/* Overview — clean course info only */}

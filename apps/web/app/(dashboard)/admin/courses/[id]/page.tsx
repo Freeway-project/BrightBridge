@@ -9,6 +9,7 @@ import { CourseChat } from "./_components/course-chat"
 import { IssueTracker } from "../../../courses/[id]/_components/issues/issue-tracker"
 import { CourseDetailRefreshWrapper } from "./_components/course-detail-refresh-wrapper"
 import { ResendInviteBanner, SendToInstructorBanner } from "./_components/send-to-instructor-banner"
+import { FinalSummaryEditor } from "@/components/shared/final-summary-editor"
 import { StagingShellBanner } from "./_components/staging-shell-banner"
 import { ResubmitBanner } from "./_components/resubmit-banner"
 import { QuestionRoundBanner } from "./_components/question-round-banner"
@@ -90,6 +91,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
           {/* Issues Tab */}
           <TabsContent value="issues" className="flex-1 overflow-y-auto p-6">
             <div className="flex flex-col gap-6 h-full">
+              <FinalSummaryEditor courseId={id} initialNotes={course.instructorSummaryNotes} editable={false} />
               <div className="bg-card border border-border rounded-lg p-6 flex-1 overflow-y-auto">
                 <IssueTracker
                   courseId={id}
