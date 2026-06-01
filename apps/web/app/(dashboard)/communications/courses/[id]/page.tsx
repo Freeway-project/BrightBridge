@@ -6,8 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CourseReviewDetail } from "@/app/(dashboard)/admin/courses/[id]/_components/course-review-detail"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
 import { SendToInstructorBanner } from "@/app/(dashboard)/admin/courses/[id]/_components/send-to-instructor-banner"
+import { QuestionRoundBanner } from "@/app/(dashboard)/admin/courses/[id]/_components/question-round-banner"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
+import { getQuestionRoundHistory } from "@/lib/courses/service"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -18,9 +20,10 @@ export default async function CommsCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_viewer", "admin_full", "super_admin"])
 
-  const [detail, sharedComments] = await Promise.all([
+  const [detail, sharedComments, questionRounds] = await Promise.all([
     getAdminCourseDetail(id),
     getSharedComments(id),
+    getQuestionRoundHistory(id),
   ])
   if (!detail) notFound()
 
@@ -46,6 +49,12 @@ export default async function CommsCourseDetailPage({ params }: Props) {
             <div className="space-y-[var(--card-spacing,1.5rem)]">
               {course.status === "ready_for_instructor" && (
                 <SendToInstructorBanner courseId={id} />
+              )}
+              {course.status === "instructor_questions" && (
+                <>
+                  <QuestionRoundBanner rounds={questionRounds} />
+                  <SendToInstructorBanner courseId={id} variant="resend" />
+                </>
               )}
               <CourseReviewDetail
                 course={course}
