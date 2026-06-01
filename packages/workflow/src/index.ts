@@ -14,8 +14,12 @@ export {
   getPipelineStage,
   isFinalStatus,
   isInstructorVisibleStatus,
+  WORKFLOW_PHASES,
   type CourseStatus,
-  type PipelineStage
+  type PipelineStage,
+  type StatusGroupKey,
+  type WorkflowPhase,
+  type WorkflowPhaseGroup
 } from "./statuses";
 export {
   assertCanTransition,

@@ -56,6 +56,66 @@ export function isInstructorVisibleStatus(status: CourseStatus) {
 
 export type PipelineStage = "migration" | "staging" | "provision"
 
+/**
+ * Sub-group keys used to bucket statuses within a pipeline phase for the
+ * dashboard tab/column UIs. See {@link WORKFLOW_PHASES}.
+ */
+export type StatusGroupKey =
+  | "todo"
+  | "in_review"
+  | "admin_review"
+  | "shell_build"
+  | "ready_to_send"
+  | "with_instructor"
+  | "final"
+
+export type WorkflowPhaseGroup = {
+  key: StatusGroupKey
+  label: string
+  statuses: CourseStatus[]
+}
+
+export type WorkflowPhase = {
+  key: PipelineStage
+  label: string
+  groups: WorkflowPhaseGroup[]
+}
+
+/**
+ * Single source of truth for grouping the 12 course statuses into the three
+ * pipeline phases (Migration / Staging / Provision) and their sub-groups.
+ * Both the TA course-list view and the admin board derive their tabs/columns
+ * from this — labels mirror {@link COURSE_STATUS_LABELS}. Every status appears
+ * in exactly one group.
+ */
+export const WORKFLOW_PHASES: WorkflowPhase[] = [
+  {
+    key: "migration",
+    label: "Migration",
+    groups: [
+      { key: "todo", label: "To Do", statuses: ["course_created", "assigned_to_ta"] },
+      { key: "in_review", label: "In Review", statuses: ["ta_review_in_progress"] },
+    ],
+  },
+  {
+    key: "staging",
+    label: "Staging",
+    groups: [
+      { key: "admin_review", label: "Admin Review", statuses: ["submitted_to_admin", "admin_changes_requested"] },
+      { key: "shell_build", label: "Shell Build", statuses: ["waiting_on_admin", "staging_in_progress"] },
+      { key: "ready_to_send", label: "Ready to Send", statuses: ["ready_for_instructor"] },
+      { key: "with_instructor", label: "With Instructor", statuses: ["sent_to_instructor", "instructor_questions", "instructor_approved"] },
+    ],
+  },
+  {
+    key: "provision",
+    label: "Provision",
+    groups: [
+      { key: "final", label: "Final Approved", statuses: ["final_approved"] },
+    ],
+  },
+]
+
 export function getPipelineStage(status: CourseStatus): PipelineStage {
   if (status === "final_approved") return "provision"
   if (

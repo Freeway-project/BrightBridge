@@ -16,8 +16,15 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Search as SearchIcon, AlertCircle, Filter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-import { getTab } from "@/lib/courses/tab-utils"
+import { WORKFLOW_PHASES, getPipelineStage, type PipelineStage } from "@coursebridge/workflow"
 import type { StatCardIcon } from "@/components/shared/stat-card"
+
+// Top-level phase tabs reuse the workflow phases, plus a cross-cutting "Issues" tab.
+const PHASE_STYLE: Record<PipelineStage, { emoji: string; activeColor: string }> = {
+  migration: { emoji: "🧭", activeColor: "text-blue-500 after:bg-blue-500" },
+  staging: { emoji: "🛠️", activeColor: "text-orange-500 after:bg-orange-500" },
+  provision: { emoji: "✅", activeColor: "text-emerald-500 after:bg-emerald-500" },
+}
 
 export interface CourseStat {
   label: string
@@ -70,23 +77,27 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
     })
   }, [initialCourses, search, subject, term])
 
-  const byTab = useMemo(() => ({
-    todo:             filtered.filter((c) => getTab(c) === "todo"),
-    in_progress:      filtered.filter((c) => getTab(c) === "in_progress"),
-    pending_admin:    filtered.filter((c) => getTab(c) === "pending_admin"),
-    done:             filtered.filter((c) => getTab(c) === "done"),
-    staging:          filtered.filter((c) => getTab(c) === "staging"),
-    with_instructor:  filtered.filter((c) => getTab(c) === "with_instructor"),
-    issues:           filtered.filter((c) => (issueCounts[c.id]?.open ?? 0) > 0),
-  }), [filtered, issueCounts])
+  // Group courses by workflow phase → sub-group, from the shared WORKFLOW_PHASES
+  // source of truth. Each phase carries its sub-groups (each with its courses)
+  // and a total count.
+  const phases = useMemo(() =>
+    WORKFLOW_PHASES.map((phase) => {
+      const groups = phase.groups.map((group) => ({
+        ...group,
+        courses: filtered.filter((c) => group.statuses.includes(c.status)),
+      }))
+      return { ...phase, groups, count: groups.reduce((n, g) => n + g.courses.length, 0) }
+    })
+  , [filtered])
 
-  const defaultTab =
-    byTab.in_progress.length > 0       ? "in_progress"
-    : byTab.pending_admin.length > 0   ? "pending_admin"
-    : byTab.todo.length > 0            ? "todo"
-    : byTab.staging.length > 0         ? "staging"
-    : byTab.with_instructor.length > 0 ? "with_instructor"
-    : "done"
+  const issueCourses = useMemo(
+    () => filtered.filter((c) => (issueCounts[c.id]?.open ?? 0) > 0),
+    [filtered, issueCounts],
+  )
+
+  // Default to the first phase that actually has courses (preserve "jump to the
+  // most relevant tab" behaviour), else the first phase.
+  const defaultTab = (phases.find((p) => p.count > 0) ?? phases[0]).key
 
   return (
     <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6 scrollbar-thin">
@@ -137,54 +148,22 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
         </div>
       </motion.div>
 
-      {/* Tabs */}
+      {/* Phase tabs (Migration · Staging · Provision) + cross-cutting Issues */}
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="relative flex h-10 w-full items-center justify-start gap-6 border-b border-border/40 bg-transparent p-0 rounded-none">
-          <TabItem
-            value="todo"
-            count={byTab.todo.length}
-            label="To Do"
-            activeColor="text-amber-500 after:bg-amber-500"
-            emoji="📋"
-          />
-          <TabItem
-            value="in_progress"
-            count={byTab.in_progress.length}
-            label="In Progress"
-            activeColor="text-blue-500 after:bg-blue-500"
-            emoji="⚙️"
-          />
-          <TabItem
-            value="pending_admin"
-            count={byTab.pending_admin.length}
-            label="Pending Admin"
-            activeColor="text-cyan-500 after:bg-cyan-500"
-            emoji="⏳"
-          />
-          <TabItem
-            value="done"
-            count={byTab.done.length}
-            label="Done"
-            activeColor="text-emerald-500 after:bg-emerald-500"
-            emoji="✅"
-          />
-          <TabItem
-            value="staging"
-            count={byTab.staging.length}
-            label="Staging"
-            activeColor="text-orange-500 after:bg-orange-500"
-            emoji="🕐"
-          />
-          <TabItem
-            value="with_instructor"
-            count={byTab.with_instructor.length}
-            label="With Instructor"
-            activeColor="text-purple-500 after:bg-purple-500"
-            emoji="📬"
-          />
+          {phases.map((phase) => (
+            <TabItem
+              key={phase.key}
+              value={phase.key}
+              count={phase.count}
+              label={phase.label}
+              activeColor={PHASE_STYLE[phase.key].activeColor}
+              emoji={PHASE_STYLE[phase.key].emoji}
+            />
+          ))}
           <TabItem
             value="issues"
-            count={byTab.issues.length}
+            count={issueCourses.length}
             label="Issues"
             activeColor="text-destructive after:bg-destructive"
             emoji="🔴"
@@ -192,20 +171,55 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
         </TabsList>
 
         <AnimatePresence mode="wait">
-          {(["todo", "in_progress", "pending_admin", "done", "staging", "with_instructor"] as const).map((tab) => (
-            <TabsContent key={tab} value={tab} className="mt-6 focus-visible:outline-none">
-              <CourseGrid
-                courses={byTab[tab]}
-                issueCounts={issueCounts}
-                canExport={canExport}
-                onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
-              />
-            </TabsContent>
-          ))}
+          {phases.map((phase) => {
+            const onClear = () => { setSearch(""); setSubject("all"); setTerm("all") }
+            // Single-group phases (Provision) render the grid directly — no sub-tab row.
+            if (phase.groups.length === 1) {
+              return (
+                <TabsContent key={phase.key} value={phase.key} className="mt-6 focus-visible:outline-none">
+                  <CourseGrid
+                    courses={phase.groups[0].courses}
+                    issueCounts={issueCounts}
+                    canExport={canExport}
+                    onClear={onClear}
+                  />
+                </TabsContent>
+              )
+            }
+            const defaultGroup = (phase.groups.find((g) => g.courses.length > 0) ?? phase.groups[0]).key
+            return (
+              <TabsContent key={phase.key} value={phase.key} className="mt-6 focus-visible:outline-none">
+                <Tabs defaultValue={defaultGroup} className="w-full">
+                  <TabsList className="flex-wrap">
+                    {phase.groups.map((group) => (
+                      <TabsTrigger key={group.key} value={group.key} className="gap-1.5">
+                        {group.label}
+                        {group.courses.length > 0 && (
+                          <span className="flex size-4 items-center justify-center rounded-full bg-current/10 text-[9px] font-black">
+                            {group.courses.length}
+                          </span>
+                        )}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  {phase.groups.map((group) => (
+                    <TabsContent key={group.key} value={group.key} className="mt-6 focus-visible:outline-none">
+                      <CourseGrid
+                        courses={group.courses}
+                        issueCounts={issueCounts}
+                        canExport={canExport}
+                        onClear={onClear}
+                      />
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </TabsContent>
+            )
+          })}
 
           <TabsContent value="issues" className="mt-6 focus-visible:outline-none">
             <div className="space-y-4">
-              {byTab.issues.length > 0 && (
+              {issueCourses.length > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-foreground">Sort by:</span>
                   <Select value={issueSort} onValueChange={(v) => setIssueSort(v as any)}>
@@ -221,7 +235,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
                 </div>
               )}
               <CourseGrid
-                courses={byTab.issues}
+                courses={issueCourses}
                 issueCounts={issueCounts}
                 canExport={canExport}
                 onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
