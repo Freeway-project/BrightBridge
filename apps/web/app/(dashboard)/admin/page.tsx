@@ -59,19 +59,17 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   ])
 
   // ---- Workflow board data (All Courses tab) -----------------------------
-  // Columns are the WORKFLOW_PHASES sub-groups (single source of truth), tagged
-  // with their phase so CoursesBoard can group them under Migration / Staging /
-  // Provision tabs. Counts come from the (cheap) status-count aggregate; cards
-  // are a recent slice per status, capped per column — List view handles full
-  // browsing/search.
-  const BOARD_COLUMNS = WORKFLOW_PHASES.flatMap((phase) =>
-    phase.groups.map((group) => ({
-      key: group.key,
-      label: group.label,
-      phase: phase.key,
-      statuses: group.statuses,
-    })),
-  )
+  // ~6 columns grouping the 12 statuses into the key workflow steps. Counts
+  // come from the (cheap) status-count aggregate; cards are a recent slice per
+  // status, capped per column — the List view handles full browsing/search.
+  const BOARD_COLUMNS: { key: string; label: string; statuses: CourseStatus[] }[] = [
+    { key: "migration", label: "Migration", statuses: ["course_created", "assigned_to_ta", "ta_review_in_progress"] },
+    { key: "submitted", label: "Submitted to Admin", statuses: ["submitted_to_admin", "admin_changes_requested"] },
+    { key: "building", label: "Waiting on Admin", statuses: ["waiting_on_admin"] },
+    { key: "finalizing", label: "Staging in Process", statuses: ["staging_in_progress"] },
+    { key: "instructor", label: "Ready / With Instructor", statuses: ["ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved"] },
+    { key: "provision", label: "Provision", statuses: ["final_approved"] },
+  ]
   const countByStatus = new Map<CourseStatus, number>(overviewData.statusCounts.map((s) => [s.status, s.count]))
   const repo = getCourseRepository()
   const cardStatuses = COURSE_STATUSES.filter((s) => (countByStatus.get(s) ?? 0) > 0)
