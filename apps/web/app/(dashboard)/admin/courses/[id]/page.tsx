@@ -8,7 +8,7 @@ import { CourseReviewDetail } from "./_components/course-review-detail"
 import { CourseChat } from "./_components/course-chat"
 import { IssueTracker } from "../../../courses/[id]/_components/issues/issue-tracker"
 import { CourseDetailRefreshWrapper } from "./_components/course-detail-refresh-wrapper"
-import { SendToInstructorBanner } from "./_components/send-to-instructor-banner"
+import { ResendInviteBanner, SendToInstructorBanner } from "./_components/send-to-instructor-banner"
 import { StagingShellBanner } from "./_components/staging-shell-banner"
 import { ResubmitBanner } from "./_components/resubmit-banner"
 import { QuestionRoundBanner } from "./_components/question-round-banner"
@@ -62,6 +62,9 @@ export default async function AdminCourseDetailPage({ params }: Props) {
                 )}
                 {course.status === "ready_for_instructor" && (
                   <SendToInstructorBanner courseId={id} />
+                )}
+                {course.status === "sent_to_instructor" && (
+                  <ResendInviteBanner courseId={id} />
                 )}
                 {course.status === "submitted_to_admin" && (
                   <ResubmitBanner submissions={submissionHistory} />
