@@ -22,6 +22,14 @@ export interface AuthService {
     userMetadata?: Record<string, unknown>;
   }): Promise<{ id: string; email: string | null }>;
   updateUserMetadata(userId: string, userMetadata: Record<string, unknown>): Promise<void>;
+  /**
+   * Generates a Supabase magic-link token for an existing user without sending
+   * Supabase's own email — we deliver the link ourselves. Returns the hashed
+   * token to be verified via verifyMagicLink.
+   */
+  generateMagicLinkHashedToken(email: string): Promise<string>;
+  /** Verifies a magic-link token and establishes the session cookie. */
+  verifyMagicLink(tokenHash: string): Promise<{ error: string | null }>;
   getBrowserClient(): ReturnType<typeof createBrowserClient>;
 }
 
@@ -106,6 +114,39 @@ class SupabaseAuthService implements AuthService {
     if (error) {
       throw new Error(error.message);
     }
+  }
+
+  async generateMagicLinkHashedToken(email: string) {
+    const admin = createAdminClient();
+
+    if (!admin) {
+      throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY.");
+    }
+
+    const { data, error } = await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const hashedToken = data.properties?.hashed_token;
+    if (!hashedToken) {
+      throw new Error("Supabase did not return a magic-link token.");
+    }
+
+    return hashedToken;
+  }
+
+  async verifyMagicLink(tokenHash: string) {
+    const supabase = await createServerClient();
+    const { error } = await supabase.auth.verifyOtp({
+      type: "magiclink",
+      token_hash: tokenHash,
+    });
+    return { error: error?.message ?? null };
   }
 
   getBrowserClient() {

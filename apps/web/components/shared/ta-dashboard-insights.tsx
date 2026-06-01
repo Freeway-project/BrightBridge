@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { AlertTriangle, CheckCircle2, FileText, ShieldAlert } from "lucide-react"
 import type { CourseSummary } from "@/lib/courses/service"
 import type { IssueCountMap } from "@/components/courses/course-list-view"
-import { getTab } from "@/lib/courses/tab-utils"
+import { getPipelineStage } from "@coursebridge/workflow"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -79,7 +79,7 @@ export function TaDashboardInsights({ courses, issueCounts }: Props) {
     const total = courses.length
     if (total === 0) return null
 
-    const done = courses.filter(c => getTab(c) === "done").length
+    const done = courses.filter(c => getPipelineStage(c.status) === "provision").length
     const completionPct = (done / total) * 100
 
     const metadataPct  = (courses.filter(c => c.reviewProgress?.courseMetadata.exists).length / total) * 100

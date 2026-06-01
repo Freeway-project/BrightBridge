@@ -23,7 +23,9 @@ export function InstructorCourseList({ courses }: Props) {
     )
   }, [courses, search])
 
-  const pending = courses.filter((c) => c.status === "sent_to_instructor").length
+  const pending = courses.filter(
+    (c) => c.status === "sent_to_instructor" || c.status === "instructor_viewing"
+  ).length
   const questions = courses.filter((c) => c.status === "instructor_questions").length
   const approved = courses.filter((c) =>
     c.status === "instructor_approved" || c.status === "final_approved"

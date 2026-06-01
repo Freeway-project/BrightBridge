@@ -1,5 +1,5 @@
 import { Topbar } from "@/components/layout/topbar"
-import { COURSE_STATUSES, type CourseStatus } from "@coursebridge/workflow"
+import { COURSE_STATUSES, WORKFLOW_PHASES, type CourseStatus } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminCoursesPage, getAdminOverviewData, type AdminCourseRow } from "@/lib/admin/queries"
 import { CoursesBoard, type BoardColumn } from "./_components/courses-board"
@@ -79,6 +79,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const boardColumns: BoardColumn[] = BOARD_COLUMNS.map((col) => ({
     key: col.key,
     label: col.label,
+    phase: col.phase,
     count: col.statuses.reduce((n, s) => n + (countByStatus.get(s) ?? 0), 0),
     cards: col.statuses
       .flatMap((s) => rowsByStatus.get(s) ?? [])

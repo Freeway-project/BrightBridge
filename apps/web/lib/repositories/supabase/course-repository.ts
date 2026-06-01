@@ -755,7 +755,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         .select("id, title, term, department, status, updated_at, course_assignments!inner(profile_id, role)")
         .eq("course_assignments.profile_id", profileId)
         .eq("course_assignments.role", "instructor")
-        .in("status", ["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
+        .in("status", ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved", "final_approved"])
         .order("updated_at", { ascending: false });
 
       if (error) {

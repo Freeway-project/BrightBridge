@@ -67,19 +67,35 @@ export const COURSE_TRANSITIONS = [
     roles: ["admin_viewer", "admin_full", "super_admin"]
   },
   {
+    // Auto-advanced when the instructor opens their review link.
+    from: "sent_to_instructor",
+    to: "instructor_viewing",
+    roles: ["instructor", "super_admin"]
+  },
+  {
     from: "sent_to_instructor",
     to: "instructor_questions",
+    roles: ["instructor", "super_admin"]
+  },
+  {
+    from: "sent_to_instructor",
+    to: "instructor_approved",
+    roles: ["instructor", "super_admin"]
+  },
+  {
+    from: "instructor_viewing",
+    to: "instructor_questions",
+    roles: ["instructor", "super_admin"]
+  },
+  {
+    from: "instructor_viewing",
+    to: "instructor_approved",
     roles: ["instructor", "super_admin"]
   },
   {
     from: "instructor_questions",
     to: "sent_to_instructor",
     roles: ["admin_viewer", "admin_full", "super_admin"]
-  },
-  {
-    from: "sent_to_instructor",
-    to: "instructor_approved",
-    roles: ["instructor", "super_admin"]
   },
   {
     from: "instructor_approved",
