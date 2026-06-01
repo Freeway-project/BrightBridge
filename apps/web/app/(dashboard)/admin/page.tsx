@@ -65,8 +65,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const BOARD_COLUMNS: { key: string; label: string; statuses: CourseStatus[] }[] = [
     { key: "migration", label: "Migration", statuses: ["course_created", "assigned_to_ta", "ta_review_in_progress"] },
     { key: "submitted", label: "Submitted to Admin", statuses: ["submitted_to_admin", "admin_changes_requested"] },
-    { key: "building", label: "Building Shell", statuses: ["waiting_on_admin"] },
-    { key: "finalizing", label: "TA Finalizing", statuses: ["staging_in_progress"] },
+    { key: "building", label: "Waiting on Admin", statuses: ["waiting_on_admin"] },
+    { key: "finalizing", label: "Staging in Process", statuses: ["staging_in_progress"] },
     { key: "instructor", label: "Ready / With Instructor", statuses: ["ready_for_instructor", "sent_to_instructor", "instructor_questions", "instructor_approved"] },
     { key: "provision", label: "Provision", statuses: ["final_approved"] },
   ]
