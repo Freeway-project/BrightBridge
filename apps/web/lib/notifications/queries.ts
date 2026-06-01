@@ -64,6 +64,33 @@ type CommentRow = {
   author: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
 };
 
+/**
+ * Node's global fetch surfaces transient connectivity blips (stale keep-alive
+ * sockets, brief DNS/network hiccups, Supabase pooler resets) as "fetch
+ * failed". These are intermittent and usually succeed on an immediate retry.
+ */
+function isTransientFetchError(err: unknown): boolean {
+  const parts = [err instanceof Error ? err.message : String(err)];
+  if (err instanceof Error && err.cause) parts.push(String((err.cause as { message?: string })?.message ?? err.cause));
+  return /fetch failed|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|socket hang up|network|terminated/i.test(parts.join(" "));
+}
+
+/** Runs `fn`, retrying transient fetch failures a few times with small backoff. */
+async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (!isTransientFetchError(err) || attempt === attempts) throw err;
+      console.warn(`[notifications] transient failure on ${label} (attempt ${attempt}/${attempts}); retrying`);
+      await new Promise((resolve) => setTimeout(resolve, 150 * attempt));
+    }
+  }
+  throw lastErr;
+}
+
 const ADMIN_ROLES: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
 const STAFF_PENDING_STATUSES = new Set<CourseStatus>([
   "assigned_to_ta",
@@ -73,6 +100,7 @@ const STAFF_PENDING_STATUSES = new Set<CourseStatus>([
 ]);
 const INSTRUCTOR_PENDING_STATUSES = new Set<CourseStatus>([
   "sent_to_instructor",
+  "instructor_viewing",
   "instructor_questions",
 ]);
 const ADMIN_PENDING_STATUSES = new Set<CourseStatus>([
@@ -100,16 +128,16 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
   try {
     const accessibleCourseIds = isAdmin
       ? null
-      : await getAssignedCourseIds(context.profile.id, role);
+      : await withRetry("assignments", () => getAssignedCourseIds(context.profile.id, role));
 
     if (accessibleCourseIds && accessibleCourseIds.length === 0) {
       return { notifications: [], pendingCount: 0, role, error: false };
     }
 
     const [courses, issues, comments] = await Promise.all([
-      getRelevantCourses(accessibleCourseIds, role),
-      getRelevantIssues(accessibleCourseIds),
-      getRecentComments(accessibleCourseIds, context.profile.id),
+      withRetry("courses", () => getRelevantCourses(accessibleCourseIds, role)),
+      withRetry("issues", () => getRelevantIssues(accessibleCourseIds)),
+      withRetry("comments", () => getRecentComments(accessibleCourseIds, context.profile.id)),
     ]);
 
     const notifications = [
@@ -358,6 +386,7 @@ function getCourseActionLabel(status: CourseStatus, role: Role, submissionCount?
   }
   if (status === "instructor_approved") return "Course is ready for final approval";
   if (status === "sent_to_instructor") return "Course is waiting for instructor review";
+  if (status === "instructor_viewing") return role === "instructor" ? "Continue your review" : "Instructor is reviewing the course";
   if (status === "instructor_questions") return role === "instructor" ? "Questions need follow-up" : "Instructor questions need review";
   if (status === "admin_changes_requested") return "Changes were requested";
   return "Course needs attention";
