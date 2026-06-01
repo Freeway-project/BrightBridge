@@ -3,7 +3,6 @@ import "server-only";
 import {
   assertCanTransition,
   COURSE_STATUSES,
-  STAFF_ACTIONABLE_COURSE_STATUSES,
   ASSIGNMENT_ROLES,
   type CourseStatus,
   type Role,
@@ -56,16 +55,15 @@ export async function getAccessibleCourses() {
     };
   }
 
-  // TAs and instructors only see courses assigned to them
+  // TAs and instructors only see courses assigned to them, but across all
+  // statuses — so a TA can still find courses they reviewed after those courses
+  // advance past the TA stage (e.g. ready_for_instructor). The dashboard tabs
+  // (Staging / With Instructor / Done) bucket the non-actionable ones for them.
   const isScoped = context.profile.role === "standard_user" || context.profile.role === "instructor";
-  const assignedFilters = context.profile.role === "standard_user"
-    ? { statuses: STAFF_ACTIONABLE_COURSE_STATUSES }
-    : undefined;
   const summaries = isScoped
     ? await getCourseRepository().listAssignedCourses(
         context.profile.id,
         toAssignmentRole(context.profile.role),
-        assignedFilters,
       )
     : await getCourseRepository().listAccessibleCourses();
 
