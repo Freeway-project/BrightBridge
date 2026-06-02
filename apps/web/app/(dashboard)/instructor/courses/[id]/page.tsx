@@ -3,7 +3,8 @@ import { Topbar } from "@/components/layout/topbar"
 import { requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
 import { getCourseRepository } from "@/lib/repositories"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StickyTabs } from "@/components/ui/sticky-tabs"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
 import { InstructorCourseActions } from "./_components/instructor-course-actions"
 import { InstructorReviewDetail } from "./_components/instructor-review-detail"
@@ -43,7 +44,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
         role={context.profile.role}
       />
       <main className="flex-1 flex overflow-hidden bg-background">
-        <Tabs defaultValue="overview" className="flex-1 flex flex-col overflow-hidden w-full">
+        <StickyTabs storageKey={`instructor-course-${id}`} defaultValue="overview" className="flex-1 flex flex-col overflow-hidden w-full">
           <div className="border-b border-border px-6 pt-4 bg-background flex items-center justify-between">
             <TabsList variant="line">
               <TabsTrigger value="overview" className="text-base">Overview</TabsTrigger>
@@ -117,7 +118,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               currentUserId={context.userId}
             />
           </TabsContent>
-        </Tabs>
+        </StickyTabs>
       </main>
     </>
   )

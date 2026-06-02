@@ -2,7 +2,8 @@ import { notFound } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StickyTabs } from "@/components/ui/sticky-tabs"
 import { CourseReviewDetail } from "@/app/(dashboard)/admin/courses/[id]/_components/course-review-detail"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
 import { FinalSummaryEditor } from "@/components/shared/final-summary-editor"
@@ -39,7 +40,7 @@ export default async function CommsCourseDetailPage({ params }: Props) {
         role={context.profile.role}
       />
       <main className="flex-1 flex overflow-hidden bg-background">
-        <Tabs defaultValue="review" className="flex-1 flex flex-col overflow-hidden w-full">
+        <StickyTabs storageKey={`comms-course-${id}`} defaultValue="review" className="flex-1 flex flex-col overflow-hidden w-full">
           <TabsList variant="line" className="border-b border-border px-6 pt-4 bg-background">
             <TabsTrigger value="review" className="text-base">Review</TabsTrigger>
             <TabsTrigger value="issues" className="text-base">Issues</TabsTrigger>
@@ -88,7 +89,7 @@ export default async function CommsCourseDetailPage({ params }: Props) {
               currentUserId={context.userId}
             />
           </TabsContent>
-        </Tabs>
+        </StickyTabs>
       </main>
     </>
   )

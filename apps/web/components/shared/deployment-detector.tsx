@@ -7,7 +7,6 @@ import {
   UpdateAvailablePill,
 } from "./deployment-notification"
 import { AnimatePresence } from "motion/react"
-import { SthitaprajnaModal } from "./sthitaprajna-modal"
 
 interface DeploymentDetectorProps {
   initialVersion: string
@@ -23,7 +22,6 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
   const [showMeteorBurst, setShowMeteorBurst] = useState(false)
   // Post-reload celebratory meteors, shown after the user refreshed.
   const [showUpdatedOverlay, setShowUpdatedOverlay] = useState(false)
-  const [showSthitaprajna, setShowSthitaprajna] = useState(false)
   const updatePending = useRef(false)
 
   // Reload is user-initiated only — triggered from the pill's Refresh button.
@@ -153,19 +151,16 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
         )}
       </AnimatePresence>
 
-      {/* Post-reload celebratory meteors → Sthitaprajna */}
+      {/* Post-reload celebratory meteors */}
       <AnimatePresence>
         {showUpdatedOverlay && (
           <UpdateAppliedOverlay
             onDone={() => {
               setShowUpdatedOverlay(false)
-              setTimeout(() => setShowSthitaprajna(true), 300)
             }}
           />
         )}
       </AnimatePresence>
-
-      <SthitaprajnaModal isOpen={showSthitaprajna} onClose={() => setShowSthitaprajna(false)} />
     </>
   )
 }
