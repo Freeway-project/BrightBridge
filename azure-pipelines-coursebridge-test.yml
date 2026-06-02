@@ -14,7 +14,7 @@ pr:
 
 variables:
   - name: imageName
-    value: okanagan/coursebridge:latest
+    value: okanagan/coursebridge-test:latest
   - name: deployTarget
     value: webapps/coursebridge-test
   - name: selfHostedPool
