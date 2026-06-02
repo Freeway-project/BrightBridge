@@ -14,6 +14,8 @@ const DOT_COLORS: Record<CourseStatus, string> = {
   ta_review_in_progress:   "bg-blue-500",
   submitted_to_admin:      "bg-blue-500",
   admin_changes_requested: "bg-orange-500",
+  waiting_on_admin:        "bg-orange-500",
+  staging_in_progress:     "bg-blue-500",
   ready_for_instructor:    "bg-blue-500",
   sent_to_instructor:      "bg-blue-500",
   instructor_questions:    "bg-orange-500",

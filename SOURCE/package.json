@@ -16,6 +16,7 @@
     "db:push": "node scripts/apply-migration.mjs",
     "db:migrate:all": "node scripts/db-migrate-all.mjs",
     "db:inspect": "node scripts/db-inspect.mjs",
+    "verify:app-access": "bash scripts/verify-app-access-outcomes.sh",
     "import:dry-run": "node scripts/import-course-instructors-dry-run.mjs",
     "import:instructors": "node scripts/import-course-instructors.mjs",
     "import:courses": "node scripts/import-courses-and-assignments.mjs",
