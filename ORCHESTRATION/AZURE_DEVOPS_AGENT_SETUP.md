@@ -4,13 +4,13 @@ This setup removes the need to allow Microsoft-hosted agent IP ranges for SSH.
 
 ## Goal
 
-Run the `UpdateRemote` stage directly on `oracle-manager-non-prod` using a self-hosted Azure DevOps agent in pool `dockercloud-nonprod`.
+Run the `UpdateRemote` stage directly on `oracle-manager-non-prod` using a self-hosted Azure DevOps agent in pool `dockercloud-non-prod`.
 
 ## 1) Create PAT and Pool
 
 In Azure DevOps:
 
-1. Create or verify agent pool `dockercloud-nonprod`.
+1. Create or verify agent pool `dockercloud-non-prod`.
 2. Create a PAT with scope: `Agent Pools (Read & manage)`.
 
 ## 2) Copy script to manager and run
@@ -20,7 +20,7 @@ From your workstation:
 ```bash
 scp ORCHESTRATION/setup-azure-devops-agent.sh deploy@oracle-manager-non-prod:/tmp/
 ssh deploy@oracle-manager-non-prod "chmod +x /tmp/setup-azure-devops-agent.sh"
-ssh deploy@oracle-manager-non-prod "AZP_URL=https://dev.azure.com/<org> AZP_TOKEN=<pat> AZP_POOL=dockercloud-nonprod AZP_AGENT_NAME=oracle-manager-non-prod /tmp/setup-azure-devops-agent.sh"
+ssh deploy@oracle-manager-non-prod "AZP_URL=https://dev.azure.com/<org> AZP_TOKEN=<pat> AZP_POOL=dockercloud-non-prod AZP_AGENT_NAME=oracle-manager-non-prod /tmp/setup-azure-devops-agent.sh"
 ```
 
 Security note:
@@ -29,7 +29,7 @@ Security note:
 
 ## 3) Verify in Azure DevOps
 
-1. Azure DevOps -> Project Settings -> Agent pools -> `dockercloud-nonprod`.
+1. Azure DevOps -> Project Settings -> Agent pools -> `dockercloud-non-prod`.
 2. Confirm agent `oracle-manager-non-prod` is online.
 
 ## 4) Pipeline behavior after setup

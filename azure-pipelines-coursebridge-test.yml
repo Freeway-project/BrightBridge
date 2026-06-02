@@ -18,7 +18,7 @@ variables:
   - name: deployTarget
     value: webapps/coursebridge-test
   - name: selfHostedPool
-    value: dockercloud-nonprod
+    value: dockercloud-non-prod
   # Variable group should contain secrets such as:
   # - DOCKERHUB_USERNAME
   # - DOCKERHUB_PAT

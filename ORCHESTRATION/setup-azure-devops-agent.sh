@@ -8,7 +8,7 @@ set -euo pipefail
 #   AZP_URL        Example: https://dev.azure.com/<org>
 #   AZP_TOKEN      PAT with Agent Pools (Read & manage)
 # Optional env vars:
-#   AZP_POOL       Agent pool name (default: dockercloud-nonprod)
+#   AZP_POOL       Agent pool name (default: dockercloud-non-prod)
 #   AZP_AGENT_NAME Agent name (default: hostname)
 #   AZP_WORK       Agent work folder (default: _work)
 #   AZP_AGENT_VERSION (default: 4.255.0)
@@ -16,7 +16,7 @@ set -euo pipefail
 : "${AZP_URL:?AZP_URL is required}"
 : "${AZP_TOKEN:?AZP_TOKEN is required}"
 
-AZP_POOL="${AZP_POOL:-dockercloud-nonprod}"
+AZP_POOL="${AZP_POOL:-dockercloud-non-prod}"
 AZP_AGENT_NAME="${AZP_AGENT_NAME:-$(hostname -s)}"
 AZP_WORK="${AZP_WORK:-_work}"
 AZP_AGENT_VERSION="${AZP_AGENT_VERSION:-4.255.0}"
