@@ -190,15 +190,25 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
             return (
               <TabsContent key={phase.key} value={phase.key} className="mt-6 focus-visible:outline-none">
                 <Tabs defaultValue={defaultGroup} className="w-full">
-                  <TabsList className="flex-wrap">
+                  <TabsList className="flex-wrap gap-2 h-auto bg-transparent p-0">
                     {phase.groups.map((group) => (
-                      <TabsTrigger key={group.key} value={group.key} className="gap-1.5">
-                        {group.label}
-                        {group.courses.length > 0 && (
-                          <span className="flex size-4 items-center justify-center rounded-full bg-current/10 text-[9px] font-black">
-                            {group.courses.length}
-                          </span>
+                      <TabsTrigger 
+                        key={group.key} 
+                        value={group.key} 
+                        className={cn(
+                          "group gap-2 px-4 py-2 rounded-full border shadow-sm transition-all",
+                          "border-border/40 bg-background hover:bg-muted/50 hover:border-border/80",
+                          "data-[state=active]:border-primary/50 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-md"
                         )}
+                      >
+                        <span className="font-semibold">{group.label}</span>
+                        <span className={cn(
+                          "flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold transition-colors",
+                          "bg-muted text-muted-foreground",
+                          "group-data-[state=active]:bg-primary/20 group-data-[state=active]:text-primary"
+                        )}>
+                          {group.courses.length}
+                        </span>
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -266,19 +276,20 @@ function TabItem({
     <TabsTrigger
       value={value}
       className={cn(
-        "relative flex h-full items-center gap-2 px-1 pb-2 text-xs font-bold uppercase tracking-wider transition-all duration-300",
+        "group relative flex h-full items-center gap-2 px-1 pb-3 text-[13px] font-bold uppercase tracking-wider transition-all duration-300",
         "text-muted-foreground/60 hover:text-foreground",
         "data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full",
         `data-[state=active]:${activeColor}`,
       )}
     >
-      <span className="text-sm grayscale-[0.8] group-data-[state=active]:grayscale-0 transition-all opacity-70">{emoji}</span>
+      <span className="text-sm grayscale-[0.8] group-data-[state=active]:grayscale-0 transition-all opacity-70 group-data-[state=active]:opacity-100">{emoji}</span>
       {label}
-      {count > 0 && (
-        <span className="flex size-4 items-center justify-center rounded-full bg-current/10 text-[9px] font-black">
-          {count}
-        </span>
-      )}
+      <span className={cn(
+        "flex h-5 min-w-5 items-center justify-center rounded-full bg-muted-foreground/10 px-1.5 text-[10px] font-black text-muted-foreground transition-colors",
+        "group-data-[state=active]:bg-current/10 group-data-[state=active]:text-current"
+      )}>
+        {count}
+      </span>
     </TabsTrigger>
   )
 }
