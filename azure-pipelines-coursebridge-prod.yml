@@ -1,0 +1,74 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - SOURCE/**
+      - ORCHESTRATION/**
+      - azure-pipelines-coursebridge-prod.yml
+
+pr: none
+
+variables:
+  - name: imageName
+    value: okanagan/coursebridge:latest
+  - name: deployTarget
+    value: webapps/coursebridge
+  - name: remoteHost
+    value: 35.183.59.40
+  - name: remoteUser
+    value: deploy
+  # Variable group should contain secrets such as:
+  # - DOCKERHUB_USERNAME
+  # - DOCKERHUB_PAT
+  # - DOCKERCLOUD_PROD_KNOWN_HOSTS
+  # - DOCKERCLOUD_PROD_SSH_PUBLIC_KEY
+  - group: coursebridge-deploy-prod
+
+stages:
+  - stage: BuildAndPush
+    displayName: Build and push production image
+    jobs:
+      - job: Build
+        displayName: Build image and push to Docker Hub
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+            clean: true
+
+          - bash: |
+              set -euo pipefail
+              echo "$DOCKERHUB_PAT" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+              docker build --file SOURCE/Dockerfile --tag "$(imageName)" SOURCE
+              docker push "$(imageName)"
+            displayName: Build and push Docker image
+
+  - stage: UpdateRemote
+    displayName: Pull new image on production
+    dependsOn: BuildAndPush
+    jobs:
+      - deployment: UpdateCourseBridgeProd
+        displayName: Update CourseBridge on production
+        environment: dockercloud-prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  clean: true
+
+                - task: InstallSSHKey@0
+                  displayName: Install SSH key
+                  inputs:
+                    knownHostsEntry: $(DOCKERCLOUD_PROD_KNOWN_HOSTS)
+                    sshPublicKey: $(DOCKERCLOUD_PROD_SSH_PUBLIC_KEY)
+                    sshKeySecureFile: dockercloud-prod-ssh-private-key
+
+                - bash: |
+                    set -euo pipefail
+                    ssh "$(remoteUser)@$(remoteHost)" "cd /data && sudo ./update.sh $(deployTarget)"
+                    ssh "$(remoteUser)@$(remoteHost)" "sudo docker service ps webapps_coursebridge --no-trunc"
+                    ssh "$(remoteUser)@$(remoteHost)" "sudo docker service logs --since 5m webapps_coursebridge 2>&1 | tail -n 200"
+                  displayName: Update production service
