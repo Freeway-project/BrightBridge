@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 
 type Props = {
   overviewPanel: React.ReactNode
@@ -28,7 +28,7 @@ export function AdminTabs({
   unassignedCount,
   openEscalationsCount,
 }: Props) {
-  const [tab, setTab] = useState("overview")
+  const [tab, setTab] = useStickyTabState("admin-dashboard", "overview")
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">

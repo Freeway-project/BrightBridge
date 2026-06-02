@@ -76,12 +76,28 @@ function TabsTrigger({
 
 function TabsContent({
   className,
+  keepMounted = true,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+}: React.ComponentProps<typeof TabsPrimitive.Content> & {
+  /**
+   * Keep the panel mounted while inactive (hidden via CSS) so in-tab state —
+   * typed-but-unsaved input, scroll position, expanded/collapsed cards — is
+   * preserved when switching tabs and back. Opt out with `keepMounted={false}`
+   * for panels that should reset on each open. Defaults to true.
+   */
+  keepMounted?: boolean
+}) {
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 text-sm outline-none", className)}
+      // With forceMount, Radix keeps the panel mounted (present is always true),
+      // so we hide the inactive one with CSS instead of unmounting it.
+      forceMount={keepMounted ? true : undefined}
+      className={cn(
+        "flex-1 text-sm outline-none",
+        keepMounted && "data-[state=inactive]:hidden",
+        className
+      )}
       {...props}
     />
   )

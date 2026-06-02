@@ -3,7 +3,8 @@ import { Topbar } from "@/components/layout/topbar"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
 import { getCourseComments } from "@/lib/services/comments"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StickyTabs } from "@/components/ui/sticky-tabs"
 import { CourseReviewDetail } from "./_components/course-review-detail"
 import { CourseChat } from "./_components/course-chat"
 import { IssueTracker } from "../../../courses/[id]/_components/issues/issue-tracker"
@@ -44,7 +45,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
         backHref="/admin"
       />
       <main className="flex-1 flex overflow-hidden bg-background">
-        <Tabs defaultValue="review" className="flex-1 flex flex-col overflow-hidden w-full">
+        <StickyTabs storageKey={`admin-course-${id}`} defaultValue="review" className="flex-1 flex flex-col overflow-hidden w-full">
           <TabsList variant="line" className="border-b border-border px-6 pt-4 bg-background">
             <TabsTrigger value="review" className="text-base">Review</TabsTrigger>
             <TabsTrigger value="issues" className="text-base">Issues</TabsTrigger>
@@ -112,7 +113,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
               />
             </div>
           </TabsContent>
-        </Tabs>
+        </StickyTabs>
       </main>
     </>
   )

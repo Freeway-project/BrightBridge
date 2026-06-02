@@ -34,3 +34,6 @@ apps/web/.deployment-version
 *Educator*
 *Heirarchy*
 *.csv
+
+# next.js auto-generated types (regenerated on build)
+next-env.d.ts

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 import { Search as SearchIcon, AlertCircle, Filter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
@@ -98,6 +99,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
   // Default to the first phase that actually has courses (preserve "jump to the
   // most relevant tab" behaviour), else the first phase.
   const defaultTab = (phases.find((p) => p.count > 0) ?? phases[0]).key
+  const [activePhase, setActivePhase] = useStickyTabState("course-list-phase", defaultTab)
 
   return (
     <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6 scrollbar-thin">
@@ -149,7 +151,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
       </motion.div>
 
       {/* Phase tabs (Migration · Staging · Provision) + cross-cutting Issues */}
-      <Tabs defaultValue={defaultTab} className="w-full">
+      <Tabs value={activePhase} onValueChange={setActivePhase} className="w-full">
         <TabsList className="relative flex h-10 w-full items-center justify-start gap-6 border-b border-border/40 bg-transparent p-0 rounded-none">
           {phases.map((phase) => (
             <TabItem
@@ -190,6 +192,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
             return (
               <TabsContent key={phase.key} value={phase.key} className="mt-6 focus-visible:outline-none">
                 <Tabs defaultValue={defaultGroup} className="w-full">
+
                   <TabsList className="flex-wrap gap-2 h-auto bg-transparent p-0">
                     {phase.groups.map((group) => (
                       <TabsTrigger 
