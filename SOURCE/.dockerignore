@@ -1,0 +1,16 @@
+.git
+.github
+.codex
+.gemini
+.playwright-mcp
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+coverage
+docs
+design_handoff
+graphify-out
+*.log
+*.csv

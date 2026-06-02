@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Okanagan College — Org Hierarchy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; padding: 2rem; }
+  h1 { text-align: center; font-size: 1.6rem; margin-bottom: .25rem; }
+  .subtitle { text-align: center; color: #64748b; margin-bottom: 2rem; font-size: .9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+  .school { background: #fff; border-radius: 12px; overflow: hidden;
+             box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .school-header { padding: 1rem 1rem .75rem; position: relative; }
+  .badge { position: absolute; top: .75rem; right: .75rem; color: #fff;
+            font-size: .7rem; font-weight: 700; padding: .2rem .5rem;
+            border-radius: 99px; }
+  h2 { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; line-height: 1.3; }
+  .meta { font-size: .78rem; color: #475569; margin-top: .2rem; }
+  .dept-list { list-style: none; padding: .5rem 1rem 1rem; }
+  .dept-list li { font-size: .82rem; padding: .3rem 0;
+                   border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .dept-list li:last-child { border-bottom: none; }
+  .root { text-align: center; background: #1e293b; color: #f8fafc;
+           padding: .6rem 1.5rem; border-radius: 8px; display: inline-block;
+           margin: 0 auto 1.5rem; font-weight: 700; font-size: 1.1rem; }
+  .root-wrap { text-align: center; }
+  .connector { width: 2px; height: 1.5rem; background: #cbd5e1;
+                margin: 0 auto; }
+</style>
+</head>
+<body>
+  <h1>Okanagan College — Org Hierarchy</h1>
+  <p class="subtitle">4 schools · 37 departments · 7 ADs · 42 department heads</p>
+  <div class="root-wrap">
+    <div class="root">🏛 Okanagan College</div>
+    <div class="connector"></div>
+  </div>
+  <div class="grid">
+    <div class="school" style="border-top: 4px solid #6366f1">
+      <div class="school-header" style="background:#6366f118">
+        <span class="badge" style="background:#6366f1">14 depts</span>
+        <h2 style="color:#6366f1">Arts & Foundational Programs</h2>
+        <p class="meta">VP: <strong>Judith Anderson</strong></p>
+        <p class="meta">ADs: <strong>Andrew Pulvermacher &amp; Chris Newitt</strong></p>
+      </div>
+      <ul class="dept-list"><li>Animation</li><li>Anthropology</li><li>Communications</li><li>Economics</li><li>English</li><li>Geography</li><li>History</li><li>Interdisciplinary Studies</li><li>Kinesiology</li><li>Paralegal</li><li>Physics & Astronomy</li><li>Psychology</li><li>Sociology</li><li>Sustainable Building Technology</li></ul>
+    </div>
+    <div class="school" style="border-top: 4px solid #f59e0b">
+      <div class="school-header" style="background:#f59e0b18">
+        <span class="badge" style="background:#f59e0b">1 depts</span>
+        <h2 style="color:#f59e0b">Hall School of Business and Entrepreneurship</h2>
+        <p class="meta">VP: <strong>Joe Baker</strong></p>
+        <p class="meta">ADs: <strong>Christine Sjolander &amp; Agnes Weighill</strong></p>
+      </div>
+      <ul class="dept-list"><li>Business Administration</li></ul>
+    </div>
+    <div class="school" style="border-top: 4px solid #10b981">
+      <div class="school-header" style="background:#10b98118">
+        <span class="badge" style="background:#10b981">11 depts</span>
+        <h2 style="color:#10b981">Science & Technology</h2>
+        <p class="meta">VP: <strong>Halia Valladares Montemayor</strong></p>
+        <p class="meta">ADs: <strong>Steve Crema</strong></p>
+      </div>
+      <ul class="dept-list"><li>Biology</li><li>Chemistry</li><li>Computer Science</li><li>Electronic Engineering Technology</li><li>Infrastructure & Computer Tech</li><li>Mathematics and Statistics</li><li>Mech Engineering</li><li>Mechanical Engineering Technology</li><li>Philosophy</li><li>Political Science</li><li>Water Engineering Technology</li></ul>
+    </div>
+    <div class="school" style="border-top: 4px solid #ef4444">
+      <div class="school-header" style="background:#ef444418">
+        <span class="badge" style="background:#ef4444">11 depts</span>
+        <h2 style="color:#ef4444">Trades & Apprenticeship</h2>
+        <p class="meta">VP: <strong>Caitlin Hartigan</strong></p>
+        <p class="meta">ADs: <strong>Danny Marques &amp; Tanya Tarlit</strong></p>
+      </div>
+      <ul class="dept-list"><li>Certified Dental Assistant</li><li>Construction Trades</li><li>Culinary & Pastry Arts</li><li>HSD- Practical Nursing</li><li>Health Care Assistant</li><li>Human Service Work</li><li>Mechanical Building Trades</li><li>Motor Vehicle Trades</li><li>Office Administration</li><li>Therapist Assistant</li><li>Welding</li></ul>
+    </div></div>
+</body>
+</html>

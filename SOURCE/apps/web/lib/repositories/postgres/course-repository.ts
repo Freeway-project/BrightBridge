@@ -1,0 +1,952 @@
+import "server-only";
+
+import type { AssignmentRole } from "@coursebridge/workflow";
+import type {
+  AdminCourseListFilters,
+  AdminCourseRow,
+  AssignmentLog,
+  AuditEvent,
+  CourseAssignmentRecord,
+  CourseRepository,
+  CourseSummary,
+  CreateCourseRecordInput,
+  InsertStatusEventInput,
+  InstructorCourse,
+  PaginatedResult,
+  StatusCount,
+  StuckCourse,
+  SubmissionEvent,
+  SuperAdminCourseRow,
+  TAWorkload,
+} from "@/lib/repositories/contracts";
+import { getPostgresPool } from "@/lib/postgres/pool";
+import { COURSE_STATUSES, type CourseStatus } from "@coursebridge/workflow";
+
+type CourseRow = {
+  id: string;
+  source_course_id: string | null;
+  target_course_id: string | null;
+  title: string;
+  term: string | null;
+  department: string | null;
+  org_unit_id: string | null;
+  status: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+function cleanOptionalText(value: string | null | undefined) {
+  const cleaned = value?.trim();
+  return cleaned ? cleaned : null;
+}
+
+function toCourseStatus(value: string): CourseStatus {
+  if (!COURSE_STATUSES.includes(value as CourseStatus)) {
+    throw new Error(`Unsupported course status: ${value}`);
+  }
+  return value as CourseStatus;
+}
+
+function toCourseSummary(row: CourseRow): CourseSummary {
+  return {
+    id: row.id,
+    sourceCourseId: row.source_course_id,
+    targetCourseId: row.target_course_id,
+    title: row.title,
+    term: row.term,
+    department: row.department,
+    orgUnitId: row.org_unit_id,
+    status: toCourseStatus(row.status),
+    createdBy: row.created_by,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function normalizeSearchTerm(value: string | undefined) {
+  if (!value) return "";
+  return value
+    .replace(/[%]/g, "")
+    .replace(/[.,:()'"`]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isMissingRelationError(error: unknown) {
+  return !!error && typeof error === "object" && "code" in error && (error as { code?: string }).code === "42P01";
+}
+
+export function createPostgresCourseRepository(): CourseRepository {
+  return {
+    async listAccessibleCourses() {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<CourseRow>(
+        `
+          SELECT id, source_course_id, target_course_id, title, term, department, org_unit_id, status, created_by, created_at, updated_at
+          FROM courses
+          ORDER BY updated_at DESC
+        `,
+      );
+      return rows.map(toCourseSummary);
+    },
+
+    async listAssignedCourses(userId, assignmentRole) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<CourseRow>(
+        `
+          SELECT c.id, c.source_course_id, c.target_course_id, c.title, c.term, c.department, c.org_unit_id, c.status, c.created_by, c.created_at, c.updated_at
+          FROM courses c
+          INNER JOIN course_assignments ca ON ca.course_id = c.id
+          WHERE ca.profile_id = $1 AND ca.role = $2
+          ORDER BY c.updated_at DESC
+        `,
+        [userId, assignmentRole],
+      );
+      return rows.map(toCourseSummary);
+    },
+
+    async getAssignedCourseById(courseId, userId, assignmentRole) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<CourseRow>(
+        `
+          SELECT c.id, c.source_course_id, c.target_course_id, c.title, c.term, c.department, c.org_unit_id, c.status, c.created_by, c.created_at, c.updated_at
+          FROM courses c
+          INNER JOIN course_assignments ca ON ca.course_id = c.id
+          WHERE c.id = $1 AND ca.profile_id = $2 AND ca.role = $3
+          LIMIT 1
+        `,
+        [courseId, userId, assignmentRole],
+      );
+      return rows[0] ? toCourseSummary(rows[0]) : null;
+    },
+
+    async createCourse(input: CreateCourseRecordInput) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<CourseRow>(
+        `
+          INSERT INTO courses (source_course_id, target_course_id, title, term, department, org_unit_id, status, created_by)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          RETURNING id, source_course_id, target_course_id, title, term, department, org_unit_id, status, created_by, created_at, updated_at
+        `,
+        [
+          cleanOptionalText(input.sourceCourseId),
+          cleanOptionalText(input.targetCourseId),
+          input.title,
+          cleanOptionalText(input.term),
+          cleanOptionalText(input.department),
+          input.orgUnitId ?? null,
+          input.status,
+          input.createdBy,
+        ],
+      );
+      return toCourseSummary(rows[0]);
+    },
+
+    async getCourseSummaryById(courseId) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<CourseRow>(
+        `
+          SELECT id, source_course_id, target_course_id, title, term, department, org_unit_id, status, created_by, created_at, updated_at
+          FROM courses
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [courseId],
+      );
+      if (!rows[0]) throw new Error("Could not load course: not found");
+      return toCourseSummary(rows[0]);
+    },
+
+    async updateCourseStatus(courseId, status) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<CourseRow>(
+        `
+          UPDATE courses
+          SET status = $2, updated_at = NOW()
+          WHERE id = $1
+          RETURNING id, source_course_id, target_course_id, title, term, department, org_unit_id, status, created_by, created_at, updated_at
+        `,
+        [courseId, status],
+      );
+      if (!rows[0]) throw new Error("Could not update course status: not found");
+      return toCourseSummary(rows[0]);
+    },
+
+    async updateCourseOrgUnit(courseId, orgUnitId) {
+      const pool = getPostgresPool();
+      let department: string | null = null;
+      if (orgUnitId) {
+        const { rows } = await pool.query<{ name: string }>(
+          `SELECT name FROM organizational_units WHERE id = $1 LIMIT 1`,
+          [orgUnitId],
+        );
+        department = rows[0]?.name ?? null;
+      }
+
+      await pool.query(
+        `
+          UPDATE courses
+          SET org_unit_id = $2,
+              department = $3,
+              updated_at = NOW()
+          WHERE id = $1
+        `,
+        [courseId, orgUnitId, department],
+      );
+    },
+
+    async getCourseAssignment(courseId, profileId) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{ course_id: string; profile_id: string; role: AssignmentRole }>(
+        `
+          SELECT course_id, profile_id, role
+          FROM course_assignments
+          WHERE course_id = $1 AND profile_id = $2
+          LIMIT 1
+        `,
+        [courseId, profileId],
+      );
+      const row = rows[0];
+      if (!row) return null;
+      return {
+        courseId: row.course_id,
+        profileId: row.profile_id,
+        role: row.role,
+      } satisfies CourseAssignmentRecord;
+    },
+
+    async hasAssignment(courseId, profileId, role) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{ id: string }>(
+        `
+          SELECT id
+          FROM course_assignments
+          WHERE course_id = $1 AND profile_id = $2 AND role = $3
+          LIMIT 1
+        `,
+        [courseId, profileId, role],
+      );
+      return rows.length > 0;
+    },
+
+    async assignUserToCourse(input) {
+      const pool = getPostgresPool();
+      await pool.query(
+        `
+          INSERT INTO course_assignments (course_id, profile_id, role, assigned_by)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (course_id, profile_id, role)
+          DO UPDATE SET assigned_by = EXCLUDED.assigned_by
+        `,
+        [input.courseId, input.profileId, input.role, input.assignedBy],
+      );
+    },
+
+    async insertStatusEvent(input: InsertStatusEventInput) {
+      const pool = getPostgresPool();
+      await pool.query(
+        `
+          INSERT INTO course_status_events (course_id, from_status, to_status, actor_id, actor_role, note)
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+        [
+          input.courseId,
+          input.fromStatus,
+          input.toStatus,
+          input.actorId,
+          input.actorRole,
+          cleanOptionalText(input.note),
+        ],
+      );
+    },
+
+    async listAdminCourses() {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        source_course_id: string | null;
+        target_course_id: string | null;
+        title: string;
+        term: string | null;
+        department: string | null;
+        org_unit_id: string | null;
+        status: string;
+        updated_at: string;
+        ta_id: string | null;
+        ta_name: string | null;
+        ta_email: string | null;
+      }>(
+        `
+          SELECT
+            c.id,
+            c.source_course_id,
+            c.target_course_id,
+            c.title,
+            c.term,
+            c.department,
+            c.org_unit_id,
+            c.status,
+            c.updated_at,
+            ta.id AS ta_id,
+            ta.full_name AS ta_name,
+            ta.email AS ta_email
+          FROM courses c
+          LEFT JOIN LATERAL (
+            SELECT p.id, p.full_name, p.email
+            FROM course_assignments ca
+            INNER JOIN profiles p ON p.id = ca.profile_id
+            WHERE ca.course_id = c.id AND ca.role = 'staff'
+            ORDER BY ca.assigned_at DESC
+            LIMIT 1
+          ) ta ON TRUE
+          ORDER BY c.updated_at DESC
+        `,
+      );
+
+      return rows.map((row) => ({
+        id: row.id,
+        sourceCourseId: row.source_course_id,
+        targetCourseId: row.target_course_id,
+        title: row.title,
+        term: row.term,
+        department: row.department,
+        orgUnitId: row.org_unit_id,
+        status: toCourseStatus(row.status),
+        updatedAt: row.updated_at,
+        ta: row.ta_id
+          ? {
+              id: row.ta_id,
+              name: row.ta_name,
+              email: row.ta_email ?? "",
+            }
+          : null,
+      })) satisfies AdminCourseRow[];
+    },
+
+    async listAdminCoursesPage(page = 1, pageSize = 50, filters: AdminCourseListFilters = {}) {
+      const pool = getPostgresPool();
+      const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+      const safePageSize = Number.isFinite(pageSize) ? Math.max(1, Math.floor(pageSize)) : 50;
+      const offset = (safePage - 1) * safePageSize;
+      const normalizedSearch = normalizeSearchTerm(filters.search);
+      const values: unknown[] = [];
+      const where: string[] = [];
+
+      if (filters.status) {
+        values.push(filters.status);
+        where.push(`c.status = $${values.length}`);
+      }
+
+      if (filters.assignedOnly) {
+        where.push(
+          `EXISTS (SELECT 1 FROM course_assignments ca WHERE ca.course_id = c.id AND ca.role = 'staff')`,
+        );
+      }
+
+      if (filters.taProfileId?.trim()) {
+        values.push(filters.taProfileId.trim());
+        where.push(
+          `EXISTS (SELECT 1 FROM course_assignments ca WHERE ca.course_id = c.id AND ca.role = 'staff' AND ca.profile_id = $${values.length})`,
+        );
+      }
+
+      if (normalizedSearch) {
+        values.push(`%${normalizedSearch}%`);
+        const searchParam = `$${values.length}`;
+        where.push(`(
+          c.title ILIKE ${searchParam}
+          OR c.source_course_id ILIKE ${searchParam}
+          OR c.target_course_id ILIKE ${searchParam}
+          OR c.term ILIKE ${searchParam}
+          OR c.department ILIKE ${searchParam}
+          OR EXISTS (
+            SELECT 1
+            FROM course_assignments ca
+            INNER JOIN profiles p ON p.id = ca.profile_id
+            WHERE ca.course_id = c.id
+              AND ca.role = 'staff'
+              AND p.role = 'standard_user'
+              AND (p.full_name ILIKE ${searchParam} OR p.email ILIKE ${searchParam})
+          )
+        )`);
+      }
+
+      const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
+      const countQuery = `SELECT COUNT(*)::text AS total FROM courses c ${whereSql}`;
+      const countResult = await pool.query<{ total: string }>(countQuery, values);
+      const total = Number(countResult.rows[0]?.total ?? "0");
+
+      values.push(safePageSize);
+      values.push(offset);
+      const limitParam = `$${values.length - 1}`;
+      const offsetParam = `$${values.length}`;
+
+      const dataQuery = `
+        SELECT
+          c.id,
+          c.source_course_id,
+          c.target_course_id,
+          c.title,
+          c.term,
+          c.department,
+          c.org_unit_id,
+          c.status,
+          c.updated_at,
+          ta.id AS ta_id,
+          ta.full_name AS ta_name,
+          ta.email AS ta_email
+        FROM courses c
+        LEFT JOIN LATERAL (
+          SELECT p.id, p.full_name, p.email
+          FROM course_assignments ca
+          INNER JOIN profiles p ON p.id = ca.profile_id
+          WHERE ca.course_id = c.id AND ca.role = 'staff'
+          ORDER BY ca.assigned_at DESC
+          LIMIT 1
+        ) ta ON TRUE
+        ${whereSql}
+        ORDER BY c.updated_at DESC
+        LIMIT ${limitParam} OFFSET ${offsetParam}
+      `;
+
+      const { rows } = await pool.query<{
+        id: string;
+        source_course_id: string | null;
+        target_course_id: string | null;
+        title: string;
+        term: string | null;
+        department: string | null;
+        org_unit_id: string | null;
+        status: string;
+        updated_at: string;
+        ta_id: string | null;
+        ta_name: string | null;
+        ta_email: string | null;
+      }>(dataQuery, values);
+
+      const data = rows.map((row) => ({
+        id: row.id,
+        sourceCourseId: row.source_course_id,
+        targetCourseId: row.target_course_id,
+        title: row.title,
+        term: row.term,
+        department: row.department,
+        orgUnitId: row.org_unit_id,
+        status: toCourseStatus(row.status),
+        updatedAt: row.updated_at,
+        ta: row.ta_id
+          ? {
+              id: row.ta_id,
+              name: row.ta_name,
+              email: row.ta_email ?? "",
+            }
+          : null,
+      })) satisfies AdminCourseRow[];
+
+      return {
+        data,
+        total,
+        page: safePage,
+        pageSize: safePageSize,
+        totalPages: Math.ceil(total / safePageSize),
+      } satisfies PaginatedResult<AdminCourseRow>;
+    },
+
+    async getAdminCourse(courseId) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        source_course_id: string | null;
+        target_course_id: string | null;
+        title: string;
+        term: string | null;
+        department: string | null;
+        org_unit_id: string | null;
+        status: string;
+        updated_at: string;
+        ta_id: string | null;
+        ta_name: string | null;
+        ta_email: string | null;
+      }>(
+        `
+          SELECT
+            c.id,
+            c.source_course_id,
+            c.target_course_id,
+            c.title,
+            c.term,
+            c.department,
+            c.org_unit_id,
+            c.status,
+            c.updated_at,
+            ta.id AS ta_id,
+            ta.full_name AS ta_name,
+            ta.email AS ta_email
+          FROM courses c
+          LEFT JOIN LATERAL (
+            SELECT p.id, p.full_name, p.email
+            FROM course_assignments ca
+            INNER JOIN profiles p ON p.id = ca.profile_id
+            WHERE ca.course_id = c.id AND ca.role = 'staff'
+            ORDER BY ca.assigned_at DESC
+            LIMIT 1
+          ) ta ON TRUE
+          WHERE c.id = $1
+          LIMIT 1
+        `,
+        [courseId],
+      );
+
+      const row = rows[0];
+      if (!row) return null;
+
+      return {
+        id: row.id,
+        sourceCourseId: row.source_course_id,
+        targetCourseId: row.target_course_id,
+        title: row.title,
+        term: row.term,
+        department: row.department,
+        orgUnitId: row.org_unit_id,
+        status: toCourseStatus(row.status),
+        updatedAt: row.updated_at,
+        ta: row.ta_id
+          ? {
+              id: row.ta_id,
+              name: row.ta_name,
+              email: row.ta_email ?? "",
+            }
+          : null,
+      } satisfies AdminCourseRow;
+    },
+
+    async listSuperAdminCourses(page = 1, pageSize = 20, search = "") {
+      const pool = getPostgresPool();
+      const safePage = Math.max(1, Math.floor(page));
+      const safePageSize = Math.max(1, Math.floor(pageSize));
+      const offset = (safePage - 1) * safePageSize;
+
+      const values: unknown[] = [];
+      let whereSql = "";
+      if (search.trim()) {
+        values.push(`%${search.trim()}%`);
+        whereSql = `WHERE c.title ILIKE $1 OR c.status ILIKE $1`;
+      }
+
+      const countQuery = `SELECT COUNT(*)::text AS total FROM courses c ${whereSql}`;
+      const countResult = await pool.query<{ total: string }>(countQuery, values);
+      const total = Number(countResult.rows[0]?.total ?? "0");
+
+      values.push(safePageSize, offset);
+      const limitParam = `$${values.length - 1}`;
+      const offsetParam = `$${values.length}`;
+
+      const dataQuery = `
+        SELECT
+          c.id,
+          c.title,
+          c.status,
+          c.term,
+          c.department,
+          c.created_at,
+          c.updated_at,
+          ta.full_name AS ta_name,
+          ta.email AS ta_email,
+          instructor.full_name AS instructor_name,
+          instructor.email AS instructor_email
+        FROM courses c
+        LEFT JOIN LATERAL (
+          SELECT p.full_name, p.email
+          FROM course_assignments ca
+          INNER JOIN profiles p ON p.id = ca.profile_id
+          WHERE ca.course_id = c.id AND ca.role = 'staff'
+          ORDER BY ca.assigned_at DESC
+          LIMIT 1
+        ) ta ON TRUE
+        LEFT JOIN LATERAL (
+          SELECT p.full_name, p.email
+          FROM course_assignments ca
+          INNER JOIN profiles p ON p.id = ca.profile_id
+          WHERE ca.course_id = c.id AND ca.role = 'instructor'
+          ORDER BY ca.assigned_at DESC
+          LIMIT 1
+        ) instructor ON TRUE
+        ${whereSql}
+        ORDER BY c.updated_at DESC
+        LIMIT ${limitParam} OFFSET ${offsetParam}
+      `;
+
+      const { rows } = await pool.query<{
+        id: string;
+        title: string;
+        status: string;
+        term: string | null;
+        department: string | null;
+        created_at: string;
+        updated_at: string;
+        ta_name: string | null;
+        ta_email: string | null;
+        instructor_name: string | null;
+        instructor_email: string | null;
+      }>(dataQuery, values);
+
+      return {
+        data: rows.map((row) => ({
+          id: row.id,
+          title: row.title,
+          status: toCourseStatus(row.status),
+          term: row.term,
+          department: row.department,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          ta: row.ta_email ? { name: row.ta_name, email: row.ta_email } : null,
+          instructor: row.instructor_email
+            ? { name: row.instructor_name, email: row.instructor_email }
+            : null,
+        })) satisfies SuperAdminCourseRow[],
+        total,
+        page: safePage,
+        pageSize: safePageSize,
+        totalPages: Math.ceil(total / safePageSize),
+      };
+    },
+
+    async countCourses() {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{ count: string }>(`SELECT COUNT(*)::text AS count FROM courses`);
+      return Number(rows[0]?.count ?? "0");
+    },
+
+    async listStatusCounts() {
+      const pool = getPostgresPool();
+      try {
+        const { rows } = await pool.query<{ status: string; count: number | string }>(
+          `SELECT status, count FROM course_status_counts`,
+        );
+        return rows.map((row) => ({
+          status: toCourseStatus(row.status),
+          count: Number(row.count),
+        })) satisfies StatusCount[];
+      } catch (error) {
+        if (!isMissingRelationError(error)) throw error;
+        return fallbackStatusCounts();
+      }
+    },
+
+    async listStuckCourses(cutoffIso) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        title: string;
+        status: string;
+        updated_at: string;
+      }>(
+        `
+          SELECT id, title, status, updated_at
+          FROM courses
+          WHERE status <> 'final_approved'
+            AND updated_at < $1::timestamptz
+          ORDER BY updated_at ASC
+        `,
+        [cutoffIso],
+      );
+
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        status: toCourseStatus(row.status),
+        days_stuck: Math.floor((Date.now() - new Date(row.updated_at).getTime()) / 86_400_000),
+        updated_at: row.updated_at,
+      })) satisfies StuckCourse[];
+    },
+
+    async listTAWorkload() {
+      const pool = getPostgresPool();
+      try {
+        const { rows } = await pool.query<{
+          profile_id: string;
+          full_name: string | null;
+          email: string;
+          active_courses: number | string;
+          needs_fixes: number | string;
+        }>(
+          `
+            SELECT profile_id, full_name, email, active_courses, needs_fixes
+            FROM ta_workload_stats
+            ORDER BY full_name ASC
+          `,
+        );
+
+        return rows.map((row) => ({
+          id: row.profile_id,
+          full_name: row.full_name,
+          email: row.email,
+          active_courses: Number(row.active_courses),
+          needs_fixes: Number(row.needs_fixes),
+        })) satisfies TAWorkload[];
+      } catch (error) {
+        if (!isMissingRelationError(error)) throw error;
+        return fallbackTAWorkload();
+      }
+    },
+
+    async listAuditEvents(limit) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        from_status: string | null;
+        to_status: string;
+        note: string | null;
+        created_at: string;
+        actor_role: string;
+        course_id: string;
+        course_title: string;
+        actor_name: string | null;
+        actor_email: string | null;
+      }>(
+        `
+          SELECT
+            e.id,
+            e.from_status,
+            e.to_status,
+            e.note,
+            e.created_at,
+            e.actor_role,
+            c.id AS course_id,
+            c.title AS course_title,
+            p.full_name AS actor_name,
+            p.email AS actor_email
+          FROM course_status_events e
+          LEFT JOIN courses c ON c.id = e.course_id
+          LEFT JOIN profiles p ON p.id = e.actor_id
+          ORDER BY e.created_at DESC
+          LIMIT $1
+        `,
+        [limit],
+      );
+
+      return rows.map((row) => ({
+        id: row.id,
+        course_id: row.course_id,
+        course_title: row.course_title ?? "—",
+        from_status: row.from_status,
+        to_status: row.to_status,
+        actor_name: row.actor_name,
+        actor_email: row.actor_email ?? "",
+        actor_role: row.actor_role,
+        note: row.note,
+        created_at: row.created_at,
+      })) satisfies AuditEvent[];
+    },
+
+    async listSubmissionHistory(courseId) {
+      return listStatusHistory(courseId, "submitted_to_admin");
+    },
+
+    async listChangeRequestHistory(courseId) {
+      return listStatusHistory(courseId, "admin_changes_requested");
+    },
+
+    async listQuestionRoundHistory(courseId) {
+      return listStatusHistory(courseId, "instructor_questions");
+    },
+
+    async listRecentAssignments(limit) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        course_id: string;
+        role: AssignmentRole;
+        assigned_at: string;
+        course_title: string | null;
+        assigned_user_name: string | null;
+        assigned_user_email: string | null;
+        assigner_name: string | null;
+        assigner_email: string | null;
+      }>(
+        `
+          SELECT
+            ca.id,
+            ca.course_id,
+            ca.role,
+            ca.assigned_at,
+            c.title AS course_title,
+            pu.full_name AS assigned_user_name,
+            pu.email AS assigned_user_email,
+            pb.full_name AS assigner_name,
+            pb.email AS assigner_email
+          FROM course_assignments ca
+          LEFT JOIN courses c ON c.id = ca.course_id
+          LEFT JOIN profiles pu ON pu.id = ca.profile_id
+          LEFT JOIN profiles pb ON pb.id = ca.assigned_by
+          ORDER BY ca.assigned_at DESC
+          LIMIT $1
+        `,
+        [limit],
+      );
+
+      return rows.map((row) => ({
+        id: row.id,
+        courseId: row.course_id,
+        courseTitle: row.course_title ?? "—",
+        assignedUser: {
+          name: row.assigned_user_name,
+          email: row.assigned_user_email ?? "—",
+        },
+        role: row.role,
+        assignedBy: {
+          name: row.assigner_name,
+          email: row.assigner_email ?? "—",
+        },
+        assignedAt: row.assigned_at,
+      })) satisfies AssignmentLog[];
+    },
+
+    async listCoursesByUnitAncestry(unitIds) {
+      if (unitIds.length === 0) {
+        return [];
+      }
+
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<CourseRow>(
+        `
+          SELECT DISTINCT c.id, c.source_course_id, c.target_course_id, c.title, c.term, c.department, c.org_unit_id, c.status, c.created_by, c.created_at, c.updated_at
+          FROM courses c
+          INNER JOIN org_unit_hierarchy_paths hp ON hp.descendant_id = c.org_unit_id
+          WHERE hp.ancestor_id = ANY($1::uuid[])
+          ORDER BY c.updated_at DESC
+        `,
+        [unitIds],
+      );
+
+      return rows.map(toCourseSummary);
+    },
+
+    async listInstructorCourses(profileId) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        title: string;
+        term: string | null;
+        department: string | null;
+        status: string;
+        updated_at: string;
+      }>(
+        `
+          SELECT c.id, c.title, c.term, c.department, c.status, c.updated_at
+          FROM courses c
+          INNER JOIN course_assignments ca ON ca.course_id = c.id
+          WHERE ca.profile_id = $1
+            AND ca.role = 'instructor'
+            AND c.status = ANY($2::text[])
+          ORDER BY c.updated_at DESC
+        `,
+        [profileId, ["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"]],
+      );
+
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        term: row.term,
+        department: row.department,
+        status: toCourseStatus(row.status),
+        updatedAt: row.updated_at,
+      })) satisfies InstructorCourse[];
+    },
+  };
+}
+
+async function listStatusHistory(courseId: string, toStatus: string): Promise<SubmissionEvent[]> {
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{
+    id: string;
+    note: string | null;
+    created_at: string;
+    actor_name: string | null;
+    actor_email: string | null;
+  }>(
+    `
+      SELECT
+        e.id,
+        e.note,
+        e.created_at,
+        p.full_name AS actor_name,
+        p.email AS actor_email
+      FROM course_status_events e
+      LEFT JOIN profiles p ON p.id = e.actor_id
+      WHERE e.course_id = $1 AND e.to_status = $2
+      ORDER BY e.created_at ASC
+    `,
+    [courseId, toStatus],
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    actorName: row.actor_name,
+    actorEmail: row.actor_email ?? "",
+    note: row.note,
+    createdAt: row.created_at,
+  }));
+}
+
+async function fallbackStatusCounts(): Promise<StatusCount[]> {
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{ status: string }>(`SELECT status FROM courses`);
+  const counts = new Map<string, number>();
+
+  for (const row of rows) {
+    counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries()).map(([status, count]) => ({
+    status: toCourseStatus(status),
+    count,
+  }));
+}
+
+async function fallbackTAWorkload(): Promise<TAWorkload[]> {
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{
+    profile_id: string;
+    full_name: string | null;
+    email: string;
+    status: string | null;
+  }>(
+    `
+      SELECT
+        ca.profile_id,
+        p.full_name,
+        p.email,
+        c.status
+      FROM course_assignments ca
+      INNER JOIN profiles p ON p.id = ca.profile_id
+      LEFT JOIN courses c ON c.id = ca.course_id
+      WHERE ca.role = 'staff'
+    `,
+  );
+
+  const byProfile = new Map<string, TAWorkload>();
+  for (const row of rows) {
+    if (!byProfile.has(row.profile_id)) {
+      byProfile.set(row.profile_id, {
+        id: row.profile_id,
+        full_name: row.full_name,
+        email: row.email,
+        active_courses: 0,
+        needs_fixes: 0,
+      });
+    }
+
+    const entry = byProfile.get(row.profile_id)!;
+    if (!row.status) continue;
+    if (row.status !== "final_approved") {
+      entry.active_courses += 1;
+    }
+    if (row.status === "admin_changes_requested" || row.status === "instructor_questions") {
+      entry.needs_fixes += 1;
+    }
+  }
+
+  return Array.from(byProfile.values()).sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
+}

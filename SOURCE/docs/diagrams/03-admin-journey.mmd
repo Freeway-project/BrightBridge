@@ -1,0 +1,20 @@
+%% Admin (gatekeeper) — review decision, then staging shell, then final sign-off
+flowchart TD
+    IN["Course submitted by TA"] --> REVIEW{"Admin reviews<br/>the TA's work"}
+    REVIEW -->|Needs work| FIX["Request Fixes<br/>(writes a note for the TA)"]
+    FIX --> BACK["Goes back to TA"]
+    REVIEW -->|Looks good| WAIT["Approve → Waiting on Admin"]
+    WAIT --> SHELL["Admin builds the staging shell"]
+    SHELL --> PUSH["Push back to TA → Staging in Process"]
+
+    PUSH --> LATER["...TA finishes staging, instructor approves..."]
+    LATER --> FINAL["Admin gives Final Sign-off"]
+
+    extra["Admin also: assigns courses to TAs/instructors,<br/>sees the Overview dashboard, handles escalations,<br/>and can edit the Issues Summary."]
+
+    classDef admin fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef new fill:#fde68a,stroke:#d97706,color:#78350f;
+    classDef n fill:#f1f5f9,stroke:#64748b,color:#334155;
+    class REVIEW,APP,FIX,FINAL admin;
+    class WAIT,SHELL,PUSH new;
+    class extra n;
