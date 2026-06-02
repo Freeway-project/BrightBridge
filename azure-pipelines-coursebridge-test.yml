@@ -1,32 +1,27 @@
 trigger:
   branches:
     include:
-      - non-production/test
+      - testing
   paths:
     include:
       - SOURCE/**
-      - ORCHESTRATION/**
       - azure-pipelines-coursebridge-test.yml
 
 pr:
   branches:
     include:
-      - non-production/test
+      - testing
 
 variables:
   - name: imageName
     value: okanagan/coursebridge:latest
   - name: deployTarget
     value: webapps/coursebridge-test
-  - name: remoteHost
-    value: 16.52.3.43
-  - name: remoteUser
-    value: deploy
+  - name: selfHostedPool
+    value: dockercloud-nonprod
   # Variable group should contain secrets such as:
   # - DOCKERHUB_USERNAME
   # - DOCKERHUB_PAT
-  # - DOCKERCLOUD_KNOWN_HOSTS
-  # - DOCKERCLOUD_SSH_PUBLIC_KEY
   - group: coursebridge-deploy
 
 stages:
@@ -49,12 +44,14 @@ stages:
             displayName: Build and push Docker image
 
   - stage: UpdateRemote
-    displayName: Pull new image on testing
+    displayName: Pull new image on testing (self-hosted)
     dependsOn: BuildAndPush
     jobs:
       - deployment: UpdateCourseBridgeTest
         displayName: Update CourseBridge on testing
         environment: dockercloud-test
+        pool:
+          name: $(selfHostedPool)
         strategy:
           runOnce:
             deploy:
@@ -62,16 +59,10 @@ stages:
                 - checkout: self
                   clean: true
 
-                - task: InstallSSHKey@0
-                  displayName: Install SSH key
-                  inputs:
-                    knownHostsEntry: $(DOCKERCLOUD_KNOWN_HOSTS)
-                    sshPublicKey: $(DOCKERCLOUD_SSH_PUBLIC_KEY)
-                    sshKeySecureFile: dockercloud-ssh-private-key
-
                 - bash: |
                     set -euo pipefail
-                    ssh "$(remoteUser)@$(remoteHost)" "cd /data && sudo ./update.sh $(deployTarget)"
-                    ssh "$(remoteUser)@$(remoteHost)" "sudo docker service ps webapps_coursebridge-test --no-trunc"
-                    ssh "$(remoteUser)@$(remoteHost)" "sudo docker service logs --since 5m webapps_coursebridge-test 2>&1 | tail -n 200"
+                    cd /data
+                    sudo ./update.sh $(deployTarget)
+                    sudo docker service ps webapps_coursebridge-test --no-trunc
+                    sudo docker service logs --since 5m webapps_coursebridge-test 2>&1 | tail -n 200
                   displayName: Update testing service
