@@ -447,7 +447,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
                 icon: "🛠️", title: "Ready to Finalize",
                 description: `${courseTitle} — the staging shell is ready. Finalize the course to send it on.`,
                 tone: "info",
-                href: `/courses/${courseId}/metadata`,
+                href: `/courses/${courseId}/submit`,
                 actionLabel: "Finalize & Send",
               }
             }

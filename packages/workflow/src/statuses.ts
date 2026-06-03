@@ -133,3 +133,64 @@ export function getPipelineStage(status: CourseStatus): PipelineStage {
   // instructor_viewing, instructor_questions, instructor_approved
   return "staging"
 }
+
+/**
+ * Whose court the case is in for a given status. The UI renders this relative
+ * to the viewer (owner === me → "Your turn", else "Waiting on …").
+ */
+export type BallInCourt = "staff" | "admin" | "instructor" | "done";
+
+const BALL_IN_COURT: Record<CourseStatus, BallInCourt> = {
+  course_created: "admin",
+  assigned_to_ta: "staff",
+  ta_review_in_progress: "staff",
+  submitted_to_admin: "admin",
+  admin_changes_requested: "staff",
+  waiting_on_admin: "admin",
+  staging_in_progress: "staff",
+  ready_for_instructor: "admin",
+  sent_to_instructor: "instructor",
+  instructor_viewing: "instructor",
+  instructor_questions: "instructor",
+  instructor_approved: "admin",
+  final_approved: "done",
+};
+
+export function getBallInCourt(status: CourseStatus): BallInCourt {
+  return BALL_IN_COURT[status];
+}
+
+/**
+ * The single descriptor for the staff "advance to next step" action. Returns
+ * null for any status where staff cannot advance the course. The non-null
+ * domain is asserted (in tests) to equal STAFF_ACTIONABLE_COURSE_STATUSES.
+ */
+export type StaffAdvance = {
+  to: CourseStatus;
+  action: "submit" | "finalize-staging";
+  ctaLabel: string;
+  requiresNote?: boolean;
+};
+
+export function getStaffAdvance(status: CourseStatus): StaffAdvance | null {
+  switch (status) {
+    case "assigned_to_ta":
+    case "ta_review_in_progress":
+      return { to: "submitted_to_admin", action: "submit", ctaLabel: "Submit to Admin" };
+    case "admin_changes_requested":
+      return {
+        to: "submitted_to_admin",
+        action: "submit",
+        ctaLabel: "Resubmit to Admin",
+        requiresNote: true,
+      };
+    case "staging_in_progress":
+      return {
+        to: "ready_for_instructor",
+        action: "finalize-staging",
+        ctaLabel: "Mark Ready for Instructor",
+      };
+    default:
+      return null;
+  }
+}

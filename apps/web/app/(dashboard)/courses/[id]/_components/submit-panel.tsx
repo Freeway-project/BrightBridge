@@ -2,8 +2,16 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { CheckCircle2, Circle, Send, Sparkles, AlertCircle, RefreshCw } from "lucide-react"
-import type { CourseStatus } from "@coursebridge/workflow"
-import { submitReview } from "@/lib/workspace/actions"
+import { getCourseStatusLabel, getStaffAdvance, type CourseStatus } from "@coursebridge/workflow"
+import { markStagingComplete, submitReview } from "@/lib/workspace/actions"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -38,11 +46,14 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [resubmitNote, setResubmitNote] = useState("")
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
-  const isResubmit = courseStatus === "admin_changes_requested"
-  const submitAllowedStatuses: CourseStatus[] = ["assigned_to_ta", "ta_review_in_progress", "admin_changes_requested"]
-  const isStatusSubmittable = submitAllowedStatuses.includes(courseStatus)
-  const blockers = sections.filter((section) => section.required && !section.complete)
+  const advance = getStaffAdvance(courseStatus)
+  const isResubmit = Boolean(advance?.requiresNote)
+  const isStatusSubmittable = advance !== null
+  // Section requirements only gate the review-submit path, not staging finalize.
+  const blockers =
+    advance?.action === "submit" ? sections.filter((section) => section.required && !section.complete) : []
   const resubmitNoteRequired = isResubmit && resubmitNote.trim().length === 0
   const disabled = blockers.length > 0 || isPending || !isStatusSubmittable || isSuccess || resubmitNoteRequired
 
@@ -55,25 +66,33 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
   }, [isSuccess])
 
   const handleSubmit = () => {
-    if (!isStatusSubmittable) {
-      const message = `Cannot submit from current status: ${courseStatus.replaceAll("_", " ")}.`
+    if (!advance) {
+      const message = `Cannot advance from current status: ${courseStatus.replaceAll("_", " ")}.`
       setErrorMsg(message)
       toast.error(message)
       return
     }
+    setConfirmOpen(true)
+  }
 
+  const runAdvance = () => {
+    if (!advance) return
+    setConfirmOpen(false)
     startTransition(async () => {
       setErrorMsg(null)
-      const res = await submitReview(courseId, isResubmit ? resubmitNote.trim() : undefined)
+      const res =
+        advance.action === "finalize-staging"
+          ? await markStagingComplete(courseId)
+          : await submitReview(courseId, isResubmit ? resubmitNote.trim() : undefined)
       if (!res?.ok) {
-        const message = res?.error || "Failed to submit."
+        const message = res?.error || "Failed to advance."
         setErrorMsg(message)
         toast.error(message)
         return
       }
 
       setIsSuccess(true)
-      toast.success("Review submitted successfully!")
+      toast.success(`${advance.ctaLabel} — done.`)
     })
   }
 
@@ -224,8 +243,8 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
                         <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-500">
                           <AlertCircle className="mt-0.5 size-5 shrink-0" />
                           <div>
-                            <p className="text-sm font-bold">Status Mismatch</p>
-                            <p className="text-xs font-medium opacity-90">This course is currently in <span className="font-bold uppercase tracking-tight">{courseStatus.replaceAll("_", " ")}</span> and cannot be submitted by a TA.</p>
+                            <p className="text-sm font-bold">Nothing to do here right now</p>
+                            <p className="text-xs font-medium opacity-90">This course is currently <span className="font-bold">{getCourseStatusLabel(courseStatus)}</span> — there is no staff action for this step.</p>
                           </div>
                         </div>
                       )}
@@ -254,16 +273,11 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
                         )}
                       >
                         {isPending ? (
-                          isResubmit ? "Resubmitting..." : "Submitting..."
-                        ) : isResubmit ? (
-                          <>
-                            Resubmit to Admin
-                            <RefreshCw className="ml-2 size-5" />
-                          </>
+                          "Working…"
                         ) : (
                           <>
-                            Submit Review
-                            <Send className="ml-2 size-5" />
+                            {advance?.ctaLabel ?? "Submit Review"}
+                            {isResubmit ? <RefreshCw className="ml-2 size-5" /> : <Send className="ml-2 size-5" />}
                           </>
                         )}
                       </Button>
@@ -276,6 +290,24 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
         )}
       </AnimatePresence>
     </div>
+    <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirm this step</DialogTitle>
+          <DialogDescription>
+            {advance
+              ? `This moves the course to "${getCourseStatusLabel(advance.to)}". You can't undo this from here.`
+              : ""}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={runAdvance}>Confirm</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </>
   )
 }
