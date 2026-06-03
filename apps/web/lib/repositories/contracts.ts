@@ -303,6 +303,7 @@ export interface CourseRepository {
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
+  listCourseStatusEvents(courseId: string): Promise<AuditEvent[]>;
   listSubmissionHistory(courseId: string): Promise<SubmissionEvent[]>;
   listChangeRequestHistory(courseId: string): Promise<SubmissionEvent[]>;
   listQuestionRoundHistory(courseId: string): Promise<SubmissionEvent[]>;

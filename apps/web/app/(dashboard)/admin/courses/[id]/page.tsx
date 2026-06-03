@@ -16,6 +16,8 @@ import { ResubmitBanner } from "./_components/resubmit-banner"
 import { QuestionRoundBanner } from "./_components/question-round-banner"
 import { FinalApprovalBanner } from "./_components/final-approval-banner"
 import { getSubmissionHistory, getQuestionRoundHistory } from "@/lib/courses/service"
+import { getCourseTimeline } from "@/lib/courses/timeline"
+import { CourseTimeline } from "@/components/courses/course-timeline"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -26,11 +28,12 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, comments, submissionHistory, questionRounds] = await Promise.all([
+  const [detail, comments, submissionHistory, questionRounds, timeline] = await Promise.all([
     getAdminCourseDetail(id),
     getCourseComments(id),
     getSubmissionHistory(id),
     getQuestionRoundHistory(id),
+    getCourseTimeline(id, { includeInternalComments: true }),
   ])
   
   if (!detail) notFound()
@@ -50,6 +53,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
             <TabsTrigger value="review" className="text-base">Review</TabsTrigger>
             <TabsTrigger value="issues" className="text-base">Issues</TabsTrigger>
             <TabsTrigger value="chat" className="text-base">Chat</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-base">Timeline</TabsTrigger>
           </TabsList>
 
           {/* Review Tab */}
@@ -112,6 +116,11 @@ export default async function AdminCourseDetailPage({ params }: Props) {
                 currentUserId={context.userId}
               />
             </div>
+          </TabsContent>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="flex-1 overflow-hidden p-6">
+            <CourseTimeline items={timeline} />
           </TabsContent>
         </StickyTabs>
       </main>

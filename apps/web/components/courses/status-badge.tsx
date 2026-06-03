@@ -6,7 +6,7 @@ interface StatusBadgeProps {
   className?: string
 }
 
-const DOT_COLORS: Record<CourseStatus, string> = {
+export const DOT_COLORS: Record<CourseStatus, string> = {
   // Migration
   course_created:          "bg-slate-400",
   assigned_to_ta:          "bg-slate-400",

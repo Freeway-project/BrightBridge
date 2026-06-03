@@ -17,6 +17,7 @@ const STEPS = [
   { label: "Syllabus & GB", sub: "Docs review", href: "syllabus-gradebook" },
   { label: "Issues", sub: "Track problems", href: "issue-log" },
   { label: "Submit", sub: "Final review", href: "submit" },
+  { label: "Timeline", sub: "Full history", href: "timeline" },
 ] as const
 
 type WorkspaceNavProps = {
