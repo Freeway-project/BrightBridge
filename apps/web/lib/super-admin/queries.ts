@@ -1,6 +1,7 @@
 import "server-only"
 
 import { getCourseRepository, getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
+import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
 import type {
   AuditEvent,
   StatusCount,
@@ -87,6 +88,75 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
 export async function getPaginatedSuperAdminCourses(page: number, pageSize: number, search: string): Promise<PaginatedResult<CourseRow>> {
   const courseRepository = getCourseRepository()
   return courseRepository.listSuperAdminCourses(page, pageSize, search)
+}
+
+export type SupportMessageRow = {
+  id: string
+  sender_role: string
+  type: "message" | "poke"
+  subject: string | null
+  body: string
+  status: "open" | "read" | "resolved"
+  created_at: string
+  sender:
+    | { full_name: string | null; role: string | null }
+    | { full_name: string | null; role: string | null }[]
+    | null
+}
+
+// Paginated list of every support message (pokes + notes) for the super-admin
+// Support panel — "who asked what". Uses the admin client; access to this data
+// is already gated by the super_admin auth check on the page.
+export async function getPaginatedSuperAdminSupportMessages(
+  page: number,
+  pageSize: number,
+  search: string,
+): Promise<PaginatedResult<SupportMessageRow>> {
+  const admin = getSupabaseAdminClientOrThrow()
+  let query = admin
+    .from("support_messages")
+    .select(
+      "id, sender_role, type, subject, body, status, created_at, sender:sender_profile_id ( full_name, role )",
+      { count: "exact" },
+    )
+
+  if (search) {
+    query = query.or(`subject.ilike.%${search}%,body.ilike.%${search}%`)
+  }
+
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+  const { data, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(from, to)
+
+  if (error) {
+    throw new Error("Could not load support messages: " + error.message)
+  }
+
+  const total = count ?? 0
+  return {
+    data: (data ?? []) as unknown as SupportMessageRow[],
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  }
+}
+
+// Count of unresolved support messages, for the Support tab badge.
+export async function getOpenSupportMessageCount(): Promise<number> {
+  const admin = getSupabaseAdminClientOrThrow()
+  const { count, error } = await admin
+    .from("support_messages")
+    .select("id", { count: "exact", head: true })
+    .neq("status", "resolved")
+
+  if (error) {
+    return 0
+  }
+
+  return count ?? 0
 }
 
 export async function getPaginatedUsers(page: number, pageSize: number, search: string): Promise<PaginatedResult<UserRow>> {

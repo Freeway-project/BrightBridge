@@ -13,8 +13,10 @@ type Props = {
   migrationPanel: React.ReactNode
   auditPanel: React.ReactNode
   analyticsPanel: React.ReactNode
+  supportPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
+  openSupportCount: number
 }
 
 export function SuperAdminTabs({
@@ -27,8 +29,10 @@ export function SuperAdminTabs({
   migrationPanel,
   auditPanel,
   analyticsPanel,
+  supportPanel,
   unassignedCount,
   openEscalationsCount,
+  openSupportCount,
 }: Props) {
   const [tab, setTab] = useStickyTabState("super-admin-dashboard", "overview")
 
@@ -55,6 +59,14 @@ export function SuperAdminTabs({
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="support">
+            Support
+            {openSupportCount > 0 && (
+              <span className="ml-1.5 rounded-full bg-yellow-500/20 px-1.5 py-0 text-[10px] font-semibold text-yellow-700 dark:text-yellow-300">
+                {openSupportCount.toLocaleString()}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="migration">Migration</TabsTrigger>
           <TabsTrigger value="organization">Organization</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
@@ -67,6 +79,7 @@ export function SuperAdminTabs({
       <TabsContent value="users">{usersPanel}</TabsContent>
       <TabsContent value="assign">{assignPanel}</TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
+      <TabsContent value="support">{supportPanel}</TabsContent>
       <TabsContent value="migration">{migrationPanel}</TabsContent>
       <TabsContent value="organization">{organizationPanel}</TabsContent>
       <TabsContent value="audit">{auditPanel}</TabsContent>

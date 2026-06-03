@@ -39,3 +39,32 @@ export async function pokeItSupportAction(): Promise<SupportActionState> {
     message: "IT support was poked. Harsh has been notified.",
   };
 }
+
+// Super-admin resolves a support message from the Support panel.
+export async function resolveSupportMessageAction(
+  id: string,
+): Promise<SupportActionState> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["super_admin"]);
+
+  const { error } = await getSupabaseAdminClientOrThrow()
+    .from("support_messages")
+    .update({
+      status: "resolved",
+      resolved_at: new Date().toISOString(),
+      resolved_by_profile_id: context.profile.id,
+    })
+    .eq("id", id);
+
+  if (error) {
+    return {
+      kind: "error",
+      message: "Could not resolve this message. Try again in a moment.",
+    };
+  }
+
+  revalidatePath("/super-admin");
+  revalidatePath("/notifications");
+
+  return { kind: "success", message: "Marked as resolved." };
+}

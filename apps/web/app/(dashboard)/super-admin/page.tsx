@@ -1,6 +1,6 @@
 import { Topbar } from "@/components/layout/topbar"
 import { OverviewView } from "@/components/super-admin/overview-view"
-import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers } from "@/lib/super-admin/queries"
+import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
 import { TweakableContent } from "@/components/shared/tweakable-content"
@@ -19,6 +19,7 @@ import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
 import { getLatestMigrationReport } from "@/lib/migration/report"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
 import { AnalyticsView } from "@/components/super-admin/analytics-view"
+import { SupportMessagesView } from "@/components/super-admin/support-messages-view"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -45,6 +46,8 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     openEscalations,
     tas,
     migrationReport,
+    supportMessagesPage,
+    openSupportCount,
   ] = await Promise.all([
     getSuperAdminData(),
     getPaginatedSuperAdminCourses(page, 50, search),
@@ -53,6 +56,8 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     getOpenEscalations(),
     getProfilesByRole("standard_user"),
     getLatestMigrationReport(),
+    getPaginatedSuperAdminSupportMessages(page, 50, search),
+    getOpenSupportMessageCount(),
   ])
 
   return (
@@ -64,6 +69,8 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
           <SuperAdminTabs
             unassignedCount={unassignedPage.total}
             openEscalationsCount={openEscalations.length}
+            openSupportCount={openSupportCount}
+            supportPanel={<SupportMessagesView result={supportMessagesPage} search={search} />}
             overviewPanel={<OverviewView data={data} />}
             coursesPanel={<CoursesView result={coursesPage} search={search} />}
             usersPanel={<UsersView result={usersPage} search={search} />}
