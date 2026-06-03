@@ -25,7 +25,7 @@ Two SQL migrations must be run in Supabase BEFORE code merge:
 
 ---
 
-## What You Need to Do (Except Vercel)
+## What You Need to Do
 
 ### Step 1: Run Database Migrations (5-10 minutes)
 
@@ -115,10 +115,10 @@ git merge ft-issue-tracker
 git push origin main
 ```
 
-**What happens next (automatic):**
-1. Vercel detects push to main
-2. Vercel runs: `npm run build`
-3. Vercel deploys to production
+**What happens next (on the VPS — run `bash scripts/deploy.sh`):**
+1. deploy.sh pulls latest main
+2. Runs the build (`npm run build`)
+3. PM2 zero-downtime reload to production
 4. App connects to DB (which already has new tables)
 5. Notifications subscribe to realtime channels
 6. Issues tab becomes available to all users
@@ -217,7 +217,7 @@ git push origin main
 ## Monitoring After Deploy
 
 ### First Hour
-- [ ] Check Vercel deployment status (green)
+- [ ] Check PM2 process status (`pm2 status` — all online)
 - [ ] Test issues tab loads
 - [ ] Create test issue → notification fires
 - [ ] Check Supabase realtime metrics
@@ -248,7 +248,7 @@ git push origin main
 ```bash
 git revert <merge-commit>
 git push origin main
-# Vercel auto-deploys main
+# Then on the VPS: bash scripts/deploy.sh
 # Code reverts to old version
 # DB changes remain (tables stay)
 ```
@@ -305,15 +305,16 @@ git merge ft-issue-tracker
 # Push to GitHub
 git push origin main
 
-# Expected:
-# - Vercel auto-detects push
-# - Vercel runs build
-# - Deploy to production
+# Then on the VPS:
+bash scripts/deploy.sh
+# - Pulls main
+# - Runs build
+# - PM2 zero-downtime reload
 # - Takes ~5 minutes total
 ```
 
 ### Verification Step
-1. Wait 5 minutes for Vercel to deploy
+1. Run `bash scripts/deploy.sh` on the VPS (~5 min)
 2. Go to your prod app
 3. Navigate to a course → "Issues" tab should exist
 4. Click "Create Issue" → form should appear
@@ -382,8 +383,8 @@ Documentation:
 | Run Migration 2 | 3 min | You (Supabase) |
 | Run verification | 2 min | You (SQL queries) |
 | Merge to main | 1 min | You (git) |
-| Vercel builds | 5 min | Vercel (auto) |
-| Vercel deploys | 3 min | Vercel (auto) |
+| VPS build | 5 min | scripts/deploy.sh |
+| PM2 reload | 1 min | scripts/deploy.sh |
 | Test in prod | 5 min | You (browser) |
 | **Total** | **~21 min** | Mostly automatic |
 
