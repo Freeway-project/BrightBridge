@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { StatusBadge } from "./status-badge"
-import { type CourseStatus } from "@coursebridge/workflow"
+import { getBallInCourt, type CourseStatus } from "@coursebridge/workflow"
+import { TurnIndicator } from "./turn-indicator"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, Clock, AlertCircle, CheckCircle2, ChevronRight, FileDown, FileSpreadsheet } from "lucide-react"
@@ -28,7 +29,8 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, issueCounts, index = 0, canExport = false }: CourseCardProps) {
-  const { action, owner, tone } = deriveNextAction(course.status)
+  const { action, tone } = deriveNextAction(course.status)
+  const isStaffTurn = getBallInCourt(course.status) === "staff"
 
   return (
     <motion.div
@@ -104,14 +106,8 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                 <p className="font-medium text-foreground/90">
                   <span className="text-muted-foreground">Next:</span> {action}
                 </p>
-                <div className="ml-auto flex items-center gap-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Owner</span>
-                  <span className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                    owner === "TA" ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                  )}>
-                    {owner}
-                  </span>
+                <div className="ml-auto">
+                  <TurnIndicator status={course.status} />
                 </div>
               </div>
             </div>
@@ -146,13 +142,13 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                 asChild
                 className={cn(
                   "font-bold transition-all duration-300 border-none",
-                  owner === "TA"
+                  isStaffTurn
                     ? "bg-black text-white hover:bg-zinc-800 shadow-sm hover:shadow"
                     : "bg-zinc-800 text-white hover:bg-zinc-700 shadow-sm hover:shadow"
                 )}
               >
                 <Link href={`/courses/${course.id}/metadata`}>
-                  {owner === "TA" ? "Continue Review" : "View Progress"}
+                  {isStaffTurn ? "Continue Review" : "View Progress"}
                   <ArrowRight className="ml-2 size-4 transition-transform group-hover/card:translate-x-1" />
                 </Link>
               </Button>
@@ -252,35 +248,34 @@ function ProgressItem({
 
 function deriveNextAction(status: CourseStatus): {
   action: string
-  owner: "TA" | "Admin" | "Admin/Viewer" | "Instructor" | "None"
   tone: "neutral" | "info" | "warning" | "success"
 } {
   switch (status) {
     case "course_created":
-      return { action: "Assign reviewer", owner: "Admin", tone: "neutral" }
+      return { action: "Assign reviewer", tone: "neutral" }
     case "assigned_to_ta":
-      return { action: "Start TA review", owner: "TA", tone: "neutral" }
+      return { action: "Start TA review", tone: "neutral" }
     case "ta_review_in_progress":
-      return { action: "Complete and submit review", owner: "TA", tone: "info" }
+      return { action: "Complete and submit review", tone: "info" }
     case "submitted_to_admin":
-      return { action: "Approve or request changes", owner: "Admin", tone: "info" }
+      return { action: "Approve or request changes", tone: "info" }
     case "admin_changes_requested":
-      return { action: "Address requested changes", owner: "TA", tone: "warning" }
+      return { action: "Address requested changes", tone: "warning" }
     case "waiting_on_admin":
-      return { action: "Build staging shell", owner: "Admin", tone: "info" }
+      return { action: "Build staging shell", tone: "info" }
     case "staging_in_progress":
-      return { action: "Finalize course", owner: "TA", tone: "info" }
+      return { action: "Finalize course", tone: "info" }
     case "ready_for_instructor":
-      return { action: "Send to instructor", owner: "Admin/Viewer", tone: "info" }
+      return { action: "Send to instructor", tone: "info" }
     case "sent_to_instructor":
-      return { action: "Await instructor decision", owner: "Instructor", tone: "info" }
+      return { action: "Await instructor decision", tone: "info" }
     case "instructor_questions":
-      return { action: "Respond and resend", owner: "Admin/Viewer", tone: "warning" }
+      return { action: "Respond and resend", tone: "warning" }
     case "instructor_approved":
-      return { action: "Finalize approval", owner: "Admin", tone: "info" }
+      return { action: "Finalize approval", tone: "info" }
     case "final_approved":
-      return { action: "Completed", owner: "None", tone: "success" }
+      return { action: "Completed", tone: "success" }
     default:
-      return { action: "Review status", owner: "Admin", tone: "neutral" }
+      return { action: "Review status", tone: "neutral" }
   }
 }
