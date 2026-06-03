@@ -42,7 +42,7 @@ type Props = {
 }
 
 export function CoursesBoard({ columns, role, listView }: Props) {
-  const [view, setView] = useState<"board" | "list">("board")
+  const [view, setView] = useState<"board" | "list">("list")
 
   return (
     <div className="space-y-4">

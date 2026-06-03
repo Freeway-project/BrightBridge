@@ -514,13 +514,30 @@ function PhasePill({ label, state }: { label: string; state: PhaseState }) {
     idle:   "bg-muted text-muted-foreground border-border",
   }[state]
 
-  const Icon = state === "done" ? CheckCircle2 : state === "active" ? LottieLoader : Circle
+  const Icon = state === "done" ? CheckCircle2 : state === "active" ? ActiveSpinner : Circle
 
   return (
     <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5", styles)}>
-      <Icon className={cn("size-2.5 shrink-0", state === "active" && "")} />
+      <Icon className="size-2.5 shrink-0" />
       <span className="text-[10px] font-medium">{label}</span>
     </div>
+  )
+}
+
+// Lightweight CSS spinner for the "active" phase. Replaces a full lottie-react
+// player (647 KB JSON, looping rAF) that was rendered once per active phase per
+// row — at 50 rows that meant dozens of simultaneous animation loops, which
+// locked up the admin table on lower-powered machines (e.g. M1). currentColor
+// keeps it tinted to the surrounding pill.
+function ActiveSpinner({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "inline-block animate-spin rounded-full border-[1.5px] border-current border-t-transparent",
+        className,
+      )}
+    />
   )
 }
 
