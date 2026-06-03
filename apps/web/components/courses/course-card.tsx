@@ -142,14 +142,13 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                 </>
               )}
               <Button
-                variant="outline"
                 size="sm"
                 asChild
                 className={cn(
-                  "border-transparent font-bold transition-all duration-300",
+                  "font-bold transition-all duration-300 border-none",
                   owner === "TA"
-                    ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:brightness-110 shadow-[0_0_15px_rgba(236,72,153,0.3)]"
-                    : "bg-gradient-to-r from-secondary/80 to-accent text-foreground hover:from-secondary hover:to-accent/80 hover:shadow-md"
+                    ? "bg-black text-white hover:bg-zinc-800 shadow-sm hover:shadow"
+                    : "bg-zinc-800 text-white hover:bg-zinc-700 shadow-sm hover:shadow"
                 )}
               >
                 <Link href={`/courses/${course.id}/metadata`}>
