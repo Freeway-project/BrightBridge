@@ -8,6 +8,7 @@ import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
 import { signOut } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
+import { SupportMessageDialog } from "./support-message-dialog"
 import Lottie from "lottie-react"
 import aiAnimationData from "@/assets/3c6d4dc5-50cf-45ba-9775-ab665ca5923d.json"
 import {
@@ -61,6 +62,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
   const items = NAV_ITEMS[role]
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
+  const canPokeSupport = role === "standard_user" || role === "admin_full"
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/50 backdrop-blur-xl">
@@ -123,6 +125,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
               </span>
             </div>
           )}
+          {canPokeSupport && <SupportMessageDialog collapsed={collapsed} />}
           <DisplaySettings />
           <form action={signOut}>
             <button

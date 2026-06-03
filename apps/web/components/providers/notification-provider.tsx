@@ -492,12 +492,46 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       )
       .subscribe()
 
+    const supportMessageChannel = role === "super_admin"
+      ? supabase
+        .channel("public:support_messages:insert")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "support_messages" },
+          async (payload) => {
+            if (!dedup("support-" + payload.new.id)) return
+
+            const senderName = await getAuthorName(payload.new.sender_profile_id)
+            const isPoke = payload.new.type === "poke"
+            const title = isPoke ? "IT Support Poke" : (payload.new.subject || "New Support Message")
+            const body = String(payload.new.body || "")
+            const preview = body.length > 100 ? body.substring(0, 100) + "..." : body
+
+            toast.warning(isPoke ? "⚡ IT Support Poke" : "💬 Support Message", {
+              description: (
+                <div className="space-y-2">
+                  <p className="font-semibold">{title}</p>
+                  <p className="text-xs text-muted-foreground">From {senderName}</p>
+                  {preview && <p className="text-xs italic text-muted-foreground">&quot;{preview}&quot;</p>}
+                </div>
+              ),
+              duration: Infinity,
+              action: { label: "Open", onClick: () => router.push("/notifications") },
+            })
+            playNotificationTone("warning")
+            router.refresh()
+          }
+        )
+        .subscribe()
+      : null
+
     return () => {
       supabase.removeChannel(issueInsertChannel)
       supabase.removeChannel(issueUpdateChannel)
       supabase.removeChannel(commentChannel)
       supabase.removeChannel(assignmentChannel)
       supabase.removeChannel(statusEventChannel)
+      if (supportMessageChannel) supabase.removeChannel(supportMessageChannel)
     }
   }, [userId, role, router])
 

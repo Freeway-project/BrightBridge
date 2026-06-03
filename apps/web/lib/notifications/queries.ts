@@ -4,7 +4,7 @@ import { getCourseStatusLabel, type CourseStatus, type Role } from "@coursebridg
 import { requireProfile } from "@/lib/auth/context";
 import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared";
 
-type NotificationKind = "assignment" | "course_action" | "issue" | "comment";
+type NotificationKind = "assignment" | "course_action" | "issue" | "comment" | "support";
 type NotificationTone = "default" | "warning" | "danger" | "success";
 
 export type NotificationItem = {
@@ -64,6 +64,17 @@ type CommentRow = {
   author: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
 };
 
+type SupportMessageRow = {
+  id: string;
+  sender_role: string;
+  type: "message" | "poke";
+  subject: string | null;
+  body: string;
+  status: "open" | "read" | "resolved";
+  created_at: string;
+  sender: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
+};
+
 const ADMIN_ROLES: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
 const STAFF_PENDING_STATUSES = new Set<CourseStatus>([
   "assigned_to_ta",
@@ -106,16 +117,18 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       return { notifications: [], pendingCount: 0, role, error: false };
     }
 
-    const [courses, issues, comments] = await Promise.all([
+    const [courses, issues, comments, supportMessages] = await Promise.all([
       getRelevantCourses(accessibleCourseIds, role),
       getRelevantIssues(accessibleCourseIds),
       getRecentComments(accessibleCourseIds, context.profile.id),
+      role === "super_admin" ? getOpenSupportMessages() : Promise.resolve([]),
     ]);
 
     const notifications = [
       ...courses.map((course) => courseToNotification(course, role)),
       ...issues.map((issue) => issueToNotification(issue, role)),
       ...comments.map((comment) => commentToNotification(comment, role)),
+      ...supportMessages.map(supportMessageToNotification),
     ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
     return {
@@ -145,6 +158,22 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
 
     return (data ?? []).map((row) => row.course_id as string);
   }
+}
+
+async function getOpenSupportMessages(): Promise<SupportMessageRow[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  const { data, error } = await admin
+    .from("support_messages")
+    .select("id, sender_role, type, subject, body, status, created_at, sender:sender_profile_id ( full_name, role )")
+    .neq("status", "resolved")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    throw new Error("Could not load support messages: " + error.message);
+  }
+
+  return (data ?? []) as unknown as SupportMessageRow[];
 }
 
 async function getRelevantCourses(courseIds: string[] | null, role: Role): Promise<CourseRow[]> {
@@ -339,6 +368,26 @@ function commentToNotification(comment: CommentRow, role: Role): NotificationIte
     href: getIssueHref(issue?.course_id ?? "", role),
     createdAt: comment.created_at,
     pending: true,
+  };
+}
+
+function supportMessageToNotification(message: SupportMessageRow): NotificationItem {
+  const senderProfile = firstRelation(message.sender);
+  const senderName = formatAuthorName(senderProfile?.full_name, senderProfile?.role ?? message.sender_role);
+  const preview = message.body.length > 120 ? message.body.slice(0, 120) + "..." : message.body;
+  const isPoke = message.type === "poke";
+
+  return {
+    id: "support-" + message.id,
+    kind: "support",
+    tone: isPoke ? "warning" : "default",
+    title: isPoke ? "IT support poke" : message.subject ?? "New support message",
+    description: isPoke ? senderName + " poked IT support." : preview,
+    courseTitle: null,
+    meta: "By " + senderName + " · " + formatIssueStatus(message.status),
+    href: "/notifications",
+    createdAt: message.created_at,
+    pending: message.status !== "resolved",
   };
 }
 

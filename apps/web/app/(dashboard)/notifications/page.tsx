@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, MessageSquare, TriangleAlert } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, LifeBuoy, MessageSquare, TriangleAlert } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Topbar } from "@/components/layout/topbar";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ const KIND_ICON = {
   course_action: Clock,
   issue: TriangleAlert,
   comment: MessageSquare,
+  support: LifeBuoy,
 };
 
 const TONE_STYLES = {
