@@ -1,7 +1,7 @@
 "use client"
 
 import { formatDistanceToNow } from "date-fns"
-import { ArrowRight, AlertTriangle, CheckCircle2, MessageSquare, Clock, History } from "lucide-react"
+import { ArrowRight, AlertTriangle, CheckCircle2, MessageSquare, Clock, History, UserPlus, ShieldAlert } from "lucide-react"
 import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow"
 import type { CourseTimelineItem } from "@/lib/courses/timeline"
 import { DOT_COLORS } from "@/components/courses/status-badge"
@@ -81,6 +81,22 @@ function TimelineDot({ item }: { item: CourseTimelineItem }) {
     )
   }
 
+  if (item.kind === "assignment") {
+    return (
+      <span className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-2 ring-blue-500/30">
+        <UserPlus className="size-4 text-blue-600" />
+      </span>
+    )
+  }
+
+  if (item.kind === "escalation" || item.kind === "escalation_message") {
+    return (
+      <span className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-2 ring-destructive/30">
+        <ShieldAlert className="size-4 text-destructive" />
+      </span>
+    )
+  }
+
   return (
     <span className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-2 ring-border">
       <MessageSquare className="size-4 text-muted-foreground" />
@@ -135,8 +151,29 @@ function TimelineBody({ item }: { item: CourseTimelineItem }) {
     )
   }
 
-  // issue_created | issue_resolved
-  {
+  if (
+    item.kind === "assignment" ||
+    item.kind === "escalation" ||
+    item.kind === "escalation_message" ||
+    item.kind === "issue_comment"
+  ) {
+    return (
+      <div className="space-y-1">
+        <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+          <span className="text-foreground">{item.summary}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          {item.actorName && <span className="text-xs text-muted-foreground">{item.actorName}</span>}
+          {when}
+        </div>
+        {item.detail && (
+          <p className="mt-1 rounded-lg bg-muted/40 px-3 py-1.5 text-sm text-foreground/90">{item.detail}</p>
+        )}
+      </div>
+    )
+  }
+
+  if (item.kind === "issue_created" || item.kind === "issue_resolved") {
     const verb = item.kind === "issue_created" ? "Raised" : "Resolved"
     return (
       <div className="space-y-1">
@@ -160,4 +197,6 @@ function TimelineBody({ item }: { item: CourseTimelineItem }) {
       </div>
     )
   }
+
+  return null
 }

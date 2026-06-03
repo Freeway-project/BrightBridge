@@ -140,6 +140,32 @@ export type AuditEvent = {
   created_at: string;
 };
 
+/**
+ * A normalized entry from the generic `audit_log` table, used to surface the
+ * activity that course_status_events / issues / comments don't already cover
+ * (assignments, escalations, escalation messages, issue comments). Profile ids
+ * are pre-resolved to display names by the repository. The repository returns
+ * an empty list if the audit_log table/migration isn't present yet — it never
+ * throws into the timeline.
+ */
+export type CourseAuditEntry = {
+  id: string;
+  tableName:
+    | "course_assignments"
+    | "course_escalations"
+    | "escalation_messages"
+    | "course_issue_comments";
+  action: "INSERT" | "UPDATE" | "DELETE" | "BACKFILL";
+  at: string;
+  actorName: string | null;
+  role: string | null; // assignment role
+  targetName: string | null; // who was assigned
+  title: string | null; // escalation title
+  body: string | null; // message / comment body
+  status: string | null; // escalation status (e.g. on resolve)
+  isSystem: boolean; // system-generated issue comment
+};
+
 export type SuperAdminData = {
   courses: SuperAdminCourseRow[];
   users: UserSummary[];
@@ -304,6 +330,7 @@ export interface CourseRepository {
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
   listCourseStatusEvents(courseId: string): Promise<AuditEvent[]>;
+  listCourseAuditEntries(courseId: string): Promise<CourseAuditEntry[]>;
   listSubmissionHistory(courseId: string): Promise<SubmissionEvent[]>;
   listChangeRequestHistory(courseId: string): Promise<SubmissionEvent[]>;
   listQuestionRoundHistory(courseId: string): Promise<SubmissionEvent[]>;

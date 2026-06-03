@@ -6,6 +6,7 @@ import type {
   AdminCourseRow,
   AssignmentLog,
   AuditEvent,
+  CourseAuditEntry,
   CourseAssignmentRecord,
   CourseRepository,
   CourseSummary,
@@ -667,6 +668,81 @@ export function createSupabaseCourseRepository(): CourseRepository {
           note: event.note,
           created_at: event.created_at,
         } satisfies AuditEvent;
+      });
+    },
+
+    async listCourseAuditEntries(courseId): Promise<CourseAuditEntry[]> {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("audit_log")
+        .select("id, table_name, action, actor_id, old_data, new_data, changed_at")
+        .eq("course_id", courseId)
+        .in("table_name", [
+          "course_assignments",
+          "course_escalations",
+          "escalation_messages",
+          "course_issue_comments",
+        ])
+        .order("changed_at", { ascending: true });
+
+      if (error) {
+        // The audit_log table may not exist yet (migration not applied). Degrade
+        // gracefully so the timeline never hard-fails — Postgres 42P01 is
+        // "undefined_table". Any other error is logged and also treated as empty.
+        if (error.code !== "42P01") {
+          console.warn(`listCourseAuditEntries: audit_log read failed: ${error.message}`);
+        }
+        return [];
+      }
+
+      type Row = {
+        id: string;
+        table_name: CourseAuditEntry["tableName"];
+        action: CourseAuditEntry["action"];
+        actor_id: string | null;
+        old_data: Record<string, unknown> | null;
+        new_data: Record<string, unknown> | null;
+        changed_at: string;
+      };
+      const rows = (data ?? []) as Row[];
+
+      // Resolve referenced profile ids (the actor, and the assignment target) to
+      // display names in one batched lookup.
+      const ids = new Set<string>();
+      for (const r of rows) {
+        if (r.actor_id) ids.add(r.actor_id);
+        const pid = (r.new_data ?? r.old_data)?.["profile_id"];
+        if (typeof pid === "string") ids.add(pid);
+      }
+      const nameById = new Map<string, string | null>();
+      if (ids.size > 0) {
+        const { data: profs } = await admin
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", [...ids]);
+        for (const p of (profs ?? []) as Array<{ id: string; full_name: string | null; email: string }>) {
+          nameById.set(p.id, p.full_name ?? p.email ?? null);
+        }
+      }
+
+      const str = (v: unknown): string | null => (typeof v === "string" && v.length > 0 ? v : null);
+
+      return rows.map((r) => {
+        const d = (r.new_data ?? r.old_data ?? {}) as Record<string, unknown>;
+        const targetId = str(d["profile_id"]);
+        return {
+          id: r.id,
+          tableName: r.table_name,
+          action: r.action,
+          at: r.changed_at,
+          actorName: r.actor_id ? (nameById.get(r.actor_id) ?? null) : null,
+          role: str(d["role"]),
+          targetName: targetId ? (nameById.get(targetId) ?? null) : null,
+          title: str(d["title"]),
+          body: str(d["body"]),
+          status: str(d["status"]),
+          isSystem: d["is_system_message"] === true,
+        } satisfies CourseAuditEntry;
       });
     },
 
