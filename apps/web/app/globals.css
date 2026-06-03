@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -60,36 +61,36 @@
   --radius: 0.875rem;
 }
 
-/* ── Sunset Theme — Candy pink & violet dream ── */
+/* ── Sunset Theme — Refined candy & sunset ambience ── */
 [data-theme="sunset"] {
-  --background: #0a0010;           /* Deep black-violet */
-  --foreground: #ffffff;           /* Pure white */
-  --card: #150020;                 /* Dark violet card */
-  --card-foreground: #fdf2f8;      /* Very light pink text for better contrast */
-  --popover: #1f0030;
+  --background: #120914;           /* Deep warm violet */
+  --foreground: #fcedf2;           /* Soft warm white */
+  --card: #190e1c;                 /* Elevated warm violet */
+  --card-foreground: #f4e4ec;      /* Softened text */
+  --popover: #211326;
   --popover-foreground: #ffffff;
-  --primary: #ec4899;              /* Pink */
-  --primary-foreground: #ffffff;   /* Changed to white for better contrast on pink */
-  --primary-hover: #f472b6;
-  --primary-depth: #be185d;
-  --secondary: #a855f7;            /* Violet */
+  --primary: #df5b7e;              /* Muted raspberry sunset pink */
+  --primary-foreground: #ffffff;
+  --primary-hover: #ed7a9a;
+  --primary-depth: #ad3559;
+  --secondary: #7e5bdf;            /* Softened sunset indigo */
   --secondary-foreground: #ffffff;
-  --muted: #1f0030;
-  --muted-foreground: #f472b6;     /* Softer pink for muted text instead of harsh fuchsia */
-  --accent: #2e0040;
-  --accent-foreground: #fbcfe8;    /* Lighter pink accent text */
-  --border: color-mix(in srgb, #ec4899 30%, transparent);
-  --border-icy: color-mix(in srgb, #ffffff 10%, transparent);
-  --input: #1f0030;
-  --ring: #ec4899;
-  --sidebar: #06000a;              /* Deepest violet */
-  --sidebar-foreground: #fbcfe8;
-  --sidebar-primary: #ec4899;
-  --sidebar-primary-foreground: #0a0010;
-  --sidebar-accent: #150020;
-  --sidebar-accent-foreground: #ec4899;
-  --sidebar-border: color-mix(in srgb, #ec4899 20%, transparent);
-  --sidebar-ring: #ec4899;
+  --muted: #26162b;
+  --muted-foreground: #b194b3;     /* Muted lavender-gray (not pink) */
+  --accent: #301a35;
+  --accent-foreground: #e6c5e8;
+  --border: color-mix(in srgb, #df5b7e 20%, transparent);
+  --border-icy: color-mix(in srgb, #fcedf2 6%, transparent);
+  --input: #26162b;
+  --ring: #df5b7e;
+  --sidebar: #0d060e;              /* Deepest shade */
+  --sidebar-foreground: #d9b8dc;
+  --sidebar-primary: #df5b7e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #190e1c;
+  --sidebar-accent-foreground: #df5b7e;
+  --sidebar-border: color-mix(in srgb, #df5b7e 12%, transparent);
+  --sidebar-ring: #df5b7e;
 }
 
 /* ── Monochrome Theme — Graphite studio, sharp contrast ─ */
