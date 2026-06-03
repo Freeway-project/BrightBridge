@@ -1,5 +1,5 @@
-import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useEffect, useMemo, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"

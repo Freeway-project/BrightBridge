@@ -1,5 +1,5 @@
-import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useCallback, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

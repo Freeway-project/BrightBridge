@@ -1,5 +1,5 @@
-import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client";
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useState, useTransition } from "react";
 import { ClipboardList, Check } from "lucide-react";

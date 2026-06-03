@@ -1,5 +1,5 @@
-import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -22,6 +22,7 @@ import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
 import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2, ArrowRight } from "lucide-react"
 
 type MetadataFormProps = {
@@ -132,7 +133,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
   const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8 px-4 sm:px-6 lg:px-8 pb-16">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
@@ -284,15 +285,17 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <section className="relative space-y-2 group/sec">
-      <div className="absolute left-[1px] top-6 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/sec:opacity-100 group-hover/sec:w-[4px] transition-all duration-300" />
-      <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-        {label}
-      </p>
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg divide-y divide-border/40 pl-[3px]">
+    <Card className="relative overflow-hidden group/sec border-border/70 bg-card/60 backdrop-blur-xl shadow-lg rounded-2xl pl-[3px]">
+      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/sec:opacity-100 group-hover/sec:w-[4px] transition-all duration-300 z-10" />
+      <CardHeader className="bg-muted/10 px-6 py-4 border-b border-border/40">
+        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
+          {label}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0 divide-y divide-border/40">
         {children}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   )
 }
 

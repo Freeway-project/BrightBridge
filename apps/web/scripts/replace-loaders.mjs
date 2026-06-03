@@ -25,9 +25,19 @@ for (const file of files) {
   let content = fs.readFileSync(file, 'utf8');
   if (content.includes('Loader2')) {
     // Replace <Loader2 className="..." /> with <LottieLoader className="..." />
-    // 1. Import LottieLoader if not present
+    // 1. Import LottieLoader if not present. The import must go AFTER any
+    //    "use client"/"use server" directive — a directive is only honored when
+    //    it is the very first statement, so prepending the import above it would
+    //    silently turn the file into a Server Component and break client hooks.
     if (!content.includes('LottieLoader')) {
-      content = 'import { LottieLoader } from "@/components/ui/lottie-loader"\n' + content;
+      const importLine = 'import { LottieLoader } from "@/components/ui/lottie-loader"\n';
+      const directive = content.match(/^\s*(["'])use (client|server)\1;?[ \t]*\r?\n/);
+      if (directive) {
+        const at = directive[0].length;
+        content = content.slice(0, at) + importLine + content.slice(at);
+      } else {
+        content = importLine + content;
+      }
     }
     
     // 2. Remove Loader2 from lucide-react import if present

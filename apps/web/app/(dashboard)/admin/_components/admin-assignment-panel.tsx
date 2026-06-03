@@ -1,5 +1,5 @@
-import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client";
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";

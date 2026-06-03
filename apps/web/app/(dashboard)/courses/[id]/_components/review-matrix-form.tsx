@@ -1,10 +1,11 @@
-import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
+import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown, Plus, CheckCircle2, ArrowRight } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
@@ -180,7 +181,7 @@ export function ReviewMatrixForm({
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-7">
+    <div className="mx-auto max-w-5xl space-y-7 px-4 sm:px-6 lg:px-8 pb-16">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -231,10 +232,10 @@ export function ReviewMatrixForm({
 
             return (
               <Collapsible defaultOpen key={section.title} className="group/coll relative">
-                <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg pl-[3px]">
+                <Card className="relative overflow-hidden rounded-2xl border-border/70 bg-card/60 backdrop-blur-xl shadow-lg pl-[3px]">
                   {/* Shifting Gradient Tint Bar on Left Side */}
-                  <div className="absolute left-[1px] top-0 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/coll:opacity-100 group-hover/coll:w-[4px] transition-all duration-300" />
-                  <CollapsibleTrigger className="group flex w-full items-center justify-between px-5 py-4 text-left">
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/coll:opacity-100 group-hover/coll:w-[4px] transition-all duration-300 z-10" />
+                  <CollapsibleTrigger className="group flex w-full items-center justify-between px-6 py-4 text-left border-b border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold text-foreground">{section.title}</span>
                       <span className="text-[10px] font-medium text-muted-foreground/60">
@@ -244,9 +245,9 @@ export function ReviewMatrixForm({
                     <ChevronDown className="size-4 text-muted-foreground/60 transition-transform group-data-[state=open]:rotate-180" />
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="border-t border-border/40 bg-background/30 overflow-x-auto">
+                    <CardContent className="p-0 overflow-x-auto">
                       {/* Column headers */}
-                      <div className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 border-b border-border/40 bg-muted/20 px-5 py-2">
+                      <div className="grid grid-cols-[2fr_140px_1.5fr_1.5fr_120px] gap-0 border-b border-border/40 bg-muted/20 px-6 py-2">
                         {["Item", "Status", "Notes", "Direct Link", ""].map((h) => (
                           <span key={h} className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">{h}</span>
                         ))}
@@ -332,9 +333,9 @@ export function ReviewMatrixForm({
                           </div>
                         )
                       })}
-                    </div>
+                    </CardContent>
                   </CollapsibleContent>
-                </div>
+                </Card>
               </Collapsible>
             )
           })}

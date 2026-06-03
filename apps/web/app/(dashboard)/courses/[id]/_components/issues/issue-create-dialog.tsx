@@ -1,5 +1,5 @@
-import { LottieLoader } from "@/components/ui/lottie-loader"
 'use client'
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useState } from 'react'
 import { IssuePhase, IssueType, IssueSeverity } from '@/lib/issues/types'
