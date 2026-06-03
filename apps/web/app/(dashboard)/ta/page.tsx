@@ -31,6 +31,7 @@ export default async function TADashboardPage() {
             initialCourses={courses}
             issueCounts={issueCounts}
             canExport={ctx.profile.role === "admin_full" || ctx.profile.role === "super_admin"}
+            scrollable={false}
           />
         </TaRefreshWrapper>
       </div>

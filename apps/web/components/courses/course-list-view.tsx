@@ -41,6 +41,8 @@ interface CourseListViewProps {
   issueCounts?: IssueCountMap
   /** Show Excel/PDF export buttons on cards — admin/super_admin only (export routes are gated). */
   canExport?: boolean
+  /** Whether the list should scroll internally. Defaults to true. */
+  scrollable?: boolean
 }
 
 const SUBJECT_PATTERN = /^([A-Za-z]+)/
@@ -50,7 +52,7 @@ function getCourseSubject(course: CourseSummary): string | null {
   return match?.[1]?.toUpperCase() ?? null
 }
 
-export function CourseListView({ initialCourses, issueCounts = {}, canExport = false }: CourseListViewProps) {
+export function CourseListView({ initialCourses, issueCounts = {}, canExport = false, scrollable = true }: CourseListViewProps) {
   const [search, setSearch] = useState("")
   const [subject, setSubject] = useState("all")
   const [term, setTerm] = useState("all")
@@ -102,7 +104,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
   const [activePhase, setActivePhase] = useStickyTabState("course-list-phase", defaultTab)
 
   return (
-    <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6 scrollbar-thin">
+    <div className={cn("space-y-6 bg-background", scrollable ? "min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 scrollbar-thin" : "p-0")}>
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -201,7 +203,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
                         className={cn(
                           "group gap-2 px-4 py-2 rounded-full border shadow-sm transition-all",
                           "border-border/40 bg-background hover:bg-muted/50 hover:border-border/80",
-                          "data-[state=active]:border-primary/50 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-md"
+                          "data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-[0_0_0_1px_var(--color-primary)]"
                         )}
                       >
                         <span className="font-semibold">{group.label}</span>
@@ -281,7 +283,7 @@ function TabItem({
       className={cn(
         "group relative flex h-full items-center gap-2 px-1 pb-3 text-[13px] font-bold uppercase tracking-wider transition-all duration-300",
         "text-muted-foreground/60 hover:text-foreground",
-        "data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-0.5 data-[state=active]:after:w-full",
+        "data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:h-1 data-[state=active]:after:w-full data-[state=active]:after:shadow-[0_-2px_8px_rgba(0,0,0,0.15)]",
         `data-[state=active]:${activeColor}`,
       )}
     >
