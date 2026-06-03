@@ -34,15 +34,18 @@ cd "$REPO_ROOT"
 # 1. Pull main
 # ---------------------------------------------------------------------------
 if [ "$SKIP_PULL" = false ]; then
-  log "Checking out and pulling main..."
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  if [ "$CURRENT_BRANCH" != "main" ]; then
-    log "Currently on '$CURRENT_BRANCH' — switching to main"
-    git checkout main
-  fi
-  git checkout -- .
-  git pull origin main
-  log "Git pull complete. $(git log -1 --oneline)"
+  log "Fetching origin/main (currently on '$CURRENT_BRANCH')..."
+  git fetch origin main
+  # Force-switch to main and hard-reset to the remote tip. Local modifications to
+  # tracked files are discarded FIRST (via -f / reset --hard) so a dirty working
+  # tree — generated files like next-env.d.ts, or leftover edits — can't abort the
+  # switch. The old order (`git checkout main` BEFORE `git checkout -- .`) aborted
+  # on any dirty tracked file and left autodeploy stuck failing every poll.
+  # This box deploys main; local tracked changes here are expendable.
+  git checkout -f main
+  git reset --hard origin/main
+  log "Now at origin/main. $(git log -1 --oneline)"
 fi
 
 # ---------------------------------------------------------------------------
