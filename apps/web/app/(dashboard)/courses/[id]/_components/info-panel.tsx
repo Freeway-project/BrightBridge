@@ -5,7 +5,6 @@ import type { CourseStatus } from "@coursebridge/workflow"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
 import { cn } from "@/lib/utils"
 import { CourseConversation } from "./course-conversation"
-import { StagingFinalizeBanner } from "./staging-finalize-banner"
 import { Button } from "@/components/ui/button"
 
 type SectionProgress = {
@@ -98,9 +97,6 @@ export function InfoPanel({
 
         <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-border/20">
           <div className="flex flex-col gap-6 pb-8">
-            {courseStatus === "staging_in_progress" && (
-              <StagingFinalizeBanner courseId={courseId} />
-            )}
             <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">
