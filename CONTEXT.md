@@ -131,7 +131,6 @@ lib/
 ```
 
 ### Monitoring / Error Handling
-- Vercel Analytics + Speed Insights in root layout
 - Sentry: client/server/edge configs, instrumentation.ts, withSentryConfig in next.config.ts
 - `app/global-error.tsx` — root crash boundary → Sentry.captureException
 - `app/(dashboard)/error.tsx` — per-page error inside sidebar shell → Sentry.captureException

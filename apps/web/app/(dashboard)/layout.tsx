@@ -11,7 +11,6 @@ import { DashboardContentShell } from "@/components/layout/dashboard-content-she
 import { isReadonlyMode } from "@/lib/system-migration"
 import { PostHogIdentifier } from "@/components/providers/posthog-identifier"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
-import { MemeProvider } from "@/components/providers/meme-provider"
 import { getDeploymentVersion } from "@/lib/deployment-version"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -44,16 +43,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <PostHogIdentifier userId={context.userId} email={context.email ?? ""} name={context.profile.fullName} role={role} />
       <OnlinePresenceTracker userId={context.userId} name={context.profile.fullName} email={context.email ?? ""} role={role} />
       <NotificationProvider userId={context.userId} role={role}>
-        <MemeProvider>
-          <SidebarProvider defaultOpen={sidebarOpen}>
-            <div className="flex h-screen w-full overflow-hidden bg-background">
-              <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
-              <DashboardContentShell>
-                {children}
-              </DashboardContentShell>
-            </div>
-          </SidebarProvider>
-        </MemeProvider>
+        <SidebarProvider defaultOpen={sidebarOpen}>
+          <div className="flex h-screen w-full overflow-hidden bg-background">
+            <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
+            <DashboardContentShell>
+              {children}
+            </DashboardContentShell>
+          </div>
+        </SidebarProvider>
       </NotificationProvider>
     </TweakProvider>
   )

@@ -11,7 +11,7 @@ BrightBridge currently has the core workflow foundation in place:
 - Workflow statuses and transition rules in `packages/workflow`
 - Core database tables and migrations for profiles, courses, assignments, review sections, review responses, comments, and invites
 - Core RLS and review-response policies
-- Sentry wiring, Vercel Analytics, and Speed Insights
+- Sentry wiring
 
 The current product is best described as:
 

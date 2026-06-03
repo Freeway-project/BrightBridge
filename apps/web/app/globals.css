@@ -65,19 +65,19 @@
   --background: #0a0010;           /* Deep black-violet */
   --foreground: #ffffff;           /* Pure white */
   --card: #150020;                 /* Dark violet card */
-  --card-foreground: #fbcfe8;      /* Light pink text */
+  --card-foreground: #fdf2f8;      /* Very light pink text for better contrast */
   --popover: #1f0030;
   --popover-foreground: #ffffff;
   --primary: #ec4899;              /* Pink */
-  --primary-foreground: #0a0010;
+  --primary-foreground: #ffffff;   /* Changed to white for better contrast on pink */
   --primary-hover: #f472b6;
   --primary-depth: #be185d;
   --secondary: #a855f7;            /* Violet */
   --secondary-foreground: #ffffff;
   --muted: #1f0030;
-  --muted-foreground: #d946ef;     /* Fuchsia muted text */
+  --muted-foreground: #f472b6;     /* Softer pink for muted text instead of harsh fuchsia */
   --accent: #2e0040;
-  --accent-foreground: #ec4899;
+  --accent-foreground: #fbcfe8;    /* Lighter pink accent text */
   --border: color-mix(in srgb, #ec4899 30%, transparent);
   --border-icy: color-mix(in srgb, #ffffff 10%, transparent);
   --input: #1f0030;
@@ -129,19 +129,19 @@
   --background: #06001a;           /* Deep space black-violet */
   --foreground: #f0e6ff;           /* Soft lavender white */
   --card: #0e0030;                 /* Deep purple surface */
-  --card-foreground: #ddbfff;      /* Light violet text */
+  --card-foreground: #f3e8ff;      /* Lighter violet text */
   --popover: #160045;
   --popover-foreground: #f0e6ff;
   --primary: #c026d3;              /* Vivid fuchsia */
-  --primary-foreground: #06001a;
+  --primary-foreground: #ffffff;   /* Pure white on fuchsia */
   --primary-hover: #d946ef;
   --primary-depth: #7c3aed;
   --secondary: #7c3aed;            /* Electric violet */
-  --secondary-foreground: #f0e6ff;
+  --secondary-foreground: #ffffff;
   --muted: #160045;
-  --muted-foreground: #a78bfa;     /* Periwinkle muted text */
+  --muted-foreground: #c4b5fd;     /* Softer periwinkle/violet */
   --accent: #1e0060;
-  --accent-foreground: #d946ef;
+  --accent-foreground: #e879f9;    /* Bright pink/fuchsia accent */
   --border: color-mix(in srgb, #c026d3 35%, transparent);
   --border-icy: color-mix(in srgb, #f0e6ff 8%, transparent);
   --input: #160045;
@@ -159,11 +159,11 @@
 /* ── Blush Theme — Soft pastels, pink, purple & lavender ─ */
 [data-theme="blush"] {
   --background: #faf8fc;           /* Soft lavender background */
-  --foreground: #5a4a7a;           /* Deep purple text */
+  --foreground: #3b2f56;           /* Deeper purple text for contrast */
   --card: #f3ecf8;                 /* Light lavender card */
-  --card-foreground: #6b5b7f;      /* Purple text on card */
+  --card-foreground: #4a3a69;      /* Darker purple text on card */
   --popover: #f0e5f7;
-  --popover-foreground: #5a4a7a;
+  --popover-foreground: #3b2f56;
   --primary: #d88ec9;              /* Soft pink */
   --primary-foreground: #ffffff;
   --primary-hover: #e0a3d9;
@@ -171,9 +171,9 @@
   --secondary: #b39ddb;            /* Soft purple */
   --secondary-foreground: #ffffff;
   --muted: #e8dff5;
-  --muted-foreground: #9b89b3;     /* Muted purple */
+  --muted-foreground: #7d6b99;     /* Darker muted purple */
   --accent: #f5d5e8;               /* Very soft pink */
-  --accent-foreground: #8b6f9e;
+  --accent-foreground: #6b4d82;    /* Darker accent text */
   --border: color-mix(in srgb, #d88ec9 20%, transparent);
   --border-icy: color-mix(in srgb, #b39ddb 15%, transparent);
   --input: #f3ecf8;

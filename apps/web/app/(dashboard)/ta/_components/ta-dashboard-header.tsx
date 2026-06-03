@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { RefreshCw, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { useMemeModal } from "@/components/providers/meme-provider"
 
 interface TaDashboardHeaderProps {
   firstName: string
@@ -14,7 +13,6 @@ interface TaDashboardHeaderProps {
 export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
   const router = useRouter()
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const { openMemeModal } = useMemeModal()
 
   const handleManualRefresh = useCallback(async () => {
     setIsRefreshing(true)
@@ -43,15 +41,6 @@ export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
           <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">
             Hey, <span className="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text text-transparent">{firstName}</span>.
           </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={openMemeModal}
-            title="Need a reset? Click for a refreshing quote!"
-            className="h-10 w-10 ml-2 hover:text-primary transition-colors"
-          >
-            <Sparkles className="size-6" />
-          </Button>
         </div>
       </div>
     </div>
