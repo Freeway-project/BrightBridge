@@ -1,10 +1,12 @@
 "use client"
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { CheckCircle2, Loader2, ArrowRight } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CheckCircle2, ArrowRight } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
   syllabusGradebookSchema,
@@ -139,7 +141,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-7">
+    <div className="mx-auto max-w-5xl space-y-7 px-4 sm:px-6 lg:px-8 pb-16">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -276,7 +278,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
           className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {isPending ? (
-            <><Loader2 className="size-4 animate-spin" /> Saving…</>
+            <><LottieLoader className="size-4 " /> Saving…</>
           ) : (
             <>
               Save & Next
@@ -299,13 +301,15 @@ function ReviewTable({
   children: React.ReactNode
 }) {
   return (
-    <section className="relative space-y-2 group/tbl">
-      <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-        {label}
-      </p>
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg pl-[3px]">
-        {/* Shifting Gradient Tint Bar on Left Side */}
-        <div className="absolute left-[1px] top-6 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/tbl:opacity-100 group-hover/tbl:w-[4px] transition-all duration-300" />
+    <Card className="relative overflow-hidden group/tbl border-border/70 bg-card/60 backdrop-blur-xl shadow-lg rounded-2xl pl-[3px]">
+      {/* Shifting Gradient Tint Bar on Left Side */}
+      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/tbl:opacity-100 group-hover/tbl:w-[4px] transition-all duration-300 z-10" />
+      <CardHeader className="bg-muted/10 px-6 py-4 border-b border-border/40">
+        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
+          {label}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
         {/* Column headers */}
         <div
           className="grid items-center border-b border-border/40 bg-muted/20 px-5 py-2"
@@ -316,8 +320,8 @@ function ReviewTable({
           ))}
         </div>
         {children}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -325,7 +329,7 @@ function SaveBadge({ isPending, status }: { isPending: boolean; status: "idle" |
   if (isPending || status === "saving")
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground">
-        <Loader2 className="size-3 animate-spin" /> Saving…
+        <LottieLoader className="size-3 " /> Saving…
       </span>
     )
   if (status === "saved")

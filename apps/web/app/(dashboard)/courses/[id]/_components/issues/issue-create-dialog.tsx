@@ -1,4 +1,5 @@
 'use client'
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useState } from 'react'
 import { IssuePhase, IssueType, IssueSeverity } from '@/lib/issues/types'
@@ -20,8 +21,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
-
 interface IssueCreateDialogProps {
   courseId: string
   phase: IssuePhase
@@ -176,7 +175,7 @@ export function IssueCreateDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={!formData.title || loading}>
-              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {loading && <LottieLoader className="w-4 h-4 mr-2 " />}
               Create Issue
             </Button>
           </div>

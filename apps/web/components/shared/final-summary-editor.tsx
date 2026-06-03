@@ -1,7 +1,8 @@
 "use client";
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useState, useTransition } from "react";
-import { ClipboardList, Check, Loader2 } from "lucide-react";
+import { ClipboardList, Check } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { saveFinalSummaryNotesAction } from "@/lib/courses/final-summary-actions";
@@ -66,7 +67,7 @@ export function FinalSummaryEditor({ courseId, initialNotes, editable }: Props) 
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground" aria-live="polite">
               {isPending ? (
-                <span className="inline-flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> Saving…</span>
+                <span className="inline-flex items-center gap-1"><LottieLoader className="size-3 " /> Saving…</span>
               ) : error ? (
                 <span className="text-destructive">{error}</span>
               ) : dirty ? (

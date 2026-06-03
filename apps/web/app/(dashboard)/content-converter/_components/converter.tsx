@@ -1,4 +1,5 @@
 "use client"
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useCallback, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,7 +19,7 @@ import {
   TEMPLATE_LABELS,
   type ConverterTemplate,
 } from "@/lib/content-converter/templates.shared"
-import { Check, CheckCircle2, Copy, Download, FileText, Loader2, Sparkles, UploadCloud } from "lucide-react"
+import { Check, CheckCircle2, Copy, Download, FileText, Sparkles, UploadCloud } from "lucide-react"
 
 const MAMMOTH_CDN = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"
 const ACCEPTED = [".pdf", ".doc", ".docx"]
@@ -294,7 +295,7 @@ export function ContentConverter() {
           </Card>
 
           <Button className="w-full gap-2" disabled={!file || busy} onClick={convert}>
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+            {busy ? <LottieLoader className="size-4 " /> : <Sparkles className="size-4" />}
             {busy ? "Converting…" : "Convert Document"}
           </Button>
 

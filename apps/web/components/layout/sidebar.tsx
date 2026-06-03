@@ -8,6 +8,8 @@ import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
 import { signOut } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
+import Lottie from "lottie-react"
+import aiAnimationData from "@/assets/3c6d4dc5-50cf-45ba-9775-ab665ca5923d.json"
 import {
   Sidebar,
   SidebarContent,
@@ -103,6 +105,12 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        
+        {!collapsed && (role === "admin_full" || role === "standard_user") && (
+          <div className="mt-auto mb-4 px-4 flex justify-center">
+            <Lottie animationData={aiAnimationData} loop={true} className="w-full max-w-[120px]" />
+          </div>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-3">
