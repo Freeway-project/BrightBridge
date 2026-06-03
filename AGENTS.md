@@ -21,7 +21,7 @@ Do not build large features without explicit instruction. Work in small, focused
 - shadcn/ui
 - Supabase Postgres/Auth/Realtime
 - Cloudflare R2 for storage
-- Vercel deployment
+- Self-hosted Ubuntu VM + PM2 (`scripts/deploy.sh`)
 
 ## Coding Guidelines
 

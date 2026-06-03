@@ -142,14 +142,19 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                 </>
               )}
               <Button
-                variant={owner === "TA" ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 asChild
-                className="!text-black"
+                className={cn(
+                  "border-transparent font-bold transition-all duration-300",
+                  owner === "TA"
+                    ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:brightness-110 shadow-[0_0_15px_rgba(236,72,153,0.3)]"
+                    : "bg-gradient-to-r from-secondary/80 to-accent text-foreground hover:from-secondary hover:to-accent/80 hover:shadow-md"
+                )}
               >
                 <Link href={`/courses/${course.id}/metadata`}>
                   {owner === "TA" ? "Continue Review" : "View Progress"}
-                  <ArrowRight className={cn("ml-2 size-4 transition-transform group-hover/card:translate-x-1")} />
+                  <ArrowRight className="ml-2 size-4 transition-transform group-hover/card:translate-x-1" />
                 </Link>
               </Button>
             </div>

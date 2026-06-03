@@ -46,7 +46,7 @@ Course Created
 - Auth: Supabase Auth
 - Realtime: Supabase Realtime
 - Storage: Cloudflare R2
-- Hosting: Vercel
+- Hosting: Self-hosted Ubuntu VM + PM2 (`scripts/deploy.sh`)
 - PDF export: Later, likely Next.js route first, separate worker later
 - Notifications: In-app first, browser push later
 
