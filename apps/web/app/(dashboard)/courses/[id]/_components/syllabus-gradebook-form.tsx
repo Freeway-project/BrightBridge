@@ -1,10 +1,11 @@
+import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
 
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { CheckCircle2, Loader2, ArrowRight } from "lucide-react"
+import { CheckCircle2, ArrowRight } from "lucide-react"
 import { saveDraft } from "@/lib/workspace/actions"
 import {
   syllabusGradebookSchema,
@@ -276,7 +277,7 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
           className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {isPending ? (
-            <><Loader2 className="size-4 animate-spin" /> Saving…</>
+            <><LottieLoader className="size-4 " /> Saving…</>
           ) : (
             <>
               Save & Next
@@ -325,7 +326,7 @@ function SaveBadge({ isPending, status }: { isPending: boolean; status: "idle" |
   if (isPending || status === "saving")
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground">
-        <Loader2 className="size-3 animate-spin" /> Saving…
+        <LottieLoader className="size-3 " /> Saving…
       </span>
     )
   if (status === "saved")

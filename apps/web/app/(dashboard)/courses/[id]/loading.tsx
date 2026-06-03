@@ -1,8 +1,7 @@
+import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
 
 import { motion } from "framer-motion"
-import { Loader2 } from "lucide-react"
-
 export default function InternalWorkspaceLoading() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center min-h-[400px]">
@@ -17,7 +16,7 @@ export default function InternalWorkspaceLoading() {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
-          <Loader2 className="size-5 text-primary/40 animate-pulse" />
+          <LottieLoader className="size-5 text-primary/40 animate-pulse" />
         </div>
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
           Syncing...

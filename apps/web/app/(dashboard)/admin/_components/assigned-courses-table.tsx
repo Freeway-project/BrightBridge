@@ -1,3 +1,4 @@
+import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
 
 import { useEffect, useMemo, useState, useTransition } from "react"
@@ -26,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Search, SlidersHorizontal, CheckCircle2, Circle, Loader2, Send } from "lucide-react"
+import { Search, SlidersHorizontal, CheckCircle2, Circle, Send } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { batchApproveToStagingAction } from "../actions"
@@ -267,7 +268,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </p>
           {isPending ? (
             <span className="inline-flex items-center gap-1.5">
-              <Loader2 className="size-3 animate-spin" />
+              <LottieLoader className="size-3 " />
               Searching…
             </span>
           ) : null}
@@ -513,11 +514,11 @@ function PhasePill({ label, state }: { label: string; state: PhaseState }) {
     idle:   "bg-muted text-muted-foreground border-border",
   }[state]
 
-  const Icon = state === "done" ? CheckCircle2 : state === "active" ? Loader2 : Circle
+  const Icon = state === "done" ? CheckCircle2 : state === "active" ? LottieLoader : Circle
 
   return (
     <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5", styles)}>
-      <Icon className={cn("size-2.5 shrink-0", state === "active" && "animate-spin")} />
+      <Icon className={cn("size-2.5 shrink-0", state === "active" && "")} />
       <span className="text-[10px] font-medium">{label}</span>
     </div>
   )

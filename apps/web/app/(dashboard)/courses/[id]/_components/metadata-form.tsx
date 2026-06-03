@@ -1,3 +1,4 @@
+import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
 
 import { useEffect, useState } from "react"
@@ -21,7 +22,7 @@ import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, Loader2, ArrowRight } from "lucide-react"
+import { CheckCircle2, ArrowRight } from "lucide-react"
 
 type MetadataFormProps = {
   course: CourseRow
@@ -266,7 +267,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
           className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {status === "saving" ? (
-            <><Loader2 className="size-4 animate-spin" /> Saving…</>
+            <><LottieLoader className="size-4 " /> Saving…</>
           ) : (
             <>
               Save & Next
@@ -338,7 +339,7 @@ function SaveBadge({ status }: { status: "idle" | "saving" | "saved" | "error" }
   if (status === "saving")
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground">
-        <Loader2 className="size-3 animate-spin" /> Saving…
+        <LottieLoader className="size-3 " /> Saving…
       </span>
     )
   if (status === "saved")

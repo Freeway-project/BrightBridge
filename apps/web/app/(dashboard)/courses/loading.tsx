@@ -1,8 +1,7 @@
+import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
 
 import { motion } from "framer-motion"
-import { Loader2 } from "lucide-react"
-
 export default function CourseWorkspaceLoading() {
   return (
     <div className="flex h-[calc(100vh-4rem)] w-full flex-col items-center justify-center bg-background/50 backdrop-blur-sm">
@@ -32,7 +31,7 @@ export default function CourseWorkspaceLoading() {
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
           {/* Center spinner */}
-          <Loader2 className="relative z-10 size-8 text-primary animate-spin" />
+          <LottieLoader className="relative z-10 size-8 text-primary " />
         </div>
         
         <div className="space-y-3 text-center">

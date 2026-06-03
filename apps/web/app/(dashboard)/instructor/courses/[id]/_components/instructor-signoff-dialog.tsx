@@ -1,7 +1,8 @@
+import { LottieLoader } from "@/components/ui/lottie-loader"
 "use client"
 
 import { useEffect, useState, useTransition } from "react"
-import { CheckCircle2, ClipboardList, Loader2, ShieldCheck } from "lucide-react"
+import { CheckCircle2, ClipboardList, ShieldCheck } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -99,7 +100,7 @@ export function InstructorSignOffDialog({ courseId, finalSummary, open, onOpenCh
               <p className="text-sm text-destructive">{loadError}</p>
             ) : !issues ? (
               <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
-                <Loader2 className="size-4 animate-spin" /> Loading open items…
+                <LottieLoader className="size-4 " /> Loading open items…
               </p>
             ) : issues.length === 0 ? (
               <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
