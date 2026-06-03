@@ -17,8 +17,8 @@ Example:
 ```ts
 {
   from: "submitted_to_admin",
-  to: "ready_for_instructor",
-  roles: ["admin", "super_admin"]
+  to: "waiting_on_admin",
+  roles: ["admin_full", "super_admin"]
 }
 ```
 
@@ -26,18 +26,26 @@ This means:
 
 ```text
 If a course is currently submitted_to_admin,
-only admin or super_admin can move it to ready_for_instructor.
+only admin_full or super_admin can move it to waiting_on_admin (approve the
+review and start building the staging shell).
 ```
 
 ## Current Main Flow
+
+Admin approval moves the course into the **staging-shell** steps
+(`waiting_on_admin` → `staging_in_progress`) before it can be sent to the
+instructor — it does not jump straight to `ready_for_instructor`.
 
 ```text
 course_created
 → assigned_to_ta
 → ta_review_in_progress
 → submitted_to_admin
-→ ready_for_instructor
+→ waiting_on_admin        (admin approves review)
+→ staging_in_progress     (staff finalizes staging)
+→ ready_for_instructor    (staff marks staging complete)
 → sent_to_instructor
+→ instructor_viewing      (auto-set when invite link opened)
 → instructor_approved
 → final_approved
 ```
@@ -67,9 +75,9 @@ Answers whether a transition is allowed.
 
 ```ts
 canTransition({
-  role: "admin",
+  role: "admin_full",
   from: "submitted_to_admin",
-  to: "ready_for_instructor"
+  to: "waiting_on_admin"
 });
 ```
 
@@ -77,13 +85,15 @@ Returns `true`.
 
 ```ts
 canTransition({
-  role: "ta",
+  role: "standard_user",
   from: "submitted_to_admin",
-  to: "ready_for_instructor"
+  to: "waiting_on_admin"
 });
 ```
 
-Returns `false`.
+Returns `false`. (Role keys are the profile roles from `transitions.ts`:
+`super_admin`, `admin_full`, `admin_viewer`, `standard_user`, `instructor` —
+`standard_user` is the reviewing staff member, labeled "TA" in the UI.)
 
 ### `getAllowedTransitions`
 
@@ -91,7 +101,7 @@ Returns the next statuses a role can move a course to from the current status.
 
 ```ts
 getAllowedTransitions({
-  role: "admin",
+  role: "admin_full",
   from: "submitted_to_admin"
 });
 ```
@@ -99,7 +109,7 @@ getAllowedTransitions({
 Returns:
 
 ```ts
-["admin_changes_requested", "ready_for_instructor"]
+["admin_changes_requested", "waiting_on_admin"]
 ```
 
 ### `assertCanTransition`

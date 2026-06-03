@@ -28,11 +28,18 @@ Course Created
 → TA completes metadata, review matrix, syllabus, and gradebook review
 → TA submits to Admin
 → Admin approves or requests fixes
-→ Approved course moves to Communication Department
-→ Communication Department sends to Instructor
-→ Instructor reviews, asks questions, or approves
+→ On approval, Admin builds the staging shell (Waiting on Admin → Staging in Process)
+→ Staff finalizes staging and marks it Ready for Instructor
+→ Admin/Comms sends to Instructor
+→ Instructor reviews (auto-tracked when they open the link), asks questions, or approves
 → Issues/questions are resolved
-→ Course becomes Final Approved / Ready for Staging
+→ Admin grants Final Approval
+
+> The enforced flow is the transition graph in
+> `packages/workflow/src/transitions.ts`; status list + phase grouping in
+> `packages/workflow/src/statuses.ts`. `docs/workflow.md` documents it in full,
+> including the role-terminology note (`standard_user` = profile role, `staff` =
+> assignment role, "TA" = UI copy — all the same reviewing person).
 
 ## Initial Tech Stack
 

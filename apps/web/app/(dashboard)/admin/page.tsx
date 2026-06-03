@@ -59,7 +59,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   ])
 
   // ---- Workflow board data (All Courses tab) -----------------------------
-  // ~6 columns grouping the 12 statuses into the key workflow steps. Counts
+  // Columns group the 13 statuses into the key workflow steps. Counts
   // come from the (cheap) status-count aggregate; cards are a recent slice per
   // status, capped per column — the List view handles full browsing/search.
   const BOARD_COLUMNS: { key: string; label: string; phase: PipelineStage; statuses: CourseStatus[] }[] = [
@@ -67,7 +67,10 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     { key: "submitted", label: "Submitted to Admin", phase: "staging", statuses: ["submitted_to_admin", "admin_changes_requested"] },
     { key: "building", label: "Waiting on Admin", phase: "staging", statuses: ["waiting_on_admin"] },
     { key: "finalizing", label: "Staging in Process", phase: "staging", statuses: ["staging_in_progress"] },
-    { key: "instructor", label: "Ready / With Instructor", phase: "staging", statuses: ["ready_for_instructor", "sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved"] },
+    // Split to mirror the staff dashboard's WORKFLOW_PHASES groups
+    // (ready_to_send vs with_instructor) so both boards read the same.
+    { key: "ready_to_send", label: "Ready to Send", phase: "staging", statuses: ["ready_for_instructor"] },
+    { key: "with_instructor", label: "With Instructor", phase: "staging", statuses: ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved"] },
     { key: "provision", label: "Provision", phase: "provision", statuses: ["final_approved"] },
   ]
   const countByStatus = new Map<CourseStatus, number>(overviewData.statusCounts.map((s) => [s.status, s.count]))
