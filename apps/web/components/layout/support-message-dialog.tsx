@@ -50,7 +50,11 @@ export function SupportMessageDialog({ collapsed }: SupportMessageDialogProps) {
         return;
       }
 
-      toast.success(result.message);
+      toast.warning(result.message, {
+        icon: <Zap className="size-4 text-amber-500" />,
+        className:
+          "border-amber-400/40 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200",
+      });
       setOpen(false);
     });
   }

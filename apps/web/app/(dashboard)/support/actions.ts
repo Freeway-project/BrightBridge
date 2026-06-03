@@ -36,6 +36,6 @@ export async function pokeItSupportAction(): Promise<SupportActionState> {
 
   return {
     kind: "success",
-    message: "IT support was poked. Super Admin has been notified.",
+    message: "IT support was poked. Harsh has been notified.",
   };
 }
