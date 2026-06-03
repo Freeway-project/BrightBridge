@@ -622,6 +622,54 @@ export function createSupabaseCourseRepository(): CourseRepository {
       });
     },
 
+    async listCourseStatusEvents(courseId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("course_status_events")
+        .select(`
+          id, from_status, to_status, note, created_at, actor_role,
+          courses ( id, title ),
+          profiles!course_status_events_actor_id_fkey ( full_name, email )
+        `)
+        .eq("course_id", courseId)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        throw new Error(`course status events: ${error.message}`);
+      }
+
+      return (data ?? []).map((row) => {
+        const event = row as unknown as {
+          id: string;
+          from_status: string | null;
+          to_status: string;
+          note: string | null;
+          created_at: string;
+          actor_role: string;
+          courses?: { id: string; title: string } | Array<{ id: string; title: string }> | null;
+          profiles?:
+            | { full_name: string | null; email: string }
+            | Array<{ full_name: string | null; email: string }>
+            | null;
+        };
+        const relatedCourse = firstRelation(event.courses);
+        const actorProfile = firstRelation(event.profiles);
+
+        return {
+          id: event.id,
+          course_id: relatedCourse?.id ?? courseId,
+          course_title: relatedCourse?.title ?? "—",
+          from_status: event.from_status,
+          to_status: event.to_status,
+          actor_name: actorProfile?.full_name ?? null,
+          actor_email: actorProfile?.email ?? "",
+          actor_role: event.actor_role,
+          note: event.note,
+          created_at: event.created_at,
+        } satisfies AuditEvent;
+      });
+    },
+
     async listSubmissionHistory(courseId) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin

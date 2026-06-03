@@ -10,6 +10,8 @@ import { InstructorCourseActions } from "./_components/instructor-course-actions
 import { InstructorReviewDetail } from "./_components/instructor-review-detail"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
+import { getCourseTimeline } from "@/lib/courses/timeline"
+import { CourseTimeline } from "@/components/courses/course-timeline"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -27,9 +29,10 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
   const assignedCourse = await getCourseRepository().getAssignedCourseById(id, context.profile.id, "instructor")
   if (!assignedCourse) notFound()
 
-  const [detail, sharedComments] = await Promise.all([
+  const [detail, sharedComments, timeline] = await Promise.all([
     getAdminCourseDetail(id),
     getSharedComments(id),
+    getCourseTimeline(id, { includeInternalComments: false }),
   ])
   if (!detail) notFound()
 
@@ -51,6 +54,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               <TabsTrigger value="review" className="text-base">Review</TabsTrigger>
               <TabsTrigger value="questions" className="text-base">Questions</TabsTrigger>
               <TabsTrigger value="discussion" className="text-base">Discussion</TabsTrigger>
+              <TabsTrigger value="timeline" className="text-base">Timeline</TabsTrigger>
             </TabsList>
             <InstructorCourseActions courseId={id} status={course.status} finalSummary={course.instructorSummaryNotes} />
           </div>
@@ -117,6 +121,11 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               comments={sharedComments}
               currentUserId={context.userId}
             />
+          </TabsContent>
+
+          {/* Timeline — full course history (internal comments hidden) */}
+          <TabsContent value="timeline" className="flex-1 overflow-hidden p-6">
+            <CourseTimeline items={timeline} />
           </TabsContent>
         </StickyTabs>
       </main>
