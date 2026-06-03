@@ -268,7 +268,7 @@ role IN ('admin_full', 'super_admin')
 
 ```bash
 1. Merge ft-issue-tracker into main
-2. Vercel automatically deploys
+2. Deploy on the VPS: `bash scripts/deploy.sh` (pull main, build, PM2 reload)
 3. Supabase automatically runs migrations in order:
    - 20260511000000_create_course_issues.sql
    - 20260511000001_migrate_escalations_to_issues.sql
@@ -306,7 +306,7 @@ WHERE NOT EXISTS (SELECT 1 FROM course_issues WHERE id = c.issue_id);
 ### Monitoring (First Week)
 
 - **Supabase Realtime:** Check connection count, message latency
-- **Vercel Analytics:** Monitor API response times (should be <200ms)
+- **PM2 / server logs:** Monitor API response times (should be <200ms)
 - **Error Logs:** Watch for RLS policy rejections (`ERROR 42501`)
 - **User Feedback:** Any reports of missing issues or access denied?
 
@@ -319,7 +319,7 @@ WHERE NOT EXISTS (SELECT 1 FROM course_issues WHERE id = c.issue_id);
 **Option A: Migrate Back to Main**
 ```bash
 git revert <commit-hash-of-merge>
-vercel --prod deploy  # Redeploy main
+bash scripts/deploy.sh  # Rebuild & PM2-reload main on the VPS
 ```
 - Supabase migrations are NOT rolled back
 - New tables remain (data not deleted)
@@ -405,7 +405,7 @@ DELETE FROM course_issues WHERE legacy_escalation_id IS NOT NULL;
 # From main branch
 git merge ft-issue-tracker
 git push origin main
-# → Vercel auto-deploys
+# → VPS deploy: bash scripts/deploy.sh (pull, build, PM2 reload)
 # → Supabase auto-runs migrations
 ```
 

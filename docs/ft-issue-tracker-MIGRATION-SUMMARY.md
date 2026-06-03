@@ -185,7 +185,7 @@ id, issue_id, author_id, body, is_system_message, created_at, updated_at
 
 1. Merge `ft-issue-tracker` into `main`
 2. Verify TypeScript: `npm run tsc --filter web`
-3. Deploy to Vercel (automatic on merge)
+3. Deploy to the VPS: `bash scripts/deploy.sh` (or auto-deploy on merge to main)
 4. Verify Supabase realtime channels are active
 5. Test notification flow with 2+ users
 6. Monitor error boundary and hydration logs for 24h

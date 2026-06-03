@@ -1,6 +1,6 @@
 # Pre-Merge Checklist for ft-issue-tracker → main
 
-**What to Run BEFORE Merge (Except Vercel)**
+**What to Run BEFORE Merge**
 
 ---
 
@@ -326,9 +326,9 @@ WHERE tablename IN ('course_issues', 'course_issue_comments', 'issue_comment_men
 ```
 1. git merge ft-issue-tracker → main
 2. Push to GitHub
-3. Vercel auto-detects push to main
-4. Vercel runs: npm run build
-5. Vercel deploys to production
+3. On the VPS: bash scripts/deploy.sh
+4. deploy.sh runs: npm run build
+5. PM2 zero-downtime reload to production
 6. Next.js app starts with new code
 7. App connects to DB (migrations already run)
 8. Issue tracker UI becomes available
@@ -347,7 +347,7 @@ WHERE tablename IN ('course_issues', 'course_issue_comments', 'issue_comment_men
 | **2. Run Migration 2** | Now (before merge) | 5 min |
 | **3. Verify Queries** | Now (before merge) | 2 min |
 | **4. Merge to main** | After DB ready | Immediate |
-| **5. Vercel deploys** | Auto, after push | 5 min |
+| **5. VPS deploy** | `bash scripts/deploy.sh` | 5 min |
 | **6. Test in prod** | After deploy | 5 min |
 | **Total** | | ~20 min |
 
