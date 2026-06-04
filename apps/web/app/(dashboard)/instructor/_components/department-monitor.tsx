@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Building2, Search } from "lucide-react"
+import Link from "next/link"
+import { Building2, ChevronRight, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { StatCard } from "@/components/shared/stat-card"
@@ -71,18 +72,22 @@ export function DepartmentMonitor({ courses }: Props) {
       ) : (
         <div className="space-y-2">
           {filtered.map((course) => (
-            <div
+            <Link
               key={course.id}
-              className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50"
+              href={`/instructor/courses/${course.id}`}
+              className="group flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 transition-colors hover:bg-muted hover:border-primary/30"
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate">{course.title}</p>
+                <p className="text-sm font-medium truncate group-hover:text-foreground">{course.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {[course.department, course.term].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              <StatusBadge status={course.status} className="ml-4 shrink-0" />
-            </div>
+              <div className="ml-4 flex shrink-0 items-center gap-2">
+                <StatusBadge status={course.status} />
+                <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </div>
+            </Link>
           ))}
         </div>
       )}

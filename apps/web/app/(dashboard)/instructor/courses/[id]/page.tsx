@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation"
+import { Eye } from "lucide-react"
 import { Topbar } from "@/components/layout/topbar"
 import { requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
-import { getCourseRepository } from "@/lib/repositories"
+import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StickyTabs } from "@/components/ui/sticky-tabs"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
@@ -27,9 +28,18 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
     notFound()
   }
 
-  // Verify instructor is assigned to this course
+  // Assigned instructors get the full workspace. Deans / dept-heads (leadership
+  // titles in the org hierarchy) and super admins get a read-only view of any
+  // course in their department tree.
   const assignedCourse = await getCourseRepository().getAssignedCourseById(id, context.profile.id, "instructor")
-  if (!assignedCourse) notFound()
+  const canViewViaHierarchy =
+    !assignedCourse &&
+    (context.profile.role === "super_admin" ||
+      (await getHierarchyRepository().hasHierarchyAccess(context.profile.id, id)))
+  if (!assignedCourse && !canViewViaHierarchy) notFound()
+
+  // Read-only when the viewer is not the assigned instructor.
+  const readOnly = !assignedCourse
 
   const [detail, sharedComments, timeline, myCourses] = await Promise.all([
     getAdminCourseDetail(id),
@@ -70,7 +80,14 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               <TabsTrigger value="discussion" className="text-base">Discussion</TabsTrigger>
               <TabsTrigger value="timeline" className="text-base">Timeline</TabsTrigger>
             </TabsList>
-            <InstructorCourseActions courseId={id} status={course.status} finalSummary={course.instructorSummaryNotes} />
+            {readOnly ? (
+              <span className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                <Eye className="size-3.5" aria-hidden />
+                Department view — read only
+              </span>
+            ) : (
+              <InstructorCourseActions courseId={id} status={course.status} finalSummary={course.instructorSummaryNotes} />
+            )}
           </div>
 
           {/* Overview — clean course info only */}
@@ -134,6 +151,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               courseId={id}
               comments={sharedComments}
               currentUserId={context.userId}
+              canPost={!readOnly}
             />
           </TabsContent>
 
