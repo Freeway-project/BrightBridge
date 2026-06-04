@@ -7,6 +7,7 @@ import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StickyTabs } from "@/components/ui/sticky-tabs"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
 import { InstructorCourseActions } from "./_components/instructor-course-actions"
+import { CourseSwitcher } from "./_components/course-switcher"
 import { InstructorReviewDetail } from "./_components/instructor-review-detail"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
@@ -29,10 +30,11 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
   const assignedCourse = await getCourseRepository().getAssignedCourseById(id, context.profile.id, "instructor")
   if (!assignedCourse) notFound()
 
-  const [detail, sharedComments, timeline] = await Promise.all([
+  const [detail, sharedComments, timeline, myCourses] = await Promise.all([
     getAdminCourseDetail(id),
     getSharedComments(id),
     getCourseTimeline(id, { includeInternalComments: false }),
+    getCourseRepository().listInstructorCourses(context.profile.id),
   ])
   if (!detail) notFound()
 
@@ -45,6 +47,12 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
         subtitle={course.sourceCourseId ?? undefined}
         backHref="/instructor"
         role={context.profile.role}
+        actions={
+          <CourseSwitcher
+            currentId={id}
+            courses={myCourses.map((c) => ({ id: c.id, title: c.title, status: c.status }))}
+          />
+        }
       />
       <main className="flex-1 flex overflow-hidden bg-background">
         <StickyTabs storageKey={`instructor-course-${id}`} defaultValue="overview" className="flex-1 flex flex-col overflow-hidden w-full">
