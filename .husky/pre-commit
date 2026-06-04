@@ -1,1 +1,13 @@
-npm run db:backup:prod
+# Optional production DB backup before committing.
+#
+# This is OFF by default: a local commit never changes production, so dumping
+# prod on every commit just burns egress (prod egress is currently exhausted —
+# see PROD_SUPABASE_SWITCH_RUNBOOK.md) and slows every commit.
+#
+# To take a prod backup as part of a commit, opt in for that commit:
+#   BACKUP_ON_COMMIT=1 git commit ...
+# Or run it directly any time:
+#   npm run db:backup:prod
+if [ "${BACKUP_ON_COMMIT:-0}" = "1" ]; then
+  npm run db:backup:prod
+fi
