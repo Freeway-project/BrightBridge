@@ -21,6 +21,7 @@ export type {
   PaginatedResult,
 } from "@/lib/repositories/contracts"
 import type { Role } from "@coursebridge/workflow"
+import type { RawOrgNode } from "@/components/ui/org-chart"
 
 export type UserRow = {
   id: string
@@ -83,6 +84,46 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
     units,
     members,
   }
+}
+
+// Pretty labels for org_unit_members.title values.
+const TITLE_LABELS: Record<string, string> = {
+  vp: "VP",
+  dean: "Dean",
+  associate_dean: "Associate Dean",
+  assistant_dean: "Assistant Dean",
+  dept_head: "Department Head",
+  educator: "Educator",
+  admin: "Admin",
+  staff: "Staff",
+}
+
+/**
+ * Flattens the org hierarchy (units + members, with names resolved from users)
+ * into the flat RawOrgNode[] the OrgChart component renders. Reuses the data
+ * already fetched by getSuperAdminData — no extra query.
+ */
+export function toOrgChartNodes(
+  data: Pick<SuperAdminData, "units" | "members" | "users">,
+): RawOrgNode[] {
+  const nameById = new Map(data.users.map((u) => [u.id, u.full_name?.trim() || u.email]))
+
+  const unitNodes: RawOrgNode[] = data.units.map((u) => ({
+    id: u.id,
+    parentId: u.parentId,
+    label: u.name,
+    type: "unit",
+  }))
+
+  const memberNodes: RawOrgNode[] = data.members.map((m) => ({
+    id: m.id,
+    parentId: m.orgUnitId,
+    label: nameById.get(m.profileId) ?? "Unknown",
+    type: "member",
+    title: TITLE_LABELS[m.title] ?? m.title,
+  }))
+
+  return [...unitNodes, ...memberNodes]
 }
 
 export async function getPaginatedSuperAdminCourses(page: number, pageSize: number, search: string): Promise<PaginatedResult<CourseRow>> {

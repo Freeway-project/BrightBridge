@@ -1,6 +1,6 @@
 import { Topbar } from "@/components/layout/topbar"
 import { OverviewView } from "@/components/super-admin/overview-view"
-import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount } from "@/lib/super-admin/queries"
+import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount, toOrgChartNodes } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
 import { TweakableContent } from "@/components/shared/tweakable-content"
@@ -8,6 +8,7 @@ import { SuperAdminTabs } from "./_components/super-admin-tabs"
 import { CoursesView } from "@/components/super-admin/courses-view"
 import { UsersView } from "@/components/super-admin/users-view"
 import { OrganizationView } from "@/components/super-admin/organization-view"
+import { HierarchyChart } from "@/components/super-admin/hierarchy-chart"
 import { AuditView } from "@/components/super-admin/audit-view"
 import { MigrationPanel } from "../admin/_components/migration-panel"
 import { AdminAssignmentPanel } from "../admin/_components/admin-assignment-panel"
@@ -83,6 +84,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
             organizationPanel={<OrganizationView data={data} />}
+            hierarchyPanel={<HierarchyChart nodes={toOrgChartNodes(data)} />}
             auditPanel={<AuditView data={data} />}
             analyticsPanel={<AnalyticsView />}
           />
