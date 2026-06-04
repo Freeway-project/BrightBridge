@@ -21,7 +21,6 @@ export type {
   PaginatedResult,
 } from "@/lib/repositories/contracts"
 import type { Role } from "@coursebridge/workflow"
-import type { RawOrgNode } from "@/components/ui/org-chart"
 
 export type UserRow = {
   id: string
@@ -98,32 +97,79 @@ const TITLE_LABELS: Record<string, string> = {
   staff: "Staff",
 }
 
+// A PrimeReact OrganizationChart node (the extra `data` payload drives our
+// custom nodeTemplate). Kept structurally compatible with primereact's TreeNode.
+export type OrgTreeNode = {
+  key: string
+  label: string
+  expanded?: boolean
+  data: {
+    kind: "unit" | "member"
+    id: string
+    name: string
+    unitType?: string
+    title?: string
+  }
+  children?: OrgTreeNode[]
+}
+
+// Units at depth < EXPAND_DEPTH render expanded; deeper levels start collapsed
+// so the chart opens on the root and the user drills down.
+const EXPAND_DEPTH = 1
+
 /**
- * Flattens the org hierarchy (units + members, with names resolved from users)
- * into the flat RawOrgNode[] the OrgChart component renders. Reuses the data
- * already fetched by getSuperAdminData — no extra query.
+ * Builds the nested org tree (units, with leadership members as child nodes)
+ * that PrimeReact's OrganizationChart renders. Reuses the units/members/users
+ * already fetched by getSuperAdminData — no extra query. Names resolve from
+ * users; titles are pretty-printed.
  */
-export function toOrgChartNodes(
+export function buildOrgTree(
   data: Pick<SuperAdminData, "units" | "members" | "users">,
-): RawOrgNode[] {
+): OrgTreeNode[] {
   const nameById = new Map(data.users.map((u) => [u.id, u.full_name?.trim() || u.email]))
 
-  const unitNodes: RawOrgNode[] = data.units.map((u) => ({
-    id: u.id,
-    parentId: u.parentId,
-    label: u.name,
-    type: "unit",
-  }))
+  const unitsByParent = new Map<string | null, typeof data.units>()
+  for (const u of data.units) {
+    const arr = unitsByParent.get(u.parentId) ?? []
+    arr.push(u)
+    unitsByParent.set(u.parentId, arr)
+  }
 
-  const memberNodes: RawOrgNode[] = data.members.map((m) => ({
-    id: m.id,
-    parentId: m.orgUnitId,
-    label: nameById.get(m.profileId) ?? "Unknown",
-    type: "member",
-    title: TITLE_LABELS[m.title] ?? m.title,
-  }))
+  const membersByUnit = new Map<string, typeof data.members>()
+  for (const m of data.members) {
+    const arr = membersByUnit.get(m.orgUnitId) ?? []
+    arr.push(m)
+    membersByUnit.set(m.orgUnitId, arr)
+  }
 
-  return [...unitNodes, ...memberNodes]
+  const buildUnit = (u: (typeof data.units)[number], depth: number): OrgTreeNode => {
+    const childUnits = (unitsByParent.get(u.id) ?? [])
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((c) => buildUnit(c, depth + 1))
+
+    const memberNodes: OrgTreeNode[] = (membersByUnit.get(u.id) ?? []).map((m) => {
+      const name = nameById.get(m.profileId) ?? "Unknown"
+      return {
+        key: m.id,
+        label: name,
+        data: { kind: "member", id: m.id, name, title: TITLE_LABELS[m.title] ?? m.title },
+      }
+    })
+
+    return {
+      key: u.id,
+      label: u.name,
+      expanded: depth < EXPAND_DEPTH,
+      data: { kind: "unit", id: u.id, name: u.name, unitType: u.type },
+      children: [...childUnits, ...memberNodes],
+    }
+  }
+
+  return (unitsByParent.get(null) ?? [])
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((root) => buildUnit(root, 0))
 }
 
 export async function getPaginatedSuperAdminCourses(page: number, pageSize: number, search: string): Promise<PaginatedResult<CourseRow>> {

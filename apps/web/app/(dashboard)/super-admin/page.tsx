@@ -1,6 +1,6 @@
 import { Topbar } from "@/components/layout/topbar"
 import { OverviewView } from "@/components/super-admin/overview-view"
-import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount, toOrgChartNodes } from "@/lib/super-admin/queries"
+import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount, buildOrgTree } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
 import { TweakableContent } from "@/components/shared/tweakable-content"
@@ -84,7 +84,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
             organizationPanel={<OrganizationView data={data} />}
-            hierarchyPanel={<HierarchyChart nodes={toOrgChartNodes(data)} />}
+            hierarchyPanel={<HierarchyChart tree={buildOrgTree(data)} />}
             auditPanel={<AuditView data={data} />}
             analyticsPanel={<AnalyticsView />}
           />
