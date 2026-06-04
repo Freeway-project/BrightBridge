@@ -13,7 +13,7 @@ import { getCourseRepository, getProfileRepository, getReviewRepository, getHier
 import type { CourseSummary, ReviewProgress, SectionProgress, CourseAssignmentRecord, InstructorCourse } from "@/lib/repositories/contracts";
 
 const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
-const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
+const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin", "provost"];
 
 export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse, SubmissionEvent } from "@/lib/repositories/contracts";
 

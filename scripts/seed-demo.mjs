@@ -60,6 +60,7 @@ const STEP_ACTOR = {
 // ── 1. Accounts ───────────────────────────────────────────────────────────────
 const ACCOUNTS = [
   { key: "superadmin", email: "superadmin@coursebridge.dev", fullName: "Dev Super Admin", role: "super_admin" },
+  { key: "provost", email: "provost@coursebridge.dev", fullName: "Dr. Pat Provost", role: "provost" },
   { key: "admin", email: "admin@coursebridge.dev", fullName: "Dev Admin", role: "admin_full" },
   { key: "ta", email: "ta@coursebridge.dev", fullName: "Dev TA", role: "standard_user" },
   { key: "comms", email: "communications@coursebridge.dev", fullName: "Dev Communications", role: "admin_viewer" },
@@ -197,6 +198,7 @@ log("    instructor@coursebridge.dev  → Simple/Full view, wizard, course switc
 log("    depthead@coursebridge.dev    → dept-head drill-in (Computer Science: 5 courses, read-only)");
 log("    dean@coursebridge.dev        → dean drill-in (whole college: 7 courses, read-only)");
 log("    associate-dean@coursebridge.dev → school-level member (per-course read-only access)");
+  log("    provost@coursebridge.dev     -> all colleges/courses + org-chart management");
 log("    admin@ / ta@ / communications@ / superadmin@  → their normal dashboards");
 
 // ── helpers ────────────────────────────────────────────────────────────────────
