@@ -23,6 +23,21 @@ export const STAFF_ACTIONABLE_COURSE_STATUSES = [
   "staging_in_progress",
 ] as const satisfies readonly CourseStatus[];
 
+/**
+ * The statuses where the assigned instructor can still act on the course —
+ * i.e. ask the TA a question or sign off. Once they have responded
+ * (`instructor_questions` / `instructor_approved`) or the course has not yet
+ * reached them, there is no instructor action to offer.
+ */
+export const INSTRUCTOR_ACTIONABLE_COURSE_STATUSES = [
+  "sent_to_instructor",
+  "instructor_viewing",
+] as const satisfies readonly CourseStatus[];
+
+export function isInstructorActionableStatus(status: CourseStatus): boolean {
+  return (INSTRUCTOR_ACTIONABLE_COURSE_STATUSES as readonly CourseStatus[]).includes(status);
+}
+
 export const COURSE_STATUS_LABELS: Record<CourseStatus, string> = {
   course_created: "Course Created",
   assigned_to_ta: "Assigned to TA",
