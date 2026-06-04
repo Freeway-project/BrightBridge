@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { StatusBadge } from "@/components/courses/status-badge"
+import { cn } from "@/lib/utils"
 
 export type SwitcherCourse = {
   id: string
@@ -26,9 +27,11 @@ export type SwitcherCourse = {
 export function CourseSwitcher({
   currentId,
   courses,
+  className,
 }: {
   currentId: string
   courses: SwitcherCourse[]
+  className?: string
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -46,7 +49,7 @@ export function CourseSwitcher({
     >
       <SelectTrigger
         aria-label="Switch to another course"
-        className="h-8 max-w-[220px] gap-2 text-sm"
+        className={cn("h-8 max-w-[220px] gap-2 text-sm", className)}
         data-pending={isPending ? "" : undefined}
       >
         <Layers className="size-4 shrink-0 text-muted-foreground" aria-hidden />
