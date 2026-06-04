@@ -900,19 +900,29 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
     async listCoursesByUnitAncestry(unitIds) {
       const admin = getSupabaseAdminClientOrThrow();
-      
-      // We join through the org_unit_hierarchy_paths view
+      if (!unitIds.length) return [];
+
+      // org_unit_hierarchy_paths is a recursive VIEW, so PostgREST cannot embed
+      // it through a foreign key. Resolve the descendant units in one query,
+      // then fetch the courses that live in any of them.
+      const { data: paths, error: pathErr } = await admin
+        .from("org_unit_hierarchy_paths")
+        .select("descendant_id")
+        .in("ancestor_id", unitIds);
+
+      if (pathErr) {
+        throw new Error(`listCoursesByUnitAncestry (paths): ${pathErr.message}`);
+      }
+
+      const descendantIds = [...new Set((paths ?? []).map((p) => p.descendant_id))];
+      if (!descendantIds.length) return [];
+
       const { data, error } = await admin
         .from("courses")
-        .select(`
-          id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,
-          organizational_units!courses_org_unit_id_fkey!inner (
-            org_unit_hierarchy_paths!org_unit_hierarchy_paths_descendant_id_fkey!inner (
-              ancestor_id
-            )
-          )
-        `)
-        .in("organizational_units.org_unit_hierarchy_paths.ancestor_id", unitIds)
+        .select(
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
+        )
+        .in("org_unit_id", descendantIds)
         .order("updated_at", { ascending: false });
 
       if (error) {
