@@ -46,11 +46,18 @@ export async function instructorRaiseQuestionAction(
     owner_id: taId ?? undefined,
   })
 
-  await transitionCourseStatus({
-    courseId,
-    toStatus: "instructor_questions",
-    note: `Instructor question: ${questionTitle.trim()}`,
-  })
+  // createIssueAction already auto-advances sent_to_instructor → instructor_questions.
+  // Only move it ourselves when it hasn't (e.g. the instructor had already opened the
+  // course, so it sits in instructor_viewing). Transitioning to the status it is
+  // already in is an illegal self-transition that would throw and 500 the request.
+  const current = await getCourseRepository().getCourseSummaryById(courseId)
+  if (current.status !== "instructor_questions") {
+    await transitionCourseStatus({
+      courseId,
+      toStatus: "instructor_questions",
+      note: `Instructor question: ${questionTitle.trim()}`,
+    })
+  }
 
   revalidateInstructorCourse(courseId)
 }
