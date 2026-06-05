@@ -32,6 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { WORKFLOW_PHASES, getPipelineStage, COURSE_STATUS_LABELS } from "@coursebridge/workflow"
 import type { CourseStatus, PipelineStage } from "@coursebridge/workflow"
 import { batchApproveToStagingAction } from "../actions"
+import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
 import { toast } from "sonner"
 
 type Props = {
@@ -48,6 +49,8 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isBatchPending, startBatchTransition] = useTransition()
+  const [reassignTargets, setReassignTargets] = useState<ReassignTarget[]>([])
+  const [reassignOpen, setReassignOpen] = useState(false)
 
   const search = searchParams.get("search") ?? ""
   const statusFilter = searchParams.get("status") ?? "all"
@@ -121,6 +124,23 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
 
   function toggleAll() {
     setSelectedIds(allEligibleSelected ? new Set() : new Set(eligibleIds))
+  }
+
+  const selectedRows = useMemo(
+    () => page.data.filter((c) => selectedIds.has(c.id)),
+    [page.data, selectedIds],
+  )
+
+  const openReassign = (rows: AdminCourseRow[]) => {
+    const targets = rows
+      .filter((r) => r.ta) // only courses that currently have a TA can be reassigned
+      .map((r) => ({ id: r.id, title: r.title, currentTaId: r.ta?.id ?? null }))
+    if (targets.length === 0) {
+      toast.error("Select at least one course that already has a TA.")
+      return
+    }
+    setReassignTargets(targets)
+    setReassignOpen(true)
   }
 
   function handleBatchApprove() {
@@ -393,6 +413,15 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                   Clear
                 </Button>
                 <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => openReassign(selectedRows)}
+                  disabled={isBatchPending}
+                >
+                  Reassign selected
+                </Button>
+                <Button
                   size="sm"
                   className="h-7 gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white"
                   disabled={isBatchPending}
@@ -467,6 +496,19 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                             <p className="text-sm font-medium text-foreground">{course.ta.name ?? "Unnamed TA"}</p>
                             <p className="truncate text-xs text-muted-foreground">{course.ta.email}</p>
                             <p className="text-[11px] text-muted-foreground">Current TA owner</p>
+                            {course.ta && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="-ml-2 mt-0.5 h-6 px-2 text-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openReassign([course])
+                                }}
+                              >
+                                Reassign
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ) : (
@@ -553,6 +595,13 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
           </div>
         </div>
       </CardContent>
+      <ReassignDialog
+        open={reassignOpen}
+        onOpenChange={setReassignOpen}
+        courses={reassignTargets}
+        tas={tas}
+        onDone={() => setSelectedIds(new Set())}
+      />
     </Card>
   )
 }
