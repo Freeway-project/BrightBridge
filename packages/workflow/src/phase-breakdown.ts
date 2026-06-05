@@ -29,7 +29,7 @@ export function getPhaseBreakdown(
 ): PhaseBreakdown[] {
   return WORKFLOW_PHASES.map((phase) => {
     const statuses: StatusBreakdown[] = phase.groups.map((group) => {
-      const status = group.statuses[0];
+      const status = group.statuses[0]!; // statusGroup() always creates a 1-element array
       return {
         status,
         label: COURSE_STATUS_LABELS[status],
