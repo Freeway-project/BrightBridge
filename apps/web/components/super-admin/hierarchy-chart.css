@@ -1,0 +1,41 @@
+/* Make the PrimeReact OrganizationChart adapt to the app theme (incl. dark mode).
+   The light-only lara theme is kept for structure; these scoped overrides replace
+   its hard-coded colors with the app's CSS variables. Scoped to .hierarchy-chart-themed. */
+
+.hierarchy-chart-themed .p-organizationchart-node-content {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Connector lines */
+.hierarchy-chart-themed .p-organizationchart-line-down {
+  background: var(--border);
+}
+.hierarchy-chart-themed .p-organizationchart-line-left,
+.hierarchy-chart-themed .p-organizationchart-line-right,
+.hierarchy-chart-themed .p-organizationchart-line-top {
+  border-color: var(--border);
+}
+
+/* +/- toggler */
+.hierarchy-chart-themed .p-organizationchart-node-content .p-node-toggler {
+  background: var(--card);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  box-shadow: none;
+}
+.hierarchy-chart-themed .p-organizationchart-node-content .p-node-toggler .p-node-toggler-icon {
+  color: var(--muted-foreground);
+}
+
+/* Selected node */
+.hierarchy-chart-themed .p-organizationchart-node-content.p-highlight {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.hierarchy-chart-themed .p-organizationchart-node-content:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}

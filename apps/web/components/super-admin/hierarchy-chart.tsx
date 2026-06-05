@@ -3,6 +3,7 @@
 import "primereact/resources/themes/lara-light-indigo/theme.css"
 import "primereact/resources/primereact.min.css"
 import "primeicons/primeicons.css"
+import "./hierarchy-chart.css"
 
 import { useState } from "react"
 import { OrganizationChart } from "primereact/organizationchart"
@@ -68,6 +69,7 @@ export function HierarchyChart({ tree }: { tree: OrgTreeNode[] }) {
   const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<UnitDetail | null>(null)
   const [member, setMember] = useState<NodeData | null>(null)
+  const [nodes, setNodes] = useState<OrgTreeNode[]>(tree)
 
   if (tree.length === 0) {
     return (
@@ -113,6 +115,14 @@ export function HierarchyChart({ tree }: { tree: OrgTreeNode[] }) {
       setOpen(true)
       return
     }
+    // Unit with sub-units/members: clicking toggles expand/collapse (drill in).
+    const hasChildren = ((node.children as TreeNode[] | undefined)?.length ?? 0) > 0
+    if (hasChildren) {
+      node.expanded = !node.expanded
+      setNodes((prev) => [...prev])
+      return
+    }
+    // Leaf unit: open its detail (courses, leadership) so it stays reachable.
     setMember(null)
     setDetail(null)
     setLoading(true)
@@ -127,13 +137,14 @@ export function HierarchyChart({ tree }: { tree: OrgTreeNode[] }) {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-muted-foreground">
-        Click any unit or person to open its details. Use the +/- togglers to expand or collapse
-        branches. Leadership is colored and ordered by role.
+        Click a department to expand its sub-units, or a person (or a bottom-level
+        unit) to open details. Use the +/- togglers to expand or collapse branches.
+        Leadership is colored and ordered by role.
       </p>
       <HierarchyLegend />
-      <div className="h-[calc(100vh-13rem)] overflow-auto rounded-lg border border-border bg-card p-4">
+      <div className="hierarchy-chart-themed h-[calc(100vh-13rem)] overflow-auto rounded-lg border border-border bg-card p-4">
         <OrganizationChart
-          value={tree as unknown as TreeNode[]}
+          value={nodes as unknown as TreeNode[]}
           selectionMode="single"
           selection={selection as TreeNode}
           onSelectionChange={(e) => setSelection(e.data)}
