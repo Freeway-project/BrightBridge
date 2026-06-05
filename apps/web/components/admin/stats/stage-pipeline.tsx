@@ -6,14 +6,15 @@ import { COURSE_STATUS_LABELS, WORKFLOW_PHASES, getPipelineStage } from "@course
 import { PHASE_COLOR } from "./phase-colors"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-
 interface Props {
   statusCounts: StatusCount[]
   totalCourses: number
 }
 
+// Canonical status order for the bar chart, flattened from WORKFLOW_PHASES.
+const STATUS_ORDER = WORKFLOW_PHASES.flatMap((p) => p.groups.map((g) => g.statuses[0]))
+
 export function StagePipeline({ statusCounts, totalCourses }: Props) {
-  const STATUS_ORDER = WORKFLOW_PHASES.flatMap((p) => p.groups.map((g) => g.statuses[0]))
 
   const data = statusCounts
     .filter((s) => s.count > 0)
