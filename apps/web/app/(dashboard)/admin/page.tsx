@@ -19,6 +19,8 @@ import { FeatureAnnouncementToast } from "@/components/shared/feature-announceme
 import { AdminOverview } from "./_components/admin-overview"
 import { MigrationPanel } from "./_components/migration-panel"
 import { getLatestMigrationReport } from "@/lib/migration/report"
+import { InstitutionPanel } from "@/components/super-admin/institution-panel"
+import { getSuperAdminData } from "@/lib/super-admin/queries"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -37,7 +39,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport] = await Promise.all([
+  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport, institutionData] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
@@ -56,6 +58,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getCourseRepository().listRecentAssignments(20),
     getAdminOverviewData(),
     getLatestMigrationReport(),
+    getSuperAdminData(),
   ])
 
   // ---- Workflow board data (All Courses tab) -----------------------------
@@ -127,6 +130,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
+            institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
           />

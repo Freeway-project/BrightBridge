@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
-import { OrganizationView } from "@/components/super-admin/organization-view"
+import { InstitutionPanel } from "@/components/super-admin/institution-panel"
 import { getSuperAdminData } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 
@@ -22,8 +22,8 @@ export default async function ProvostOrganizationPage() {
   return (
     <>
       <Topbar title="Organization" subtitle="Manage colleges, departments, and leadership" />
-      <div className="min-w-0 flex-1 overflow-hidden flex flex-col bg-background">
-        <OrganizationView data={data} />
+      <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
+        <InstitutionPanel data={data} storageKey="provost-institution" defaultTab="organization" />
       </div>
     </>
   )

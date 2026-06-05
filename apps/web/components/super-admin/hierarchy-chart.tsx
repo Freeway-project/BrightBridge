@@ -7,7 +7,7 @@ import "primeicons/primeicons.css"
 import { useState } from "react"
 import { OrganizationChart } from "primereact/organizationchart"
 import type { TreeNode } from "primereact/treenode"
-import { Building2, Folder, GraduationCap, User } from "lucide-react"
+import { Building2, Folder, GraduationCap } from "lucide-react"
 import { COURSE_STATUS_LABELS } from "@coursebridge/workflow"
 import type { OrgTreeNode } from "@/lib/super-admin/queries"
 import { getUnitDetail, type UnitDetail } from "@/app/(dashboard)/super-admin/hierarchy-actions"
@@ -20,6 +20,46 @@ type NodeData = OrgTreeNode["data"]
 
 function statusLabel(status: string) {
   return COURSE_STATUS_LABELS[status as keyof typeof COURSE_STATUS_LABELS] ?? status
+}
+
+// Role/level coloring for leadership nodes. Keyed by the raw title so the dot,
+// card accent, and legend all stay in sync. Class strings are literal so
+// Tailwind's JIT keeps them.
+type TitleStyle = { dot: string; border: string; text: string; label: string }
+const TITLE_STYLES: Record<string, TitleStyle> = {
+  vp:             { dot: "bg-purple-500",  border: "border-l-purple-500",  text: "text-purple-600 dark:text-purple-300",   label: "VP" },
+  dean:           { dot: "bg-blue-500",    border: "border-l-blue-500",    text: "text-blue-600 dark:text-blue-300",       label: "Dean" },
+  associate_dean: { dot: "bg-sky-500",     border: "border-l-sky-500",     text: "text-sky-600 dark:text-sky-300",         label: "Associate Dean" },
+  assistant_dean: { dot: "bg-cyan-500",    border: "border-l-cyan-500",    text: "text-cyan-600 dark:text-cyan-300",       label: "Assistant Dean" },
+  dept_head:      { dot: "bg-emerald-500", border: "border-l-emerald-500", text: "text-emerald-600 dark:text-emerald-300", label: "Department Head" },
+  educator:       { dot: "bg-amber-500",   border: "border-l-amber-500",   text: "text-amber-600 dark:text-amber-300",     label: "Educator" },
+  admin:          { dot: "bg-rose-500",    border: "border-l-rose-500",    text: "text-rose-600 dark:text-rose-300",       label: "Admin" },
+  staff:          { dot: "bg-slate-400",   border: "border-l-slate-400",   text: "text-slate-500 dark:text-slate-300",     label: "Staff" },
+}
+const DEFAULT_TITLE_STYLE: TitleStyle = { dot: "bg-muted-foreground", border: "border-l-border", text: "text-muted-foreground", label: "Member" }
+
+function titleStyle(rawTitle?: string): TitleStyle {
+  return (rawTitle && TITLE_STYLES[rawTitle]) || DEFAULT_TITLE_STYLE
+}
+
+// Render order for the legend (matches seniority).
+const LEGEND_ORDER = ["vp", "dean", "associate_dean", "assistant_dean", "dept_head", "educator", "admin", "staff"] as const
+
+function HierarchyLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs">
+      <span className="font-semibold text-muted-foreground">Roles:</span>
+      {LEGEND_ORDER.map((key) => {
+        const s = TITLE_STYLES[key]
+        return (
+          <span key={key} className="inline-flex items-center gap-1.5">
+            <span className={`size-2.5 rounded-full ${s.dot}`} />
+            <span className={s.text}>{s.label}</span>
+          </span>
+        )
+      })}
+    </div>
+  )
 }
 
 export function HierarchyChart({ tree }: { tree: OrgTreeNode[] }) {
@@ -40,12 +80,13 @@ export function HierarchyChart({ tree }: { tree: OrgTreeNode[] }) {
   const nodeTemplate = (node: TreeNode) => {
     const d = node.data as NodeData
     if (d.kind === "member") {
+      const s = titleStyle(d.rawTitle)
       return (
-        <div className="flex w-44 items-center gap-2 text-left">
-          <User className="size-4 shrink-0 text-indigo-500" />
+        <div className={`flex w-44 items-center gap-2 rounded-md border-l-4 ${s.border} bg-background/60 px-2 py-1 text-left`}>
+          <span className={`size-2.5 shrink-0 rounded-full ${s.dot}`} />
           <div className="min-w-0">
             <div className="truncate text-sm font-medium">{d.name}</div>
-            <div className="truncate text-xs text-muted-foreground">{d.title}</div>
+            <div className={`truncate text-xs font-medium ${s.text}`}>{d.title}</div>
           </div>
         </div>
       )
@@ -87,8 +128,9 @@ export function HierarchyChart({ tree }: { tree: OrgTreeNode[] }) {
     <div className="flex flex-col gap-3">
       <p className="text-sm text-muted-foreground">
         Click any unit or person to open its details. Use the +/- togglers to expand or collapse
-        branches.
+        branches. Leadership is colored and ordered by role.
       </p>
+      <HierarchyLegend />
       <div className="h-[calc(100vh-13rem)] overflow-auto rounded-lg border border-border bg-card p-4">
         <OrganizationChart
           value={tree as unknown as TreeNode[]}

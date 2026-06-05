@@ -28,11 +28,15 @@ export type UnitDetail = {
 /**
  * Loads the detail panel for a clicked org-chart node: the unit's direct child
  * units, its leadership members, and all courses in its subtree (capped for
- * display). Reuses listCoursesByUnitAncestry. Super-admin / provost only.
+ * display). Reuses listCoursesByUnitAncestry. Super-admin / provost / admin.
  */
 export async function getUnitDetail(unitId: string): Promise<UnitDetail> {
   const context = await requireProfile()
-  if (context.profile.role !== "super_admin" && context.profile.role !== "provost") {
+  if (
+    context.profile.role !== "super_admin" &&
+    context.profile.role !== "provost" &&
+    context.profile.role !== "admin_full"
+  ) {
     throw new Error("Unauthorized")
   }
 

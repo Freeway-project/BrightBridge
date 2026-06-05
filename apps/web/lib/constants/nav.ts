@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Bell,
   BarChart3,
+  Network,
   type LucideIcon,
 } from "lucide-react"
 import type { Role } from "@coursebridge/workflow"
@@ -32,6 +33,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   admin_full: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
+    { label: "Hierarchy", href: "/hierarchy", icon: Network },
     { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Migration", href: "/migration", icon: FileText },
@@ -50,6 +52,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   super_admin: [
     { label: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
+    { label: "Hierarchy", href: "/hierarchy", icon: Network },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
@@ -57,6 +60,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   provost: [
     { label: "Overview",     href: "/provost",     icon: LayoutDashboard },
     { label: "Organization", href: "/provost/org", icon: Building2 },
+    { label: "Hierarchy",    href: "/hierarchy",   icon: Network },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",        href: "/guide",       icon: HelpCircle },
   ],

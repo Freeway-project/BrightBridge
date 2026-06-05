@@ -97,6 +97,19 @@ const TITLE_LABELS: Record<string, string> = {
   staff: "Staff",
 }
 
+// Seniority order so leadership renders top-to-bottom within a unit
+// (VP → Dean → … → Educator). Unknown titles sort last.
+const TITLE_RANK: Record<string, number> = {
+  vp: 0,
+  dean: 1,
+  associate_dean: 2,
+  assistant_dean: 3,
+  dept_head: 4,
+  educator: 5,
+  admin: 6,
+  staff: 7,
+}
+
 // A PrimeReact OrganizationChart node (the extra `data` payload drives our
 // custom nodeTemplate). Kept structurally compatible with primereact's TreeNode.
 export type OrgTreeNode = {
@@ -109,6 +122,8 @@ export type OrgTreeNode = {
     name: string
     unitType?: string
     title?: string
+    /** Raw title key (dean, dept_head, …) used for role-based coloring. */
+    rawTitle?: string
   }
   children?: OrgTreeNode[]
 }
@@ -148,14 +163,27 @@ export function buildOrgTree(
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((c) => buildUnit(c, depth + 1))
 
-    const memberNodes: OrgTreeNode[] = (membersByUnit.get(u.id) ?? []).map((m) => {
-      const name = nameById.get(m.profileId) ?? "Unknown"
-      return {
-        key: m.id,
-        label: name,
-        data: { kind: "member", id: m.id, name, title: TITLE_LABELS[m.title] ?? m.title },
-      }
-    })
+    const memberNodes: OrgTreeNode[] = (membersByUnit.get(u.id) ?? [])
+      .slice()
+      .sort(
+        (a, b) =>
+          (TITLE_RANK[a.title] ?? 99) - (TITLE_RANK[b.title] ?? 99) ||
+          (nameById.get(a.profileId) ?? "").localeCompare(nameById.get(b.profileId) ?? ""),
+      )
+      .map((m) => {
+        const name = nameById.get(m.profileId) ?? "Unknown"
+        return {
+          key: m.id,
+          label: name,
+          data: {
+            kind: "member" as const,
+            id: m.id,
+            name,
+            title: TITLE_LABELS[m.title] ?? m.title,
+            rawTitle: m.title,
+          },
+        }
+      })
 
     return {
       key: u.id,

@@ -11,6 +11,7 @@ type Props = {
   escalationsPanel: React.ReactNode
   completedPanel: React.ReactNode
   migrationPanel: React.ReactNode
+  institutionPanel: React.ReactNode
   assignmentLogsPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
@@ -24,6 +25,7 @@ export function AdminTabs({
   escalationsPanel,
   completedPanel,
   migrationPanel,
+  institutionPanel,
   assignmentLogsPanel,
   unassignedCount,
   openEscalationsCount,
@@ -54,6 +56,7 @@ export function AdminTabs({
             )}
           </TabsTrigger>
           <TabsTrigger value="migration">Migration</TabsTrigger>
+          <TabsTrigger value="institution">Institution</TabsTrigger>
           <TabsTrigger value="completed">Provision</TabsTrigger>
         </TabsList>
       </div>
@@ -70,6 +73,7 @@ export function AdminTabs({
       </TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
       <TabsContent value="migration">{migrationPanel}</TabsContent>
+      <TabsContent value="institution">{institutionPanel}</TabsContent>
       <TabsContent value="completed">{completedPanel}</TabsContent>
     </Tabs>
   )

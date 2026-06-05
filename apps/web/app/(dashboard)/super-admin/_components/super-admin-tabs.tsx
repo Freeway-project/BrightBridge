@@ -4,13 +4,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 
 type Props = {
-  overviewPanel: React.ReactNode
+  institutionPanel: React.ReactNode
   coursesPanel: React.ReactNode
   usersPanel: React.ReactNode
   assignPanel: React.ReactNode
   escalationsPanel: React.ReactNode
-  organizationPanel: React.ReactNode
-  hierarchyPanel: React.ReactNode
   migrationPanel: React.ReactNode
   auditPanel: React.ReactNode
   analyticsPanel: React.ReactNode
@@ -21,13 +19,11 @@ type Props = {
 }
 
 export function SuperAdminTabs({
-  overviewPanel,
+  institutionPanel,
   coursesPanel,
   usersPanel,
   assignPanel,
   escalationsPanel,
-  organizationPanel,
-  hierarchyPanel,
   migrationPanel,
   auditPanel,
   analyticsPanel,
@@ -36,13 +32,13 @@ export function SuperAdminTabs({
   openEscalationsCount,
   openSupportCount,
 }: Props) {
-  const [tab, setTab] = useStickyTabState("super-admin-dashboard", "overview")
+  const [tab, setTab] = useStickyTabState("super-admin-dashboard", "institution")
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
       <div className="border-b border-border w-full">
         <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="institution">Institution</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="assign">
@@ -70,22 +66,18 @@ export function SuperAdminTabs({
             )}
           </TabsTrigger>
           <TabsTrigger value="migration">Migration</TabsTrigger>
-          <TabsTrigger value="organization">Organization</TabsTrigger>
-          <TabsTrigger value="hierarchy">Hierarchy</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
       </div>
 
-      <TabsContent value="overview">{overviewPanel}</TabsContent>
+      <TabsContent value="institution">{institutionPanel}</TabsContent>
       <TabsContent value="courses">{coursesPanel}</TabsContent>
       <TabsContent value="users">{usersPanel}</TabsContent>
       <TabsContent value="assign">{assignPanel}</TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
       <TabsContent value="support">{supportPanel}</TabsContent>
       <TabsContent value="migration">{migrationPanel}</TabsContent>
-      <TabsContent value="organization">{organizationPanel}</TabsContent>
-      <TabsContent value="hierarchy">{hierarchyPanel}</TabsContent>
       <TabsContent value="audit">{auditPanel}</TabsContent>
       <TabsContent value="analytics">{analyticsPanel}</TabsContent>
     </Tabs>
