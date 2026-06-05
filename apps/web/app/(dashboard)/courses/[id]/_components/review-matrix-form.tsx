@@ -36,6 +36,8 @@ type ReviewMatrixFormProps = {
   courseId: string
   defaultValues: ReviewMatrixFormValues
   initialIssues: Issue[]
+  /** When rendered inside the single-scroll workspace, save in place (no step navigation). */
+  embedded?: boolean
 }
 
 const STATUS_OPTIONS: { value: ReviewMatrixStatus; label: string; color: string }[] = [
@@ -60,6 +62,7 @@ export function ReviewMatrixForm({
   courseId,
   defaultValues,
   initialIssues,
+  embedded = false,
 }: ReviewMatrixFormProps) {
   const dirtySource = `review-matrix-form:${courseId}`
   const localDraftKey = `coursebridge:${courseId}:local-draft:review_matrix`
@@ -346,12 +349,17 @@ export function ReviewMatrixForm({
       <div className="flex justify-end pt-1">
         <Button
           disabled={isPending}
-          onClick={() => void handleSave(true)}
+          onClick={() => void handleSave(!embedded)}
           type="button"
           className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {isPending ? (
             <><LottieLoader className="size-4 " /> Saving…</>
+          ) : embedded ? (
+            <>
+              Save
+              <CheckCircle2 className="size-4" />
+            </>
           ) : (
             <>
               Save & Next
