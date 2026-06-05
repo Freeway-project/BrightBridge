@@ -98,11 +98,11 @@ function statusGroup(status: CourseStatus): WorkflowPhaseGroup {
 }
 
 /**
- * Single source of truth for grouping the course statuses into the three
- * pipeline phases (Migration / Staging / Provision). Each status is its own
- * column, labelled with its canonical status label, so the column header, the
- * card badge, and the backend status all read identically. Both the staff
- * course-list view and the admin board derive their columns from this.
+ * Single source of truth for grouping the course statuses into the four
+ * pipeline phases (Migration / Staging / Instructor / Provision). Each status
+ * is its own column, labelled with its canonical status label, so the column
+ * header, the card badge, and the backend status all read identically. Both
+ * the staff course-list view and the admin board derive their columns from this.
  */
 export const WORKFLOW_PHASES: WorkflowPhase[] = [
   {
