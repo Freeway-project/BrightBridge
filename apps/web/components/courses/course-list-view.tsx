@@ -24,6 +24,7 @@ import type { StatCardIcon } from "@/components/shared/stat-card"
 const PHASE_STYLE: Record<PipelineStage, { emoji: string; activeColor: string }> = {
   migration: { emoji: "🧭", activeColor: "text-blue-500 after:bg-blue-500" },
   staging: { emoji: "🛠️", activeColor: "text-orange-500 after:bg-orange-500" },
+  instructor: { emoji: "🎓", activeColor: "text-violet-500 after:bg-violet-500" },
   provision: { emoji: "✅", activeColor: "text-emerald-500 after:bg-emerald-500" },
 }
 

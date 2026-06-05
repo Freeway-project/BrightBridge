@@ -72,7 +72,7 @@ export function isInstructorVisibleStatus(status: CourseStatus) {
   );
 }
 
-export type PipelineStage = "migration" | "staging" | "provision"
+export type PipelineStage = "migration" | "staging" | "instructor" | "provision"
 
 /**
  * Group keys now map 1:1 to a course status — each dashboard column holds
@@ -98,11 +98,11 @@ function statusGroup(status: CourseStatus): WorkflowPhaseGroup {
 }
 
 /**
- * Single source of truth for grouping the course statuses into the three
- * pipeline phases (Migration / Staging / Provision). Each status is its own
- * column, labelled with its canonical status label, so the column header, the
- * card badge, and the backend status all read identically. Both the staff
- * course-list view and the admin board derive their columns from this.
+ * Single source of truth for grouping the course statuses into the four
+ * pipeline phases (Migration / Staging / Instructor / Provision). Each status
+ * is its own column, labelled with its canonical status label, so the column
+ * header, the card badge, and the backend status all read identically. Both
+ * the staff course-list view and the admin board derive their columns from this.
  */
 export const WORKFLOW_PHASES: WorkflowPhase[] = [
   {
@@ -119,6 +119,12 @@ export const WORKFLOW_PHASES: WorkflowPhase[] = [
       "waiting_on_admin",
       "staging_in_progress",
       "ready_for_instructor",
+    ] as const satisfies readonly CourseStatus[]).map(statusGroup),
+  },
+  {
+    key: "instructor",
+    label: "Instructor",
+    groups: ([
       "sent_to_instructor",
       "instructor_viewing",
       "instructor_questions",
@@ -141,9 +147,16 @@ export function getPipelineStage(status: CourseStatus): PipelineStage {
   ) {
     return "migration"
   }
+  if (
+    status === "sent_to_instructor" ||
+    status === "instructor_viewing" ||
+    status === "instructor_questions" ||
+    status === "instructor_approved"
+  ) {
+    return "instructor"
+  }
   // submitted_to_admin, admin_changes_requested, waiting_on_admin,
-  // staging_in_progress, ready_for_instructor, sent_to_instructor,
-  // instructor_viewing, instructor_questions, instructor_approved
+  // staging_in_progress, ready_for_instructor
   return "staging"
 }
 
