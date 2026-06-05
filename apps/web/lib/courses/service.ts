@@ -143,6 +143,32 @@ export async function assignUserToCourse(input: AssignUserToCourseInput) {
   });
 }
 
+export type ReassignCourseStaffInput = {
+  courseId: string;
+  newProfileId: string;
+  reason?: string | null;
+};
+
+export async function reassignCourseStaff(input: ReassignCourseStaffInput) {
+  const context = await requireProfile();
+  requireAnyRole(context, adminRoles); // ["admin_full", "super_admin"]
+
+  const profile = await getProfileRepository().getProfileById(input.newProfileId);
+  if (!profile) {
+    throw new Error("Selected TA does not exist.");
+  }
+  if (profile.role !== "standard_user") {
+    throw new Error("Courses can only be reassigned to a TA.");
+  }
+
+  await getCourseRepository().reassignCourseStaff({
+    courseId: input.courseId,
+    newProfileId: input.newProfileId,
+    actorId: context.profile.id,
+    reason: input.reason ?? null,
+  });
+}
+
 export async function updateCourseDepartment(courseId: string, orgUnitId: string | null) {
   const context = await requireProfile();
   requireAnyRole(context, adminRoles);

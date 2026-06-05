@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AssignmentRole } from "@coursebridge/workflow";
+import { COURSE_STATUSES } from "@coursebridge/workflow";
 import type {
   AdminCourseListFilters,
   AdminCourseRow,
@@ -250,6 +251,20 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
       if (error) {
         throw new Error(`Could not assign user to course: ${error.message}`);
+      }
+    },
+
+    async reassignCourseStaff(input) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { error } = await admin.rpc("reassign_course_staff", {
+        p_course_id: input.courseId,
+        p_new_profile_id: input.newProfileId,
+        p_actor_id: input.actorId,
+        p_reason: input.reason,
+      });
+
+      if (error) {
+        throw new Error(error.message);
       }
     },
 
@@ -1047,41 +1062,63 @@ function isMissingRelationError(error: { code?: string; message?: string } | nul
 
 async function fallbackStatusCounts(): Promise<StatusCount[]> {
   const admin = getSupabaseAdminClientOrThrow();
-  const { data, error } = await admin.from("courses").select("status");
 
-  if (error) {
-    throw new Error(`status counts fallback: ${error.message}`);
-  }
+  // The course_status_counts view is missing — count each status server-side
+  // with head/count queries instead of pulling rows. A plain
+  // `select("status")` is silently capped at PostgREST's default ~1000 rows, so
+  // it undercounts any table larger than that (the cause of the prod "874 vs
+  // 2286" Staging bug). head:true transfers no rows and returns exact totals.
+  const results = await Promise.all(
+    COURSE_STATUSES.map(async (status) => {
+      const { count, error } = await admin
+        .from("courses")
+        .select("*", { count: "exact", head: true })
+        .eq("status", status);
 
-  const counts = new Map<string, number>();
-  for (const row of data ?? []) {
-    const key = String((row as { status: string }).status);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
+      if (error) {
+        throw new Error(`status counts fallback: ${error.message}`);
+      }
 
-  return Array.from(counts.entries()).map(([status, count]) => ({
-    status: toCourseStatus(status),
-    count,
-  }));
+      return { status: toCourseStatus(status), count: count ?? 0 } satisfies StatusCount;
+    }),
+  );
+
+  // Match the view's shape: omit statuses with no courses.
+  return results.filter((row) => row.count > 0);
 }
 
 async function fallbackTAWorkload(): Promise<TAWorkload[]> {
   const admin = getSupabaseAdminClientOrThrow();
-  const { data, error } = await admin
-    .from("course_assignments")
-    .select(`
-      profile_id, role,
-      courses!inner ( status ),
-      profiles!course_assignments_profile_id_fkey ( full_name, email )
-    `)
-    .eq("role", "staff");
 
-  if (error) {
-    throw new Error(`ta workload fallback: ${error.message}`);
+  // The ta_workload_stats view is missing — aggregate the staff assignments
+  // here. A single select is capped at PostgREST's default ~1000 rows, so page
+  // through (ordered by the PK for stable paging) to avoid undercounting on
+  // installs with more than 1000 staff assignments.
+  const PAGE = 1000;
+  const rows: unknown[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await admin
+      .from("course_assignments")
+      .select(`
+        profile_id, role,
+        courses!inner ( status ),
+        profiles!course_assignments_profile_id_fkey ( full_name, email )
+      `)
+      .eq("role", "staff")
+      .order("id", { ascending: true })
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      throw new Error(`ta workload fallback: ${error.message}`);
+    }
+
+    const batch = data ?? [];
+    rows.push(...batch);
+    if (batch.length < PAGE) break;
   }
 
   const byProfile = new Map<string, TAWorkload>();
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const typed = row as {
       profile_id: string;
       courses?: { status: string } | Array<{ status: string }> | null;

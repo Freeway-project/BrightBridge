@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import {
   assignUserToCourse,
   transitionCourseStatus,
+  reassignCourseStaff,
 } from "@/lib/courses/service";
 import { requireAnyRole, requireProfile } from "@/lib/auth/context";
 import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
@@ -256,6 +257,54 @@ export async function assignTaToCourseAction(
         : message,
     };
   }
+}
+
+export async function batchReassignCourseAction(
+  _state: AssignTaState,
+  formData: FormData,
+): Promise<AssignTaState> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["admin_full", "super_admin"]);
+
+  const profileId = String(formData.get("profileId") ?? "");
+  const reason = String(formData.get("reason") ?? "").trim();
+  const courseIds = String(formData.get("courseIds") ?? "").split(",").filter(Boolean);
+
+  if (!profileId || courseIds.length === 0) {
+    return { kind: "error", message: "Select both a new TA and at least one course." };
+  }
+
+  const results: Array<{ courseId: string; title: string; success: boolean; message: string }> = [];
+  let successCount = 0;
+
+  for (const courseId of courseIds) {
+    const detail = await getAdminCourseDetail(courseId);
+    const title = detail?.course.title ?? "Unknown Course";
+    try {
+      await reassignCourseStaff({ courseId, newProfileId: profileId, reason });
+      results.push({ courseId, title, success: true, message: "Reassigned" });
+      successCount++;
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Reassignment failed";
+      results.push({ courseId, title, success: false, message: msg });
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/ta");
+  courseIds.forEach((id) => revalidatePath(`/courses/${id}`));
+
+  if (successCount === courseIds.length) {
+    return { kind: "success", message: `Reassigned ${successCount} course(s).`, results };
+  }
+  if (successCount === 0) {
+    return { kind: "error", message: "All reassignments failed.", results };
+  }
+  return {
+    kind: "success",
+    message: `Reassigned ${successCount} out of ${courseIds.length} courses. Some failed.`,
+    results,
+  };
 }
 
 export async function updateCourseDepartmentAction(courseId: string, orgUnitId: string | null): Promise<void> {

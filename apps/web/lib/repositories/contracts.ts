@@ -247,6 +247,13 @@ export type AssignUserToCourseRecordInput = {
   assignedBy: string;
 };
 
+export type ReassignCourseStaffRecordInput = {
+  courseId: string;
+  newProfileId: string;
+  actorId: string;
+  reason: string | null;
+};
+
 export type InsertStatusEventInput = {
   courseId: string;
   fromStatus: CourseStatus | null;
@@ -317,6 +324,7 @@ export interface CourseRepository {
   getCourseAssignment(courseId: string, profileId: string): Promise<CourseAssignmentRecord | null>;
   hasAssignment(courseId: string, profileId: string, role: AssignmentRole): Promise<boolean>;
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;
+  reassignCourseStaff(input: ReassignCourseStaffRecordInput): Promise<void>;
   insertStatusEvent(input: InsertStatusEventInput): Promise<void>;
   listAdminCourses(): Promise<AdminCourseRow[]>;
   listAdminCoursesPage(

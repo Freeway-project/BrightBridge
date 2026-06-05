@@ -32,6 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { WORKFLOW_PHASES, getPipelineStage, COURSE_STATUS_LABELS } from "@coursebridge/workflow"
 import type { CourseStatus, PipelineStage } from "@coursebridge/workflow"
 import { batchApproveToStagingAction } from "../actions"
+import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
 import { toast } from "sonner"
 
 type Props = {
@@ -48,6 +49,8 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isBatchPending, startBatchTransition] = useTransition()
+  const [reassignTargets, setReassignTargets] = useState<ReassignTarget[]>([])
+  const [reassignOpen, setReassignOpen] = useState(false)
 
   const search = searchParams.get("search") ?? ""
   const statusFilter = searchParams.get("status") ?? "all"
@@ -90,8 +93,8 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   )
 
   const filteredCourses = page.data
-  const eligibleIds = useMemo(
-    () => filteredCourses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id),
+  const selectableIds = useMemo(
+    () => filteredCourses.filter((c) => c.ta).map((c) => c.id),
     [filteredCourses]
   )
 
@@ -109,7 +112,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
-  const allEligibleSelected = eligibleIds.length > 0 && eligibleIds.every((id) => selectedIds.has(id))
+  const allSelectableSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id))
 
   function toggleRow(id: string) {
     setSelectedIds((prev) => {
@@ -120,11 +123,33 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   }
 
   function toggleAll() {
-    setSelectedIds(allEligibleSelected ? new Set() : new Set(eligibleIds))
+    setSelectedIds(allSelectableSelected ? new Set() : new Set(selectableIds))
+  }
+
+  const selectedRows = useMemo(
+    () => page.data.filter((c) => selectedIds.has(c.id)),
+    [page.data, selectedIds],
+  )
+  const approveEligibleSelectedCount = selectedRows.filter((r) => r.status === "submitted_to_admin").length
+
+  const openReassign = (rows: AdminCourseRow[]) => {
+    const targets = rows
+      .filter((r) => r.ta) // only courses that currently have a TA can be reassigned
+      .map((r) => ({ id: r.id, title: r.title }))
+    if (targets.length === 0) {
+      toast.error("Select at least one course that already has a TA.")
+      return
+    }
+    setReassignTargets(targets)
+    setReassignOpen(true)
   }
 
   function handleBatchApprove() {
-    const ids = Array.from(selectedIds)
+    const ids = selectedRows.filter((r) => r.status === "submitted_to_admin").map((r) => r.id)
+    if (ids.length === 0) {
+      toast.warning("None of the selected courses are ready to move to staging.")
+      return
+    }
     startBatchTransition(async () => {
       const { succeeded, failed } = await batchApproveToStagingAction(ids)
       setSelectedIds(new Set())
@@ -363,13 +388,6 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
           ) : null}
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Migration" value={migration} tone={migration > 0 ? "warn" : "default"} />
-          <SummaryStat label="Staging" value={staging} tone={staging > 0 ? "default" : "default"} />
-          <SummaryStat label="Needs Admin Action" value={needsAction} tone={needsAction > 0 ? "danger" : "default"} />
-          <SummaryStat label="Provision" value={provision} tone={provision > 0 ? "success" : "default"} />
-        </div>
-
         {filteredCourses.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border px-6 py-12 text-center">
             <p className="text-sm font-medium text-foreground">No courses match these filters.</p>
@@ -393,9 +411,18 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                   Clear
                 </Button>
                 <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => openReassign(selectedRows)}
+                  disabled={isBatchPending}
+                >
+                  Reassign selected
+                </Button>
+                <Button
                   size="sm"
                   className="h-7 gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white"
-                  disabled={isBatchPending}
+                  disabled={isBatchPending || approveEligibleSelectedCount === 0}
                   onClick={handleBatchApprove}
                 >
                   <Send className="size-3" />
@@ -410,11 +437,11 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-10 pl-4">
-                    {eligibleIds.length > 0 && (
+                    {selectableIds.length > 0 && (
                       <Checkbox
-                        checked={allEligibleSelected}
+                        checked={allSelectableSelected}
                         onCheckedChange={toggleAll}
-                        aria-label="Select all eligible"
+                        aria-label="Select all reassignable"
                       />
                     )}
                   </TableHead>
@@ -433,7 +460,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                     onClick={() => router.push(`/admin/courses/${course.id}`)}
                   >
                     <TableCell className="w-10 pl-4 align-middle" onClick={(e) => e.stopPropagation()}>
-                      {course.status === "submitted_to_admin" && (
+                      {course.ta && (
                         <Checkbox
                           checked={selectedIds.has(course.id)}
                           onCheckedChange={() => toggleRow(course.id)}
@@ -467,6 +494,17 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                             <p className="text-sm font-medium text-foreground">{course.ta.name ?? "Unnamed TA"}</p>
                             <p className="truncate text-xs text-muted-foreground">{course.ta.email}</p>
                             <p className="text-[11px] text-muted-foreground">Current TA owner</p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="-ml-2 mt-0.5 h-6 px-2 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openReassign([course])
+                              }}
+                            >
+                              Reassign
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -553,6 +591,19 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
           </div>
         </div>
       </CardContent>
+      <ReassignDialog
+        open={reassignOpen}
+        onOpenChange={setReassignOpen}
+        courses={reassignTargets}
+        tas={tas}
+        onDone={(ids) =>
+          setSelectedIds((prev) => {
+            const next = new Set(prev)
+            ids.forEach((id) => next.delete(id))
+            return next
+          })
+        }
+      />
     </Card>
   )
 }
@@ -630,27 +681,43 @@ function ActiveSpinner({ className }: { className?: string }) {
   )
 }
 
-function SummaryStat({
+// A clickable phase stat-card: shows a phase's total course count and filters
+// the table to that phase when clicked. The active card is highlighted with a
+// primary ring + tint so the current filter is obvious at a glance.
+function PhaseCard({
   label,
   value,
-  tone,
+  active,
+  onClick,
 }: {
   label: string
   value: number
-  tone: "default" | "warn" | "danger" | "success"
+  active: boolean
+  onClick: () => void
 }) {
-  const toneClass = {
-    default: "border-border bg-muted/30 text-foreground",
-    warn: "border-yellow-500/20 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300",
-    danger: "border-orange-500/20 bg-orange-500/10 text-orange-700 dark:text-orange-300",
-    success: "border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-300",
-  }[tone]
-
   return (
-    <div className={cn("rounded-lg border px-4 py-3", toneClass)}>
-      <p className="text-[11px] uppercase tracking-wide opacity-80">{label}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+        active
+          ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm"
+          : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+      )}
+    >
+      <span
+        className={cn(
+          "text-[11px] font-medium uppercase tracking-wide",
+          active ? "text-primary" : "text-muted-foreground"
+        )}
+      >
+        {label}
+      </span>
+      <span className="text-2xl font-semibold tabular-nums">{value}</span>
+    </button>
   )
 }
 
