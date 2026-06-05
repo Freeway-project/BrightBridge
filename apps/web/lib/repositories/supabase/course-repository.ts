@@ -253,6 +253,20 @@ export function createSupabaseCourseRepository(): CourseRepository {
       }
     },
 
+    async reassignCourseStaff(input) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { error } = await admin.rpc("reassign_course_staff", {
+        p_course_id: input.courseId,
+        p_new_profile_id: input.newProfileId,
+        p_actor_id: input.actorId,
+        p_reason: input.reason,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    },
+
     async insertStatusEvent(input: InsertStatusEventInput) {
       const admin = getSupabaseAdminClientOrThrow();
       const { error } = await admin.from("course_status_events").insert({
