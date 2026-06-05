@@ -2,6 +2,7 @@ import { Topbar } from "@/components/layout/topbar"
 import { getInstructorDashboardData } from "@/lib/courses/service"
 import { InstructorCourseList } from "./_components/instructor-course-list"
 import { DepartmentMonitor } from "./_components/department-monitor"
+import { DashboardStatsRail } from "./_components/dashboard-stats-rail"
 import { TweakableContent } from "@/components/shared/tweakable-content"
 
 export default async function InstructorDashboardPage() {
@@ -10,10 +11,17 @@ export default async function InstructorDashboardPage() {
   return (
     <>
       <Topbar title="My Course Reviews" />
-      <TweakableContent className="flex-1 overflow-y-auto p-6 space-y-8">
-        <InstructorCourseList courses={myCourses} />
-        {isDeptHead && <DepartmentMonitor courses={departmentCourses} />}
-      </TweakableContent>
+      <div className="flex flex-1 overflow-hidden">
+        <DashboardStatsRail
+          myCourses={myCourses}
+          departmentCourses={departmentCourses}
+          isDeptHead={isDeptHead}
+        />
+        <TweakableContent className="flex-1 overflow-y-auto p-6 space-y-8">
+          <InstructorCourseList courses={myCourses} />
+          {isDeptHead && <DepartmentMonitor courses={departmentCourses} />}
+        </TweakableContent>
+      </div>
     </>
   )
 }

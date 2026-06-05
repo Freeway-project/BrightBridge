@@ -85,6 +85,93 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
   }
 }
 
+// Pretty labels for org_unit_members.title values.
+const TITLE_LABELS: Record<string, string> = {
+  vp: "VP",
+  dean: "Dean",
+  associate_dean: "Associate Dean",
+  assistant_dean: "Assistant Dean",
+  dept_head: "Department Head",
+  educator: "Educator",
+  admin: "Admin",
+  staff: "Staff",
+}
+
+// A PrimeReact OrganizationChart node (the extra `data` payload drives our
+// custom nodeTemplate). Kept structurally compatible with primereact's TreeNode.
+export type OrgTreeNode = {
+  key: string
+  label: string
+  expanded?: boolean
+  data: {
+    kind: "unit" | "member"
+    id: string
+    name: string
+    unitType?: string
+    title?: string
+  }
+  children?: OrgTreeNode[]
+}
+
+// Units at depth < EXPAND_DEPTH render expanded; deeper levels start collapsed
+// so the chart opens on the root and the user drills down.
+const EXPAND_DEPTH = 1
+
+/**
+ * Builds the nested org tree (units, with leadership members as child nodes)
+ * that PrimeReact's OrganizationChart renders. Reuses the units/members/users
+ * already fetched by getSuperAdminData — no extra query. Names resolve from
+ * users; titles are pretty-printed.
+ */
+export function buildOrgTree(
+  data: Pick<SuperAdminData, "units" | "members" | "users">,
+): OrgTreeNode[] {
+  const nameById = new Map(data.users.map((u) => [u.id, u.full_name?.trim() || u.email]))
+
+  const unitsByParent = new Map<string | null, typeof data.units>()
+  for (const u of data.units) {
+    const arr = unitsByParent.get(u.parentId) ?? []
+    arr.push(u)
+    unitsByParent.set(u.parentId, arr)
+  }
+
+  const membersByUnit = new Map<string, typeof data.members>()
+  for (const m of data.members) {
+    const arr = membersByUnit.get(m.orgUnitId) ?? []
+    arr.push(m)
+    membersByUnit.set(m.orgUnitId, arr)
+  }
+
+  const buildUnit = (u: (typeof data.units)[number], depth: number): OrgTreeNode => {
+    const childUnits = (unitsByParent.get(u.id) ?? [])
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((c) => buildUnit(c, depth + 1))
+
+    const memberNodes: OrgTreeNode[] = (membersByUnit.get(u.id) ?? []).map((m) => {
+      const name = nameById.get(m.profileId) ?? "Unknown"
+      return {
+        key: m.id,
+        label: name,
+        data: { kind: "member", id: m.id, name, title: TITLE_LABELS[m.title] ?? m.title },
+      }
+    })
+
+    return {
+      key: u.id,
+      label: u.name,
+      expanded: depth < EXPAND_DEPTH,
+      data: { kind: "unit", id: u.id, name: u.name, unitType: u.type },
+      children: [...childUnits, ...memberNodes],
+    }
+  }
+
+  return (unitsByParent.get(null) ?? [])
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((root) => buildUnit(root, 0))
+}
+
 export async function getPaginatedSuperAdminCourses(page: number, pageSize: number, search: string): Promise<PaginatedResult<CourseRow>> {
   const courseRepository = getCourseRepository()
   return courseRepository.listSuperAdminCourses(page, pageSize, search)

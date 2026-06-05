@@ -11,6 +11,7 @@ import { InstructorCourseActions } from "./_components/instructor-course-actions
 import { CourseSwitcher } from "./_components/course-switcher"
 import { CourseSwitchSidebar } from "./_components/course-switch-sidebar"
 import { InstructorReviewDetail } from "./_components/instructor-review-detail"
+import { InstructorCourseShell } from "./_components/instructor-course-shell"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
 import { getCourseTimeline } from "@/lib/courses/timeline"
@@ -71,6 +72,19 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           currentId={id}
           courses={myCourses.map((c) => ({ id: c.id, title: c.title, status: c.status, term: c.term }))}
         />
+        <InstructorCourseShell
+          courseId={id}
+          status={course.status}
+          finalSummary={course.instructorSummaryNotes}
+          readOnly={readOnly}
+          reviewNode={
+            <InstructorReviewDetail
+              course={course}
+              responses={responses}
+              sectionKeyById={sectionKeyById}
+            />
+          }
+          full={
         <StickyTabs storageKey={`instructor-course-${id}`} defaultValue="overview" className="flex-1 flex flex-col overflow-hidden w-full">
           <div className="border-b border-border px-6 pt-4 bg-background flex items-center justify-between">
             <TabsList variant="line">
@@ -160,6 +174,8 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
             <CourseTimeline items={timeline} />
           </TabsContent>
         </StickyTabs>
+          }
+        />
       </main>
     </>
   )

@@ -1,5 +1,6 @@
 export const ROLES = [
   "super_admin",
+  "provost",
   "admin_full",
   "admin_viewer",
   "standard_user",
@@ -10,6 +11,7 @@ export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = {
   super_admin: "Super Admin",
+  provost: "Provost",
   admin_full: "Admin",
   admin_viewer: "Viewer",
   standard_user: "Staff",

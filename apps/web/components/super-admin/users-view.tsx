@@ -33,6 +33,7 @@ const ROLE_BADGE_CLASS: Record<string, string> = {
   admin_viewer:  "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
   instructor:     "bg-green-500/15 text-green-400 border-green-500/20",
   super_admin:    "bg-red-500/15 text-red-400 border-red-500/20",
+  provost:        "bg-orange-500/15 text-orange-400 border-orange-500/20",
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -41,6 +42,7 @@ const ROLE_LABELS: Record<string, string> = {
   admin_viewer: "Viewer",
   instructor: "Instructor",
   super_admin: "Super Admin",
+  provost: "Provost",
 }
 
 function fmt(dateStr: string) {

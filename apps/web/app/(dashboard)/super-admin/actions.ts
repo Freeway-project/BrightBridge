@@ -109,7 +109,7 @@ export async function createUnitAction(
   _state: ManageUserState,
   formData: FormData,
 ): Promise<ManageUserState> {
-  await requireSuperAdmin()
+  await requireOrgManager()
 
   const name = String(formData.get("name") ?? "").trim()
   const type = String(formData.get("type") ?? "").trim()
@@ -129,6 +129,7 @@ export async function createUnitAction(
   }
 
   revalidatePath("/super-admin")
+  revalidatePath("/provost")
   return { kind: "success", message: `Created unit ${name}.` }
 }
 
@@ -136,7 +137,7 @@ export async function addUnitMemberAction(
   _state: ManageUserState,
   formData: FormData,
 ): Promise<ManageUserState> {
-  await requireSuperAdmin()
+  await requireOrgManager()
 
   const profileId = String(formData.get("profileId") ?? "")
   const orgUnitId = String(formData.get("orgUnitId") ?? "")
@@ -156,19 +157,33 @@ export async function addUnitMemberAction(
   }
 
   revalidatePath("/super-admin")
+  revalidatePath("/provost")
   return { kind: "success", message: "Added member to unit." }
 }
 
 export async function removeUnitMemberAction(memberId: string): Promise<void> {
-  await requireSuperAdmin()
+  await requireOrgManager()
   await getHierarchyRepository().removeMember(memberId)
   revalidatePath("/super-admin")
+  revalidatePath("/provost")
 }
 
 async function requireSuperAdmin() {
   const context = await requireProfile()
 
   if (context.profile.role !== "super_admin") {
+    redirect("/dashboard")
+  }
+
+  return context
+}
+
+// Org-chart management is shared by super_admin and provost (institution-wide
+// oversight). User/role management stays super_admin-only.
+async function requireOrgManager() {
+  const context = await requireProfile()
+
+  if (context.profile.role !== "super_admin" && context.profile.role !== "provost") {
     redirect("/dashboard")
   }
 
