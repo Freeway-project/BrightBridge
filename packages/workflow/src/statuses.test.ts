@@ -8,9 +8,11 @@ import {
   getBallInCourt,
   getPipelineStage,
   getStaffAdvance,
+  getStaffAdvanceOptions,
   isInstructorActionableStatus,
   type CourseStatus,
 } from "./statuses";
+import { canTransition } from "./transitions";
 
 describe("getBallInCourt", () => {
   const expected: Record<CourseStatus, ReturnType<typeof getBallInCourt>> = {
@@ -68,6 +70,56 @@ describe("getStaffAdvance", () => {
   it("is non-null for exactly STAFF_ACTIONABLE_COURSE_STATUSES", () => {
     const nonNull = COURSE_STATUSES.filter((s) => getStaffAdvance(s) !== null).sort();
     expect(nonNull).toEqual([...STAFF_ACTIONABLE_COURSE_STATUSES].sort());
+  });
+
+  it("returns the first option (ready_for_instructor) for staging_in_progress", () => {
+    expect(getStaffAdvance("staging_in_progress")).toEqual({
+      to: "ready_for_instructor",
+      action: "finalize-staging",
+      ctaLabel: "Mark Ready for Instructor",
+    });
+  });
+});
+
+describe("getStaffAdvanceOptions", () => {
+  it("offers a two-way fork out of staging_in_progress", () => {
+    expect(getStaffAdvanceOptions("staging_in_progress")).toEqual([
+      { to: "ready_for_instructor", action: "finalize-staging", ctaLabel: "Mark Ready for Instructor" },
+      { to: "final_approved", action: "provision-complete", ctaLabel: "Mark Provision Complete" },
+    ]);
+  });
+
+  it("returns a single option for the other staff-actionable statuses", () => {
+    expect(getStaffAdvanceOptions("ta_review_in_progress")).toHaveLength(1);
+    expect(getStaffAdvanceOptions("admin_changes_requested")).toHaveLength(1);
+  });
+
+  it("returns an empty array for non-staff-actionable statuses", () => {
+    expect(getStaffAdvanceOptions("submitted_to_admin")).toEqual([]);
+    expect(getStaffAdvanceOptions("final_approved")).toEqual([]);
+  });
+
+  it("getStaffAdvance equals the first option for every status", () => {
+    for (const s of COURSE_STATUSES) {
+      expect(getStaffAdvance(s)).toEqual(getStaffAdvanceOptions(s)[0] ?? null);
+    }
+  });
+});
+
+describe("staging_in_progress → final_approved (provision complete)", () => {
+  it("is allowed for staff (standard_user) and super_admin", () => {
+    expect(canTransition({ role: "standard_user", from: "staging_in_progress", to: "final_approved" })).toBe(true);
+    expect(canTransition({ role: "super_admin", from: "staging_in_progress", to: "final_approved" })).toBe(true);
+  });
+
+  it("is denied for admins and instructors", () => {
+    expect(canTransition({ role: "admin_viewer", from: "staging_in_progress", to: "final_approved" })).toBe(false);
+    expect(canTransition({ role: "admin_full", from: "staging_in_progress", to: "final_approved" })).toBe(false);
+    expect(canTransition({ role: "instructor", from: "staging_in_progress", to: "final_approved" })).toBe(false);
+  });
+
+  it("keeps the existing staging_in_progress → ready_for_instructor branch", () => {
+    expect(canTransition({ role: "standard_user", from: "staging_in_progress", to: "ready_for_instructor" })).toBe(true);
   });
 });
 

@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { CheckCircle2, Circle, Send, Sparkles, AlertCircle, RefreshCw } from "lucide-react"
-import { getCourseStatusLabel, getStaffAdvance, type CourseStatus } from "@coursebridge/workflow"
-import { markStagingComplete, submitReview } from "@/lib/workspace/actions"
+import { getCourseStatusLabel, getStaffAdvance, getStaffAdvanceOptions, type CourseStatus } from "@coursebridge/workflow"
+import { markProvisionComplete, markStagingComplete, submitReview } from "@/lib/workspace/actions"
 import {
   Dialog,
   DialogContent,
@@ -39,16 +39,22 @@ type SubmitPanelProps = {
     actorEmail: string
     createdAt: string
   } | null
+  /** Current "Final Summary for Instructor" notes, pre-filled into the provision dialog. */
+  instructorNotes?: string | null
 }
 
-export function SubmitPanel({ courseId, courseStatus, sections, reviewData, latestChangeRequest }: SubmitPanelProps) {
+export function SubmitPanel({ courseId, courseStatus, sections, reviewData, latestChangeRequest, instructorNotes }: SubmitPanelProps) {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [resubmitNote, setResubmitNote] = useState("")
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [provisionOpen, setProvisionOpen] = useState(false)
+  const [provisionNotes, setProvisionNotes] = useState(instructorNotes ?? "")
 
   const advance = getStaffAdvance(courseStatus)
+  const provisionOption =
+    getStaffAdvanceOptions(courseStatus).find((option) => option.action === "provision-complete") ?? null
   const isResubmit = Boolean(advance?.requiresNote)
   const isStatusSubmittable = advance !== null
   // Section requirements only gate the review-submit path, not staging finalize.
@@ -93,6 +99,23 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
 
       setIsSuccess(true)
       toast.success(`${advance.ctaLabel} — done.`)
+    })
+  }
+
+  const runProvision = () => {
+    setProvisionOpen(false)
+    startTransition(async () => {
+      setErrorMsg(null)
+      const res = await markProvisionComplete(courseId, provisionNotes.trim() || undefined)
+      if (!res?.ok) {
+        const message = res?.error || "Failed to mark provision complete."
+        setErrorMsg(message)
+        toast.error(message)
+        return
+      }
+
+      setIsSuccess(true)
+      toast.success("Provision complete — course finalized.")
     })
   }
 
@@ -259,28 +282,44 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
 
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-xs font-medium text-muted-foreground">
-                        By submitting, you confirm that all review criteria have been met according to the guidelines.
+                        {provisionOption
+                          ? "Hand this course to the instructor for review, or mark it provision complete to finish it now."
+                          : "By submitting, you confirm that all review criteria have been met according to the guidelines."}
                       </p>
-                      <Button
-                        disabled={disabled}
-                        onClick={handleSubmit}
-                        size="lg"
-                        className={cn(
-                          "h-14 min-w-[200px] rounded-2xl px-8 text-base font-black uppercase tracking-[0.15em] transition-all duration-500",
-                          !disabled && isResubmit
-                            ? "bg-gradient-to-r from-amber-500 to-orange-500 shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:-translate-y-1 active:scale-95"
-                            : !disabled && "bg-gradient-to-r from-blue-600 to-violet-600 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 active:scale-95"
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        {provisionOption && (
+                          <Button
+                            variant="outline"
+                            disabled={isPending || isSuccess}
+                            onClick={() => setProvisionOpen(true)}
+                            size="lg"
+                            className="h-14 rounded-2xl px-6 text-sm font-black uppercase tracking-[0.12em] border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
+                          >
+                            {provisionOption.ctaLabel}
+                            <CheckCircle2 className="ml-2 size-5" />
+                          </Button>
                         )}
-                      >
-                        {isPending ? (
-                          "Working…"
-                        ) : (
-                          <>
-                            {advance?.ctaLabel ?? "Submit Review"}
-                            {isResubmit ? <RefreshCw className="ml-2 size-5" /> : <Send className="ml-2 size-5" />}
-                          </>
-                        )}
-                      </Button>
+                        <Button
+                          disabled={disabled}
+                          onClick={handleSubmit}
+                          size="lg"
+                          className={cn(
+                            "h-14 min-w-[200px] rounded-2xl px-8 text-base font-black uppercase tracking-[0.15em] transition-all duration-500",
+                            !disabled && isResubmit
+                              ? "bg-gradient-to-r from-amber-500 to-orange-500 shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:-translate-y-1 active:scale-95"
+                              : !disabled && "bg-gradient-to-r from-blue-600 to-violet-600 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 active:scale-95"
+                          )}
+                        >
+                          {isPending ? (
+                            "Working…"
+                          ) : (
+                            <>
+                              {advance?.ctaLabel ?? "Submit Review"}
+                              {isResubmit ? <RefreshCw className="ml-2 size-5" /> : <Send className="ml-2 size-5" />}
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -305,6 +344,39 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
             Cancel
           </Button>
           <Button onClick={runAdvance}>Confirm</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    <Dialog open={provisionOpen} onOpenChange={setProvisionOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Mark provision complete</DialogTitle>
+          <DialogDescription>
+            This finalizes the course as <span className="font-semibold">{getCourseStatusLabel("final_approved")}</span> and
+            skips instructor review entirely. You can&apos;t undo this from here.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <label htmlFor="provision-notes" className="text-sm font-medium">
+            Instructor notes <span className="text-muted-foreground">(optional)</span>
+          </label>
+          <Textarea
+            id="provision-notes"
+            value={provisionNotes}
+            onChange={(e) => setProvisionNotes(e.target.value)}
+            rows={4}
+            maxLength={5000}
+            placeholder="Anything the instructor should know about this course…"
+            className="resize-none"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setProvisionOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={runProvision} disabled={isPending}>
+            Confirm provision complete
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -22,8 +22,9 @@ course_created
             → ta_review_in_progress  (staff resumes)
               → submitted_to_admin
         → waiting_on_admin          ← admin approves review, builds staging shell
-          → staging_in_progress      (staff finalizes staging)
-            → ready_for_instructor   ← staff marks staging complete
+          → staging_in_progress      (staff finalizes staging — two-way fork)
+            → final_approved         ← staff "Mark Provision Complete" (skips instructor)
+            → ready_for_instructor   ← staff "Mark Ready for Instructor"
               → sent_to_instructor
                 → instructor_viewing    ← auto-set when invite link is opened
                 → instructor_questions  ← instructor has questions
@@ -94,6 +95,7 @@ submitted_to_admin      → waiting_on_admin          admin_full, super_admin
 admin_changes_requested → ta_review_in_progress     standard_user, admin_full, super_admin
 waiting_on_admin        → staging_in_progress       admin_full, super_admin
 staging_in_progress     → ready_for_instructor      standard_user, super_admin
+staging_in_progress     → final_approved            standard_user, super_admin   (provision complete — skips instructor)
 ready_for_instructor    → sent_to_instructor        admin_viewer, admin_full, super_admin
 sent_to_instructor      → instructor_viewing        instructor, super_admin
 sent_to_instructor      → instructor_questions      instructor, super_admin

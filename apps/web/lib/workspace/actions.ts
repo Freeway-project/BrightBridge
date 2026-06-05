@@ -12,6 +12,7 @@ import {
 } from "@/lib/services/review";
 import { getCourseById } from "@/lib/services/courses";
 import { transitionCourseStatus } from "@/lib/courses/service";
+import { saveFinalSummaryNotes } from "@/lib/courses/final-summary";
 import type { SectionKey } from "./types";
 import {
   metadataSchema,
@@ -213,5 +214,66 @@ export async function markStagingComplete(courseId: string): Promise<{ ok: boole
       Sentry.captureException(error instanceof Error ? error : new Error("markStagingComplete failed"));
     });
     return { ok: false, error: "Failed to finalize staging. Please try again." };
+  }
+}
+
+export async function markProvisionComplete(
+  courseId: string,
+  notes?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (await isCurrentHostReadonly()) {
+    return { ok: false, error: "System migration in progress. This action is temporarily disabled." };
+  }
+  const ctx = await requireProfile();
+  try {
+    const course = await getCourseById(courseId, ctx.userId, ctx.profile.role);
+    if (!course) {
+      return { ok: false, error: "Course not found or assignment was revoked. Refreshing..." };
+    }
+
+    // Idempotency guard: tolerate repeat clicks once the course is already done.
+    if (course.status === "final_approved") {
+      revalidatePath("/ta");
+      revalidatePath(`/courses/${courseId}`);
+      return { ok: true };
+    }
+
+    // Save the (optional) instructor notes while the course is still in the
+    // staging window — saveFinalSummaryNotes only permits edits during staging,
+    // so this must happen before the transition to final_approved.
+    const trimmedNotes = notes?.trim();
+    if (trimmedNotes) {
+      await saveFinalSummaryNotes(courseId, trimmedNotes);
+    }
+
+    await transitionCourseStatus({
+      courseId,
+      toStatus: "final_approved",
+      note: "TA marked provision complete (skipped instructor review).",
+    });
+
+    revalidatePath("/ta");
+    revalidatePath(`/courses/${courseId}`);
+    revalidatePath("/admin");
+    revalidatePath("/communications");
+    return { ok: true };
+  } catch (error) {
+    console.error("markProvisionComplete failed", {
+      courseId,
+      actorId: ctx.userId,
+      actorRole: ctx.profile.role,
+      error,
+    });
+    Sentry.withScope((scope) => {
+      scope.setTag("area", "ta_workspace");
+      scope.setTag("action", "mark_provision_complete");
+      scope.setContext("mark_provision_complete", {
+        actorId: ctx.userId,
+        actorRole: ctx.profile.role,
+        courseId,
+      });
+      Sentry.captureException(error instanceof Error ? error : new Error("markProvisionComplete failed"));
+    });
+    return { ok: false, error: "Failed to mark provision complete. Please try again." };
   }
 }
