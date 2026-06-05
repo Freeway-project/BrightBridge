@@ -534,12 +534,55 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
         .subscribe()
       : null
 
+    const reassignmentChannel = supabase
+      .channel("public:course_reassignments:insert")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "course_reassignments" },
+        async (payload) => {
+          if (!dedup(`reassign-${payload.new.id}`)) return
+          const isNewTa = payload.new.to_profile_id === userId
+          // Relevant to the new TA, or to any admin watching.
+          if (!isNewTa && !IS_ADMIN(role)) return
+          // Don't toast the actor about their own action.
+          if (payload.new.reassigned_by === userId) return
+
+          const courseTitle = await getCourseCode(payload.new.course_id)
+
+          if (isNewTa) {
+            toast.success("📚 Course Reassigned to You", {
+              description: `"${courseTitle}" was reassigned to you. Open it when you are ready.`,
+              duration: Infinity,
+              action: {
+                label: "Open Review",
+                onClick: () => router.push(`/courses/${payload.new.course_id}/metadata`),
+              },
+            })
+            playNotificationTone("success")
+          } else {
+            const toName = await getAuthorName(payload.new.to_profile_id)
+            toast.info("🔄 Course Reassigned", {
+              description: `"${courseTitle}" was reassigned to ${toName}.`,
+              duration: Infinity,
+              action: {
+                label: "View",
+                onClick: () => router.push(`/admin/courses/${payload.new.course_id}`),
+              },
+            })
+            playNotificationTone("info")
+          }
+          router.refresh()
+        }
+      )
+      .subscribe()
+
     return () => {
       supabase.removeChannel(issueInsertChannel)
       supabase.removeChannel(issueUpdateChannel)
       supabase.removeChannel(commentChannel)
       supabase.removeChannel(assignmentChannel)
       supabase.removeChannel(statusEventChannel)
+      supabase.removeChannel(reassignmentChannel)
       if (supportMessageChannel) supabase.removeChannel(supportMessageChannel)
     }
   }, [userId, role, router])
