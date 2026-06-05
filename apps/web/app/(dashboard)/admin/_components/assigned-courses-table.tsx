@@ -102,8 +102,13 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
-  // Phase cards reflect ALL courses (global statusCounts), not just the current
-  // page — phaseCount sums a phase's statuses from countByStatus.
+  // Summary boxes reflect ALL courses (global statusCounts), not just the current
+  // page. phaseCount sums a phase's statuses from countByStatus; Staging includes
+  // the instructor phase (incl. instructor_viewing) to match the prior grouping.
+  const migration = phaseCount("migration")
+  const staging = phaseCount("staging") + phaseCount("instructor")
+  const needsAction = (countByStatus.get("submitted_to_admin") ?? 0) + (countByStatus.get("instructor_approved") ?? 0)
+  const provision = phaseCount("provision")
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
@@ -292,25 +297,53 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
             the workflow definition. A phase tab filters by all its statuses; a
             chip narrows to one. */}
         <div className="space-y-2">
-          {/* Clickable phase stat-cards. Each is both the headline count for a
-              workflow phase AND the filter for it — one element, no duplicate
-              static summary row. The active phase is highlighted with a ring. */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
-            <PhaseCard
-              label="All courses"
-              value={totalFilterCount}
-              active={activePhase === "all"}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
               onClick={() => setPhase("all")}
-            />
-            {WORKFLOW_PHASES.map((p) => (
-              <PhaseCard
-                key={p.key}
-                label={p.label}
-                value={phaseCount(p.key)}
-                active={activePhase === p.key}
-                onClick={() => setPhase(p.key)}
-              />
-            ))}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                activePhase === "all"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:bg-muted"
+              )}
+            >
+              All
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[10px] font-semibold",
+                  activePhase === "all" ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                )}
+              >
+                {totalFilterCount}
+              </span>
+            </button>
+            {WORKFLOW_PHASES.map((p) => {
+              const active = activePhase === p.key
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => setPhase(p.key)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background hover:bg-muted"
+                  )}
+                >
+                  {p.label}
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-[10px] font-semibold",
+                      active ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {phaseCount(p.key)}
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
           {activePhase !== "all" && (
