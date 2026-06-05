@@ -99,13 +99,8 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
-  // Summary boxes reflect ALL courses (global statusCounts), not just the current
-  // page. phaseCount sums a phase's statuses from countByStatus; Staging includes
-  // the instructor phase (incl. instructor_viewing) to match the prior grouping.
-  const migration = phaseCount("migration")
-  const staging = phaseCount("staging") + phaseCount("instructor")
-  const needsAction = (countByStatus.get("submitted_to_admin") ?? 0) + (countByStatus.get("instructor_approved") ?? 0)
-  const provision = phaseCount("provision")
+  // Phase cards reflect ALL courses (global statusCounts), not just the current
+  // page — phaseCount sums a phase's statuses from countByStatus.
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
@@ -272,53 +267,25 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
             the workflow definition. A phase tab filters by all its statuses; a
             chip narrows to one. */}
         <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
+          {/* Clickable phase stat-cards. Each is both the headline count for a
+              workflow phase AND the filter for it — one element, no duplicate
+              static summary row. The active phase is highlighted with a ring. */}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
+            <PhaseCard
+              label="All courses"
+              value={totalFilterCount}
+              active={activePhase === "all"}
               onClick={() => setPhase("all")}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-                activePhase === "all"
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background hover:bg-muted"
-              )}
-            >
-              All
-              <span
-                className={cn(
-                  "rounded-full px-1.5 text-[10px] font-semibold",
-                  activePhase === "all" ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
-                )}
-              >
-                {totalFilterCount}
-              </span>
-            </button>
-            {WORKFLOW_PHASES.map((p) => {
-              const active = activePhase === p.key
-              return (
-                <button
-                  key={p.key}
-                  type="button"
-                  onClick={() => setPhase(p.key)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-                    active
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-background hover:bg-muted"
-                  )}
-                >
-                  {p.label}
-                  <span
-                    className={cn(
-                      "rounded-full px-1.5 text-[10px] font-semibold",
-                      active ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    {phaseCount(p.key)}
-                  </span>
-                </button>
-              )
-            })}
+            />
+            {WORKFLOW_PHASES.map((p) => (
+              <PhaseCard
+                key={p.key}
+                label={p.label}
+                value={phaseCount(p.key)}
+                active={activePhase === p.key}
+                onClick={() => setPhase(p.key)}
+              />
+            ))}
           </div>
 
           {activePhase !== "all" && (
@@ -361,13 +328,6 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
               Searching…
             </span>
           ) : null}
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Migration" value={migration} tone={migration > 0 ? "warn" : "default"} />
-          <SummaryStat label="Staging" value={staging} tone={staging > 0 ? "default" : "default"} />
-          <SummaryStat label="Needs Admin Action" value={needsAction} tone={needsAction > 0 ? "danger" : "default"} />
-          <SummaryStat label="Provision" value={provision} tone={provision > 0 ? "success" : "default"} />
         </div>
 
         {filteredCourses.length === 0 ? (
@@ -630,27 +590,43 @@ function ActiveSpinner({ className }: { className?: string }) {
   )
 }
 
-function SummaryStat({
+// A clickable phase stat-card: shows a phase's total course count and filters
+// the table to that phase when clicked. The active card is highlighted with a
+// primary ring + tint so the current filter is obvious at a glance.
+function PhaseCard({
   label,
   value,
-  tone,
+  active,
+  onClick,
 }: {
   label: string
   value: number
-  tone: "default" | "warn" | "danger" | "success"
+  active: boolean
+  onClick: () => void
 }) {
-  const toneClass = {
-    default: "border-border bg-muted/30 text-foreground",
-    warn: "border-yellow-500/20 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300",
-    danger: "border-orange-500/20 bg-orange-500/10 text-orange-700 dark:text-orange-300",
-    success: "border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-300",
-  }[tone]
-
   return (
-    <div className={cn("rounded-lg border px-4 py-3", toneClass)}>
-      <p className="text-[11px] uppercase tracking-wide opacity-80">{label}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+        active
+          ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm"
+          : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+      )}
+    >
+      <span
+        className={cn(
+          "text-[11px] font-medium uppercase tracking-wide",
+          active ? "text-primary" : "text-muted-foreground"
+        )}
+      >
+        {label}
+      </span>
+      <span className="text-2xl font-semibold tabular-nums">{value}</span>
+    </button>
   )
 }
 
