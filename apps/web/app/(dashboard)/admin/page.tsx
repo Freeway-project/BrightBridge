@@ -62,17 +62,17 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   // Columns group the 13 statuses into the key workflow steps. Counts
   // come from the (cheap) status-count aggregate; cards are a recent slice per
   // status, capped per column — the List view handles full browsing/search.
-  const BOARD_COLUMNS: { key: string; label: string; phase: PipelineStage; statuses: CourseStatus[] }[] = [
-    { key: "migration", label: "Migration", phase: "migration", statuses: ["course_created", "assigned_to_ta", "ta_review_in_progress"] },
-    { key: "submitted", label: "Submitted to Admin", phase: "staging", statuses: ["submitted_to_admin", "admin_changes_requested"] },
-    { key: "building", label: "Waiting on Admin", phase: "staging", statuses: ["waiting_on_admin"] },
-    { key: "finalizing", label: "Staging in Process", phase: "staging", statuses: ["staging_in_progress"] },
-    // Split to mirror the staff dashboard's WORKFLOW_PHASES groups
-    // (ready_to_send vs with_instructor) so both boards read the same.
-    { key: "ready_to_send", label: "Ready to Send", phase: "staging", statuses: ["ready_for_instructor"] },
-    { key: "with_instructor", label: "With Instructor", phase: "staging", statuses: ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved"] },
-    { key: "provision", label: "Provision", phase: "provision", statuses: ["final_approved"] },
-  ]
+  // One column per status, derived from the shared WORKFLOW_PHASES so the admin
+  // board and the staff list always show identical columns/labels.
+  const BOARD_COLUMNS: { key: string; label: string; phase: PipelineStage; statuses: CourseStatus[] }[] =
+    WORKFLOW_PHASES.flatMap((phase) =>
+      phase.groups.map((group) => ({
+        key: group.key,
+        label: group.label,
+        phase: phase.key,
+        statuses: group.statuses,
+      })),
+    )
   const countByStatus = new Map<CourseStatus, number>(overviewData.statusCounts.map((s) => [s.status, s.count]))
   const repo = getCourseRepository()
   const cardStatuses = COURSE_STATUSES.filter((s) => (countByStatus.get(s) ?? 0) > 0)
