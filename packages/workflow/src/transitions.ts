@@ -62,6 +62,14 @@ export const COURSE_TRANSITIONS = [
     roles: ["standard_user", "super_admin"]
   },
   {
+    // "Provision Complete" — staff finish a course that needs no instructor
+    // review, skipping the entire instructor phase. Mirrors the role set of the
+    // ready_for_instructor branch above.
+    from: "staging_in_progress",
+    to: "final_approved",
+    roles: ["standard_user", "super_admin"]
+  },
+  {
     from: "ready_for_instructor",
     to: "sent_to_instructor",
     roles: ["admin_viewer", "admin_full", "super_admin"]

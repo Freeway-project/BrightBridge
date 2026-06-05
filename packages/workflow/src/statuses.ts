@@ -191,32 +191,59 @@ export function getBallInCourt(status: CourseStatus): BallInCourt {
  * null for any status where staff cannot advance the course. The non-null
  * domain is asserted (in tests) to equal STAFF_ACTIONABLE_COURSE_STATUSES.
  */
+export type StaffAdvanceAction = "submit" | "finalize-staging" | "provision-complete";
+
 export type StaffAdvance = {
   to: CourseStatus;
-  action: "submit" | "finalize-staging";
+  action: StaffAdvanceAction;
   ctaLabel: string;
   requiresNote?: boolean;
 };
 
-export function getStaffAdvance(status: CourseStatus): StaffAdvance | null {
+/**
+ * All staff "advance" options available for a status. Most statuses offer a
+ * single action, but `staging_in_progress` is a fork: the staff member either
+ * hands the course to the instructor, or marks it provision-complete (done,
+ * skipping instructor review entirely). Returns an empty array for statuses
+ * where staff cannot advance the course.
+ */
+export function getStaffAdvanceOptions(status: CourseStatus): StaffAdvance[] {
   switch (status) {
     case "assigned_to_ta":
     case "ta_review_in_progress":
-      return { to: "submitted_to_admin", action: "submit", ctaLabel: "Submit to Admin" };
+      return [{ to: "submitted_to_admin", action: "submit", ctaLabel: "Submit to Admin" }];
     case "admin_changes_requested":
-      return {
-        to: "submitted_to_admin",
-        action: "submit",
-        ctaLabel: "Resubmit to Admin",
-        requiresNote: true,
-      };
+      return [
+        {
+          to: "submitted_to_admin",
+          action: "submit",
+          ctaLabel: "Resubmit to Admin",
+          requiresNote: true,
+        },
+      ];
     case "staging_in_progress":
-      return {
-        to: "ready_for_instructor",
-        action: "finalize-staging",
-        ctaLabel: "Mark Ready for Instructor",
-      };
+      return [
+        {
+          to: "ready_for_instructor",
+          action: "finalize-staging",
+          ctaLabel: "Mark Ready for Instructor",
+        },
+        {
+          to: "final_approved",
+          action: "provision-complete",
+          ctaLabel: "Mark Provision Complete",
+        },
+      ];
     default:
-      return null;
+      return [];
   }
+}
+
+/**
+ * The primary staff advance for a status (the first of {@link getStaffAdvanceOptions}),
+ * or null if there is none. Used for single-action surfaces like the course
+ * card's "next action" label.
+ */
+export function getStaffAdvance(status: CourseStatus): StaffAdvance | null {
+  return getStaffAdvanceOptions(status)[0] ?? null;
 }

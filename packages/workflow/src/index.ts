@@ -15,6 +15,7 @@ export {
   getCourseStatusLabel,
   getPipelineStage,
   getStaffAdvance,
+  getStaffAdvanceOptions,
   isFinalStatus,
   isInstructorActionableStatus,
   isInstructorVisibleStatus,
@@ -23,6 +24,7 @@ export {
   type CourseStatus,
   type PipelineStage,
   type StaffAdvance,
+  type StaffAdvanceAction,
   type StatusGroupKey,
   type WorkflowPhase,
   type WorkflowPhaseGroup
