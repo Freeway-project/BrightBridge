@@ -99,15 +99,13 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
-  const migration = filteredCourses.filter((c) => c.status === "course_created" || c.status === "assigned_to_ta" || c.status === "ta_review_in_progress").length
-  const staging = filteredCourses.filter((c) => {
-    const s = c.status
-    return s === "submitted_to_admin" || s === "admin_changes_requested" ||
-           s === "waiting_on_admin" || s === "staging_in_progress" ||
-           s === "ready_for_instructor" || s === "sent_to_instructor" || s === "instructor_questions" || s === "instructor_approved"
-  }).length
-  const needsAction = filteredCourses.filter((c) => c.status === "submitted_to_admin" || c.status === "instructor_approved").length
-  const provision = filteredCourses.filter((c) => c.status === "final_approved").length
+  // Summary boxes reflect ALL courses (global statusCounts), not just the current
+  // page. phaseCount sums a phase's statuses from countByStatus; Staging includes
+  // the instructor phase (incl. instructor_viewing) to match the prior grouping.
+  const migration = phaseCount("migration")
+  const staging = phaseCount("staging") + phaseCount("instructor")
+  const needsAction = (countByStatus.get("submitted_to_admin") ?? 0) + (countByStatus.get("instructor_approved") ?? 0)
+  const provision = phaseCount("provision")
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
