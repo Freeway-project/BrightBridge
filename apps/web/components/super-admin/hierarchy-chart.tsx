@@ -5,7 +5,7 @@ import "primereact/resources/primereact.min.css"
 import "primeicons/primeicons.css"
 import "./hierarchy-chart.css"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { OrganizationChart } from "primereact/organizationchart"
 import type { TreeNode } from "primereact/treenode"
 import { Building2, Folder, GraduationCap } from "lucide-react"
@@ -70,6 +70,8 @@ export function HierarchyChart({ tree }: { tree: OrgTreeNode[] }) {
   const [detail, setDetail] = useState<UnitDetail | null>(null)
   const [member, setMember] = useState<NodeData | null>(null)
   const [nodes, setNodes] = useState<OrgTreeNode[]>(tree)
+  // Re-sync local expansion state if the server provides a fresh tree.
+  useEffect(() => { setNodes(tree) }, [tree])
 
   if (tree.length === 0) {
     return (
