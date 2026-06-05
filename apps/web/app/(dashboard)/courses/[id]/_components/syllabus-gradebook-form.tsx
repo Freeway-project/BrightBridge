@@ -30,6 +30,8 @@ import { cn } from "@/lib/utils"
 type SyllabusGradebookFormProps = {
   courseId: string
   defaultValues: SyllabusGradebookFormValues
+  /** When rendered inside the single-scroll workspace, save in place (no step navigation). */
+  embedded?: boolean
 }
 
 const SYLLABUS_STATUS_OPTIONS: { value: SyllabusRowStatus; label: string; color: string }[] = [
@@ -60,7 +62,7 @@ const REVIEW_DOT: Record<ReviewMatrixStatus, string> = {
   na:         "bg-muted-foreground/30",
 }
 
-export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGradebookFormProps) {
+export function SyllabusGradebookForm({ courseId, defaultValues, embedded = false }: SyllabusGradebookFormProps) {
   const dirtySource = `syllabus-gradebook-form:${courseId}`
   const localDraftKey = `coursebridge:${courseId}:local-draft:syllabus_review`
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
@@ -273,12 +275,17 @@ export function SyllabusGradebookForm({ courseId, defaultValues }: SyllabusGrade
       <div className="flex justify-end pt-1">
         <Button
           disabled={isPending}
-          onClick={() => void handleSave(true)}
+          onClick={() => void handleSave(!embedded)}
           type="button"
           className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {isPending ? (
             <><LottieLoader className="size-4 " /> Saving…</>
+          ) : embedded ? (
+            <>
+              Save
+              <CheckCircle2 className="size-4" />
+            </>
           ) : (
             <>
               Save & Next

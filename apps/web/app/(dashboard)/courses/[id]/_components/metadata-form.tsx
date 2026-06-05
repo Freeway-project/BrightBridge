@@ -29,6 +29,8 @@ type MetadataFormProps = {
   course: CourseRow
   reviewerName: string
   defaultValues: MetadataFormValues
+  /** When rendered inside the single-scroll workspace, save in place (no step navigation). */
+  embedded?: boolean
 }
 
 const SEASONS = ["Fall", "Winter", "Spring", "Summer"]
@@ -44,7 +46,7 @@ function parseTerm(term: string): { season: string; year: string } {
   return { season: parts[0] ?? "", year: parts[1] ?? "" }
 }
 
-export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
+export function MetadataForm({ course, reviewerName, defaultValues, embedded = false }: MetadataFormProps) {
   const dirtySource = `metadata-form:${course.id}`
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const router = useRouter()
@@ -124,7 +126,7 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
 
   async function handleAdvance() {
     const ok = await performSave()
-    if (ok) router.push(`/courses/${course.id}/review-matrix`)
+    if (ok && !embedded) router.push(`/courses/${course.id}/review-matrix`)
   }
 
   const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
@@ -269,6 +271,11 @@ export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFo
         >
           {status === "saving" ? (
             <><LottieLoader className="size-4 " /> Saving…</>
+          ) : embedded ? (
+            <>
+              Save
+              <CheckCircle2 className="size-4" />
+            </>
           ) : (
             <>
               Save & Next

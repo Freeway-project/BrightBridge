@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
@@ -33,12 +34,48 @@ function getInitials(name?: string | null) {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 1)
 }
 
+// Steps that live as sections in the single-scroll workspace (Timeline is its
+// own page). Section ids match the WorkspaceSection ids on the combined page.
+const SCROLL_STEPS = new Set(["metadata", "review-matrix", "syllabus-gradebook", "issue-log", "submit"])
+
 export function WorkspaceNav({ courseId, courseTitle, courseStatus, reviewerName, instructorName }: WorkspaceNavProps) {
   const pathname = usePathname()
+  // The combined single-scroll workspace lives at the course root; the dedicated
+  // step pages add a trailing segment. On the combined page the nav scroll-jumps
+  // between sections instead of navigating routes.
+  const isCombined = pathname === `/courses/${courseId}` || pathname === `/courses/${courseId}/`
   const activeIndex = Math.max(
     0,
     STEPS.findIndex((step) => pathname.endsWith(`/${step.href}`)),
   )
+  const [activeSection, setActiveSection] = useState("metadata")
+
+  useEffect(() => {
+    if (!isCombined) return
+    const ids = STEPS.filter((s) => SCROLL_STEPS.has(s.href)).map((s) => `section-${s.href}`)
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null)
+    if (!els.length) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        const top = visible[0]
+        if (top) setActiveSection(top.target.id.replace(/^section-/, ""))
+      },
+      { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5, 1] },
+    )
+    els.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [isCombined, courseId])
+
+  function scrollToSection(href: string) {
+    document.getElementById(`section-${href}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    setActiveSection(href)
+  }
 
   return (
     <aside className="hidden w-72 shrink-0 border-r border-border-icy bg-sidebar/40 p-5 lg:block overflow-y-auto backdrop-blur-sm">
@@ -71,21 +108,24 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus, reviewerName
             <div className="absolute left-6 top-4 bottom-4 w-px bg-primary/10" />
             
             {STEPS.map((step, index) => {
-              const active = index === activeIndex
-              const done = index < activeIndex
+              const useScroll = isCombined && SCROLL_STEPS.has(step.href)
+              const active = useScroll
+                ? activeSection === step.href
+                : isCombined
+                  ? false
+                  : index === activeIndex
+              const done = !isCombined && index < activeIndex
 
-              return (
-                <Link
-                  key={step.href}
-                  href={`/courses/${courseId}/${step.href}`}
-                  className={cn(
-                    "group relative flex items-start gap-4 rounded-xl px-3 py-3 transition-all duration-300",
-                    active
-                      ? "bg-primary/10 text-foreground ring-1 ring-primary/20 shadow-lg shadow-primary/5"
-                      : "text-muted-foreground hover:bg-white/5",
-                  )}
-                >
-                  <motion.div 
+              const itemClassName = cn(
+                "group relative flex w-full items-start gap-4 rounded-xl px-3 py-3 text-left transition-all duration-300",
+                active
+                  ? "bg-primary/10 text-foreground ring-1 ring-primary/20 shadow-lg shadow-primary/5"
+                  : "text-muted-foreground hover:bg-white/5",
+              )
+
+              const inner = (
+                <>
+                  <motion.div
                     layout
                     className={cn(
                       "relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-black border-2 transition-all duration-500",
@@ -119,6 +159,20 @@ export function WorkspaceNav({ courseId, courseTitle, courseStatus, reviewerName
                       {step.sub}
                     </p>
                   </div>
+                </>
+              )
+
+              if (useScroll) {
+                return (
+                  <button key={step.href} type="button" onClick={() => scrollToSection(step.href)} className={itemClassName}>
+                    {inner}
+                  </button>
+                )
+              }
+
+              return (
+                <Link key={step.href} href={`/courses/${courseId}/${step.href}`} className={itemClassName}>
+                  {inner}
                 </Link>
               )
             })}
