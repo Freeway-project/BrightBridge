@@ -90,6 +90,7 @@ const ADMIN_PENDING_STATUSES = new Set<CourseStatus>([
   "course_created",
   "submitted_to_admin",
   "waiting_on_admin",
+  "ready_for_instructor",
   "instructor_questions",
   "instructor_approved",
 ]);
@@ -310,6 +311,11 @@ function courseToNotification(course: CourseRow, role: Role): NotificationItem {
     tone = "success";
   }
 
+  // ready_for_instructor is informational for everyone EXCEPT admins, who must
+  // act on it (send the finalized staging to the instructor) — so it's pending
+  // for them, in step with ADMIN_PENDING_STATUSES.
+  const adminMustSend = course.status === "ready_for_instructor" && ADMIN_ROLES.includes(role);
+
   return {
     id: `course-${course.id}-${course.status}`,
     kind: "course_action",
@@ -320,7 +326,11 @@ function courseToNotification(course: CourseRow, role: Role): NotificationItem {
     meta: [label, course.department, course.term].filter(Boolean).join(" · "),
     href: getCourseHref(course.id, role),
     createdAt: course.updated_at,
-    pending: course.status !== "final_approved" && course.status !== "instructor_approved" && course.status !== "ready_for_instructor",
+    pending:
+      adminMustSend ||
+      (course.status !== "final_approved" &&
+        course.status !== "instructor_approved" &&
+        course.status !== "ready_for_instructor"),
   };
 }
 
@@ -406,6 +416,7 @@ function getCourseActionLabel(status: CourseStatus, role: Role, submissionCount?
       : "Course is ready for admin review";
   }
   if (status === "instructor_approved") return "Course is ready for final approval";
+  if (status === "ready_for_instructor") return "Staging finalized — send to instructor";
   if (status === "sent_to_instructor") return "Course is waiting for instructor review";
   if (status === "instructor_questions") return role === "instructor" ? "Questions need follow-up" : "Instructor questions need review";
   if (status === "admin_changes_requested") return "Changes were requested";

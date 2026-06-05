@@ -412,6 +412,15 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
                 href: `/admin/courses/${courseId}`,
                 actionLabel: "Build Shell",
               }
+            } else if (toStatus === "ready_for_instructor") {
+              const courseTitle = await getCourseCode(courseId)
+              spec = {
+                icon: "📦", title: "Staging Finalized — Ready to Send",
+                description: `${courseTitle} — staging is finalized. Send it to the instructor to continue.`,
+                tone: "success",
+                href: `/admin/courses/${courseId}`,
+                actionLabel: "Send to Instructor",
+              }
             }
           } else if (role === "standard_user") {
             // Only show if user is the TA for this course
