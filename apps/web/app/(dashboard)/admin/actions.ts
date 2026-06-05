@@ -259,48 +259,6 @@ export async function assignTaToCourseAction(
   }
 }
 
-export async function reassignCourseAction(
-  _state: AssignTaState,
-  formData: FormData,
-): Promise<AssignTaState> {
-  const context = await requireProfile();
-  requireAnyRole(context, ["admin_full", "super_admin"]);
-
-  const courseId = String(formData.get("courseId") ?? "");
-  const profileId = String(formData.get("profileId") ?? "");
-  const reason = String(formData.get("reason") ?? "").trim();
-
-  if (!courseId || !profileId) {
-    return { kind: "error", message: "Select both a course and a new TA." };
-  }
-
-  try {
-    await reassignCourseStaff({ courseId, newProfileId: profileId, reason });
-
-    revalidatePath("/admin");
-    revalidatePath("/ta");
-    revalidatePath(`/courses/${courseId}`);
-
-    return { kind: "success", message: "Course reassigned to the new TA." };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Could not reassign the course.";
-    Sentry.withScope((scope) => {
-      scope.setTag("area", "admin_assignment");
-      scope.setTag("action", "reassign_course");
-      scope.setTag("actor_role", context.profile.role);
-      scope.setContext("reassign_attempt", {
-        actorId: context.profile.id,
-        actorEmail: context.profile.email,
-        courseId,
-        profileId,
-      });
-      scope.setLevel("error");
-      Sentry.captureException(error instanceof Error ? error : new Error(message));
-    });
-    return { kind: "error", message };
-  }
-}
-
 export async function batchReassignCourseAction(
   _state: AssignTaState,
   formData: FormData,
