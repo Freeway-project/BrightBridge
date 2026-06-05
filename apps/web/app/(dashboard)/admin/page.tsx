@@ -59,11 +59,10 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   ])
 
   // ---- Workflow board data (All Courses tab) -----------------------------
-  // Columns group the 13 statuses into the key workflow steps. Counts
-  // come from the (cheap) status-count aggregate; cards are a recent slice per
-  // status, capped per column — the List view handles full browsing/search.
   // One column per status, derived from the shared WORKFLOW_PHASES so the admin
-  // board and the staff list always show identical columns/labels.
+  // board and the staff list always show identical columns/labels. Counts come
+  // from the (cheap) status-count aggregate; cards are a recent slice per status,
+  // capped per column — the List view handles full browsing/search.
   const BOARD_COLUMNS: { key: string; label: string; phase: PipelineStage; statuses: CourseStatus[] }[] =
     WORKFLOW_PHASES.flatMap((phase) =>
       phase.groups.map((group) => ({
