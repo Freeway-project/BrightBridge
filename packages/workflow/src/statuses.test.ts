@@ -121,4 +121,30 @@ describe("WORKFLOW_PHASES", () => {
       expect(phaseKey).toBe(getPipelineStage(group.statuses[0]));
     }
   });
+
+  it("groups the four instructor statuses under a dedicated 'instructor' phase", () => {
+    const instructor = WORKFLOW_PHASES.find((p) => p.key === "instructor");
+    expect(instructor).toBeDefined();
+    expect(instructor!.groups.flatMap((g) => g.statuses).sort()).toEqual(
+      ["instructor_approved", "instructor_questions", "instructor_viewing", "sent_to_instructor"].sort(),
+    );
+  });
+
+  it("keeps ready_for_instructor in staging, not instructor", () => {
+    const staging = WORKFLOW_PHASES.find((p) => p.key === "staging");
+    expect(staging!.groups.flatMap((g) => g.statuses).sort()).toEqual(
+      ["admin_changes_requested", "ready_for_instructor", "staging_in_progress", "submitted_to_admin", "waiting_on_admin"].sort(),
+    );
+  });
+});
+
+describe("getPipelineStage — instructor phase", () => {
+  it("maps the four instructor statuses to 'instructor'", () => {
+    for (const s of ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved"] as const) {
+      expect(getPipelineStage(s)).toBe("instructor");
+    }
+  });
+  it("keeps ready_for_instructor in staging", () => {
+    expect(getPipelineStage("ready_for_instructor")).toBe("staging");
+  });
 });
