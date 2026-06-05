@@ -2,23 +2,10 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from "recharts"
 import type { StatusCount } from "@/lib/repositories/contracts"
-import { COURSE_STATUS_LABELS } from "@coursebridge/workflow"
+import { COURSE_STATUS_LABELS, WORKFLOW_PHASES, getPipelineStage } from "@coursebridge/workflow"
+import { PHASE_COLOR } from "./phase-colors"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-const STATUS_COLORS: Record<string, string> = {
-  course_created:           "#64748b",
-  assigned_to_ta:           "#64748b",
-  ta_review_in_progress:    "#3b82f6",
-  submitted_to_admin:       "#3b82f6",
-  admin_changes_requested:  "#f97316",
-  waiting_on_admin:         "#8b5cf6",
-  staging_in_progress:      "#8b5cf6",
-  ready_for_instructor:     "#8b5cf6",
-  sent_to_instructor:       "#f59e0b",
-  instructor_questions:     "#f59e0b",
-  instructor_approved:      "#f59e0b",
-  final_approved:           "#10b981",
-}
 
 interface Props {
   statusCounts: StatusCount[]
@@ -26,6 +13,8 @@ interface Props {
 }
 
 export function StagePipeline({ statusCounts, totalCourses }: Props) {
+  const STATUS_ORDER = WORKFLOW_PHASES.flatMap((p) => p.groups.map((g) => g.statuses[0]))
+
   const data = statusCounts
     .filter((s) => s.count > 0)
     .map((s) => ({
@@ -33,16 +22,9 @@ export function StagePipeline({ statusCounts, totalCourses }: Props) {
       label: COURSE_STATUS_LABELS[s.status] ?? s.status,
       count: s.count,
       pct: totalCourses > 0 ? Math.round((s.count / totalCourses) * 100) : 0,
+      color: PHASE_COLOR[getPipelineStage(s.status)],
     }))
-    .sort((a, b) => {
-      const order = [
-        "course_created", "assigned_to_ta", "ta_review_in_progress",
-        "submitted_to_admin", "admin_changes_requested",
-        "waiting_on_admin", "staging_in_progress", "ready_for_instructor",
-        "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved",
-      ]
-      return order.indexOf(a.status) - order.indexOf(b.status)
-    })
+    .sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status))
 
   return (
     <Card className="border-border/60 bg-card/50 backdrop-blur-sm">
@@ -77,7 +59,7 @@ export function StagePipeline({ statusCounts, totalCourses }: Props) {
             />
             <Bar dataKey="count" radius={[0, 6, 6, 0]} maxBarSize={20}>
               {data.map((entry) => (
-                <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? "#6366f1"} fillOpacity={0.85} />
+                <Cell key={entry.status} fill={entry.color} fillOpacity={0.85} />
               ))}
               <LabelList
                 dataKey="count"
