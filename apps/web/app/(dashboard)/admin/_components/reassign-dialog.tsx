@@ -53,8 +53,14 @@ export function ReassignDialog({ open, onOpenChange, courses, tas, onDone }: Pro
       lastHandled.current = state
       toast.success(state.message ?? "Courses reassigned.")
       router.refresh()
-      onDone?.(courses.map((c) => c.id))
-      onOpenChange(false)
+      const failed = state.results?.filter((r) => !r.success) ?? []
+      const succeededIds = state.results
+        ? state.results.filter((r) => r.success).map((r) => r.courseId)
+        : courses.map((c) => c.id)
+      onDone?.(succeededIds)
+      if (failed.length === 0) {
+        onOpenChange(false)
+      }
     } else if (state.kind === "error") {
       lastHandled.current = state
       toast.error(state.message ?? "Reassignment failed.")
@@ -109,7 +115,7 @@ export function ReassignDialog({ open, onOpenChange, courses, tas, onDone }: Pro
             <Textarea name="reason" placeholder="Why is this being reassigned?" rows={3} />
           </div>
 
-          {state.kind === "error" && state.results && (
+          {state.results?.some((r) => !r.success) && (
             <ul className="max-h-32 space-y-1 overflow-auto text-xs">
               {state.results.filter((r) => !r.success).map((r) => (
                 <li key={r.courseId} className="text-destructive">
