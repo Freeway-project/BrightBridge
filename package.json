@@ -29,7 +29,7 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "pg": "^8.20.0",
-    "turbo": "^2.5.0",
+    "turbo": "^2.9.14",
     "typescript": "^5.9.0"
   },
   "packageManager": "npm@11.12.1"
