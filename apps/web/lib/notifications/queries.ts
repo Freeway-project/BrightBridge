@@ -75,6 +75,15 @@ type SupportMessageRow = {
   sender: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
 };
 
+type ReassignmentRow = {
+  id: string;
+  course_id: string;
+  to_profile_id: string;
+  created_at: string;
+  courses: { title: string | null } | { title: string | null }[] | null;
+  to_profile: { full_name: string | null } | { full_name: string | null }[] | null;
+};
+
 const ADMIN_ROLES: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
 const STAFF_PENDING_STATUSES = new Set<CourseStatus>([
   "assigned_to_ta",
@@ -118,11 +127,12 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       return { notifications: [], pendingCount: 0, role, error: false };
     }
 
-    const [courses, issues, comments, supportMessages] = await Promise.all([
+    const [courses, issues, comments, supportMessages, reassignments] = await Promise.all([
       getRelevantCourses(accessibleCourseIds, role),
       getRelevantIssues(accessibleCourseIds),
       getRecentComments(accessibleCourseIds, context.profile.id),
       role === "super_admin" ? getOpenSupportMessages() : Promise.resolve([]),
+      getRecentReassignments(context.profile.id, isAdmin),
     ]);
 
     const notifications = [
@@ -130,6 +140,7 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       ...issues.map((issue) => issueToNotification(issue, role)),
       ...comments.map((comment) => commentToNotification(comment, role)),
       ...supportMessages.map(supportMessageToNotification),
+      ...reassignments.map((r) => reassignmentToNotification(r, isAdmin)),
     ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
     return {
@@ -159,6 +170,29 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
 
     return (data ?? []).map((row) => row.course_id as string);
   }
+}
+
+async function getRecentReassignments(
+  forProfileId: string,
+  isAdmin: boolean,
+): Promise<ReassignmentRow[]> {
+  const admin = getSupabaseAdminClientOrThrow();
+  let query = admin
+    .from("course_reassignments")
+    .select("id, course_id, to_profile_id, created_at, courses ( title ), to_profile:to_profile_id ( full_name )")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  // TAs only see reassignments TO them; admins see all recent.
+  if (!isAdmin) {
+    query = query.eq("to_profile_id", forProfileId);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    throw new Error(`Could not load reassignments: ${error.message}`);
+  }
+  return (data ?? []) as unknown as ReassignmentRow[];
 }
 
 async function getOpenSupportMessages(): Promise<SupportMessageRow[]> {
@@ -398,6 +432,27 @@ function supportMessageToNotification(message: SupportMessageRow): NotificationI
     href: "/notifications",
     createdAt: message.created_at,
     pending: message.status !== "resolved",
+  };
+}
+
+function reassignmentToNotification(row: ReassignmentRow, viewerIsAdmin: boolean): NotificationItem {
+  const courseTitle = firstRelation(row.courses)?.title ?? null;
+  const toName = firstRelation(row.to_profile)?.full_name ?? "a TA";
+  return {
+    id: `reassign-${row.id}`,
+    kind: "assignment",
+    tone: viewerIsAdmin ? "default" : "success",
+    title: viewerIsAdmin
+      ? `Course reassigned to ${toName}`
+      : `You've been assigned ${courseTitle ?? "a course"}`,
+    description: viewerIsAdmin
+      ? `${courseTitle ?? "A course"} was reassigned to ${toName}.`
+      : `${courseTitle ?? "A course"} was reassigned to you. Open it when you're ready.`,
+    courseTitle,
+    meta: "Reassignment",
+    href: viewerIsAdmin ? `/admin/courses/${row.course_id}` : `/courses/${row.course_id}/metadata`,
+    createdAt: row.created_at,
+    pending: !viewerIsAdmin, // actionable for the new TA, informational for admins
   };
 }
 
