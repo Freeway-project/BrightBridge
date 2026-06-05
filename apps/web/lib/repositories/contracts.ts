@@ -85,6 +85,8 @@ export type AdminCourseRow = {
 export type AdminCourseListFilters = {
   search?: string;
   status?: CourseStatus;
+  /** Filter to any of these statuses (whole-phase filter). Takes precedence over `status`. */
+  statuses?: readonly CourseStatus[];
   taProfileId?: string;
   assignedOnly?: boolean;
 };

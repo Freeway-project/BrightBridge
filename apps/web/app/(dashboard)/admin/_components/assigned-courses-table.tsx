@@ -29,16 +29,18 @@ import {
 import { cn } from "@/lib/utils"
 import { Search, SlidersHorizontal, CheckCircle2, Circle, Send } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { CourseStatus } from "@coursebridge/workflow"
+import { WORKFLOW_PHASES, getPipelineStage, COURSE_STATUS_LABELS } from "@coursebridge/workflow"
+import type { CourseStatus, PipelineStage } from "@coursebridge/workflow"
 import { batchApproveToStagingAction } from "../actions"
 import { toast } from "sonner"
 
 type Props = {
   page: AdminCoursesPage
   tas: ProfileOption[]
+  statusCounts: { status: CourseStatus; count: number }[]
 }
 
-export function AssignedCoursesTable({ page, tas }: Props) {
+export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -49,8 +51,32 @@ export function AssignedCoursesTable({ page, tas }: Props) {
 
   const search = searchParams.get("search") ?? ""
   const statusFilter = searchParams.get("status") ?? "all"
+  const phaseParam = searchParams.get("phase")
   const taFilter = searchParams.get("ta") ?? "all"
   const currentPage = Math.max(page.page, 1)
+
+  // A selected status chip implies its phase; otherwise honor the phase tab.
+  // No param defaults to the Staging phase (matches the server); the All tab
+  // sets an explicit ?phase=all.
+  const activePhase: PipelineStage | "all" =
+    statusFilter !== "all"
+      ? getPipelineStage(statusFilter as CourseStatus)
+      : phaseParam === "all"
+        ? "all"
+        : ((phaseParam as PipelineStage | null) ?? "staging")
+
+  const countByStatus = useMemo(
+    () => new Map(statusCounts.map((s) => [s.status, s.count])),
+    [statusCounts]
+  )
+  const totalFilterCount = useMemo(
+    () => statusCounts.reduce((n, s) => n + s.count, 0),
+    [statusCounts]
+  )
+  const phaseStatuses = (key: PipelineStage) =>
+    WORKFLOW_PHASES.find((p) => p.key === key)?.groups.flatMap((g) => g.statuses) ?? []
+  const phaseCount = (key: PipelineStage) =>
+    phaseStatuses(key).reduce((n, s) => n + (countByStatus.get(s) ?? 0), 0)
 
   const taOptions = useMemo(
     () =>
@@ -119,6 +145,18 @@ export function AssignedCoursesTable({ page, tas }: Props) {
       search: null,
       status: null,
       ta: null,
+    })
+  }
+
+  // Phase tabs write `phase` explicitly (including the "all" sentinel) so it
+  // isn't dropped by setQuery's "all means clear" rule, and clear any status chip.
+  function setPhase(key: PipelineStage | "all") {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("page", "1")
+    params.delete("status")
+    params.set("phase", key)
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`)
     })
   }
 
@@ -208,35 +246,6 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </div>
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
             <Select
-              value={statusFilter}
-              onValueChange={(value) =>
-                setQuery({
-                  page: "1",
-                  status: value === "all" ? null : value,
-                })
-              }
-            >
-              <SelectTrigger className="w-full min-w-0 sm:w-[200px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent className="max-h-64 overflow-y-auto">
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="course_created">Migration — unassigned</SelectItem>
-                <SelectItem value="assigned_to_ta">Migration — assigned to TA</SelectItem>
-                <SelectItem value="ta_review_in_progress">Migration — TA reviewing</SelectItem>
-                <SelectItem value="submitted_to_admin">Staging — waiting on admin</SelectItem>
-                <SelectItem value="admin_changes_requested">Staging — fixes requested</SelectItem>
-                <SelectItem value="waiting_on_admin">Staging — admin building shell</SelectItem>
-                <SelectItem value="staging_in_progress">Staging — TA finalizing</SelectItem>
-                <SelectItem value="ready_for_instructor">Staging — ready to send</SelectItem>
-                <SelectItem value="sent_to_instructor">Staging — instructor reviewing</SelectItem>
-                <SelectItem value="instructor_questions">Staging — instructor questions</SelectItem>
-                <SelectItem value="instructor_approved">Staging — awaiting final sign-off</SelectItem>
-                <SelectItem value="final_approved">Provision — final approved</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
               value={taFilter}
               onValueChange={(value) =>
                 setQuery({
@@ -258,6 +267,88 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Phase tabs + status-chip drill-down. Labels and grouping derive from
+            WORKFLOW_PHASES / COURSE_STATUS_LABELS so they can never drift from
+            the workflow definition. A phase tab filters by all its statuses; a
+            chip narrows to one. */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPhase("all")}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                activePhase === "all"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:bg-muted"
+              )}
+            >
+              All
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[10px] font-semibold",
+                  activePhase === "all" ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                )}
+              >
+                {totalFilterCount}
+              </span>
+            </button>
+            {WORKFLOW_PHASES.map((p) => {
+              const active = activePhase === p.key
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => setPhase(p.key)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background hover:bg-muted"
+                  )}
+                >
+                  {p.label}
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-[10px] font-semibold",
+                      active ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {phaseCount(p.key)}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          {activePhase !== "all" && (
+            <div className="flex flex-wrap items-center gap-1.5 border-t border-border/60 pt-2">
+              <span className="mr-0.5 text-xs font-medium text-muted-foreground">Status:</span>
+              {phaseStatuses(activePhase).map((s) => {
+                const active = statusFilter === s
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setQuery({ page: "1", status: active ? null : s, phase: activePhase })}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                      active
+                        ? "border-primary bg-primary/10 font-medium text-primary"
+                        : "border-border bg-background text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {COURSE_STATUS_LABELS[s]}
+                    <span className="text-[10px] font-semibold text-muted-foreground">
+                      {countByStatus.get(s) ?? 0}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">

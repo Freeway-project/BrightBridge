@@ -37,6 +37,15 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const pageSize = parsePositiveInt(resolvedSearchParams?.pageSize, 50)
   const search = getSingleParam(resolvedSearchParams?.search)
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
+  const rawPhase = getSingleParam(resolvedSearchParams?.phase)
+  // A single status (chip) wins. Otherwise a phase tab filters by all its
+  // statuses — and the default landing view is the Staging phase (the active
+  // work, since migration is largely done); `?phase=all` clears the filter.
+  const phase: PipelineStage | undefined =
+    status || rawPhase === "all" ? undefined : (parsePipelineStage(rawPhase) ?? "staging")
+  const phaseStatuses = phase
+    ? WORKFLOW_PHASES.find((p) => p.key === phase)?.groups.flatMap((g) => g.statuses)
+    : undefined
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
   const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport, institutionData] = await Promise.all([
@@ -45,6 +54,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
       pageSize,
       search,
       status,
+      statuses: phaseStatuses,
       taProfileId,
     }),
     getAdminCoursesPage({
@@ -114,7 +124,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               <CoursesBoard
                 columns={boardColumns}
                 role={context.profile.role}
-                listView={<AssignedCoursesTable page={coursesPage} tas={tas} />}
+                listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} />}
               />
             }
             assignPanel={
@@ -168,4 +178,12 @@ function parseCourseStatus(value: string | undefined): CourseStatus | undefined 
   }
 
   return COURSE_STATUSES.includes(value as CourseStatus) ? (value as CourseStatus) : undefined
+}
+
+function parsePipelineStage(value: string | undefined): PipelineStage | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  return WORKFLOW_PHASES.some((p) => p.key === value) ? (value as PipelineStage) : undefined
 }
