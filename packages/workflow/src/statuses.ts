@@ -108,7 +108,7 @@ export const WORKFLOW_PHASES: WorkflowPhase[] = [
   {
     key: "migration",
     label: "Migration",
-    groups: (["course_created", "assigned_to_ta", "ta_review_in_progress"] as CourseStatus[]).map(statusGroup),
+    groups: (["course_created", "assigned_to_ta", "ta_review_in_progress"] as const satisfies readonly CourseStatus[]).map(statusGroup),
   },
   {
     key: "staging",
@@ -123,12 +123,12 @@ export const WORKFLOW_PHASES: WorkflowPhase[] = [
       "instructor_viewing",
       "instructor_questions",
       "instructor_approved",
-    ] as CourseStatus[]).map(statusGroup),
+    ] as const satisfies readonly CourseStatus[]).map(statusGroup),
   },
   {
     key: "provision",
     label: "Provision",
-    groups: (["final_approved"] as CourseStatus[]).map(statusGroup),
+    groups: (["final_approved"] as const satisfies readonly CourseStatus[]).map(statusGroup),
   },
 ]
 
