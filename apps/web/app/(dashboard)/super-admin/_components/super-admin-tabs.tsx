@@ -10,6 +10,7 @@ type Props = {
   assignPanel: React.ReactNode
   escalationsPanel: React.ReactNode
   organizationPanel: React.ReactNode
+  hierarchyPanel: React.ReactNode
   migrationPanel: React.ReactNode
   auditPanel: React.ReactNode
   analyticsPanel: React.ReactNode
@@ -26,6 +27,7 @@ export function SuperAdminTabs({
   assignPanel,
   escalationsPanel,
   organizationPanel,
+  hierarchyPanel,
   migrationPanel,
   auditPanel,
   analyticsPanel,
@@ -69,6 +71,7 @@ export function SuperAdminTabs({
           </TabsTrigger>
           <TabsTrigger value="migration">Migration</TabsTrigger>
           <TabsTrigger value="organization">Organization</TabsTrigger>
+          <TabsTrigger value="hierarchy">Hierarchy</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
@@ -82,6 +85,7 @@ export function SuperAdminTabs({
       <TabsContent value="support">{supportPanel}</TabsContent>
       <TabsContent value="migration">{migrationPanel}</TabsContent>
       <TabsContent value="organization">{organizationPanel}</TabsContent>
+      <TabsContent value="hierarchy">{hierarchyPanel}</TabsContent>
       <TabsContent value="audit">{auditPanel}</TabsContent>
       <TabsContent value="analytics">{analyticsPanel}</TabsContent>
     </Tabs>

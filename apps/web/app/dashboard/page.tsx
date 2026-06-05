@@ -10,6 +10,7 @@ const ROLE_ROUTES: Record<Role, string> = {
   admin_viewer: "/communications",
   instructor: "/instructor",
   super_admin: "/super-admin",
+  provost: "/provost",
 };
 
 export default async function DashboardPage() {

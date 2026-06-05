@@ -54,4 +54,10 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
   ],
+  provost: [
+    { label: "Overview",     href: "/provost",     icon: LayoutDashboard },
+    { label: "Organization", href: "/provost/org", icon: Building2 },
+    { label: "Notifications", href: "/notifications", icon: Bell },
+    { label: "Guide",        href: "/guide",       icon: HelpCircle },
+  ],
 }

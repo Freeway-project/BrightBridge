@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   COURSE_STATUSES,
+  INSTRUCTOR_ACTIONABLE_COURSE_STATUSES,
   STAFF_ACTIONABLE_COURSE_STATUSES,
   getBallInCourt,
   getStaffAdvance,
+  isInstructorActionableStatus,
   type CourseStatus,
 } from "./statuses";
 
@@ -63,5 +65,25 @@ describe("getStaffAdvance", () => {
   it("is non-null for exactly STAFF_ACTIONABLE_COURSE_STATUSES", () => {
     const nonNull = COURSE_STATUSES.filter((s) => getStaffAdvance(s) !== null).sort();
     expect(nonNull).toEqual([...STAFF_ACTIONABLE_COURSE_STATUSES].sort());
+  });
+});
+
+describe("isInstructorActionableStatus", () => {
+  it("is true only while the course is awaiting the instructor's decision", () => {
+    expect(isInstructorActionableStatus("sent_to_instructor")).toBe(true);
+    expect(isInstructorActionableStatus("instructor_viewing")).toBe(true);
+  });
+
+  it("is false once the instructor has responded or before it reaches them", () => {
+    expect(isInstructorActionableStatus("instructor_questions")).toBe(false);
+    expect(isInstructorActionableStatus("instructor_approved")).toBe(false);
+    expect(isInstructorActionableStatus("final_approved")).toBe(false);
+    expect(isInstructorActionableStatus("ready_for_instructor")).toBe(false);
+    expect(isInstructorActionableStatus("ta_review_in_progress")).toBe(false);
+  });
+
+  it("is true for exactly INSTRUCTOR_ACTIONABLE_COURSE_STATUSES", () => {
+    const actionable = COURSE_STATUSES.filter(isInstructorActionableStatus).sort();
+    expect(actionable).toEqual([...INSTRUCTOR_ACTIONABLE_COURSE_STATUSES].sort());
   });
 });

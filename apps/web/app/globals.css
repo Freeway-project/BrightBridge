@@ -450,3 +450,30 @@ html[data-magicui-theme-vt="active"]::view-transition-new(root) {
   background: color-mix(in srgb, var(--background) 90%, transparent) !important;
   color: var(--foreground) !important;
 }
+
+/* Instructor guided walkthrough (driver.js) — large, high-contrast popover
+   tuned for less-technical / older users. */
+.cb-instructor-tour.driver-popover {
+  max-width: 22rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-radius: 0.75rem;
+}
+.cb-instructor-tour .driver-popover-title {
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+.cb-instructor-tour .driver-popover-description {
+  font-size: 1rem;
+  line-height: 1.55;
+  margin-top: 0.35rem;
+}
+.cb-instructor-tour .driver-popover-navigation-btns button {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+}
+.cb-instructor-tour .driver-popover-progress-text {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
