@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   COURSE_STATUSES,
+  COURSE_STATUS_LABELS,
   INSTRUCTOR_ACTIONABLE_COURSE_STATUSES,
   STAFF_ACTIONABLE_COURSE_STATUSES,
+  WORKFLOW_PHASES,
   getBallInCourt,
+  getPipelineStage,
   getStaffAdvance,
   isInstructorActionableStatus,
   type CourseStatus,
@@ -85,5 +88,37 @@ describe("isInstructorActionableStatus", () => {
   it("is true for exactly INSTRUCTOR_ACTIONABLE_COURSE_STATUSES", () => {
     const actionable = COURSE_STATUSES.filter(isInstructorActionableStatus).sort();
     expect(actionable).toEqual([...INSTRUCTOR_ACTIONABLE_COURSE_STATUSES].sort());
+  });
+});
+
+describe("WORKFLOW_PHASES", () => {
+  const allGroups = WORKFLOW_PHASES.flatMap((phase) =>
+    phase.groups.map((group) => ({ phaseKey: phase.key, group })),
+  );
+
+  it("has exactly one group per course status, covering all statuses once", () => {
+    const grouped = allGroups
+      .flatMap(({ group }) => group.statuses)
+      .sort();
+    expect(grouped).toEqual([...COURSE_STATUSES].sort());
+  });
+
+  it("gives every group exactly one status", () => {
+    for (const { group } of allGroups) {
+      expect(group.statuses).toHaveLength(1);
+    }
+  });
+
+  it("labels every group with its canonical status label", () => {
+    for (const { group } of allGroups) {
+      const status = group.statuses[0];
+      expect(group.label).toBe(COURSE_STATUS_LABELS[status]);
+    }
+  });
+
+  it("places every group under the status's pipeline phase", () => {
+    for (const { phaseKey, group } of allGroups) {
+      expect(phaseKey).toBe(getPipelineStage(group.statuses[0]));
+    }
   });
 });
