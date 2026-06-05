@@ -17,14 +17,14 @@ import { batchReassignCourseAction, type AssignTaState } from "../actions"
 
 const initialState: AssignTaState = { kind: "idle", message: null }
 
-export type ReassignTarget = { id: string; title: string; currentTaId: string | null }
+export type ReassignTarget = { id: string; title: string }
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   courses: ReassignTarget[]
   tas: ProfileOption[]
-  onDone?: () => void
+  onDone?: (courseIds: string[]) => void
 }
 
 export function ReassignDialog({ open, onOpenChange, courses, tas, onDone }: Props) {
@@ -53,13 +53,13 @@ export function ReassignDialog({ open, onOpenChange, courses, tas, onDone }: Pro
       lastHandled.current = state
       toast.success(state.message ?? "Courses reassigned.")
       router.refresh()
-      onDone?.()
+      onDone?.(courses.map((c) => c.id))
       onOpenChange(false)
     } else if (state.kind === "error") {
       lastHandled.current = state
       toast.error(state.message ?? "Reassignment failed.")
     }
-  }, [state, router, onDone, onOpenChange])
+  }, [state, router, onDone, onOpenChange, courses])
 
   // Reset selection when reopened.
   useEffect(() => {

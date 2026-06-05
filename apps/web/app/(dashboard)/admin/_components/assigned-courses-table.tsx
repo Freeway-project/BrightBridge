@@ -93,10 +93,6 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   )
 
   const filteredCourses = page.data
-  const eligibleIds = useMemo(
-    () => filteredCourses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id),
-    [filteredCourses]
-  )
   const selectableIds = useMemo(
     () => filteredCourses.filter((c) => c.ta).map((c) => c.id),
     [filteredCourses]
@@ -139,7 +135,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const openReassign = (rows: AdminCourseRow[]) => {
     const targets = rows
       .filter((r) => r.ta) // only courses that currently have a TA can be reassigned
-      .map((r) => ({ id: r.id, title: r.title, currentTaId: r.ta?.id ?? null }))
+      .map((r) => ({ id: r.id, title: r.title }))
     if (targets.length === 0) {
       toast.error("Select at least one course that already has a TA.")
       return
@@ -505,19 +501,17 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                             <p className="text-sm font-medium text-foreground">{course.ta.name ?? "Unnamed TA"}</p>
                             <p className="truncate text-xs text-muted-foreground">{course.ta.email}</p>
                             <p className="text-[11px] text-muted-foreground">Current TA owner</p>
-                            {course.ta && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="-ml-2 mt-0.5 h-6 px-2 text-xs"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  openReassign([course])
-                                }}
-                              >
-                                Reassign
-                              </Button>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="-ml-2 mt-0.5 h-6 px-2 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openReassign([course])
+                              }}
+                            >
+                              Reassign
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -609,7 +603,13 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
         onOpenChange={setReassignOpen}
         courses={reassignTargets}
         tas={tas}
-        onDone={() => setSelectedIds(new Set())}
+        onDone={(ids) =>
+          setSelectedIds((prev) => {
+            const next = new Set(prev)
+            ids.forEach((id) => next.delete(id))
+            return next
+          })
+        }
       />
     </Card>
   )
