@@ -32,6 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { WORKFLOW_PHASES, getPipelineStage, COURSE_STATUS_LABELS } from "@coursebridge/workflow"
 import type { CourseStatus, PipelineStage } from "@coursebridge/workflow"
 import { batchApproveToStagingAction } from "../actions"
+import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
 import { toast } from "sonner"
 
 type Props = {
@@ -48,6 +49,8 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isBatchPending, startBatchTransition] = useTransition()
+  const [reassignTargets, setReassignTargets] = useState<ReassignTarget[]>([])
+  const [reassignOpen, setReassignOpen] = useState(false)
 
   const search = searchParams.get("search") ?? ""
   const statusFilter = searchParams.get("status") ?? "all"
@@ -90,8 +93,8 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   )
 
   const filteredCourses = page.data
-  const eligibleIds = useMemo(
-    () => filteredCourses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id),
+  const selectableIds = useMemo(
+    () => filteredCourses.filter((c) => c.ta).map((c) => c.id),
     [filteredCourses]
   )
 
@@ -109,7 +112,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
-  const allEligibleSelected = eligibleIds.length > 0 && eligibleIds.every((id) => selectedIds.has(id))
+  const allSelectableSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id))
 
   function toggleRow(id: string) {
     setSelectedIds((prev) => {
@@ -120,11 +123,33 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   }
 
   function toggleAll() {
-    setSelectedIds(allEligibleSelected ? new Set() : new Set(eligibleIds))
+    setSelectedIds(allSelectableSelected ? new Set() : new Set(selectableIds))
+  }
+
+  const selectedRows = useMemo(
+    () => page.data.filter((c) => selectedIds.has(c.id)),
+    [page.data, selectedIds],
+  )
+  const approveEligibleSelectedCount = selectedRows.filter((r) => r.status === "submitted_to_admin").length
+
+  const openReassign = (rows: AdminCourseRow[]) => {
+    const targets = rows
+      .filter((r) => r.ta) // only courses that currently have a TA can be reassigned
+      .map((r) => ({ id: r.id, title: r.title }))
+    if (targets.length === 0) {
+      toast.error("Select at least one course that already has a TA.")
+      return
+    }
+    setReassignTargets(targets)
+    setReassignOpen(true)
   }
 
   function handleBatchApprove() {
-    const ids = Array.from(selectedIds)
+    const ids = selectedRows.filter((r) => r.status === "submitted_to_admin").map((r) => r.id)
+    if (ids.length === 0) {
+      toast.warning("None of the selected courses are ready to move to staging.")
+      return
+    }
     startBatchTransition(async () => {
       const { succeeded, failed } = await batchApproveToStagingAction(ids)
       setSelectedIds(new Set())
@@ -393,9 +418,18 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                   Clear
                 </Button>
                 <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => openReassign(selectedRows)}
+                  disabled={isBatchPending}
+                >
+                  Reassign selected
+                </Button>
+                <Button
                   size="sm"
                   className="h-7 gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white"
-                  disabled={isBatchPending}
+                  disabled={isBatchPending || approveEligibleSelectedCount === 0}
                   onClick={handleBatchApprove}
                 >
                   <Send className="size-3" />
@@ -410,11 +444,11 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-10 pl-4">
-                    {eligibleIds.length > 0 && (
+                    {selectableIds.length > 0 && (
                       <Checkbox
-                        checked={allEligibleSelected}
+                        checked={allSelectableSelected}
                         onCheckedChange={toggleAll}
-                        aria-label="Select all eligible"
+                        aria-label="Select all reassignable"
                       />
                     )}
                   </TableHead>
@@ -433,7 +467,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                     onClick={() => router.push(`/admin/courses/${course.id}`)}
                   >
                     <TableCell className="w-10 pl-4 align-middle" onClick={(e) => e.stopPropagation()}>
-                      {course.status === "submitted_to_admin" && (
+                      {course.ta && (
                         <Checkbox
                           checked={selectedIds.has(course.id)}
                           onCheckedChange={() => toggleRow(course.id)}
@@ -467,6 +501,17 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                             <p className="text-sm font-medium text-foreground">{course.ta.name ?? "Unnamed TA"}</p>
                             <p className="truncate text-xs text-muted-foreground">{course.ta.email}</p>
                             <p className="text-[11px] text-muted-foreground">Current TA owner</p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="-ml-2 mt-0.5 h-6 px-2 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openReassign([course])
+                              }}
+                            >
+                              Reassign
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -553,6 +598,19 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
           </div>
         </div>
       </CardContent>
+      <ReassignDialog
+        open={reassignOpen}
+        onOpenChange={setReassignOpen}
+        courses={reassignTargets}
+        tas={tas}
+        onDone={(ids) =>
+          setSelectedIds((prev) => {
+            const next = new Set(prev)
+            ids.forEach((id) => next.delete(id))
+            return next
+          })
+        }
+      />
     </Card>
   )
 }
