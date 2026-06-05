@@ -20,7 +20,7 @@ export function AdminOverview({ data }: { data: AdminOverviewData }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-6 sm:max-w-md">
+      <div className="grid grid-cols-2 gap-6 max-w-md">
         <StatCard label="Total Courses" value={totalCourses} icon="book-open" />
         <StatCard label="Completed" value={completed} icon="check-square" sub={`${completedPct}% of total`} />
       </div>

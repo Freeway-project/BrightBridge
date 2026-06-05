@@ -297,6 +297,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const to = from + safePageSize - 1;
       const normalizedSearch = normalizeSearchTerm(filters.search);
       const status = filters.status;
+      const statuses = filters.statuses && filters.statuses.length > 0 ? filters.statuses : undefined;
       const taProfileId = filters.taProfileId?.trim() || undefined;
       const assignedOnly = filters.assignedOnly === true;
       const requireStaffJoin = assignedOnly || Boolean(taProfileId);
@@ -321,7 +322,9 @@ export function createSupabaseCourseRepository(): CourseRepository {
           { count: "exact" },
         );
 
-      if (status) {
+      if (statuses) {
+        query = query.in("status", statuses as string[]);
+      } else if (status) {
         query = query.eq("status", status);
       }
 
