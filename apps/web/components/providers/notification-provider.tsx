@@ -540,12 +540,12 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "course_reassignments" },
         async (payload) => {
-          if (!dedup(`reassign-${payload.new.id}`)) return
           const isNewTa = payload.new.to_profile_id === userId
           // Relevant to the new TA, or to any admin watching.
           if (!isNewTa && !IS_ADMIN(role)) return
           // Don't toast the actor about their own action.
           if (payload.new.reassigned_by === userId) return
+          if (!dedup(`reassign-${payload.new.id}`)) return
 
           const courseTitle = await getCourseCode(payload.new.course_id)
 
