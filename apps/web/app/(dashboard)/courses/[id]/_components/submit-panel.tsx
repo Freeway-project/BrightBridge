@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
+import { SummaryNotesRows, parseSummaryRows, joinSummaryRows } from "@/components/shared/summary-notes-rows"
 import { ReviewSummary } from "./review-summary"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { toast } from "sonner"
@@ -50,11 +51,16 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
   const [resubmitNote, setResubmitNote] = useState("")
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [provisionOpen, setProvisionOpen] = useState(false)
-  const [provisionNotes, setProvisionNotes] = useState(instructorNotes ?? "")
+  const [provisionRows, setProvisionRows] = useState<string[]>(() => parseSummaryRows(instructorNotes))
+  const [finalSummaryRows, setFinalSummaryRows] = useState<string[]>(() => parseSummaryRows(instructorNotes))
 
   const advance = getStaffAdvance(courseStatus)
   const provisionOption =
     getStaffAdvanceOptions(courseStatus).find((option) => option.action === "provision-complete") ?? null
+  const isFinalize = advance?.action === "finalize-staging"
+  // The Final Summary for Instructor is mandatory before handing a course to the
+  // instructor (Mark Ready for Instructor). Provision Complete keeps it optional.
+  const finalSummaryRequired = isFinalize && joinSummaryRows(finalSummaryRows).length === 0
   const isResubmit = Boolean(advance?.requiresNote)
   const isStatusSubmittable = advance !== null
   // Section requirements only gate the review-submit path, not staging finalize.
@@ -88,7 +94,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
       setErrorMsg(null)
       const res =
         advance.action === "finalize-staging"
-          ? await markStagingComplete(courseId)
+          ? await markStagingComplete(courseId, joinSummaryRows(finalSummaryRows))
           : await submitReview(courseId, isResubmit ? resubmitNote.trim() : undefined)
       if (!res?.ok) {
         const message = res?.error || "Failed to advance."
@@ -106,7 +112,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
     setProvisionOpen(false)
     startTransition(async () => {
       setErrorMsg(null)
-      const res = await markProvisionComplete(courseId, provisionNotes.trim() || undefined)
+      const res = await markProvisionComplete(courseId, joinSummaryRows(provisionRows) || undefined)
       if (!res?.ok) {
         const message = res?.error || "Failed to mark provision complete."
         setErrorMsg(message)
@@ -280,20 +286,28 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-xs font-medium text-muted-foreground">
-                        {provisionOption
-                          ? "Hand this course to the instructor for review, or mark it provision complete to finish it now."
-                          : "By submitting, you confirm that all review criteria have been met according to the guidelines."}
-                      </p>
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="space-y-4">
+                      {provisionOption ? (
+                        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-800 dark:text-amber-300">
+                          <AlertCircle className="mt-0.5 size-5 shrink-0" />
+                          <p className="text-sm font-medium">
+                            Hand this course to the instructor for review, or mark it{" "}
+                            <span className="font-bold">provision complete</span> to finish it now.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-xs font-medium text-muted-foreground">
+                          By submitting, you confirm that all review criteria have been met according to the guidelines.
+                        </p>
+                      )}
+                      <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                         {provisionOption && (
                           <Button
                             variant="outline"
                             disabled={isPending || isSuccess}
                             onClick={() => setProvisionOpen(true)}
                             size="lg"
-                            className="h-14 rounded-2xl px-6 text-sm font-black uppercase tracking-[0.12em] border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
+                            className="h-14 w-full rounded-2xl px-6 text-sm font-black uppercase tracking-[0.12em] border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400 sm:w-auto"
                           >
                             {provisionOption.ctaLabel}
                             <CheckCircle2 className="ml-2 size-5" />
@@ -304,7 +318,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
                           onClick={handleSubmit}
                           size="lg"
                           className={cn(
-                            "h-14 min-w-[200px] rounded-2xl px-8 text-base font-black uppercase tracking-[0.15em] transition-all duration-500",
+                            "h-14 w-full rounded-2xl px-8 text-base font-black uppercase tracking-[0.15em] transition-all duration-500 sm:w-auto sm:min-w-[200px]",
                             !disabled && isResubmit
                               ? "bg-gradient-to-r from-amber-500 to-orange-500 shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:-translate-y-1 active:scale-95"
                               : !disabled && "bg-gradient-to-r from-blue-600 to-violet-600 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 active:scale-95"
@@ -339,11 +353,29 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
               : ""}
           </DialogDescription>
         </DialogHeader>
+        {isFinalize && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">
+              Final Summary for Instructor <span className="text-destructive">(required)</span>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              A short, plain-language wrap-up the instructor will read before signing off. Add one point per row.
+            </p>
+            <SummaryNotesRows
+              rows={finalSummaryRows}
+              onChange={setFinalSummaryRows}
+              disabled={isPending}
+              placeholder="Summarise a key outcome or anything the instructor should know…"
+            />
+          </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={() => setConfirmOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={runAdvance}>Confirm</Button>
+          <Button onClick={runAdvance} disabled={finalSummaryRequired}>
+            Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -357,17 +389,14 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <label htmlFor="provision-notes" className="text-sm font-medium">
+          <p className="text-sm font-medium">
             Instructor notes <span className="text-muted-foreground">(optional)</span>
-          </label>
-          <Textarea
-            id="provision-notes"
-            value={provisionNotes}
-            onChange={(e) => setProvisionNotes(e.target.value)}
-            rows={4}
-            maxLength={5000}
+          </p>
+          <SummaryNotesRows
+            rows={provisionRows}
+            onChange={setProvisionRows}
+            disabled={isPending}
             placeholder="Anything the instructor should know about this course…"
-            className="resize-none"
           />
         </div>
         <DialogFooter>

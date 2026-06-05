@@ -23,8 +23,8 @@ course_created
               → submitted_to_admin
         → waiting_on_admin          ← admin approves review, builds staging shell
           → staging_in_progress      (staff finalizes staging — two-way fork)
-            → final_approved         ← staff "Mark Provision Complete" (skips instructor)
-            → ready_for_instructor   ← staff "Mark Ready for Instructor"
+            → final_approved         ← staff "Mark Provision Complete" (skips instructor; instructor notes optional)
+            → ready_for_instructor   ← staff "Mark Ready for Instructor" (requires a Final Summary for Instructor)
               → sent_to_instructor
                 → instructor_viewing    ← auto-set when invite link is opened
                 → instructor_questions  ← instructor has questions
