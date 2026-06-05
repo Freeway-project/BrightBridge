@@ -54,6 +54,27 @@ export const COURSE_STATUS_LABELS: Record<CourseStatus, string> = {
   final_approved: "Final Approved"
 };
 
+/**
+ * Abbreviated status labels for dense displays (e.g. the admin phase breakdown),
+ * where the phase header already supplies context. Display-only — the canonical
+ * names remain COURSE_STATUS_LABELS.
+ */
+export const COURSE_STATUS_SHORT_LABELS: Record<CourseStatus, string> = {
+  course_created: "Created",
+  assigned_to_ta: "Assigned",
+  ta_review_in_progress: "TA Review",
+  submitted_to_admin: "Submitted",
+  admin_changes_requested: "Changes",
+  waiting_on_admin: "Waiting",
+  staging_in_progress: "In Process",
+  ready_for_instructor: "Ready",
+  sent_to_instructor: "Sent",
+  instructor_viewing: "Viewing",
+  instructor_questions: "Questions",
+  instructor_approved: "Approved",
+  final_approved: "Final"
+};
+
 export function getCourseStatusLabel(status: CourseStatus) {
   return COURSE_STATUS_LABELS[status];
 }

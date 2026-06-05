@@ -8,6 +8,7 @@ export {
 } from "./roles";
 export {
   COURSE_STATUS_LABELS,
+  COURSE_STATUS_SHORT_LABELS,
   COURSE_STATUSES,
   INSTRUCTOR_ACTIONABLE_COURSE_STATUSES,
   STAFF_ACTIONABLE_COURSE_STATUSES,
@@ -29,6 +30,11 @@ export {
   type WorkflowPhase,
   type WorkflowPhaseGroup
 } from "./statuses";
+export {
+  getPhaseBreakdown,
+  type PhaseBreakdown,
+  type StatusBreakdown
+} from "./phase-breakdown";
 export {
   assertCanTransition,
   canTransition,
