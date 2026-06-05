@@ -1,5 +1,3 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { PhaseBreakdown as PhaseBreakdownData } from "@coursebridge/workflow"
@@ -17,14 +15,14 @@ export function PhaseBreakdown({ breakdown }: { breakdown: PhaseBreakdownData[] 
         {breakdown.map((phase) => (
           <div key={phase.key} className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="size-2 rounded-full" style={{ backgroundColor: PHASE_COLOR[phase.key] }} />
+              <span aria-hidden className="size-2 rounded-full" style={{ backgroundColor: PHASE_COLOR[phase.key] }} />
               <span className="text-xs font-black uppercase tracking-wider text-foreground">{phase.label}</span>
-              <span className="ml-auto text-sm font-black tabular-nums text-foreground">{phase.total}</span>
+              <span className={cn("ml-auto text-sm font-black tabular-nums", phase.total === 0 ? "text-muted-foreground/40" : "text-foreground")}>{phase.total}</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-4 text-xs">
               {phase.statuses.map((s, i) => (
                 <span key={s.status} className="flex items-center gap-1">
-                  <span className={cn(s.count === 0 ? "text-muted-foreground/40" : "text-muted-foreground")}>
+                  <span className={s.count === 0 ? "text-muted-foreground/40" : "text-muted-foreground"}>
                     {s.shortLabel}
                   </span>
                   <span className={cn("font-bold tabular-nums", s.count === 0 ? "text-muted-foreground/40" : "text-foreground")}>
