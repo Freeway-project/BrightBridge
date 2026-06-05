@@ -97,6 +97,10 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
     () => filteredCourses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id),
     [filteredCourses]
   )
+  const selectableIds = useMemo(
+    () => filteredCourses.filter((c) => c.ta).map((c) => c.id),
+    [filteredCourses]
+  )
 
   const visibleTaCount = new Set(
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
@@ -112,7 +116,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
-  const allEligibleSelected = eligibleIds.length > 0 && eligibleIds.every((id) => selectedIds.has(id))
+  const allSelectableSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id))
 
   function toggleRow(id: string) {
     setSelectedIds((prev) => {
@@ -123,13 +127,14 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   }
 
   function toggleAll() {
-    setSelectedIds(allEligibleSelected ? new Set() : new Set(eligibleIds))
+    setSelectedIds(allSelectableSelected ? new Set() : new Set(selectableIds))
   }
 
   const selectedRows = useMemo(
     () => page.data.filter((c) => selectedIds.has(c.id)),
     [page.data, selectedIds],
   )
+  const approveEligibleSelectedCount = selectedRows.filter((r) => r.status === "submitted_to_admin").length
 
   const openReassign = (rows: AdminCourseRow[]) => {
     const targets = rows
@@ -144,7 +149,11 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
   }
 
   function handleBatchApprove() {
-    const ids = Array.from(selectedIds)
+    const ids = selectedRows.filter((r) => r.status === "submitted_to_admin").map((r) => r.id)
+    if (ids.length === 0) {
+      toast.warning("None of the selected courses are ready to move to staging.")
+      return
+    }
     startBatchTransition(async () => {
       const { succeeded, failed } = await batchApproveToStagingAction(ids)
       setSelectedIds(new Set())
@@ -424,7 +433,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                 <Button
                   size="sm"
                   className="h-7 gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white"
-                  disabled={isBatchPending}
+                  disabled={isBatchPending || approveEligibleSelectedCount === 0}
                   onClick={handleBatchApprove}
                 >
                   <Send className="size-3" />
@@ -439,11 +448,11 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-10 pl-4">
-                    {eligibleIds.length > 0 && (
+                    {selectableIds.length > 0 && (
                       <Checkbox
-                        checked={allEligibleSelected}
+                        checked={allSelectableSelected}
                         onCheckedChange={toggleAll}
-                        aria-label="Select all eligible"
+                        aria-label="Select all reassignable"
                       />
                     )}
                   </TableHead>
@@ -462,7 +471,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                     onClick={() => router.push(`/admin/courses/${course.id}`)}
                   >
                     <TableCell className="w-10 pl-4 align-middle" onClick={(e) => e.stopPropagation()}>
-                      {course.status === "submitted_to_admin" && (
+                      {course.ta && (
                         <Checkbox
                           checked={selectedIds.has(course.id)}
                           onCheckedChange={() => toggleRow(course.id)}
