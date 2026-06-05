@@ -3,10 +3,9 @@ import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useState, useTransition } from "react";
 import { ClipboardList, Check } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { saveFinalSummaryNotesAction } from "@/lib/courses/final-summary-actions";
-import { cn } from "@/lib/utils";
+import { SummaryNotesRows, parseSummaryRows, joinSummaryRows } from "./summary-notes-rows";
 
 interface Props {
   courseId: string;
@@ -17,31 +16,35 @@ interface Props {
 
 /**
  * "Final Summary for Instructor" — the TA's plain-language wrap-up shown to the
- * instructor at sign-off. Editable by the assigned TA during staging; read-only
- * everywhere else. Renders nothing when read-only and empty.
+ * instructor at sign-off. Authored as an add/remove list of note rows (stored
+ * joined into a single text field). Editable by the assigned TA during staging;
+ * read-only everywhere else. Renders nothing when read-only and empty.
  */
 export function FinalSummaryEditor({ courseId, initialNotes, editable }: Props) {
-  const [notes, setNotes] = useState(initialNotes ?? "");
-  const [savedNotes, setSavedNotes] = useState(initialNotes ?? "");
+  const [rows, setRows] = useState<string[]>(() => parseSummaryRows(initialNotes));
+  const [savedJoined, setSavedJoined] = useState(() => joinSummaryRows(parseSummaryRows(initialNotes)));
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const dirty = notes.trim() !== savedNotes.trim();
+  const joined = joinSummaryRows(rows);
+  const dirty = joined !== savedJoined;
 
   function save() {
     if (!dirty) return;
     setError(null);
     startTransition(async () => {
       try {
-        await saveFinalSummaryNotesAction(courseId, notes);
-        setSavedNotes(notes);
+        await saveFinalSummaryNotesAction(courseId, joined);
+        setSavedJoined(joined);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not save the summary.");
       }
     });
   }
 
-  if (!editable && !savedNotes.trim()) return null;
+  if (!editable && !savedJoined.trim()) return null;
+
+  const readonlyRows = parseSummaryRows(savedJoined);
 
   return (
     <section className="rounded-lg border border-border bg-card p-5 space-y-3">
@@ -53,16 +56,14 @@ export function FinalSummaryEditor({ courseId, initialNotes, editable }: Props) 
       {editable ? (
         <>
           <p className="text-xs text-muted-foreground">
-            A short, plain-language wrap-up the instructor will read before signing off.
+            A short, plain-language wrap-up the instructor will read before signing off. Add one point per row.
           </p>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+          <SummaryNotesRows
+            rows={rows}
+            onChange={setRows}
+            disabled={isPending}
             onBlur={save}
-            rows={5}
-            maxLength={5000}
-            placeholder="Summarise the key outcomes and anything the instructor should know…"
-            className="resize-y"
+            placeholder="Summarise a key outcome or anything the instructor should know…"
           />
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground" aria-live="polite">
@@ -72,7 +73,7 @@ export function FinalSummaryEditor({ courseId, initialNotes, editable }: Props) 
                 <span className="text-destructive">{error}</span>
               ) : dirty ? (
                 "Unsaved changes"
-              ) : savedNotes.trim() ? (
+              ) : savedJoined.trim() ? (
                 <span className="inline-flex items-center gap-1 text-success"><Check className="size-3" /> Saved</span>
               ) : null}
             </span>
@@ -82,7 +83,11 @@ export function FinalSummaryEditor({ courseId, initialNotes, editable }: Props) 
           </div>
         </>
       ) : (
-        <p className={cn("text-sm whitespace-pre-wrap leading-relaxed text-foreground")}>{savedNotes}</p>
+        <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed text-foreground">
+          {readonlyRows.map((row, i) => (
+            <li key={i}>{row}</li>
+          ))}
+        </ul>
       )}
     </section>
   );
