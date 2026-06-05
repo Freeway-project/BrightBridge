@@ -75,17 +75,10 @@ export function isInstructorVisibleStatus(status: CourseStatus) {
 export type PipelineStage = "migration" | "staging" | "provision"
 
 /**
- * Sub-group keys used to bucket statuses within a pipeline phase for the
- * dashboard tab/column UIs. See {@link WORKFLOW_PHASES}.
+ * Group keys now map 1:1 to a course status — each dashboard column holds
+ * exactly one status, labelled with its canonical {@link COURSE_STATUS_LABELS}.
  */
-export type StatusGroupKey =
-  | "todo"
-  | "in_review"
-  | "admin_review"
-  | "shell_build"
-  | "ready_to_send"
-  | "with_instructor"
-  | "final"
+export type StatusGroupKey = CourseStatus
 
 export type WorkflowPhaseGroup = {
   key: StatusGroupKey
@@ -99,38 +92,43 @@ export type WorkflowPhase = {
   groups: WorkflowPhaseGroup[]
 }
 
+/** One column = one status; label mirrors COURSE_STATUS_LABELS. */
+function statusGroup(status: CourseStatus): WorkflowPhaseGroup {
+  return { key: status, label: COURSE_STATUS_LABELS[status], statuses: [status] }
+}
+
 /**
- * Single source of truth for grouping the 12 course statuses into the three
- * pipeline phases (Migration / Staging / Provision) and their sub-groups.
- * Both the TA course-list view and the admin board derive their tabs/columns
- * from this — labels mirror {@link COURSE_STATUS_LABELS}. Every status appears
- * in exactly one group.
+ * Single source of truth for grouping the course statuses into the three
+ * pipeline phases (Migration / Staging / Provision). Each status is its own
+ * column, labelled with its canonical status label, so the column header, the
+ * card badge, and the backend status all read identically. Both the staff
+ * course-list view and the admin board derive their columns from this.
  */
 export const WORKFLOW_PHASES: WorkflowPhase[] = [
   {
     key: "migration",
     label: "Migration",
-    groups: [
-      { key: "todo", label: "To Do", statuses: ["course_created", "assigned_to_ta"] },
-      { key: "in_review", label: "In Review", statuses: ["ta_review_in_progress"] },
-    ],
+    groups: (["course_created", "assigned_to_ta", "ta_review_in_progress"] as CourseStatus[]).map(statusGroup),
   },
   {
     key: "staging",
     label: "Staging",
-    groups: [
-      { key: "admin_review", label: "Admin Review", statuses: ["submitted_to_admin", "admin_changes_requested"] },
-      { key: "shell_build", label: "Shell Build", statuses: ["waiting_on_admin", "staging_in_progress"] },
-      { key: "ready_to_send", label: "Ready to Send", statuses: ["ready_for_instructor"] },
-      { key: "with_instructor", label: "With Instructor", statuses: ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved"] },
-    ],
+    groups: ([
+      "submitted_to_admin",
+      "admin_changes_requested",
+      "waiting_on_admin",
+      "staging_in_progress",
+      "ready_for_instructor",
+      "sent_to_instructor",
+      "instructor_viewing",
+      "instructor_questions",
+      "instructor_approved",
+    ] as CourseStatus[]).map(statusGroup),
   },
   {
     key: "provision",
     label: "Provision",
-    groups: [
-      { key: "final", label: "Final Approved", statuses: ["final_approved"] },
-    ],
+    groups: (["final_approved"] as CourseStatus[]).map(statusGroup),
   },
 ]
 
