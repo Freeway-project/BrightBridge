@@ -51,10 +51,15 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [provisionOpen, setProvisionOpen] = useState(false)
   const [provisionNotes, setProvisionNotes] = useState(instructorNotes ?? "")
+  const [finalSummary, setFinalSummary] = useState(instructorNotes ?? "")
 
   const advance = getStaffAdvance(courseStatus)
   const provisionOption =
     getStaffAdvanceOptions(courseStatus).find((option) => option.action === "provision-complete") ?? null
+  const isFinalize = advance?.action === "finalize-staging"
+  // The Final Summary for Instructor is mandatory before handing a course to the
+  // instructor (Mark Ready for Instructor). Provision Complete keeps it optional.
+  const finalSummaryRequired = isFinalize && finalSummary.trim().length === 0
   const isResubmit = Boolean(advance?.requiresNote)
   const isStatusSubmittable = advance !== null
   // Section requirements only gate the review-submit path, not staging finalize.
@@ -88,7 +93,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
       setErrorMsg(null)
       const res =
         advance.action === "finalize-staging"
-          ? await markStagingComplete(courseId)
+          ? await markStagingComplete(courseId, finalSummary.trim())
           : await submitReview(courseId, isResubmit ? resubmitNote.trim() : undefined)
       if (!res?.ok) {
         const message = res?.error || "Failed to advance."
@@ -339,11 +344,32 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
               : ""}
           </DialogDescription>
         </DialogHeader>
+        {isFinalize && (
+          <div className="space-y-2">
+            <label htmlFor="final-summary" className="text-sm font-medium">
+              Final Summary for Instructor <span className="text-destructive">(required)</span>
+            </label>
+            <p className="text-xs text-muted-foreground">
+              A short, plain-language wrap-up the instructor will read before signing off.
+            </p>
+            <Textarea
+              id="final-summary"
+              value={finalSummary}
+              onChange={(e) => setFinalSummary(e.target.value)}
+              rows={5}
+              maxLength={5000}
+              placeholder="Summarise the key outcomes and anything the instructor should know…"
+              className="resize-none"
+            />
+          </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={() => setConfirmOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={runAdvance}>Confirm</Button>
+          <Button onClick={runAdvance} disabled={finalSummaryRequired}>
+            Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

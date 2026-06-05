@@ -12,7 +12,7 @@ import {
 } from "@/lib/services/review";
 import { getCourseById } from "@/lib/services/courses";
 import { transitionCourseStatus } from "@/lib/courses/service";
-import { saveFinalSummaryNotes } from "@/lib/courses/final-summary";
+import { getFinalSummaryNotes, saveFinalSummaryNotes } from "@/lib/courses/final-summary";
 import type { SectionKey } from "./types";
 import {
   metadataSchema,
@@ -167,7 +167,10 @@ export async function submitReview(courseId: string, note?: string): Promise<{ o
   }
 }
 
-export async function markStagingComplete(courseId: string): Promise<{ ok: boolean; error?: string }> {
+export async function markStagingComplete(
+  courseId: string,
+  notes?: string,
+): Promise<{ ok: boolean; error?: string }> {
   if (await isCurrentHostReadonly()) {
     return { ok: false, error: "System migration in progress. This action is temporarily disabled." };
   }
@@ -183,6 +186,21 @@ export async function markStagingComplete(courseId: string): Promise<{ ok: boole
       revalidatePath("/ta");
       revalidatePath(`/courses/${courseId}`);
       return { ok: true };
+    }
+
+    // The Final Summary for Instructor is mandatory before handing the course to
+    // the instructor. Persist any notes supplied from the dialog (allowed while
+    // still in staging), then require a non-empty summary before transitioning.
+    const trimmedNotes = notes?.trim();
+    if (trimmedNotes) {
+      await saveFinalSummaryNotes(courseId, trimmedNotes);
+    }
+    const effectiveSummary = trimmedNotes || (await getFinalSummaryNotes(courseId))?.trim();
+    if (!effectiveSummary) {
+      return {
+        ok: false,
+        error: "A Final Summary for Instructor is required before marking the course ready for instructor.",
+      };
     }
 
     await transitionCourseStatus({
