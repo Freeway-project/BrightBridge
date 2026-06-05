@@ -113,3 +113,44 @@ that each card's badge matches the column header it sits under.
   1:1 naming. Many will be empty for a given TA; counts make that obvious.
 - Admin kanban gains horizontal columns in Staging; existing board already
   scrolls, so no new mechanism needed.
+
+## Addendum (2026-06-05): Instructor becomes its own pipeline phase
+
+Feedback after the per-status split: the four instructor statuses are the *tail*
+of the workflow (all occur after `ready_for_instructor`; ball is with instructor
+or admin, never staff) and don't belong under "Staging". Promote them to a 4th
+top-level phase **Instructor**, between Staging and Provision. Shared across all
+roles (single `WORKFLOW_PHASES`). No flow/transition change — `transitions.ts`
+and `COURSE_STATUSES` are untouched; this is purely how statuses are grouped into
+phase tabs.
+
+New phase layout:
+
+| Phase | Statuses |
+|---|---|
+| Migration | course_created, assigned_to_ta, ta_review_in_progress |
+| Staging | submitted_to_admin, admin_changes_requested, waiting_on_admin, staging_in_progress, **ready_for_instructor** |
+| Instructor *(new)* | sent_to_instructor, instructor_viewing, instructor_questions, instructor_approved |
+| Provision | final_approved |
+
+`ready_for_instructor` deliberately STAYS in Staging — it means staff finished
+staging and it is *ready to send*; the instructor has not received it yet (ball
+is with the admin to send). The Instructor phase begins at `sent_to_instructor`.
+
+Code changes:
+- `PipelineStage` gains `"instructor"` → `"migration" | "staging" | "instructor" | "provision"`.
+- `getPipelineStage()` returns `"instructor"` for the four instructor statuses.
+- `WORKFLOW_PHASES` adds the Instructor phase between Staging and Provision.
+- `apps/web/components/courses/course-list-view.tsx`: `PHASE_STYLE` (an exhaustive
+  `Record<PipelineStage>`) gains an `instructor` entry (emoji + active color).
+- Admin board (`admin/page.tsx`, `courses-board.tsx`) auto-follows — both derive
+  columns/tabs from `WORKFLOW_PHASES`; neither has an exhaustive `PipelineStage`
+  record. No other `PipelineStage` consumer is exhaustive (`issue-tracker` uses a
+  separate `IssuePhase` type; export route / `ta-dashboard-insights` only compare
+  values).
+
+Tests: extend `statuses.test.ts` — assert a phase keyed `"instructor"` exists and
+holds exactly the four instructor statuses, and that Staging holds exactly the
+five non-instructor staging statuses. The existing phase-placement test
+(`phaseKey === getPipelineStage(status)`) continues to guard agreement between
+`WORKFLOW_PHASES` and `getPipelineStage`.
