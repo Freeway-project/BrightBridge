@@ -3,17 +3,7 @@
 import { requireProfile } from "@/lib/auth/context"
 import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
 import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
-
-const LEADERSHIP_TITLE_LABELS: Record<string, string> = {
-  vp: "VP",
-  dean: "Dean",
-  associate_dean: "Associate Dean",
-  assistant_dean: "Assistant Dean",
-  dept_head: "Department Head",
-  educator: "Educator",
-  admin: "Admin",
-  staff: "Staff",
-}
+import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 
 const COURSE_LIMIT = 100
 
@@ -72,7 +62,7 @@ export async function getUnitDetail(unitId: string): Promise<UnitDetail> {
   const members = unitMembers.map((m) => ({
     id: m.id,
     name: nameById.get(m.profileId) ?? "Unknown",
-    title: LEADERSHIP_TITLE_LABELS[m.title] ?? m.title,
+    title: ROLE_TITLE_LABELS[m.title] ?? m.title,
   }))
 
   return {
