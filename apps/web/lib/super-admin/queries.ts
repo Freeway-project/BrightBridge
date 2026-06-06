@@ -21,6 +21,7 @@ export type {
   PaginatedResult,
 } from "@/lib/repositories/contracts"
 import type { Role } from "@coursebridge/workflow"
+import { ROLE_TITLE_LABELS, ROLE_TITLE_RANK } from "@/lib/super-admin/roles"
 
 export type UserRow = {
   id: string
@@ -85,33 +86,9 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
   }
 }
 
-// Pretty labels for org_unit_members.title values.
-const TITLE_LABELS: Record<string, string> = {
-  vp: "VP",
-  dean: "Dean",
-  associate_dean: "Associate Dean",
-  assistant_dean: "Assistant Dean",
-  dept_head: "Department Head",
-  educator: "Educator",
-  admin: "Admin",
-  staff: "Staff",
-}
-
-// Seniority order so leadership renders top-to-bottom within a unit
-// (VP → Dean → … → Educator). Unknown titles sort last.
-const TITLE_RANK: Record<string, number> = {
-  vp: 0,
-  dean: 1,
-  associate_dean: 2,
-  assistant_dean: 3,
-  dept_head: 4,
-  educator: 5,
-  admin: 6,
-  staff: 7,
-}
-
-// A PrimeReact OrganizationChart node (the extra `data` payload drives our
-// custom nodeTemplate). Kept structurally compatible with primereact's TreeNode.
+// A node in the org hierarchy tree. `data` is the payload the HierarchyTree
+// renderer reads (unit vs. member, role, etc.); `expanded` seeds the tree's
+// default open/closed state.
 export type OrgTreeNode = {
   key: string
   label: string
@@ -134,9 +111,9 @@ const EXPAND_DEPTH = 1
 
 /**
  * Builds the nested org tree (units, with leadership members as child nodes)
- * that PrimeReact's OrganizationChart renders. Reuses the units/members/users
- * already fetched by getSuperAdminData — no extra query. Names resolve from
- * users; titles are pretty-printed.
+ * that the HierarchyTree renders. Reuses the units/members/users already
+ * fetched by getSuperAdminData — no extra query. Names resolve from users;
+ * titles are pretty-printed.
  */
 export function buildOrgTree(
   data: Pick<SuperAdminData, "units" | "members" | "users">,
@@ -167,7 +144,7 @@ export function buildOrgTree(
       .slice()
       .sort(
         (a, b) =>
-          (TITLE_RANK[a.title] ?? 99) - (TITLE_RANK[b.title] ?? 99) ||
+          (ROLE_TITLE_RANK[a.title] ?? 99) - (ROLE_TITLE_RANK[b.title] ?? 99) ||
           (nameById.get(a.profileId) ?? "").localeCompare(nameById.get(b.profileId) ?? ""),
       )
       .map((m) => {
@@ -179,7 +156,7 @@ export function buildOrgTree(
             kind: "member" as const,
             id: m.id,
             name,
-            title: TITLE_LABELS[m.title] ?? m.title,
+            title: ROLE_TITLE_LABELS[m.title] ?? m.title,
             rawTitle: m.title,
           },
         }

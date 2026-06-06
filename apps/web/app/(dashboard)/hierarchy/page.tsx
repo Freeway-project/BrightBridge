@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
-import { HierarchyChart } from "@/components/super-admin/hierarchy-chart"
+import { HierarchyTree } from "@/components/super-admin/hierarchy-tree"
 import { getSuperAdminData, buildOrgTree } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 
@@ -25,9 +25,9 @@ export default async function HierarchyPage() {
 
   return (
     <>
-      <Topbar title="Hierarchy" subtitle="Institution org chart — deans, department heads, and units" />
+      <Topbar title="Hierarchy" subtitle="Institution org tree — deans, department heads, and units" />
       <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
-        <HierarchyChart tree={buildOrgTree(data)} />
+        <HierarchyTree tree={buildOrgTree(data)} />
       </div>
     </>
   )
