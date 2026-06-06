@@ -5,8 +5,9 @@ import { HelpCircle, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useHierarchyTour } from "./hierarchy-guided-tour"
 
-// Auto-launch the tour once per browser; the bar then stays as a permanent,
-// friendly "how do I use this" affordance for non-technical users.
+// Auto-launch the tour once per session — so it greets you each time you log in,
+// but doesn't re-fire as you click around within the same visit. The bar stays
+// as a permanent, friendly "how do I use this" affordance.
 const SEEN_KEY = "coursebridge:hierarchy-tour-seen"
 
 export function HierarchyIntro() {
@@ -14,8 +15,8 @@ export function HierarchyIntro() {
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    if (localStorage.getItem(SEEN_KEY)) return
-    localStorage.setItem(SEEN_KEY, "1")
+    if (sessionStorage.getItem(SEEN_KEY)) return
+    sessionStorage.setItem(SEEN_KEY, "1")
     // Wait for first paint so the tour's anchor elements exist.
     const t = setTimeout(() => startTour(), 600)
     return () => clearTimeout(t)

@@ -3,6 +3,7 @@
 import { useCallback } from "react"
 import { driver, type DriveStep } from "driver.js"
 import "driver.js/dist/driver.css"
+import "./hierarchy-tour.css"
 
 /**
  * Friendly walkthrough of the org explorer, built on driver.js (same library as
@@ -86,13 +87,16 @@ export function useHierarchyTour() {
     const d = driver({
       showProgress: true,
       allowClose: true,
-      overlayColor: "#0f172a",
-      overlayOpacity: 0.6,
-      stagePadding: 6,
-      stageRadius: 10,
+      animate: true,
+      smoothScroll: true,
+      overlayColor: "#0b0b12",
+      overlayOpacity: 0.72,
+      stagePadding: 8,
+      stageRadius: 14,
+      popoverClass: "cb-hierarchy-tour",
       nextBtnText: "Next →",
       prevBtnText: "← Back",
-      doneBtnText: "Got it",
+      doneBtnText: "Got it 🎉",
       steps,
     })
 
