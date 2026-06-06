@@ -1,5 +1,6 @@
+import type { ReactNode } from "react"
 import Link from "next/link"
-import { BookOpen, Building2, Folder, FolderTree, GraduationCap, Users } from "lucide-react"
+import { ArrowRight, BookOpen, Building2, Folder, FolderTree, GraduationCap, Users } from "lucide-react"
 import type { AdminCourseRow, PaginatedResult, StatusCount } from "@/lib/repositories/contracts"
 import type { OrgChild, OrgExplorerView } from "@/lib/hierarchy/explorer-queries"
 import { roleTitleStyle } from "@/lib/super-admin/roles"
@@ -12,11 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { StatCard } from "@/components/shared/stat-card"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { PaginationControls } from "@/components/shared/pagination-controls"
 import { OrgBreadcrumb } from "@/components/hierarchy/org-breadcrumb"
 import { OrgCourseFilters } from "@/components/hierarchy/org-course-filters"
+import { HierarchyIntro } from "@/components/hierarchy/hierarchy-intro"
 import { cn } from "@/lib/utils"
 
 function UnitTypeIcon({ type, className }: { type: string; className?: string }) {
@@ -25,8 +28,33 @@ function UnitTypeIcon({ type, className }: { type: string; className?: string })
   return <Folder className={className} />
 }
 
+// Per-unit-type accent (left border + icon tint) so colleges / schools /
+// departments are visually distinct at a glance.
+const UNIT_TYPE_STYLES: Record<string, { border: string; iconBg: string }> = {
+  college:    { border: "border-l-blue-500",    iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-300" },
+  faculty:    { border: "border-l-violet-500",  iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-300" },
+  school:     { border: "border-l-violet-500",  iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-300" },
+  department: { border: "border-l-emerald-500", iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" },
+}
+const DEFAULT_UNIT_STYLE = { border: "border-l-slate-400", iconBg: "bg-slate-400/10 text-slate-600 dark:text-slate-300" }
+function unitTypeStyle(type: string) {
+  return UNIT_TYPE_STYLES[type] ?? DEFAULT_UNIT_STYLE
+}
+
 function countBy(statusCounts: StatusCount[], status: string) {
   return statusCounts.find((c) => c.status === status)?.count ?? 0
+}
+
+// Wraps a KPI card with a plain-language tooltip — inline help for non-technical users.
+function Kpi({ tip, children }: { tip: string; children: ReactNode }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="cursor-help">{children}</div>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-[14rem] text-center">{tip}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 export function OrgExplorer({
@@ -47,11 +75,15 @@ export function OrgExplorer({
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
-      <OrgBreadcrumb crumbs={breadcrumb} />
+      <HierarchyIntro />
+
+      <div data-tour="breadcrumb">
+        <OrgBreadcrumb crumbs={breadcrumb} />
+      </div>
 
       {current && (
         <div className="flex items-center gap-2">
-          <span className="rounded-md bg-muted p-2 text-foreground/70">
+          <span className={cn("rounded-md p-2", unitTypeStyle(current.type).iconBg)}>
             <UnitTypeIcon type={current.type} className="size-5" />
           </span>
           <div>
@@ -62,18 +94,28 @@ export function OrgExplorer({
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Courses" value={courseTotal} icon="book-open" index={0} />
-        <StatCard label="In progress" value={inProgress} icon="clock" index={1} />
-        <StatCard label="Approved" value={approved} icon="check-square" index={2} />
-        <StatCard
-          label="Needs attention"
-          value={needsAttention}
-          icon="alert-triangle"
-          index={3}
-          accent={needsAttention > 0 ? "#ef4444" : "#10b981"}
-        />
-      </div>
+      <TooltipProvider delayDuration={150}>
+        <div data-tour="kpis" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Kpi tip="Total courses in this unit and everything beneath it.">
+            <StatCard label="Courses" value={courseTotal} icon="book-open" index={0} />
+          </Kpi>
+          <Kpi tip="Courses still being worked on — not yet final-approved.">
+            <StatCard label="In progress" value={inProgress} icon="clock" index={1} />
+          </Kpi>
+          <Kpi tip="Courses that have reached Final Approved.">
+            <StatCard label="Approved" value={approved} icon="check-square" index={2} />
+          </Kpi>
+          <Kpi tip="Courses where someone is waiting on a fix or a question — worth a look.">
+            <StatCard
+              label="Needs attention"
+              value={needsAttention}
+              icon="alert-triangle"
+              index={3}
+              accent={needsAttention > 0 ? "#ef4444" : "#10b981"}
+            />
+          </Kpi>
+        </div>
+      </TooltipProvider>
 
       {/* Sub-units / Colleges */}
       {children.length > 0 && (
@@ -82,7 +124,10 @@ export function OrgExplorer({
             <FolderTree className="size-3.5" /> {childLabel}{" "}
             <span className="font-normal normal-case">({children.length})</span>
           </h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div
+            data-tour="subunits"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
             {children.map((c) => (
               <SubUnitCard key={c.id} child={c} />
             ))}
@@ -92,7 +137,7 @@ export function OrgExplorer({
 
       {/* Leadership */}
       {current && (
-        <section>
+        <section data-tour="leadership">
           <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Users className="size-3.5" /> Leadership
           </h3>
@@ -135,14 +180,20 @@ export function OrgExplorer({
 }
 
 function SubUnitCard({ child }: { child: OrgChild }) {
+  const s = unitTypeStyle(child.type)
   return (
     <Link
       href={`/hierarchy?unit=${child.id}`}
       className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      <Card className="h-full transition-all group-hover:border-primary/40 group-hover:shadow-md">
+      <Card
+        className={cn(
+          "h-full border-l-4 transition-all group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md",
+          s.border,
+        )}
+      >
         <CardContent className="flex items-start gap-3 p-4">
-          <span className="mt-0.5 rounded-md bg-muted p-2 text-foreground/70">
+          <span className={cn("mt-0.5 shrink-0 rounded-md p-2", s.iconBg)}>
             <UnitTypeIcon type={child.type} className="size-4" />
           </span>
           <div className="min-w-0 flex-1">
@@ -159,6 +210,11 @@ function SubUnitCard({ child }: { child: OrgChild }) {
               </span>
             </div>
           </div>
+          {/* "Click me" affordance */}
+          <span className="mt-0.5 inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-muted-foreground transition-colors group-hover:text-primary">
+            Open
+            <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+          </span>
         </CardContent>
       </Card>
     </Link>
@@ -181,7 +237,7 @@ function CoursesSection({
     filteredCount !== courseTotal ? `${filteredCount} of ${courseTotal}` : `${courseTotal}`
 
   return (
-    <section className="flex min-w-0 flex-col">
+    <section data-tour="courses" className="flex min-w-0 flex-col">
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Courses <span className="font-normal normal-case">({countLabel})</span>

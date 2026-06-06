@@ -13,6 +13,11 @@ type Props = {
   /** Unique per host so super-admin / admin / provost don't share tab state. */
   storageKey?: string
   defaultTab?: InstitutionTab
+  /**
+   * Hide the review-status Overview tab. The provost's Overview duplicates their
+   * /provost dashboard, so /provost/org shows just the Organization manager.
+   */
+  showOverview?: boolean
 }
 
 /**
@@ -26,8 +31,15 @@ export function InstitutionPanel({
   data,
   storageKey = "institution-panel",
   defaultTab = "overview",
+  showOverview = true,
 }: Props) {
-  const [tab, setTab] = useStickyTabState(storageKey, defaultTab)
+  const [tab, setTab] = useStickyTabState(storageKey, showOverview ? defaultTab : "organization")
+
+  // With no Overview tab there's nothing to switch between — render the org
+  // manager directly without the tab chrome.
+  if (!showOverview) {
+    return <OrganizationView data={data} />
+  }
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">

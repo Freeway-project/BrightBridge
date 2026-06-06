@@ -10,7 +10,9 @@ const ROLE_ROUTES: Record<Role, string> = {
   admin_viewer: "/communications",
   instructor: "/instructor",
   super_admin: "/super-admin",
-  provost: "/provost",
+  // Provost lands on the Hierarchy explorer — the most useful view for
+  // institution-wide oversight. The /provost dashboard stays reachable via nav.
+  provost: "/hierarchy",
 };
 
 export default async function DashboardPage() {
