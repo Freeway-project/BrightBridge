@@ -16,6 +16,9 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { transitionCourseAction } from "../actions"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
+import type { ProfileOption } from "@/lib/repositories/contracts"
 
 export type BoardCard = {
   id: string
@@ -39,10 +42,32 @@ type Props = {
   role: EffectiveRole
   /** The existing detailed table, shown when the admin toggles to list view. */
   listView: React.ReactNode
+  tas?: ProfileOption[]
 }
 
-export function CoursesBoard({ columns, role, listView }: Props) {
+export function CoursesBoard({ columns, role, tas = [], listView }: Props) {
   const [view, setView] = useState<"board" | "list">("list")
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [reassignOpen, setReassignOpen] = useState(false)
+  const [reassignTargets, setReassignTargets] = useState<ReassignTarget[]>([])
+
+  function toggleSelection(id: string, title: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+        setReassignTargets((targets) => targets.filter((t) => t.id !== id))
+      } else {
+        next.add(id)
+        setReassignTargets((targets) => [...targets, { id, title }])
+      }
+      return next
+    })
+  }
+
+  function openReassign() {
+    setReassignOpen(true)
+  }
 
   return (
     <div className="space-y-4">
@@ -62,13 +87,61 @@ export function CoursesBoard({ columns, role, listView }: Props) {
         </div>
       </div>
 
-      {view === "list" ? listView : <BoardView columns={columns} role={role} />}
+      {view === "list" ? listView : <BoardView columns={columns} role={role} selectedIds={selectedIds} onToggleSelection={toggleSelection} />}
+
+      {view === "board" && selectedIds.size > 0 && (
+        <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 backdrop-blur">
+          <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+            {selectedIds.size} course{selectedIds.size !== 1 ? "s" : ""} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setSelectedIds(new Set()); setReassignTargets([]) }}>
+              Clear
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={openReassign}
+            >
+              Reassign selected
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {tas.length > 0 && (
+        <ReassignDialog
+          open={reassignOpen}
+          onOpenChange={setReassignOpen}
+          courses={reassignTargets}
+          tas={tas}
+          onDone={(ids) => {
+            setSelectedIds((prev) => {
+              const next = new Set(prev)
+              ids.forEach((id) => next.delete(id))
+              return next
+            })
+            setReassignTargets((targets) => targets.filter((t) => !ids.includes(t.id)))
+          }}
+        />
+      )}
     </div>
   )
 }
 
 /** Board view: phase tabs (Migration · Staging · Provision), each showing its kanban columns. */
-function BoardView({ columns, role }: { columns: BoardColumn[]; role: EffectiveRole }) {
+function BoardView({ 
+  columns, 
+  role, 
+  selectedIds, 
+  onToggleSelection 
+}: { 
+  columns: BoardColumn[]; 
+  role: EffectiveRole;
+  selectedIds: Set<string>;
+  onToggleSelection: (id: string, title: string) => void;
+}) {
   const phases = WORKFLOW_PHASES.map((p) => {
     const phaseColumns = columns.filter((c) => c.phase === p.key)
     return { key: p.key, label: p.label, columns: phaseColumns, count: phaseColumns.reduce((n, c) => n + c.count, 0) }
@@ -93,7 +166,13 @@ function BoardView({ columns, role }: { columns: BoardColumn[]; role: EffectiveR
         <TabsContent key={p.key} value={p.key} className="mt-4 focus-visible:outline-none">
           <div className="flex gap-4 overflow-x-auto pb-4">
             {p.columns.map((col) => (
-              <Column key={col.key} column={col} role={role} />
+              <Column 
+                key={col.key} 
+                column={col} 
+                role={role} 
+                selectedIds={selectedIds}
+                onToggleSelection={onToggleSelection}
+              />
             ))}
           </div>
         </TabsContent>
@@ -125,7 +204,17 @@ function ViewToggle({
   )
 }
 
-function Column({ column, role }: { column: BoardColumn; role: EffectiveRole }) {
+function Column({ 
+  column, 
+  role,
+  selectedIds,
+  onToggleSelection
+}: { 
+  column: BoardColumn; 
+  role: EffectiveRole;
+  selectedIds: Set<string>;
+  onToggleSelection: (id: string, title: string) => void;
+}) {
   const hidden = column.count - column.cards.length
   return (
     <div className="flex w-72 shrink-0 flex-col rounded-lg border border-border bg-muted/30">
@@ -140,7 +229,13 @@ function Column({ column, role }: { column: BoardColumn; role: EffectiveRole }) 
           <p className="px-1 py-6 text-center text-xs text-muted-foreground">No courses</p>
         )}
         {column.cards.map((card) => (
-          <BoardCardItem key={card.id} card={card} role={role} />
+          <BoardCardItem 
+            key={card.id} 
+            card={card} 
+            role={role} 
+            selected={selectedIds.has(card.id)}
+            onToggleSelection={() => onToggleSelection(card.id, card.title)}
+          />
         ))}
         {hidden > 0 && (
           <p className="px-1 pt-1 text-center text-xs text-muted-foreground">
@@ -152,7 +247,17 @@ function Column({ column, role }: { column: BoardColumn; role: EffectiveRole }) 
   )
 }
 
-function BoardCardItem({ card, role }: { card: BoardCard; role: EffectiveRole }) {
+function BoardCardItem({ 
+  card, 
+  role,
+  selected,
+  onToggleSelection
+}: { 
+  card: BoardCard; 
+  role: EffectiveRole;
+  selected: boolean;
+  onToggleSelection: () => void;
+}) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -174,13 +279,26 @@ function BoardCardItem({ card, role }: { card: BoardCard; role: EffectiveRole })
   }
 
   return (
-    <div className={cn("rounded-md border border-border bg-background p-3 shadow-sm", pending && "opacity-50")}>
-      <a href={`/admin/courses/${card.id}`} className="block">
-        <p className="line-clamp-2 text-sm font-medium text-foreground hover:underline">{card.title}</p>
-      </a>
-      {card.sourceCourseId && (
-        <p className="mt-0.5 text-xs text-muted-foreground">#{card.sourceCourseId}</p>
-      )}
+    <div className={cn(
+      "rounded-md border p-3 shadow-sm transition-colors", 
+      selected ? "border-primary bg-primary/5" : "border-border bg-background",
+      pending && "opacity-50"
+    )}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <a href={`/admin/courses/${card.id}`} className="block">
+            <p className="line-clamp-2 text-sm font-medium text-foreground hover:underline">{card.title}</p>
+          </a>
+          {card.sourceCourseId && (
+            <p className="mt-0.5 text-xs text-muted-foreground">#{card.sourceCourseId}</p>
+          )}
+        </div>
+        <Checkbox 
+          checked={selected}
+          onCheckedChange={onToggleSelection}
+          className="mt-0.5 shrink-0"
+        />
+      </div>
       <div className="mt-2">
         <StatusBadge status={card.status} />
       </div>

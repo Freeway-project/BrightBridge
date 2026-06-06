@@ -124,6 +124,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               <CoursesBoard
                 columns={boardColumns}
                 role={context.profile.role}
+                tas={tas}
                 listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} />}
               />
             }
