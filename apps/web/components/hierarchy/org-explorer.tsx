@@ -41,6 +41,21 @@ function unitTypeStyle(type: string) {
   return UNIT_TYPE_STYLES[type] ?? DEFAULT_UNIT_STYLE
 }
 
+// Friendly singular/plural names so the UI reads "Department" (not "department")
+// and section headings adapt to what's underneath (Colleges → Schools → Departments).
+const UNIT_TYPE_LABELS: Record<string, { one: string; many: string }> = {
+  college:    { one: "College",    many: "Colleges" },
+  faculty:    { one: "Faculty",    many: "Faculties" },
+  school:     { one: "School",     many: "Schools" },
+  department: { one: "Department", many: "Departments" },
+}
+function typeLabel(type: string, plural = false): string {
+  const l = UNIT_TYPE_LABELS[type]
+  if (l) return plural ? l.many : l.one
+  const cap = type.charAt(0).toUpperCase() + type.slice(1)
+  return plural ? `${cap}s` : cap
+}
+
 function countBy(statusCounts: StatusCount[], status: string) {
   return statusCounts.find((c) => c.status === status)?.count ?? 0
 }
@@ -71,7 +86,11 @@ export function OrgExplorer({
   const needsAttention =
     countBy(statusCounts, "admin_changes_requested") + countBy(statusCounts, "instructor_questions")
   const inProgress = Math.max(0, courseTotal - approved)
-  const childLabel = current ? "Sub-units" : "Colleges"
+  // Name the children section after what's actually in it (all Schools, all
+  // Departments, …); fall back to "Sub-units" when it's a mix.
+  const childTypes = new Set(children.map((c) => c.type))
+  const childLabel =
+    childTypes.size === 1 ? typeLabel(children[0].type, true) : current ? "Sub-units" : "Units"
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
@@ -88,7 +107,7 @@ export function OrgExplorer({
           </span>
           <div>
             <h2 className="text-xl font-semibold leading-tight">{current.name}</h2>
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{current.type}</p>
+            <p className="text-xs font-medium text-muted-foreground">{typeLabel(current.type)}</p>
           </div>
         </div>
       )}
@@ -198,7 +217,7 @@ function SubUnitCard({ child }: { child: OrgChild }) {
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium group-hover:text-primary">{child.name}</p>
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{child.type}</p>
+            <p className="text-[11px] font-medium text-muted-foreground">{typeLabel(child.type)}</p>
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <BookOpen className="size-3" />
