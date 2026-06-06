@@ -65,7 +65,7 @@ export function OrgCourseFilters({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Search courses…"
-          aria-label="Search courses"
+          aria-label="Search courses by title, code, term, department, or staff"
           className="h-8 pl-8 text-xs"
         />
       </div>

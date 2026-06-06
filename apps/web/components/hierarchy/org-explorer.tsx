@@ -136,8 +136,11 @@ export function OrgExplorer({
 
 function SubUnitCard({ child }: { child: OrgChild }) {
   return (
-    <Link href={`/hierarchy?unit=${child.id}`} className="group block">
-      <Card className="h-full transition-all hover:border-primary/40 hover:shadow-md">
+    <Link
+      href={`/hierarchy?unit=${child.id}`}
+      className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      <Card className="h-full transition-all group-hover:border-primary/40 group-hover:shadow-md">
         <CardContent className="flex items-start gap-3 p-4">
           <span className="mt-0.5 rounded-md bg-muted p-2 text-foreground/70">
             <UnitTypeIcon type={child.type} className="size-4" />
@@ -191,16 +194,16 @@ function CoursesSection({
         />
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="pl-4 text-xs">Code</TableHead>
-              <TableHead className="text-xs">Title</TableHead>
-              <TableHead className="w-[190px] text-xs">Status</TableHead>
-              <TableHead className="text-xs">Term</TableHead>
-              <TableHead className="text-xs">Department</TableHead>
-              <TableHead className="text-xs">Staff (TA)</TableHead>
+              <TableHead scope="col" className="pl-4 text-xs">Code</TableHead>
+              <TableHead scope="col" className="text-xs">Title</TableHead>
+              <TableHead scope="col" className="w-[190px] text-xs">Status</TableHead>
+              <TableHead scope="col" className="hidden text-xs sm:table-cell">Term</TableHead>
+              <TableHead scope="col" className="hidden text-xs md:table-cell">Department</TableHead>
+              <TableHead scope="col" className="text-xs">Staff (TA)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -222,8 +225,8 @@ function CoursesSection({
                   <TableCell>
                     <StatusBadge status={c.status} />
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{c.term ?? "—"}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{c.department ?? "—"}</TableCell>
+                  <TableCell className="hidden text-xs text-muted-foreground sm:table-cell">{c.term ?? "—"}</TableCell>
+                  <TableCell className="hidden text-xs text-muted-foreground md:table-cell">{c.department ?? "—"}</TableCell>
                   <TableCell className="text-xs">{c.ta?.name ?? c.ta?.email ?? "—"}</TableCell>
                 </TableRow>
               ))

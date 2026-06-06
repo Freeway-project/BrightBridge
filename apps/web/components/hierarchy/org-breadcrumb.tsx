@@ -19,7 +19,7 @@ export function OrgBreadcrumb({ crumbs }: { crumbs: OrgCrumb[] }) {
           <span key={it.id ?? "__root"} className="flex items-center gap-1">
             {i > 0 && <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" />}
             {isLast ? (
-              <span className="font-semibold text-foreground">{it.name}</span>
+              <span aria-current="page" className="font-semibold text-foreground">{it.name}</span>
             ) : (
               <Link href={href} className="text-muted-foreground hover:text-foreground hover:underline">
                 {it.name}
