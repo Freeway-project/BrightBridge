@@ -19,6 +19,8 @@ import type {
   StuckCourse,
   SuperAdminCourseRow,
   TAWorkload,
+  UnitCourseFacets,
+  UnitCourseListFilters,
 } from "@/lib/repositories/contracts";
 import { cleanOptionalText, getSupabaseAdminClientOrThrow, toCourseStatus } from "./shared";
 
@@ -949,6 +951,141 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
       return (data ?? []).map((row) => toCourseSummary(row as unknown as CourseRow));
     },
+
+    async listCoursesByUnit(unitId, page = 1, pageSize = 50, filters: UnitCourseListFilters = {}) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+      const safePageSize = Number.isFinite(pageSize) ? Math.max(1, Math.floor(pageSize)) : 50;
+
+      const descendantIds = await resolveDescendantUnitIds(admin, [unitId]);
+      if (!descendantIds.length) {
+        return { data: [], total: 0, page: safePage, pageSize: safePageSize, totalPages: 0 };
+      }
+
+      const from = (safePage - 1) * safePageSize;
+      const to = from + safePageSize - 1;
+      const normalizedSearch = normalizeSearchTerm(filters.search);
+      const searchMatchingStaffIds = normalizedSearch
+        ? await findMatchingStaffProfileIds(normalizedSearch)
+        : [];
+      const searchMatchingStaffCourseIds = searchMatchingStaffIds.length > 0
+        ? await findStaffAssignedCourseIds(searchMatchingStaffIds)
+        : [];
+
+      let query = admin
+        .from("courses")
+        .select(
+          `
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
+          course_assignments (
+            role,
+            profile_id,
+            profiles!course_assignments_profile_id_fkey ( id, full_name, email )
+          )
+        `,
+          { count: "exact" },
+        )
+        .in("org_unit_id", descendantIds);
+
+      if (filters.status) {
+        query = query.eq("status", filters.status);
+      }
+
+      if (filters.term) {
+        query = query.eq("term", filters.term);
+      }
+
+      if (normalizedSearch) {
+        const term = `%${normalizedSearch}%`;
+        const searchPredicates = [
+          `title.ilike.${term}`,
+          `source_course_id.ilike.${term}`,
+          `target_course_id.ilike.${term}`,
+          `term.ilike.${term}`,
+          `department.ilike.${term}`,
+        ];
+        if (searchMatchingStaffCourseIds.length > 0) {
+          searchPredicates.push(`id.in.(${searchMatchingStaffCourseIds.join(",")})`);
+        }
+        query = query.or(searchPredicates.join(","));
+      }
+
+      const { data, error, count } = await query
+        .order("updated_at", { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        throw new Error(`listCoursesByUnit: ${error.message}`);
+      }
+
+      const total = count ?? 0;
+      return {
+        data: mapAdminCourseRows(data ?? []),
+        total,
+        page: safePage,
+        pageSize: safePageSize,
+        totalPages: Math.ceil(total / safePageSize),
+      } satisfies PaginatedResult<AdminCourseRow>;
+    },
+
+    async getUnitCourseFacets(unitId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const descendantIds = await resolveDescendantUnitIds(admin, [unitId]);
+      if (!descendantIds.length) {
+        return { statusCounts: [], terms: [], total: 0 };
+      }
+
+      const rows = await fetchAllSubtreeCourses(admin, descendantIds, "status, term");
+
+      const counts = new Map<string, number>();
+      const terms = new Set<string>();
+      for (const row of rows as Array<{ status: string; term: string | null }>) {
+        counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
+        const t = row.term?.trim();
+        if (t) terms.add(t);
+      }
+
+      const statusCounts: StatusCount[] = COURSE_STATUSES.filter((s) => counts.has(s)).map((s) => ({
+        status: s,
+        count: counts.get(s) ?? 0,
+      }));
+
+      return {
+        statusCounts,
+        terms: [...terms].sort((a, b) => b.localeCompare(a)),
+        total: rows.length,
+      } satisfies UnitCourseFacets;
+    },
+
+    async getChildUnitCourseCounts(childUnitIds) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const result: Record<string, number> = {};
+      for (const id of childUnitIds) result[id] = 0;
+      if (!childUnitIds.length) return result;
+
+      // Siblings' subtrees are disjoint, so each descendant maps to exactly one
+      // child. Resolve all child subtrees in one paths query, then tally courses.
+      const { data: paths, error: pathErr } = await admin
+        .from("org_unit_hierarchy_paths")
+        .select("ancestor_id, descendant_id")
+        .in("ancestor_id", childUnitIds);
+
+      if (pathErr) {
+        throw new Error(`getChildUnitCourseCounts (paths): ${pathErr.message}`);
+      }
+
+      const descendantToChild = new Map<string, string>();
+      for (const p of paths ?? []) descendantToChild.set(p.descendant_id, p.ancestor_id);
+      const descendantIds = [...descendantToChild.keys()];
+      if (!descendantIds.length) return result;
+
+      const rows = await fetchAllSubtreeCourses(admin, descendantIds, "org_unit_id");
+      for (const row of rows as Array<{ org_unit_id: string | null }>) {
+        const child = row.org_unit_id ? descendantToChild.get(row.org_unit_id) : undefined;
+        if (child) result[child] = (result[child] ?? 0) + 1;
+      }
+      return result;
+    },
   };
 }
 
@@ -1011,6 +1148,49 @@ async function findStaffAssignedCourseIds(profileIds: string[]): Promise<string[
   }
 
   return Array.from(new Set((data ?? []).map((row) => row.course_id)));
+}
+
+type AdminClient = ReturnType<typeof getSupabaseAdminClientOrThrow>;
+
+// Resolves a unit (or units) to its whole subtree of unit ids via the recursive
+// org_unit_hierarchy_paths view (each unit is its own descendant at depth 0).
+async function resolveDescendantUnitIds(admin: AdminClient, unitIds: string[]): Promise<string[]> {
+  if (!unitIds.length) return [];
+  const { data, error } = await admin
+    .from("org_unit_hierarchy_paths")
+    .select("descendant_id")
+    .in("ancestor_id", unitIds);
+  if (error) {
+    throw new Error(`resolveDescendantUnitIds: ${error.message}`);
+  }
+  return [...new Set((data ?? []).map((p) => p.descendant_id))];
+}
+
+// Fetches every course in the given units, paging past PostgREST's 1000-row cap.
+// `columns` selects only what the caller needs (e.g. "status, term") to keep the
+// payload small over large subtrees.
+async function fetchAllSubtreeCourses(
+  admin: AdminClient,
+  unitIds: string[],
+  columns: string,
+): Promise<unknown[]> {
+  if (!unitIds.length) return [];
+  const PAGE = 1000;
+  const all: unknown[] = [];
+  for (let offset = 0; ; offset += PAGE) {
+    const { data, error } = await admin
+      .from("courses")
+      .select(columns)
+      .in("org_unit_id", unitIds)
+      .range(offset, offset + PAGE - 1);
+    if (error) {
+      throw new Error(`fetchAllSubtreeCourses: ${error.message}`);
+    }
+    const batch = (data ?? []) as unknown[];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return all;
 }
 
 function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {

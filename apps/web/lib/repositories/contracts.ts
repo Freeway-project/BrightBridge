@@ -95,6 +95,12 @@ export type AssignedCourseListFilters = {
   statuses?: readonly CourseStatus[];
 };
 
+export type UnitCourseListFilters = {
+  search?: string;
+  status?: CourseStatus;
+  term?: string;
+};
+
 export type SuperAdminCourseRow = {
   id: string;
   code: string | null;
@@ -111,6 +117,15 @@ export type SuperAdminCourseRow = {
 export type StatusCount = {
   status: CourseStatus;
   count: number;
+};
+
+export type UnitCourseFacets = {
+  /** Status breakdown over the unit's whole subtree (unfiltered). */
+  statusCounts: StatusCount[];
+  /** Distinct, non-empty course terms in the subtree (for the term filter). */
+  terms: string[];
+  /** Total courses in the subtree. */
+  total: number;
 };
 
 export type StuckCourse = {
@@ -346,6 +361,17 @@ export interface CourseRepository {
   listQuestionRoundHistory(courseId: string): Promise<SubmissionEvent[]>;
   listRecentAssignments(limit: number): Promise<AssignmentLog[]>;
   listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
+  /** Paginated courses across a unit's whole subtree, with search/status/term filters. */
+  listCoursesByUnit(
+    unitId: string,
+    page?: number,
+    pageSize?: number,
+    filters?: UnitCourseListFilters,
+  ): Promise<PaginatedResult<AdminCourseRow>>;
+  /** Status breakdown + distinct terms + total over a unit's subtree (drives KPIs/term filter). */
+  getUnitCourseFacets(unitId: string): Promise<UnitCourseFacets>;
+  /** Subtree course count for each of the given (sibling) child units, keyed by unit id. */
+  getChildUnitCourseCounts(childUnitIds: string[]): Promise<Record<string, number>>;
   listInstructorCourses(profileId: string): Promise<InstructorCourse[]>;
 }
 
