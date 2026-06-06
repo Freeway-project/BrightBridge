@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
-import { InstitutionPanel } from "@/components/super-admin/institution-panel"
+import { ProvostDashboard } from "@/components/provost/provost-dashboard"
 import { getSuperAdminData } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 
 // Provost = institution-wide oversight. Sees every college, dean, department,
 // and course across the institution (global all-access, no org-unit membership).
-// The leadership roster (deans, dept-heads) lives on the Organization page.
+// This is the executive dashboard: welcome banner, hero KPIs, status breakdown,
+// at-risk courses, and the institution-wide "who did what" activity feed. Org/
+// leadership management lives on the Organization page; the org chart on /hierarchy.
 export default async function ProvostOverviewPage() {
   const context = await getAuthContext()
 
@@ -22,9 +24,7 @@ export default async function ProvostOverviewPage() {
   return (
     <>
       <Topbar title="Provost Overview" subtitle="Institution-wide review status" />
-      <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
-        <InstitutionPanel data={data} storageKey="provost-institution" defaultTab="overview" />
-      </div>
+      <ProvostDashboard data={data} provostName={context.profile.fullName} />
     </>
   )
 }
