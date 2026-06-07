@@ -14,6 +14,13 @@ import { createSupabaseEscalationRepository } from "./supabase/escalation-reposi
 import { createSupabaseHierarchyRepository } from "./supabase/hierarchy-repository";
 import { createSupabaseProfileRepository } from "./supabase/profile-repository";
 import { createSupabaseReviewRepository } from "./supabase/review-repository";
+import { createPostgresCommentRepository } from "./postgres/comment-repository";
+import { createPostgresCourseRepository } from "./postgres/course-repository";
+import { createPostgresEscalationRepository } from "./postgres/escalation-repository";
+import { createPostgresHierarchyRepository } from "./postgres/hierarchy-repository";
+import { createPostgresProfileRepository } from "./postgres/profile-repository";
+import { createPostgresReviewRepository } from "./postgres/review-repository";
+import { isPostgresProvider } from "./provider";
 
 let courseRepository: CourseRepository | null = null;
 let profileRepository: ProfileRepository | null = null;
@@ -23,31 +30,43 @@ let hierarchyRepository: HierarchyRepository | null = null;
 let escalationRepository: EscalationRepository | null = null;
 
 export function getCourseRepository(): CourseRepository {
-  courseRepository ??= createSupabaseCourseRepository();
+  courseRepository ??= isPostgresProvider()
+    ? createPostgresCourseRepository()
+    : createSupabaseCourseRepository();
   return courseRepository;
 }
 
 export function getProfileRepository(): ProfileRepository {
-  profileRepository ??= createSupabaseProfileRepository();
+  profileRepository ??= isPostgresProvider()
+    ? createPostgresProfileRepository()
+    : createSupabaseProfileRepository();
   return profileRepository;
 }
 
 export function getReviewRepository(): ReviewRepository {
-  reviewRepository ??= createSupabaseReviewRepository();
+  reviewRepository ??= isPostgresProvider()
+    ? createPostgresReviewRepository()
+    : createSupabaseReviewRepository();
   return reviewRepository;
 }
 
 export function getCommentRepository(): CommentRepository {
-  commentRepository ??= createSupabaseCommentRepository();
+  commentRepository ??= isPostgresProvider()
+    ? createPostgresCommentRepository()
+    : createSupabaseCommentRepository();
   return commentRepository;
 }
 
 export function getHierarchyRepository(): HierarchyRepository {
-  hierarchyRepository ??= createSupabaseHierarchyRepository();
+  hierarchyRepository ??= isPostgresProvider()
+    ? createPostgresHierarchyRepository()
+    : createSupabaseHierarchyRepository();
   return hierarchyRepository;
 }
 
 export function getEscalationRepository(): EscalationRepository {
-  escalationRepository ??= createSupabaseEscalationRepository();
+  escalationRepository ??= isPostgresProvider()
+    ? createPostgresEscalationRepository()
+    : createSupabaseEscalationRepository();
   return escalationRepository;
 }
