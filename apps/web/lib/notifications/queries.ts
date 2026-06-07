@@ -3,6 +3,8 @@ import "server-only";
 import { getCourseStatusLabel, type CourseStatus, type Role } from "@coursebridge/workflow";
 import { requireProfile } from "@/lib/auth/context";
 import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared";
+import { getPostgresPool } from "@/lib/postgres/pool";
+import { isPostgresProvider } from "@/lib/repositories/provider";
 
 type NotificationKind = "assignment" | "course_action" | "issue" | "comment" | "support";
 type NotificationTone = "default" | "warning" | "danger" | "success";
@@ -114,7 +116,6 @@ export type NotificationsPageData = {
 
 export async function getNotificationsPageData(): Promise<NotificationsPageData> {
   const context = await requireProfile();
-  const admin = getSupabaseAdminClientOrThrow();
   const role = context.profile.role;
   const isAdmin = ADMIN_ROLES.includes(role);
 
@@ -158,6 +159,17 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
 
   async function getAssignedCourseIds(profileId: string, profileRole: Role) {
     const assignmentRole = profileRole === "instructor" ? "instructor" : "staff";
+
+    if (isPostgresProvider()) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{ course_id: string }>(
+        `SELECT course_id FROM course_assignments WHERE profile_id = $1 AND role = $2`,
+        [profileId, assignmentRole],
+      );
+      return rows.map((row) => row.course_id);
+    }
+
+    const admin = getSupabaseAdminClientOrThrow();
     const { data, error } = await admin
       .from("course_assignments")
       .select("course_id")
@@ -176,6 +188,44 @@ async function getRecentReassignments(
   forProfileId: string,
   isAdmin: boolean,
 ): Promise<ReassignmentRow[]> {
+  if (isPostgresProvider()) {
+    const pool = getPostgresPool();
+    const values: unknown[] = [];
+    let whereSql = "";
+    if (!isAdmin) {
+      values.push(forProfileId);
+      whereSql = `WHERE r.to_profile_id = $1`;
+    }
+    const { rows } = await pool.query<{
+      id: string;
+      course_id: string;
+      to_profile_id: string;
+      created_at: string;
+      course_title: string | null;
+      to_full_name: string | null;
+    }>(
+      `
+        SELECT r.id, r.course_id, r.to_profile_id, r.created_at,
+               c.title AS course_title, p.full_name AS to_full_name
+        FROM course_reassignments r
+        LEFT JOIN courses c ON c.id = r.course_id
+        LEFT JOIN profiles p ON p.id = r.to_profile_id
+        ${whereSql}
+        ORDER BY r.created_at DESC
+        LIMIT 50
+      `,
+      values,
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      course_id: row.course_id,
+      to_profile_id: row.to_profile_id,
+      created_at: row.created_at,
+      courses: { title: row.course_title },
+      to_profile: { full_name: row.to_full_name },
+    }));
+  }
+
   const admin = getSupabaseAdminClientOrThrow();
   let query = admin
     .from("course_reassignments")
@@ -196,6 +246,41 @@ async function getRecentReassignments(
 }
 
 async function getOpenSupportMessages(): Promise<SupportMessageRow[]> {
+  if (isPostgresProvider()) {
+    const pool = getPostgresPool();
+    const { rows } = await pool.query<{
+      id: string;
+      sender_role: string;
+      type: "message" | "poke";
+      subject: string | null;
+      body: string;
+      status: "open" | "read" | "resolved";
+      created_at: string;
+      sender_full_name: string | null;
+      sender_profile_role: string | null;
+    }>(
+      `
+        SELECT s.id, s.sender_role, s.type, s.subject, s.body, s.status, s.created_at,
+               p.full_name AS sender_full_name, p.role AS sender_profile_role
+        FROM support_messages s
+        LEFT JOIN profiles p ON p.id = s.sender_profile_id
+        WHERE s.status <> 'resolved'
+        ORDER BY s.created_at DESC
+        LIMIT 50
+      `,
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      sender_role: row.sender_role,
+      type: row.type,
+      subject: row.subject,
+      body: row.body,
+      status: row.status,
+      created_at: row.created_at,
+      sender: { full_name: row.sender_full_name, role: row.sender_profile_role },
+    }));
+  }
+
   const admin = getSupabaseAdminClientOrThrow();
   const { data, error } = await admin
     .from("support_messages")
@@ -212,8 +297,44 @@ async function getOpenSupportMessages(): Promise<SupportMessageRow[]> {
 }
 
 async function getRelevantCourses(courseIds: string[] | null, role: Role): Promise<CourseRow[]> {
-  const admin = getSupabaseAdminClientOrThrow();
   const pendingStatuses = getPendingStatuses(role);
+
+  if (isPostgresProvider()) {
+    const pool = getPostgresPool();
+    const values: unknown[] = [pendingStatuses];
+    let courseFilter = "";
+    if (courseIds) {
+      values.push(courseIds);
+      courseFilter = `AND id = ANY($${values.length}::uuid[])`;
+    }
+    const { rows } = await pool.query<CourseRow>(
+      `
+        SELECT id, title, term, department, status, updated_at
+        FROM courses
+        WHERE status = ANY($1::text[]) ${courseFilter}
+        ORDER BY updated_at DESC
+        LIMIT 100
+      `,
+      values,
+    );
+    const pgCourses = rows as CourseRow[];
+
+    const submittedIds = pgCourses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id);
+    if (submittedIds.length > 0) {
+      const { rows: events } = await pool.query<{ course_id: string }>(
+        `SELECT course_id FROM course_status_events WHERE course_id = ANY($1::uuid[]) AND to_status = 'submitted_to_admin'`,
+        [submittedIds],
+      );
+      const countMap = new Map<string, number>();
+      for (const ev of events) countMap.set(ev.course_id, (countMap.get(ev.course_id) ?? 0) + 1);
+      for (const course of pgCourses) {
+        if (countMap.has(course.id)) course.submission_count = countMap.get(course.id);
+      }
+    }
+    return pgCourses;
+  }
+
+  const admin = getSupabaseAdminClientOrThrow();
 
   let query = admin
     .from("courses")
@@ -261,6 +382,54 @@ async function getRelevantCourses(courseIds: string[] | null, role: Role): Promi
 }
 
 async function getRelevantIssues(courseIds: string[] | null): Promise<IssueRow[]> {
+  if (isPostgresProvider()) {
+    const pool = getPostgresPool();
+    const values: unknown[] = [];
+    let courseFilter = "";
+    if (courseIds) {
+      values.push(courseIds);
+      courseFilter = `WHERE i.course_id = ANY($${values.length}::uuid[])`;
+    }
+    const { rows } = await pool.query<{
+      id: string;
+      course_id: string;
+      title: string;
+      type: string;
+      severity: string;
+      status: "open" | "in_review" | "resolved";
+      created_at: string;
+      updated_at: string;
+      course_title: string | null;
+      cb_full_name: string | null;
+      cb_role: string | null;
+    }>(
+      `
+        SELECT i.id, i.course_id, i.title, i.type, i.severity, i.status, i.created_at, i.updated_at,
+               c.title AS course_title,
+               p.full_name AS cb_full_name, p.role AS cb_role
+        FROM course_issues i
+        LEFT JOIN courses c ON c.id = i.course_id
+        LEFT JOIN profiles p ON p.id = i.created_by
+        ${courseFilter}
+        ORDER BY i.updated_at DESC
+        LIMIT 125
+      `,
+      values,
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      course_id: row.course_id,
+      title: row.title,
+      type: row.type,
+      severity: row.severity,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      courses: { title: row.course_title },
+      created_by_profile: { full_name: row.cb_full_name, role: row.cb_role },
+    }));
+  }
+
   const admin = getSupabaseAdminClientOrThrow();
 
   let query = admin
@@ -289,6 +458,55 @@ async function getRelevantIssues(courseIds: string[] | null): Promise<IssueRow[]
 }
 
 async function getRecentComments(courseIds: string[] | null, currentUserId: string): Promise<CommentRow[]> {
+  if (isPostgresProvider()) {
+    const pool = getPostgresPool();
+    const values: unknown[] = [currentUserId];
+    let courseFilter = "";
+    if (courseIds) {
+      values.push(courseIds);
+      courseFilter = `AND i.course_id = ANY($${values.length}::uuid[])`;
+    }
+    const { rows } = await pool.query<{
+      id: string;
+      issue_id: string;
+      author_id: string;
+      body: string;
+      created_at: string;
+      course_id: string;
+      issue_title: string | null;
+      course_title: string | null;
+      author_full_name: string | null;
+      author_role: string | null;
+    }>(
+      `
+        SELECT c.id, c.issue_id, c.author_id, c.body, c.created_at,
+               i.course_id, i.title AS issue_title, crs.title AS course_title,
+               p.full_name AS author_full_name, p.role AS author_role
+        FROM course_issue_comments c
+        INNER JOIN course_issues i ON i.id = c.issue_id
+        LEFT JOIN courses crs ON crs.id = i.course_id
+        LEFT JOIN profiles p ON p.id = c.author_id
+        WHERE c.is_system_message = false AND c.author_id <> $1 ${courseFilter}
+        ORDER BY c.created_at DESC
+        LIMIT 25
+      `,
+      values,
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      issue_id: row.issue_id,
+      author_id: row.author_id,
+      body: row.body,
+      created_at: row.created_at,
+      course_issues: {
+        course_id: row.course_id,
+        title: row.issue_title,
+        courses: { title: row.course_title },
+      },
+      author: { full_name: row.author_full_name, role: row.author_role },
+    }));
+  }
+
   const admin = getSupabaseAdminClientOrThrow();
 
   let query = admin

@@ -2,6 +2,8 @@ import "server-only"
 
 import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
 import { getCourseRepository } from "@/lib/repositories"
+import { getPostgresPool } from "@/lib/postgres/pool"
+import { isPostgresProvider } from "@/lib/repositories/provider"
 import type { SuperAdminCourseRow } from "@/lib/repositories/contracts"
 
 /**
@@ -42,8 +44,18 @@ export async function getAllSuperAdminCourses(search = ""): Promise<SuperAdminCo
   return all
 }
 
-/** Page through an entire table, selecting only the given columns. */
+/**
+ * Page through an entire table, selecting only the given columns. `table` and
+ * `columns` are internal constants (never user input). On Postgres there is no
+ * 1000-row response cap, so a single SELECT suffices.
+ */
 async function fetchAllRows<T>(table: string, columns: string): Promise<T[]> {
+  if (isPostgresProvider()) {
+    const pool = getPostgresPool()
+    const { rows } = await pool.query(`SELECT ${columns} FROM ${table}`)
+    return rows as T[]
+  }
+
   const admin = getSupabaseAdminClientOrThrow()
   const rows: T[] = []
   let from = 0
@@ -69,14 +81,9 @@ async function fetchAllRows<T>(table: string, columns: string): Promise<T[]> {
  * lookups are by course id, so unrelated aggregate rows are simply ignored.
  */
 export async function getCoursesForExport(search = ""): Promise<CourseExportRow[]> {
-  const admin = getSupabaseAdminClientOrThrow()
-
   const [courses, sections, responses, issues] = await Promise.all([
     getAllSuperAdminCourses(search),
-    admin
-      .from("review_sections")
-      .select("id, key")
-      .then((r) => (r.data ?? []) as Array<{ id: string; key: string }>),
+    fetchAllRows<{ id: string; key: string }>("review_sections", "id, key"),
     fetchAllRows<{ course_id: string; section_id: string; status: string }>(
       "review_responses",
       "course_id, section_id, status",

@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import type { Role } from "@coursebridge/workflow"
+import type { NotificationItem } from "@/lib/notifications/queries"
 
 const IS_ADMIN = (role: Role) => role === "admin_full" || role === "super_admin"
 
@@ -68,10 +68,22 @@ interface NotificationProviderProps {
   role: Role
 }
 
+type NotificationFeedResponse = {
+  notifications: NotificationItem[]
+  pendingCount: number
+}
+
+// Polling notification provider. Replaces the Supabase Realtime channel
+// subscriptions (which don't work against self-hosted Postgres) with a 15s poll
+// of /api/notifications/feed, which is backed by getNotificationsPageData and
+// therefore covers every source (issues, comments, status events, assignments,
+// support messages, reassignments) under both DB providers. New items since the
+// last poll are toasted; a change in pendingCount refreshes server components.
 export function NotificationProvider({ children, userId, role }: NotificationProviderProps) {
   const router = useRouter()
   const seenIds = useRef(new Set<string>())
-  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
+  const initialLoadDone = useRef(false)
+  const pendingCountRef = useRef<number | null>(null)
 
   // Pre-enable AudioContext on user interaction to bypass browser autoplay restrictions
   useEffect(() => {
@@ -108,10 +120,6 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
 
   useEffect(() => {
     if (!userId) return
-    if (!supabaseRef.current) {
-      supabaseRef.current = createClient()
-    }
-    const supabase = supabaseRef.current
 
     function dedup(id: string): boolean {
       if (seenIds.current.has(id)) return false
@@ -119,471 +127,103 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       return true
     }
 
-    async function getCourseCode(courseId: string): Promise<string> {
-      const { data } = await supabase
-        .from("courses")
-        .select("title")
-        .eq("id", courseId)
-        .single()
-      return data?.title ?? "Unknown Course"
+    function iconFor(item: NotificationItem): string {
+      if (item.kind === "issue") {
+        const meta = item.meta.toLowerCase()
+        if (meta.includes("critical")) return SEVERITY_ICON.critical
+        if (meta.includes("major")) return SEVERITY_ICON.major
+        return SEVERITY_ICON.minor
+      }
+      if (item.kind === "comment") return "💬"
+      if (item.kind === "assignment") return "📚"
+      if (item.kind === "support") return "🛟"
+      return "📌"
     }
 
-    async function getAuthorName(authorId: string): Promise<string> {
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, role")
-        .eq("id", authorId)
-        .single()
-      
-      if (data?.full_name && data.full_name.trim() !== "") {
-        return data.full_name
+    function labelFor(item: NotificationItem): string {
+      if (item.kind === "issue") {
+        const lower = item.description.toLowerCase()
+        const key = Object.keys(TYPE_LABEL).find((candidate) => lower.includes(candidate.replace(/_/g, " ")))
+        if (key) return TYPE_LABEL[key]
+        return "Issue"
       }
-      if (data?.role) {
-        if (data.role === "standard_user") return "Staff Member"
-        if (data.role === "super_admin" || data.role === "admin_full") return "Administrator"
-        if (data.role === "admin_viewer") return "Viewer"
-        if (data.role === "instructor") return "Instructor"
-        if (data.role === "communications") return "Communications Team"
-      }
-      return "Team Member"
+      if (item.kind === "comment") return "Comment"
+      if (item.kind === "assignment") return "Assignment"
+      if (item.kind === "support") return "Support"
+      return "Course"
     }
 
-    const issueInsertChannel = supabase
-      .channel("public:course_issues:insert")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "course_issues" },
-        async (payload) => {
-          if (!dedup(`issue-${payload.new.id}`)) return
-          if (payload.new.created_by === userId) return
-
-          const [courseTitle, authorName] = await Promise.all([
-            getCourseCode(payload.new.course_id),
-            getAuthorName(payload.new.created_by),
-          ])
-
-          const icon = SEVERITY_ICON[payload.new.severity] ?? "⚠️"
-          const isQuestion = payload.new.type === "question"
-          const typeLabel = isQuestion && role === "standard_user"
-            ? "Instructor Question"
-            : TYPE_LABEL[payload.new.type] ?? "Issue"
-          const href = IS_ADMIN(role)
-            ? `/admin/courses/${payload.new.course_id}`
-            : payload.new.type === "escalation"
-              ? `/courses/${payload.new.course_id}`
-              : `/courses/${payload.new.course_id}/issue-log`
-
-          toast.warning(`${icon} New ${typeLabel}`, {
-            description: (
-              <div className="space-y-2">
-                <p className="font-semibold">{payload.new.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  Raised by {authorName} • {payload.new.severity} severity
-                </p>
-                <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
-                {payload.new.description && (
-                  <p className="text-xs italic text-muted-foreground">&quot;{payload.new.description.substring(0, 100)}{payload.new.description.length > 100 ? "…" : ""}&quot;</p>
-                )}
-              </div>
-            ),
-            duration: Infinity,
-            action: { label: "Open Issue", onClick: () => router.push(href) },
-          })
-          playNotificationTone("warning")
-        }
+    function showNotification(item: NotificationItem) {
+      const icon = iconFor(item)
+      const label = labelFor(item)
+      const content = (
+        <div className="space-y-1.5">
+          <p className="font-semibold">{item.title}</p>
+          <p className="text-xs text-muted-foreground">{item.description}</p>
+          <p className="text-xs text-muted-foreground">{item.meta}</p>
+        </div>
       )
-      .subscribe()
 
-    const issueUpdateChannel = supabase
-      .channel("public:course_issues:update")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "course_issues" },
-        async (payload) => {
-          if (!dedup(`issue-status-${payload.new.id}-${payload.new.status}`)) return
-          if (payload.old.status === payload.new.status) return
-          if (payload.new.resolved_by === userId) return
+      const options = {
+        description: content,
+        duration: Infinity,
+        action: { label: "Open", onClick: () => router.push(item.href) },
+      }
 
-          const courseTitle = await getCourseCode(payload.new.course_id)
-          const href = IS_ADMIN(role)
-            ? `/admin/courses/${payload.new.course_id}`
-            : payload.new.type === "escalation"
-              ? `/courses/${payload.new.course_id}`
-              : `/courses/${payload.new.course_id}/issues`
+      if (item.tone === "success") {
+        toast.success(`${icon} ${label}`, options)
+        playNotificationTone("success")
+      } else if (item.tone === "warning" || item.tone === "danger") {
+        toast.warning(`${icon} ${label}`, options)
+        playNotificationTone("warning")
+      } else {
+        toast.info(`${icon} ${label}`, options)
+        playNotificationTone("info")
+      }
+    }
 
-          const statusMap: Record<string, { icon: string; label: string }> = {
-            resolved: { icon: "✅", label: "Resolved" },
-            in_review: { icon: "🔄", label: "In Review" },
-            open: { icon: "↩️", label: "Reopened" },
+    async function pollFeed() {
+      try {
+        const response = await fetch('/api/notifications/feed', {
+          credentials: 'include',
+          cache: 'no-store',
+        })
+        if (!response.ok) return
+
+        const data = (await response.json()) as NotificationFeedResponse
+        const items = data.notifications ?? []
+
+        // First load: seed the seen set so we don't toast the whole backlog.
+        if (!initialLoadDone.current) {
+          for (const item of items) {
+            seenIds.current.add(item.id)
           }
-
-          const status = statusMap[payload.new.status] || { icon: "📌", label: "Updated" }
-
-          if (payload.new.status === "resolved") {
-            toast.success(`${status.icon} Issue ${status.label}`, {
-              description: (
-                <div className="space-y-2">
-                  <p className="font-semibold">{payload.new.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Status changed: open → <span className="font-semibold text-success">resolved</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
-                </div>
-              ),
-              duration: Infinity,
-              action: { label: "View Details", onClick: () => router.push(href) },
-            })
-            playNotificationTone("success")
-          } else if (payload.new.status === "in_review") {
-            toast.info(`${status.icon} Issue ${status.label}`, {
-              description: (
-                <div className="space-y-2">
-                  <p className="font-semibold">{payload.new.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Status changed: <span className="text-warning">open</span> → <span className="font-semibold text-info">in review</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
-                </div>
-              ),
-              duration: Infinity,
-              action: { label: "View Details", onClick: () => router.push(href) },
-            })
-            playNotificationTone("info")
-          } else if (payload.new.status === "open") {
-            toast.warning(`${status.icon} Issue ${status.label}`, {
-              description: (
-                <div className="space-y-2">
-                  <p className="font-semibold">{payload.new.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Status changed: <span className="text-success">resolved</span> → <span className="font-semibold text-warning">open</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">Course: {courseTitle}</p>
-                </div>
-              ),
-              duration: Infinity,
-              action: { label: "View Details", onClick: () => router.push(href) },
-            })
-            playNotificationTone("warning")
-          }
+          initialLoadDone.current = true
+          pendingCountRef.current = data.pendingCount
+          return
         }
-      )
-      .subscribe()
 
-    const commentChannel = supabase
-      .channel("public:course_issue_comments:insert")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "course_issue_comments" },
-        async (payload) => {
-          if (!dedup(`comment-${payload.new.id}`)) return
-          if (payload.new.author_id === userId) return
-          if (payload.new.is_system_message) return
-
-          const { data: issue } = await supabase
-            .from("course_issues")
-            .select("course_id, title, type")
-            .eq("id", payload.new.issue_id)
-            .single()
-
-          if (!issue) return
-
-          const [courseTitle, authorName] = await Promise.all([
-            getCourseCode(issue.course_id),
-            getAuthorName(payload.new.author_id),
-          ])
-
-          const href = IS_ADMIN(role)
-            ? `/admin/courses/${issue.course_id}`
-            : issue.type === "escalation"
-              ? `/courses/${issue.course_id}`
-              : `/courses/${issue.course_id}/issues`
-
-          const body: string = payload.new.body
-          const preview = body.length > 100 ? `${body.substring(0, 100)}…` : body
-
-          toast.info("💬 New Comment", {
-            description: (
-              <div className="space-y-2">
-                <p className="font-semibold">{issue.title}</p>
-                <p className="text-xs italic text-muted-foreground">&quot;{preview}&quot;</p>
-                <p className="text-xs text-muted-foreground">By {authorName} on {courseTitle}</p>
-              </div>
-            ),
-            duration: Infinity,
-            action: { label: "Reply", onClick: () => router.push(href) },
-          })
-          playNotificationTone("info")
+        const newItems = items.filter((item) => dedup(item.id))
+        for (const item of newItems.slice(0, 3).reverse()) {
+          showNotification(item)
         }
-      )
-      .subscribe()
 
-    const assignmentChannel = supabase
-      .channel("public:course_assignments:insert")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "course_assignments" },
-        async (payload) => {
-          if (payload.new.profile_id !== userId) return
-          if (!dedup(`assign-${payload.new.id}`)) return
-
-          const courseTitle = await getCourseCode(payload.new.course_id)
-
-          toast.success("📚 Course Assigned to You", {
-            description: `You were assigned \"${courseTitle}\". Open it when you are ready.`,
-            duration: Infinity,
-            action: {
-              label: "Open Review",
-              onClick: () => router.push(`/courses/${payload.new.course_id}/metadata`),
-            },
-          })
-          playNotificationTone("success")
-        }
-      )
-      .subscribe()
-
-    const statusEventChannel = supabase
-      .channel("public:course_status_events:insert")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "course_status_events" },
-        async (payload) => {
-          if (!dedup(`status-${payload.new.id}`)) return
-          // Skip events the current user triggered themselves
-          if (payload.new.actor_id === userId) return
-
-          const toStatus: string = payload.new.to_status
-          const courseId: string = payload.new.course_id
-
-          // Determine relevance and message per role + target status
-          type ToastSpec = {
-            icon: string
-            title: string
-            description: string
-            tone: "info" | "success" | "warning"
-            href: string
-            actionLabel: string
-          }
-
-          let spec: ToastSpec | null = null
-
-          if (IS_ADMIN(role)) {
-            if (toStatus === "submitted_to_admin") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "📋", title: "New Submission",
-                description: `${courseTitle} is ready for your review.`,
-                tone: "info",
-                href: `/admin/courses/${courseId}`,
-                actionLabel: "Review",
-              }
-            } else if (toStatus === "instructor_questions") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "❓", title: "Instructor Has Questions",
-                description: `${courseTitle} — the instructor raised a question.`,
-                tone: "warning",
-                href: `/admin/courses/${courseId}`,
-                actionLabel: "View",
-              }
-            } else if (toStatus === "instructor_viewing") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "👀", title: "Instructor Reviewing",
-                description: `${courseTitle} — the instructor opened the review.`,
-                tone: "info",
-                href: `/admin/courses/${courseId}`,
-                actionLabel: "View",
-              }
-            } else if (toStatus === "instructor_approved") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "✅", title: "Instructor Approved",
-                description: `${courseTitle} — final approval is needed.`,
-                tone: "success",
-                href: `/admin/courses/${courseId}`,
-                actionLabel: "Approve",
-              }
-            } else if (toStatus === "waiting_on_admin") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "🏗️", title: "Ready for Staging Shell",
-                description: `${courseTitle} — review approved. Build the staging shell to continue.`,
-                tone: "info",
-                href: `/admin/courses/${courseId}`,
-                actionLabel: "Build Shell",
-              }
-            } else if (toStatus === "ready_for_instructor") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "📦", title: "Staging Finalized — Ready to Send",
-                description: `${courseTitle} — staging is finalized. Send it to the instructor to continue.`,
-                tone: "success",
-                href: `/admin/courses/${courseId}`,
-                actionLabel: "Send to Instructor",
-              }
-            }
-          } else if (role === "standard_user") {
-            // Only show if user is the TA for this course
-            const { data: assignment } = await supabase
-              .from("course_assignments")
-              .select("id")
-              .eq("course_id", courseId)
-              .eq("profile_id", userId)
-              .maybeSingle()
-            if (!assignment) return
-
-            if (toStatus === "admin_changes_requested") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "⚠️", title: "Changes Requested",
-                description: `${courseTitle} — an admin has requested changes.`,
-                tone: "warning",
-                href: `/courses/${courseId}/submit`,
-                actionLabel: "View Feedback",
-              }
-            } else if (toStatus === "waiting_on_admin") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "🎉", title: "Review Approved — Staging Next",
-                description: `${courseTitle} — approved by admin, who is now building the staging shell.`,
-                tone: "success",
-                href: `/courses/${courseId}/metadata`,
-                actionLabel: "View",
-              }
-            } else if (toStatus === "staging_in_progress") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "🛠️", title: "Ready to Finalize",
-                description: `${courseTitle} — the staging shell is ready. Finalize the course to send it on.`,
-                tone: "info",
-                href: `/courses/${courseId}/submit`,
-                actionLabel: "Finalize & Send",
-              }
-            }
-          } else if (role === "instructor") {
-            if (toStatus === "sent_to_instructor") {
-              const courseTitle = await getCourseCode(courseId)
-              spec = {
-                icon: "📬", title: "Course Ready for Review",
-                description: `${courseTitle} is ready for your review.`,
-                tone: "info",
-                href: `/instructor/courses/${courseId}`,
-                actionLabel: "Open",
-              }
-            }
-          }
-
-          if (!spec) return
-
-          const { icon, title, description, tone, href, actionLabel } = spec
-          if (tone === "success") {
-            toast.success(`${icon} ${title}`, {
-              description,
-              duration: Infinity,
-              action: { label: actionLabel, onClick: () => router.push(href) },
-            })
-          } else if (tone === "warning") {
-            toast.warning(`${icon} ${title}`, {
-              description,
-              duration: Infinity,
-              action: { label: actionLabel, onClick: () => router.push(href) },
-            })
-          } else {
-            toast.info(`${icon} ${title}`, {
-              description,
-              duration: Infinity,
-              action: { label: actionLabel, onClick: () => router.push(href) },
-            })
-          }
-          playNotificationTone(tone)
+        if (pendingCountRef.current !== null && pendingCountRef.current !== data.pendingCount) {
           router.refresh()
         }
-      )
-      .subscribe()
+        pendingCountRef.current = data.pendingCount
+      } catch {
+        // Best-effort polling only.
+      }
+    }
 
-    const supportMessageChannel = role === "super_admin"
-      ? supabase
-        .channel("public:support_messages:insert")
-        .on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "support_messages" },
-          async (payload) => {
-            if (!dedup("support-" + payload.new.id)) return
-
-            const senderName = await getAuthorName(payload.new.sender_profile_id)
-            const isPoke = payload.new.type === "poke"
-            const title = isPoke ? "IT Support Poke" : (payload.new.subject || "New Support Message")
-            const body = String(payload.new.body || "")
-            const preview = body.length > 100 ? body.substring(0, 100) + "..." : body
-
-            toast.warning(isPoke ? "⚡ IT Support Poke" : "💬 Support Message", {
-              description: (
-                <div className="space-y-2">
-                  <p className="font-semibold">{title}</p>
-                  <p className="text-xs text-muted-foreground">From {senderName}</p>
-                  {preview && <p className="text-xs italic text-muted-foreground">&quot;{preview}&quot;</p>}
-                </div>
-              ),
-              duration: Infinity,
-              action: { label: "Open", onClick: () => router.push("/notifications") },
-            })
-            playNotificationTone("warning")
-            router.refresh()
-          }
-        )
-        .subscribe()
-      : null
-
-    const reassignmentChannel = supabase
-      .channel("public:course_reassignments:insert")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "course_reassignments" },
-        async (payload) => {
-          const isNewTa = payload.new.to_profile_id === userId
-          // Relevant to the new TA, or to any admin watching.
-          if (!isNewTa && !IS_ADMIN(role)) return
-          // Don't toast the actor about their own action.
-          if (payload.new.reassigned_by === userId) return
-          if (!dedup(`reassign-${payload.new.id}`)) return
-
-          const courseTitle = await getCourseCode(payload.new.course_id)
-
-          if (isNewTa) {
-            toast.success("📚 Course Reassigned to You", {
-              description: `"${courseTitle}" was reassigned to you. Open it when you are ready.`,
-              duration: Infinity,
-              action: {
-                label: "Open Review",
-                onClick: () => router.push(`/courses/${payload.new.course_id}/metadata`),
-              },
-            })
-            playNotificationTone("success")
-          } else {
-            const toName = await getAuthorName(payload.new.to_profile_id)
-            toast.info("🔄 Course Reassigned", {
-              description: `"${courseTitle}" was reassigned to ${toName}.`,
-              duration: Infinity,
-              action: {
-                label: "View",
-                onClick: () => router.push(`/admin/courses/${payload.new.course_id}`),
-              },
-            })
-            playNotificationTone("info")
-          }
-          router.refresh()
-        }
-      )
-      .subscribe()
+    void pollFeed()
+    const timer = window.setInterval(() => {
+      void pollFeed()
+    }, 15000)
 
     return () => {
-      supabase.removeChannel(issueInsertChannel)
-      supabase.removeChannel(issueUpdateChannel)
-      supabase.removeChannel(commentChannel)
-      supabase.removeChannel(assignmentChannel)
-      supabase.removeChannel(statusEventChannel)
-      supabase.removeChannel(reassignmentChannel)
-      if (supportMessageChannel) supabase.removeChannel(supportMessageChannel)
+      window.clearInterval(timer)
     }
   }, [userId, role, router])
 

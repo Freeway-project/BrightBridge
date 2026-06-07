@@ -377,6 +377,7 @@ export interface CourseRepository {
 
 export interface ProfileRepository {
   getProfileById(profileId: string): Promise<AppProfileRecord | null>;
+  getProfileByEmail(email: string): Promise<AppProfileRecord | null>;
   getProfilesByRole(role: Role): Promise<ProfileOption[]>;
   listUsers(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<UserSummary>>;
   upsertProfile(input: {

@@ -1,0 +1,29 @@
+# Local development Postgres for the DB_PROVIDER=postgres path.
+# Brings up a throwaway Postgres so you can run `npm run dev` fully offline
+# (no Supabase, no Entra). See docs/LOCAL-DEV.md.
+#
+#   npm run dev:db:up      # start postgres
+#   npm run dev:db:migrate # apply supabase/migrations/*
+#   npm run dev:db:seed    # seed dev profiles + sample courses
+#   npm run dev            # run the app (with apps/web/.env.local set)
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: brightbridge-dev-pg
+    environment:
+      POSTGRES_USER: coursebridge_user
+      POSTGRES_PASSWORD: localdev
+      POSTGRES_DB: coursebridge
+    ports:
+      - "5433:5432"
+    volumes:
+      - brightbridge_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coursebridge_user -d coursebridge"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  brightbridge_pg:

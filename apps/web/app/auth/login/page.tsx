@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react"
 import { DEV_ACCOUNTS } from "./dev-accounts"
-import { signInAsDevEmail, signInWithPasswordAction, type ActionState } from "./actions"
+import { signInAsDevEmail, signInWithPasswordAction, startAzureOidcSignInAction, type ActionState } from "./actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AnimatedBubbleParticles } from "@/components/ui/animated-bubble-particles"
@@ -106,6 +106,7 @@ function SigningInOverlay({ visible }: { visible: boolean }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(signInWithPasswordAction, initialState)
+  const oidcEnabled = process.env.NEXT_PUBLIC_AUTH_PROVIDER === "azure-oidc"
 
   return (
     <>
@@ -163,6 +164,20 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {oidcEnabled && (
+              <form action={startAzureOidcSignInAction} className="space-y-4">
+                <Button className="w-full h-10 gap-2" type="submit">
+                  <KeyRound className="size-4" />
+                  Sign in with Microsoft
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Authenticate with your Microsoft account to continue.
+                </p>
+              </form>
+            )}
+
+            {!oidcEnabled && (
+            <>
             <form action={formAction} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium" htmlFor="email">Email address</label>
@@ -204,6 +219,8 @@ export default function LoginPage() {
                 <p className="text-sm text-destructive leading-tight">{state.error}</p>
               </div>
             ) : null}
+            </>
+            )}
 
             <div className="rounded-lg border border-dashed border-border px-4 py-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -211,7 +228,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {process.env.NODE_ENV === "development" && (
+            {!oidcEnabled && process.env.NODE_ENV === "development" && (
               <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
                 <div>
                   <p className="text-xs font-medium text-foreground">Dev quick login</p>
