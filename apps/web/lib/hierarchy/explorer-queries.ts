@@ -4,6 +4,8 @@ import type { CourseStatus } from "@coursebridge/workflow"
 import { requireProfile } from "@/lib/auth/context"
 import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
 import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
+import { getPostgresPool } from "@/lib/postgres/pool"
+import { isPostgresProvider } from "@/lib/repositories/provider"
 import type {
   AdminCourseRow,
   OrgUnit,
@@ -105,14 +107,28 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   if (effectiveUnitId) {
     const unitMembers = allMembers.filter((m) => m.orgUnitId === effectiveUnitId)
     if (unitMembers.length) {
-      const admin = getSupabaseAdminClientOrThrow()
-      const { data: profiles } = await admin
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", unitMembers.map((m) => m.profileId))
+      const memberIds = unitMembers.map((m) => m.profileId)
+      let profiles: Array<{ id: string; full_name: string | null; email: string }> = []
+
+      if (isPostgresProvider()) {
+        const pool = getPostgresPool()
+        const result = await pool.query<{ id: string; full_name: string | null; email: string }>(
+          `SELECT id, full_name, email FROM profiles WHERE id = ANY($1::uuid[])`,
+          [memberIds],
+        )
+        profiles = result.rows
+      } else {
+        const admin = getSupabaseAdminClientOrThrow()
+        const { data } = await admin
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", memberIds)
+        profiles = (data ?? []) as Array<{ id: string; full_name: string | null; email: string }>
+      }
+
       const nameById = new Map<string, string>()
-      for (const p of profiles ?? []) {
-        nameById.set(p.id, (p.full_name as string)?.trim() || (p.email as string))
+      for (const p of profiles) {
+        nameById.set(p.id, p.full_name?.trim() || p.email)
       }
       leadership = unitMembers
         .map((m) => ({
