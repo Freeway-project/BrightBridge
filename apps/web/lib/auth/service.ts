@@ -5,8 +5,10 @@ import { cookies } from "next/headers";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { getProfileRepository } from "@/lib/repositories";
 
 const AUTH_PROVIDER_AZURE_OIDC = "azure-oidc";
+const AUTH_PROVIDER_DEV = "dev";
 const OIDC_SESSION_COOKIE = "coursebridge_auth_session";
 const OIDC_STATE_COOKIE = "coursebridge_oidc_state";
 const OIDC_NONCE_COOKIE = "coursebridge_oidc_nonce";
@@ -61,6 +63,10 @@ function authProvider(): string {
 
 export function isAzureOidcEnabled(): boolean {
   return authProvider() === AUTH_PROVIDER_AZURE_OIDC;
+}
+
+export function isDevAuthEnabled(): boolean {
+  return authProvider() === AUTH_PROVIDER_DEV;
 }
 
 export function getAzureOidcConfigOrThrow(): AzureOidcConfig {
@@ -443,10 +449,107 @@ class OidcAuthService implements AuthService {
   }
 }
 
+// ── Local dev (AUTH_PROVIDER=dev) ───────────────────────────────────────────
+// Fully offline auth for `npm run dev` against a local Postgres — no Supabase or
+// Entra needed. Reuses the OIDC signed-cookie session, but "signs in" by looking
+// up a seeded profile by email (the login page's dev quick-login). Disabled when
+// NODE_ENV=production.
+
+class DevAuthService implements AuthService {
+  async getCurrentSessionUser(): Promise<SessionUser | null> {
+    const cookieStore = await cookies();
+    const rawSession = cookieStore.get(OIDC_SESSION_COOKIE)?.value;
+    if (!rawSession) {
+      return null;
+    }
+
+    const session = decodeSession(rawSession);
+    if (!session) {
+      try {
+        cookieStore.delete(OIDC_SESSION_COOKIE);
+      } catch {
+        // cookies() is read-only in Server Components — best-effort cleanup.
+      }
+      return null;
+    }
+
+    return {
+      id: session.sub,
+      email: session.email,
+      userMetadata: { full_name: session.full_name },
+    };
+  }
+
+  async signInWithPassword(email: string, _password: string) {
+    if (process.env.NODE_ENV === "production") {
+      return { error: "Dev sign-in is disabled in production." };
+    }
+
+    const profile = await getProfileRepository().getProfileByEmail(email.trim().toLowerCase());
+    if (!profile) {
+      return { error: `No local profile for ${email}. Seed the dev database: npm run dev:db:seed` };
+    }
+
+    const exp = Math.floor(Date.now() / 1000) + 8 * 60 * 60;
+    const cookieStore = await cookies();
+    cookieStore.set(
+      OIDC_SESSION_COOKIE,
+      encodeSession({ sub: profile.id, email: profile.email, full_name: profile.fullName, exp }),
+      { httpOnly: true, secure: false, sameSite: "lax", path: "/", expires: new Date(exp * 1000) },
+    );
+    return { error: null };
+  }
+
+  async signOut() {
+    const cookieStore = await cookies();
+    cookieStore.delete(OIDC_SESSION_COOKIE);
+  }
+
+  async exchangeCodeForSession(_code: string, _state?: string | null) {
+    // Dev auth uses direct sign-in, not an authorization-code exchange.
+  }
+
+  async createUserWithPassword(input: {
+    email: string;
+    password: string;
+    emailConfirm?: boolean;
+    userMetadata?: Record<string, unknown>;
+  }) {
+    return supabaseCreateUserWithPassword(input);
+  }
+
+  async updateUserMetadata(userId: string, userMetadata: Record<string, unknown>) {
+    return supabaseUpdateUserMetadata(userId, userMetadata);
+  }
+
+  async generateMagicLinkHashedToken(email: string) {
+    return supabaseGenerateMagicLinkHashedToken(email);
+  }
+
+  async verifyMagicLink(tokenHash: string) {
+    return supabaseVerifyMagicLink(tokenHash);
+  }
+
+  getBrowserClient() {
+    return createBrowserClient();
+  }
+}
+
 let authService: AuthService | null = null;
 
 export function getAuthService(): AuthService {
-  authService ??= isAzureOidcEnabled() ? new OidcAuthService() : new SupabaseAuthService();
+  if (authService) {
+    return authService;
+  }
+
+  if (isAzureOidcEnabled()) {
+    authService = new OidcAuthService();
+  } else if (isDevAuthEnabled()) {
+    authService = new DevAuthService();
+  } else {
+    authService = new SupabaseAuthService();
+  }
+
   return authService;
 }
 
