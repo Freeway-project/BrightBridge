@@ -41,6 +41,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   admin_viewer: [
     { label: "Handoff Queue", href: "/communications", icon: Send },
+    { label: "Hierarchy", href: "/hierarchy", icon: Network },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
   ],
