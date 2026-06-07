@@ -12,6 +12,10 @@ export type ActionState = {
   error?: string
 }
 
+export async function startAzureOidcSignInAction() {
+  redirect("/auth/oidc/login")
+}
+
 export async function signInWithPasswordAction(
   _state: ActionState,
   formData: FormData,

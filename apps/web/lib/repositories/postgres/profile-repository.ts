@@ -46,6 +46,22 @@ export function createPostgresProfileRepository(): ProfileRepository {
       return rows[0] ? mapProfile(rows[0]) : null;
     },
 
+    async getProfileByEmail(email) {
+      const pool = getPostgresPool();
+      const normalizedEmail = email.trim().toLowerCase();
+      const { rows } = await pool.query<ProfileRow>(
+        `
+          SELECT id, email, full_name, role
+          FROM profiles
+          WHERE LOWER(email) = $1
+          LIMIT 1
+        `,
+        [normalizedEmail],
+      );
+
+      return rows[0] ? mapProfile(rows[0]) : null;
+    },
+
     async getProfilesByRole(role) {
       const pool = getPostgresPool();
       const { rows } = await pool.query<ProfileRow>(

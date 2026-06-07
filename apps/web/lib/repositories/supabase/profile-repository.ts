@@ -39,6 +39,30 @@ export function createSupabaseProfileRepository(): ProfileRepository {
       };
     },
 
+    async getProfileByEmail(email) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("profiles")
+        .select("id,email,full_name,role")
+        .ilike("email", email.trim())
+        .maybeSingle();
+
+      if (error) {
+        throw new Error(formatPostgrestError("Could not load profile by email", error));
+      }
+
+      if (!data) {
+        return null;
+      }
+
+      return {
+        id: data.id,
+        email: data.email,
+        fullName: data.full_name,
+        role: data.role as Role,
+      };
+    },
+
     async getProfilesByRole(role) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin

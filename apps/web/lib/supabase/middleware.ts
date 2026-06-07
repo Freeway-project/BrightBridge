@@ -2,6 +2,20 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  const authProvider = (process.env.AUTH_PROVIDER ?? "").trim().toLowerCase();
+  if (authProvider === "azure-oidc") {
+    const hasOidcSession = Boolean(request.cookies.get("coursebridge_auth_session")?.value);
+    const isAuthPath = request.nextUrl.pathname.startsWith('/auth');
+
+    if (!hasOidcSession && !isAuthPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth/login';
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
