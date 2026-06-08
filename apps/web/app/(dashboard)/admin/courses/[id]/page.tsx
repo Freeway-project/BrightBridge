@@ -19,6 +19,8 @@ import { getSubmissionHistory, getQuestionRoundHistory } from "@/lib/courses/ser
 import { getCourseTimeline } from "@/lib/courses/timeline"
 import { CourseTimeline } from "@/components/courses/course-timeline"
 import { lastForCourse, listByCourse } from "@/lib/instructor-emails/queries"
+import { viewForCourse } from "@/lib/instructor-views/queries"
+import { OpenedDot } from "@/components/instructor/opened-dot"
 import { EmailsList } from "./_components/emails-list"
 
 interface Props {
@@ -30,7 +32,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, comments, submissionHistory, questionRounds, timeline, lastEmail, emails] = await Promise.all([
+  const [detail, comments, submissionHistory, questionRounds, timeline, lastEmail, emails, instructorView] = await Promise.all([
     getAdminCourseDetail(id),
     getCourseComments(id),
     getSubmissionHistory(id),
@@ -38,6 +40,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
     getCourseTimeline(id, { includeInternalComments: true }),
     lastForCourse(id),
     listByCourse(id),
+    viewForCourse(id),
   ])
 
   if (!detail) notFound()
@@ -58,7 +61,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
           <TabsList variant="line" className="border-b border-border px-6 pt-4 bg-background">
             <TabsTrigger value="review" className="text-base">Review</TabsTrigger>
             <TabsTrigger value="issues" className="text-base">Issues</TabsTrigger>
-            <TabsTrigger value="chat" className="text-base">Chat</TabsTrigger>
+            <TabsTrigger value="chat" className="text-base">Discussion</TabsTrigger>
             <TabsTrigger value="timeline" className="text-base">Timeline</TabsTrigger>
             <TabsTrigger value="emails" className="text-base">Emails</TabsTrigger>
           </TabsList>
