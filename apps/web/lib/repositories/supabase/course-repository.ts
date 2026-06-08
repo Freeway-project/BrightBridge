@@ -36,6 +36,12 @@ type CourseRow = {
   created_by: string;
   created_at: string;
   updated_at: string;
+  // Optional embed: present only on list queries that join course_assignments
+  // (used to surface the assigned TA / instructor on course cards).
+  course_assignments?: Array<{
+    role: string;
+    profiles?: NamedProfile | NamedProfile[] | null;
+  }> | null;
 };
 
 type AssignmentProfile = { id: string; full_name: string | null; email: string };
@@ -93,7 +99,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(
-          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
+          `id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,
+           course_assignments ( role, profiles!course_assignments_profile_id_fkey ( full_name, email ) )`,
         )
         .order("updated_at", { ascending: false });
 
@@ -1119,6 +1126,12 @@ export function createSupabaseCourseRepository(): CourseRepository {
   };
 }
 
+function namedProfileFor(row: CourseRow, role: string): { name: string | null; email: string } | null {
+  const assignment = row.course_assignments?.find((a) => a.role === role);
+  const profile = firstRelation(assignment?.profiles);
+  return profile ? { name: profile.full_name, email: profile.email } : null;
+}
+
 function toCourseSummary(row: CourseRow): CourseSummary {
   return {
     id: row.id,
@@ -1132,6 +1145,10 @@ function toCourseSummary(row: CourseRow): CourseSummary {
     createdBy: row.created_by,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    // Only meaningful when the query embedded course_assignments+profiles
+    // (e.g. listAccessibleCourses); otherwise both stay null.
+    ta: namedProfileFor(row, "staff"),
+    instructor: namedProfileFor(row, "instructor"),
   };
 }
 

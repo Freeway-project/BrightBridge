@@ -5,7 +5,7 @@ import { StatusBadge } from "./status-badge"
 import { type CourseStatus } from "@coursebridge/workflow"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowRight, Clock, AlertCircle, CheckCircle2, ChevronRight, FileDown, FileSpreadsheet } from "lucide-react"
+import { ArrowRight, Clock, AlertCircle, CheckCircle2, ChevronRight, FileDown, FileSpreadsheet, User, GraduationCap, ArrowRightLeft } from "lucide-react"
 import type { ReviewProgress } from "@/lib/courses/service"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
@@ -14,11 +14,14 @@ interface CourseCardProps {
   course: {
     id: string
     sourceCourseId: string | null
+    targetCourseId?: string | null
     title: string
     term: string | null
     department: string | null
     status: CourseStatus
     updatedAt: string
+    ta?: { name: string | null; email: string } | null
+    instructor?: { name: string | null; email: string } | null
     reviewProgress?: ReviewProgress
   }
   issueCounts?: { open: number; resolved: number }
@@ -29,6 +32,12 @@ interface CourseCardProps {
 
 export function CourseCard({ course, issueCounts, index = 0, canExport = false }: CourseCardProps) {
   const { action, owner, tone } = deriveNextAction(course.status)
+  const progress = computeProgress(course.reviewProgress)
+  const age = daysSince(course.updatedAt)
+  // Flag courses sitting in a non-terminal stage for a while.
+  const stale = age >= 7 && course.status !== "final_approved"
+  const assigneeName = course.ta?.name ?? course.ta?.email ?? null
+  const instructorName = course.instructor?.name ?? course.instructor?.email ?? null
 
   return (
     <motion.div
@@ -52,10 +61,16 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground/80">
                     {course.sourceCourseId || "NO-CODE"}
                   </h3>
+                  {course.targetCourseId && (
+                    <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60" title="Target course code">
+                      <ArrowRightLeft className="size-3" />
+                      {course.targetCourseId}
+                    </span>
+                  )}
                   <div className="h-4 w-px bg-border/40" />
                 </div>
                 <span className="truncate text-base font-bold text-foreground transition-colors group-hover/card:text-primary">
@@ -74,13 +89,29 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                   <span className="text-muted-foreground/60">Dept:</span>
                   <span className="text-foreground/90">{course.department || "N/A"}</span>
                 </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <Clock className="size-3.5 text-muted-foreground/60" />
-                  <span className="text-foreground/85">
-                    Updated {new Date(course.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                  </span>
+                <div
+                  className={cn(
+                    "flex items-center gap-1.5 font-medium",
+                    stale ? "text-amber-500" : "text-foreground/85",
+                  )}
+                  title={`In this stage for ${age} day${age === 1 ? "" : "s"} (updated ${new Date(course.updatedAt).toLocaleDateString()})`}
+                >
+                  <Clock className={cn("size-3.5", stale ? "text-amber-500" : "text-muted-foreground/60")} />
+                  <span>{formatAge(age)} in stage</span>
                 </div>
-                
+                {assigneeName && (
+                  <div className="flex items-center gap-1.5 font-medium" title={`Reviewer: ${assigneeName}`}>
+                    <User className="size-3.5 text-muted-foreground/60" />
+                    <span className="max-w-[10rem] truncate text-foreground/85">{assigneeName}</span>
+                  </div>
+                )}
+                {instructorName && (
+                  <div className="flex items-center gap-1.5 font-medium" title={`Instructor: ${instructorName}`}>
+                    <GraduationCap className="size-3.5 text-muted-foreground/60" />
+                    <span className="max-w-[10rem] truncate text-foreground/85">{instructorName}</span>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-3 ml-auto sm:ml-0">
                   {issueCounts && issueCounts.open > 0 && (
                     <div className="flex items-center gap-1.5 rounded-full border border-destructive/30 bg-destructive/10 px-2.5 py-1 text-[10px] font-bold text-destructive animate-pulse-subtle">
@@ -94,6 +125,24 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                       {issueCounts.resolved} RESOLVED
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                  <span>Review Progress</span>
+                  <span className={cn(progress.pct === 100 ? "text-emerald-500" : "text-foreground/80")}>
+                    {progress.submitted}/{progress.total} · {progress.pct}%
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/50">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all duration-500",
+                      progress.pct === 100 ? "bg-emerald-500" : "bg-primary",
+                    )}
+                    style={{ width: `${progress.pct}%` }}
+                  />
                 </div>
               </div>
 
@@ -248,6 +297,31 @@ function ProgressItem({
       </div>
     </div>
   )
+}
+
+// Section-based completion: submitted = 1, started-but-not-submitted = 0.5.
+function computeProgress(progress: ReviewProgress | undefined): { pct: number; submitted: number; total: number } {
+  const sections = [progress?.courseMetadata, progress?.reviewMatrix, progress?.syllabusReview]
+  const total = sections.length
+  let score = 0
+  let submitted = 0
+  for (const s of sections) {
+    if (s?.status === "submitted") { score += 1; submitted += 1 }
+    else if (s?.exists) { score += 0.5 }
+  }
+  return { pct: Math.round((score / total) * 100), submitted, total }
+}
+
+function daysSince(iso: string): number {
+  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000))
+}
+
+function formatAge(days: number): string {
+  if (days <= 0) return "today"
+  if (days === 1) return "1d"
+  if (days < 7) return `${days}d`
+  if (days < 30) return `${Math.floor(days / 7)}w`
+  return `${Math.floor(days / 30)}mo`
 }
 
 function deriveNextAction(status: CourseStatus): {

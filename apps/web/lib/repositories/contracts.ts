@@ -46,6 +46,10 @@ export type CourseSummary = {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  /** Assigned reviewer (course_assignments role "staff"). Populated by list queries that join assignments. */
+  ta?: { name: string | null; email: string } | null;
+  /** Assigned instructor (course_assignments role "instructor"). */
+  instructor?: { name: string | null; email: string } | null;
   reviewProgress?: ReviewProgress;
 };
 

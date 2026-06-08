@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { CourseCard } from "./course-card"
 import type { CourseSummary } from "@/lib/courses/service"
 import { Button } from "@/components/ui/button"
@@ -324,6 +324,31 @@ function CourseGrid({
     return arr
   }, [courses, sortBy, issueCounts])
 
+  // Render in batches and grow on scroll instead of mounting every card (each
+  // card animates), so large lists stay snappy.
+  const BATCH = 12
+  const [visible, setVisible] = useState(BATCH)
+  // Reset the window whenever the course set changes (filter/tab/sort change).
+  useEffect(() => { setVisible(BATCH) }, [sortedCourses])
+
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const total = sortedCourses.length
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) setVisible((v) => Math.min(v + BATCH, total))
+      },
+      { rootMargin: "600px" },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [total])
+
+  const shown = sortedCourses.slice(0, visible)
+  const hasMore = visible < total
+
   if (courses.length === 0) {
     return (
       <motion.div 
@@ -344,10 +369,17 @@ function CourseGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:gap-6">
-      {sortedCourses.map((course, i) => (
-        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i} canExport={canExport} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:gap-6">
+        {shown.map((course, i) => (
+          <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i % BATCH} canExport={canExport} />
+        ))}
+      </div>
+      {hasMore && (
+        <div ref={sentinelRef} className="flex items-center justify-center py-6 text-xs text-muted-foreground">
+          Showing {shown.length} of {total} — scroll to load more
+        </div>
+      )}
+    </>
   )
 }
