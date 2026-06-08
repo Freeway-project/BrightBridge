@@ -3,6 +3,7 @@ import { PhaseBreakdown } from "@/components/admin/stats/phase-breakdown"
 import { AuditView } from "@/components/super-admin/audit-view"
 import { getPhaseBreakdown, type CourseStatus } from "@coursebridge/workflow"
 import type { SuperAdminData } from "@/lib/super-admin/queries"
+import type { AuditEvent, PaginatedResult } from "@/lib/repositories/contracts"
 import { buildProvostSummary } from "@/lib/provost/summary"
 import { ProvostWelcomeBanner } from "./provost-welcome-banner"
 import { ProvostKpiRow } from "./provost-kpi-row"
@@ -16,9 +17,11 @@ import { ProvostExplore } from "./provost-explore"
  */
 export function ProvostDashboard({
   data,
+  auditInitial,
   provostName,
 }: {
   data: SuperAdminData
+  auditInitial: PaginatedResult<AuditEvent>
   provostName: string | null
 }) {
   const summary = buildProvostSummary(data, provostName)
@@ -48,7 +51,7 @@ export function ProvostDashboard({
             </CardTitle>
           </CardHeader>
           <CardContent className="border-t border-border p-0">
-            <AuditView data={data} />
+            <AuditView initial={auditInitial} />
           </CardContent>
         </Card>
       </div>

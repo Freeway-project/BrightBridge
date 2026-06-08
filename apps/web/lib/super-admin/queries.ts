@@ -90,6 +90,14 @@ export async function getPaginatedSuperAdminCourses(page: number, pageSize: numb
   return courseRepository.listSuperAdminCourses(page, pageSize, search)
 }
 
+// Page of audit-trail events, newest first. The Audit Trail view seeds itself
+// with page 1 and pulls further pages on scroll, so we never load the whole
+// history into the browser at once.
+export async function getPaginatedAuditEvents(page: number, pageSize: number): Promise<PaginatedResult<AuditEvent>> {
+  const courseRepository = getCourseRepository()
+  return courseRepository.listAuditEventsPage(page, pageSize)
+}
+
 export type SupportMessageRow = {
   id: string
   sender_role: string
