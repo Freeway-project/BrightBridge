@@ -12,6 +12,7 @@ import { requireAnyRole, requireProfile } from "@/lib/auth/context";
 import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
 import { resolveEscalation } from "@/lib/services/escalations";
 import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow";
+import { syncCourseChannel } from "@/lib/chat/membership";
 
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
@@ -119,6 +120,12 @@ export async function batchAssignTaAction(
   revalidatePath("/ta");
   courseIds.forEach(id => revalidatePath(`/courses/${id}`));
 
+  for (const { courseId, success } of results) {
+    if (success) {
+      try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
+    }
+  }
+
   if (successCount === courseIds.length) {
     return {
       kind: "success",
@@ -203,6 +210,8 @@ export async function assignTaToCourseAction(
     revalidatePath("/admin");
     revalidatePath("/ta");
     revalidatePath(`/courses/${courseId}`);
+
+    try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
 
     console.info("[assignTaToCourseAction] Attempt succeeded", {
       requestId,
@@ -293,6 +302,12 @@ export async function batchReassignCourseAction(
   revalidatePath("/admin");
   revalidatePath("/ta");
   courseIds.forEach((id) => revalidatePath(`/courses/${id}`));
+
+  for (const { courseId, success } of results) {
+    if (success) {
+      try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
+    }
+  }
 
   if (successCount === courseIds.length) {
     return { kind: "success", message: `Reassigned ${successCount} course(s).`, results };
@@ -388,6 +403,8 @@ export async function createInstructorAndAssignAction(
 
     revalidatePath("/admin");
     revalidatePath(`/courses/${courseId}`);
+
+    try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
 
     return {
       kind: "success",

@@ -6,6 +6,7 @@ import { ROLES, type Role } from "@coursebridge/workflow"
 import { getAuthService } from "@/lib/auth/service"
 import { requireProfile } from "@/lib/auth/context"
 import { getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
+import { syncRoleChannel } from "@/lib/chat/membership"
 
 export type ManageUserState = {
   kind: "idle" | "success" | "error"
@@ -87,6 +88,8 @@ export async function updateUserRoleAction(
     return { kind: "error", message: "User profile not found." }
   }
 
+  const oldRole = profile.role
+
   try {
     await getProfileRepository().updateProfileRole(userId, role)
     await getAuthService().updateUserMetadata(userId, {
@@ -99,6 +102,11 @@ export async function updateUserRoleAction(
       message: error instanceof Error ? error.message : "Could not update user role.",
     }
   }
+
+  try {
+    if (oldRole) await syncRoleChannel(oldRole)
+    await syncRoleChannel(role)
+  } catch (e) { console.error("syncRoleChannel failed:", e) }
 
   revalidatePath("/super-admin")
 
