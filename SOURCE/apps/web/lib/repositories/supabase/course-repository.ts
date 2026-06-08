@@ -463,6 +463,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
       };
       const staffAssignment = course.course_assignments?.find((assignment) => assignment.role === "staff");
       const staffProfile = firstRelation(staffAssignment?.profiles);
+      const instructorAssignment = course.course_assignments?.find((assignment) => assignment.role === "instructor");
+      const instructorProfile = firstRelation(instructorAssignment?.profiles);
 
       return {
         id: course.id,
@@ -480,6 +482,13 @@ export function createSupabaseCourseRepository(): CourseRepository {
               id: staffProfile.id,
               name: staffProfile.full_name,
               email: staffProfile.email,
+            }
+          : null,
+        instructor: instructorProfile
+          ? {
+              id: instructorProfile.id,
+              name: instructorProfile.full_name,
+              email: instructorProfile.email,
             }
           : null,
       } satisfies AdminCourseRow;
@@ -1242,6 +1251,8 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
     };
     const staffAssignment = course.course_assignments?.find((assignment) => assignment.role === "staff");
     const staffProfile = firstRelation(staffAssignment?.profiles);
+    const instructorAssignment = course.course_assignments?.find((assignment) => assignment.role === "instructor");
+    const instructorProfile = firstRelation(instructorAssignment?.profiles);
 
     return {
       id: course.id,
@@ -1259,6 +1270,13 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
             id: staffProfile.id,
             name: staffProfile.full_name,
             email: staffProfile.email,
+          }
+        : null,
+      instructor: instructorProfile
+        ? {
+            id: instructorProfile.id,
+            name: instructorProfile.full_name,
+            email: instructorProfile.email,
           }
         : null,
     } satisfies AdminCourseRow;

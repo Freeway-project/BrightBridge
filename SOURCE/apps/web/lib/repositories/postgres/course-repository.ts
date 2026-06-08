@@ -53,6 +53,9 @@ type AdminCourseJoinRow = {
   ta_id: string | null;
   ta_name: string | null;
   ta_email: string | null;
+  instructor_id: string | null;
+  instructor_name: string | null;
+  instructor_email: string | null;
   instructor_summary_notes?: string | null;
 };
 
@@ -67,6 +70,18 @@ const ADMIN_COURSE_STAFF_JOIN = `
     ORDER BY ca.assigned_at DESC
     LIMIT 1
   ) ta ON TRUE
+`;
+
+// The instructor lateral join — same pattern for the assigned instructor.
+const ADMIN_COURSE_INSTRUCTOR_JOIN = `
+  LEFT JOIN LATERAL (
+    SELECT p.id, p.full_name, p.email
+    FROM course_assignments ca
+    INNER JOIN profiles p ON p.id = ca.profile_id
+    WHERE ca.course_id = c.id AND ca.role = 'instructor'
+    ORDER BY ca.assigned_at DESC
+    LIMIT 1
+  ) instr ON TRUE
 `;
 
 function cleanOptionalText(value: string | null | undefined) {
@@ -117,6 +132,13 @@ function mapAdminCourseRow(row: AdminCourseJoinRow): AdminCourseRow {
           id: row.ta_id,
           name: row.ta_name,
           email: row.ta_email ?? "",
+        }
+      : null,
+    instructor: row.instructor_id
+      ? {
+          id: row.instructor_id,
+          name: row.instructor_name,
+          email: row.instructor_email ?? "",
         }
       : null,
   };
@@ -401,9 +423,13 @@ export function createPostgresCourseRepository(): CourseRepository {
             c.updated_at,
             ta.id AS ta_id,
             ta.full_name AS ta_name,
-            ta.email AS ta_email
+            ta.email AS ta_email,
+            instr.id AS instructor_id,
+            instr.full_name AS instructor_name,
+            instr.email AS instructor_email
           FROM courses c
           ${ADMIN_COURSE_STAFF_JOIN}
+          ${ADMIN_COURSE_INSTRUCTOR_JOIN}
           ORDER BY c.updated_at DESC
         `,
       );
@@ -486,9 +512,13 @@ export function createPostgresCourseRepository(): CourseRepository {
           c.updated_at,
           ta.id AS ta_id,
           ta.full_name AS ta_name,
-          ta.email AS ta_email
+          ta.email AS ta_email,
+          instr.id AS instructor_id,
+          instr.full_name AS instructor_name,
+          instr.email AS instructor_email
         FROM courses c
         ${ADMIN_COURSE_STAFF_JOIN}
+        ${ADMIN_COURSE_INSTRUCTOR_JOIN}
         ${whereSql}
         ORDER BY c.updated_at DESC
         LIMIT ${limitParam} OFFSET ${offsetParam}
@@ -522,9 +552,13 @@ export function createPostgresCourseRepository(): CourseRepository {
             c.instructor_summary_notes,
             ta.id AS ta_id,
             ta.full_name AS ta_name,
-            ta.email AS ta_email
+            ta.email AS ta_email,
+            instr.id AS instructor_id,
+            instr.full_name AS instructor_name,
+            instr.email AS instructor_email
           FROM courses c
           ${ADMIN_COURSE_STAFF_JOIN}
+          ${ADMIN_COURSE_INSTRUCTOR_JOIN}
           WHERE c.id = $1
           LIMIT 1
         `,
@@ -1024,9 +1058,13 @@ export function createPostgresCourseRepository(): CourseRepository {
             c.updated_at,
             ta.id AS ta_id,
             ta.full_name AS ta_name,
-            ta.email AS ta_email
+            ta.email AS ta_email,
+            instr.id AS instructor_id,
+            instr.full_name AS instructor_name,
+            instr.email AS instructor_email
           FROM courses c
           ${ADMIN_COURSE_STAFF_JOIN}
+          ${ADMIN_COURSE_INSTRUCTOR_JOIN}
           ${whereSql}
           ORDER BY c.updated_at DESC
           LIMIT ${limitParam} OFFSET ${offsetParam}

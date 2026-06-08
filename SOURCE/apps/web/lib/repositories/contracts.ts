@@ -78,6 +78,7 @@ export type AdminCourseRow = {
   status: CourseStatus;
   updatedAt: string;
   ta: { id: string; name: string | null; email: string } | null;
+  instructor: { id: string; name: string | null; email: string } | null;
   instructorSummaryNotes: string | null;
   reviewProgress?: ReviewProgress;
 };
