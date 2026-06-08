@@ -6,13 +6,10 @@ import { revalidatePath } from "next/cache";
 import {
   assignUserToCourse,
   transitionCourseStatus,
-  reassignCourseStaff,
 } from "@/lib/courses/service";
 import { requireAnyRole, requireProfile } from "@/lib/auth/context";
 import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
 import { resolveEscalation } from "@/lib/services/escalations";
-import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow";
-import { syncCourseChannel } from "@/lib/chat/membership";
 
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
@@ -120,12 +117,6 @@ export async function batchAssignTaAction(
   revalidatePath("/ta");
   courseIds.forEach(id => revalidatePath(`/courses/${id}`));
 
-  for (const { courseId, success } of results) {
-    if (success) {
-      try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
-    }
-  }
-
   if (successCount === courseIds.length) {
     return {
       kind: "success",
@@ -211,8 +202,6 @@ export async function assignTaToCourseAction(
     revalidatePath("/ta");
     revalidatePath(`/courses/${courseId}`);
 
-    try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
-
     console.info("[assignTaToCourseAction] Attempt succeeded", {
       requestId,
       courseId,
@@ -268,60 +257,6 @@ export async function assignTaToCourseAction(
   }
 }
 
-export async function batchReassignCourseAction(
-  _state: AssignTaState,
-  formData: FormData,
-): Promise<AssignTaState> {
-  const context = await requireProfile();
-  requireAnyRole(context, ["admin_full", "super_admin"]);
-
-  const profileId = String(formData.get("profileId") ?? "");
-  const reason = String(formData.get("reason") ?? "").trim();
-  const courseIds = String(formData.get("courseIds") ?? "").split(",").filter(Boolean);
-
-  if (!profileId || courseIds.length === 0) {
-    return { kind: "error", message: "Select both a new TA and at least one course." };
-  }
-
-  const results: Array<{ courseId: string; title: string; success: boolean; message: string }> = [];
-  let successCount = 0;
-
-  for (const courseId of courseIds) {
-    const detail = await getAdminCourseDetail(courseId);
-    const title = detail?.course.title ?? "Unknown Course";
-    try {
-      await reassignCourseStaff({ courseId, newProfileId: profileId, reason });
-      results.push({ courseId, title, success: true, message: "Reassigned" });
-      successCount++;
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Reassignment failed";
-      results.push({ courseId, title, success: false, message: msg });
-    }
-  }
-
-  revalidatePath("/admin");
-  revalidatePath("/ta");
-  courseIds.forEach((id) => revalidatePath(`/courses/${id}`));
-
-  for (const { courseId, success } of results) {
-    if (success) {
-      try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
-    }
-  }
-
-  if (successCount === courseIds.length) {
-    return { kind: "success", message: `Reassigned ${successCount} course(s).`, results };
-  }
-  if (successCount === 0) {
-    return { kind: "error", message: "All reassignments failed.", results };
-  }
-  return {
-    kind: "success",
-    message: `Reassigned ${successCount} out of ${courseIds.length} courses. Some failed.`,
-    results,
-  };
-}
-
 export async function updateCourseDepartmentAction(courseId: string, orgUnitId: string | null): Promise<void> {
   const { updateCourseDepartment } = await import("@/lib/courses/service");
   await updateCourseDepartment(courseId, orgUnitId);
@@ -346,18 +281,40 @@ export async function createInstructorAndAssignAction(
   }
 
   const { getProfileRepository, getCourseRepository } = await import("@/lib/repositories");
+  const { getAuthService } = await import("@/lib/auth/service");
   const { assignUserToCourse } = await import("@/lib/courses/service");
-  const { randomUUID } = await import("node:crypto");
 
   try {
     const profiles = getProfileRepository();
+    const auth = getAuthService();
 
-    // Look up an existing instructor profile by email; create one if missing.
-    // The OIDC sub assigned to this profile id is a placeholder — auth/context
-    // re-resolves it by email on the first Entra sign-in.
-    const existing = await profiles.getProfileByEmail(email);
-    const userId = existing?.id ?? randomUUID();
+    // 1. Try to create auth user. If it already exists, reuse existing profile ID by email.
+    let userId: string;
 
+    try {
+      const user = await auth.createUserWithPassword({
+        email,
+        password: Math.random().toString(36).slice(-12), // Random password for now
+        emailConfirm: true,
+        userMetadata: {
+          full_name: fullName,
+          role: "instructor",
+        },
+      });
+      userId = user.id;
+    } catch (error: any) {
+      if (error.message?.includes("already registered") || error.message?.includes("already exists")) {
+        const existingProfile = await profiles.getProfileByEmail(email);
+        if (!existingProfile) {
+          throw new Error("User already exists in auth, but no profile exists. Ask the user to sign in once, then re-assign.");
+        }
+        userId = existingProfile.id;
+      } else {
+        throw error;
+      }
+    }
+
+    // 2. Ensure profile exists and has instructor role
     await profiles.upsertProfile({
       id: userId,
       email,
@@ -375,8 +332,6 @@ export async function createInstructorAndAssignAction(
     revalidatePath("/admin");
     revalidatePath(`/courses/${courseId}`);
 
-    try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
-
     return {
       kind: "success",
       message: `Instructor ${fullName} created and assigned.`,
@@ -393,28 +348,12 @@ export async function createInstructorAndAssignAction(
 export async function approveReviewAction(courseId: string): Promise<void> {
   await transitionCourseStatus({
     courseId,
-    toStatus: "waiting_on_admin",
-    note: "Approved by admin — building staging shell.",
+    toStatus: "ready_for_instructor",
+    note: "Approved by admin.",
   });
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath("/ta");
-  revalidatePath(`/courses/${courseId}`);
   redirect("/admin");
-}
-
-export async function markStagingReadyAction(courseId: string): Promise<void> {
-  const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "super_admin"]);
-  await transitionCourseStatus({
-    courseId,
-    toStatus: "staging_in_progress",
-    note: "Staging shell ready — pushed to TA to finalize.",
-  });
-  revalidatePath("/admin");
-  revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath("/ta");
-  revalidatePath(`/courses/${courseId}`);
 }
 
 export async function requestFixesAction(courseId: string, note: string): Promise<void> {
@@ -445,7 +384,7 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
   let failed = 0;
   for (const courseId of courseIds) {
     try {
-      await transitionCourseStatus({ courseId, toStatus: "waiting_on_admin", note: "Batch approved to staging." });
+      await transitionCourseStatus({ courseId, toStatus: "ready_for_instructor", note: "Batch approved to staging." });
       succeeded++;
     } catch {
       failed++;
@@ -457,54 +396,6 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
   return { succeeded, failed };
 }
 
-/**
- * Generates a fresh magic-link invite for every assigned instructor AND sends
- * the "course is ready" email through the logged instructor-emails service —
- * so every attempt shows up in the admin Emails tab regardless of outcome.
- *
- * Best-effort at the per-recipient level: a failure to one instructor is
- * logged + persisted (status='failed') but never throws, so it can't roll
- * back the surrounding status transition.
- */
-async function emailInstructorInvites(courseId: string, createdBy: string): Promise<void> {
-  try {
-    const [{ createReviewInvite, getCourseInstructorRecipients }, { buildInviteLink }, { notifyInstructor }] = await Promise.all([
-      import("@/lib/invites/service"),
-      import("@/lib/email/templates/instructor-invite"),
-      import("@/lib/instructor-emails/service"),
-    ]);
-
-    const detail = await getAdminCourseDetail(courseId);
-    const courseTitle = detail?.course.title ?? "your migrated course";
-    const recipients = await getCourseInstructorRecipients(courseId);
-
-    for (const recipient of recipients) {
-      try {
-        const { token } = await createReviewInvite({
-          courseId,
-          email: recipient.email,
-          createdBy,
-        });
-        await notifyInstructor({
-          courseId,
-          sentBy: createdBy,
-          recipient: recipient.email,
-          instructorName: recipient.fullName,
-          courseTitle,
-          dashboardUrl: buildInviteLink(token),
-        });
-      } catch (innerErr) {
-        console.error(
-          `[sendToInstructor] Failed to notify ${recipient.email} for course ${courseId}:`,
-          innerErr,
-        );
-      }
-    }
-  } catch (error) {
-    console.error(`[sendToInstructor] Failed to issue instructor invites for course ${courseId}:`, error);
-  }
-}
-
 export async function sendToInstructorAction(courseId: string): Promise<void> {
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
@@ -513,43 +404,12 @@ export async function sendToInstructorAction(courseId: string): Promise<void> {
     toStatus: "sent_to_instructor",
     note: "Sent to instructor by communications.",
   });
-  await emailInstructorInvites(courseId, ctx.userId);
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/communications");
   revalidatePath(`/communications/courses/${courseId}`);
   revalidatePath("/ta");
   revalidatePath("/instructor");
-}
-
-/**
- * Re-issues the instructor magic-link invite without changing course status.
- * Used by the "Resend invite" affordance once a course is already with the
- * instructor.
- */
-export async function resendInstructorInviteAction(courseId: string): Promise<void> {
-  const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
-
-  // Resend is only allowed after a failed send. A successful prior send means
-  // the instructor already has a working magic link; a still-pending send
-  // shouldn't be duplicated. The Emails tab UI also hides the resend button
-  // unless the last send failed, but the guard lives here too because the
-  // action is exported.
-  const { lastForCourse } = await import("@/lib/instructor-emails/queries");
-  const last = await lastForCourse(courseId);
-  if (!last) {
-    throw new Error("No previous send to resend — use the initial send action.");
-  }
-  if (last.status !== "failed") {
-    throw new Error(
-      `Resend is only available after a failed send (last send: ${last.status}).`,
-    );
-  }
-
-  await emailInstructorInvites(courseId, ctx.userId);
-  revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath(`/admin/courses/${courseId}/emails`);
 }
 
 export async function grantFinalApprovalAction(courseId: string): Promise<void> {
@@ -563,35 +423,4 @@ export async function grantFinalApprovalAction(courseId: string): Promise<void> 
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/instructor");
-}
-
-/**
- * Generic click-to-advance used by the courses board. `transitionCourseStatus`
- * itself enforces the allowed-transition graph and the actor's role
- * (assertCanTransition) and course access (assertCanActOnCourse), so this is
- * safe for any (courseId, toStatus) — an illegal move throws and is reported.
- */
-export async function transitionCourseAction(
-  courseId: string,
-  toStatus: CourseStatus,
-): Promise<{ ok: boolean; error?: string }> {
-  const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "super_admin"]);
-  try {
-    await transitionCourseStatus({
-      courseId,
-      toStatus,
-      note: `Moved to "${getCourseStatusLabel(toStatus)}" from the courses board.`,
-    });
-    revalidatePath("/admin");
-    revalidatePath(`/admin/courses/${courseId}`);
-    revalidatePath("/ta");
-    revalidatePath(`/courses/${courseId}`);
-    return { ok: true };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "Could not move the course.",
-    };
-  }
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { CheckCircle2, MessageCircleQuestion } from "lucide-react"
+import { CheckCircle2, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,29 +13,26 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import type { CourseStatus } from "@coursebridge/workflow"
-import { instructorRaiseQuestionAction } from "../actions"
-import { InstructorSignOffDialog } from "./instructor-signoff-dialog"
+import { instructorApproveAction, instructorRaiseQuestionAction } from "../actions"
 
 interface Props {
   courseId: string
   status: CourseStatus
-  finalSummary: string | null
 }
 
-export function InstructorCourseActions({ courseId, status, finalSummary }: Props) {
+export function InstructorCourseActions({ courseId, status }: Props) {
   const [isPending, startTransition] = useTransition()
-  const [questionOpen, setQuestionOpen] = useState(false)
-  const [signOffOpen, setSignOffOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
 
-  if (status !== "sent_to_instructor" && status !== "instructor_viewing") return null
+  if (status !== "sent_to_instructor") return null
 
-  const submitQuestion = () => {
+  const handleRaiseQuestion = () => {
     if (!title.trim()) return
     startTransition(async () => {
       await instructorRaiseQuestionAction(courseId, title, description)
-      setQuestionOpen(false)
+      setDialogOpen(false)
       setTitle("")
       setDescription("")
     })
@@ -47,35 +44,34 @@ export function InstructorCourseActions({ courseId, status, finalSummary }: Prop
         <Button
           size="sm"
           variant="outline"
-          className="h-9 gap-1.5"
+          className="h-8 gap-1.5 text-xs"
           disabled={isPending}
-          onClick={() => setQuestionOpen(true)}
+          onClick={() => setDialogOpen(true)}
         >
-          <MessageCircleQuestion className="size-4" />
-          I have a question — speak to TA
+          <HelpCircle className="size-3.5" />
+          Raise a Question
         </Button>
         <Button
           size="sm"
-          className="h-9 gap-1.5 bg-green-600 hover:bg-green-700 text-white"
+          className="h-8 gap-1.5 text-xs bg-green-600 hover:bg-green-700 text-white"
           disabled={isPending}
-          onClick={() => setSignOffOpen(true)}
+          onClick={() => startTransition(() => instructorApproveAction(courseId))}
         >
-          <CheckCircle2 className="size-4" />
-          Sign off — all good
+          <CheckCircle2 className="size-3.5" />
+          {isPending ? "Saving…" : "Approve Course"}
         </Button>
       </div>
 
-      {/* Question to the TA */}
-      <Dialog open={questionOpen} onOpenChange={setQuestionOpen}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Ask the TA a question</DialogTitle>
+            <DialogTitle>Raise a Question</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <p className="text-sm font-medium">Question <span className="text-destructive">*</span></p>
               <Input
-                placeholder="What would you like to ask?"
+                placeholder="What is your question?"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -83,31 +79,27 @@ export function InstructorCourseActions({ courseId, status, finalSummary }: Prop
             <div className="space-y-1.5">
               <p className="text-sm font-medium text-muted-foreground">Details <span className="text-xs">(optional)</span></p>
               <Textarea
-                placeholder="Add any helpful context…"
+                placeholder="Add context, location in the course, etc."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                rows={4}
+                rows={3}
+                className="resize-none"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setQuestionOpen(false)} disabled={isPending}>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isPending}>
               Cancel
             </Button>
-            <Button onClick={submitQuestion} disabled={isPending || !title.trim()}>
-              {isPending ? "Sending…" : "Send to TA"}
+            <Button
+              onClick={handleRaiseQuestion}
+              disabled={!title.trim() || isPending}
+            >
+              {isPending ? "Submitting…" : "Submit Question"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Final summary & sign-off */}
-      <InstructorSignOffDialog
-        courseId={courseId}
-        finalSummary={finalSummary}
-        open={signOffOpen}
-        onOpenChange={setSignOffOpen}
-      />
     </>
   )
 }

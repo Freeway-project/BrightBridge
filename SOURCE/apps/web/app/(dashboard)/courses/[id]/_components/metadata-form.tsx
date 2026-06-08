@@ -1,5 +1,4 @@
 "use client"
-import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -22,15 +21,12 @@ import { useStoredTimerValue } from "./review-timer"
 import { clearUnsavedChanges, setUnsavedChanges } from "@/lib/deployment-sync"
 import { CopyButton } from "@/components/ui/copy-button"
 import { cn } from "@/lib/utils"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2, ArrowRight } from "lucide-react"
+import { CheckCircle2, Loader2, ArrowRight } from "lucide-react"
 
 type MetadataFormProps = {
   course: CourseRow
   reviewerName: string
   defaultValues: MetadataFormValues
-  /** When rendered inside the single-scroll workspace, save in place (no step navigation). */
-  embedded?: boolean
 }
 
 const SEASONS = ["Fall", "Winter", "Spring", "Summer"]
@@ -46,7 +42,7 @@ function parseTerm(term: string): { season: string; year: string } {
   return { season: parts[0] ?? "", year: parts[1] ?? "" }
 }
 
-export function MetadataForm({ course, reviewerName, defaultValues, embedded = false }: MetadataFormProps) {
+export function MetadataForm({ course, reviewerName, defaultValues }: MetadataFormProps) {
   const dirtySource = `metadata-form:${course.id}`
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const router = useRouter()
@@ -126,7 +122,7 @@ export function MetadataForm({ course, reviewerName, defaultValues, embedded = f
 
   async function handleAdvance() {
     const ok = await performSave()
-    if (ok && !embedded) router.push(`/courses/${course.id}/review-matrix`)
+    if (ok) router.push(`/courses/${course.id}/review-matrix`)
   }
 
   const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
@@ -135,7 +131,7 @@ export function MetadataForm({ course, reviewerName, defaultValues, embedded = f
   const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-4 sm:px-6 lg:px-8 pb-16">
+    <div className="mx-auto max-w-3xl space-y-8">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
@@ -270,12 +266,7 @@ export function MetadataForm({ course, reviewerName, defaultValues, embedded = f
           className="h-11 rounded-xl px-6 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 shadow-xl hover:border-white/30 text-white flex items-center gap-2 transition-all duration-300"
         >
           {status === "saving" ? (
-            <><LottieLoader className="size-4 " /> Saving…</>
-          ) : embedded ? (
-            <>
-              Save
-              <CheckCircle2 className="size-4" />
-            </>
+            <><Loader2 className="size-4 animate-spin" /> Saving…</>
           ) : (
             <>
               Save & Next
@@ -292,17 +283,15 @@ export function MetadataForm({ course, reviewerName, defaultValues, embedded = f
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <Card className="relative overflow-hidden group/sec border-border/70 bg-card/60 backdrop-blur-xl shadow-lg rounded-2xl pl-[3px]">
-      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/sec:opacity-100 group-hover/sec:w-[4px] transition-all duration-300 z-10" />
-      <CardHeader className="bg-muted/10 px-6 py-4 border-b border-border/40">
-        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
-          {label}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0 divide-y divide-border/40">
+    <section className="relative space-y-2 group/sec">
+      <div className="absolute left-[1px] top-6 bottom-0 w-[3px] rounded-l-2xl bg-gradient-to-b from-cyan-400 via-violet-500 to-fuchsia-500 opacity-60 group-hover/sec:opacity-100 group-hover/sec:w-[4px] transition-all duration-300" />
+      <p className="px-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+        {label}
+      </p>
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xl shadow-lg divide-y divide-border/40 pl-[3px]">
         {children}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -349,7 +338,7 @@ function SaveBadge({ status }: { status: "idle" | "saving" | "saved" | "error" }
   if (status === "saving")
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground">
-        <LottieLoader className="size-3 " /> Saving…
+        <Loader2 className="size-3 animate-spin" /> Saving…
       </span>
     )
   if (status === "saved")

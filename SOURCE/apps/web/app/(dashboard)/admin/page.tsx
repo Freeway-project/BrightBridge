@@ -1,8 +1,7 @@
 import { Topbar } from "@/components/layout/topbar"
-import { COURSE_STATUSES, WORKFLOW_PHASES, type CourseStatus, type PipelineStage } from "@coursebridge/workflow"
+import { COURSE_STATUSES, type CourseStatus } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
-import { getAdminCoursesPage, getAdminOverviewData, type AdminCourseRow } from "@/lib/admin/queries"
-import { CoursesBoard, type BoardColumn } from "./_components/courses-board"
+import { getAdminCoursesPage, getAdminOverviewData } from "@/lib/admin/queries"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { getOpenEscalations } from "@/lib/services/escalations"
 import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
@@ -19,17 +18,6 @@ import { FeatureAnnouncementToast } from "@/components/shared/feature-announceme
 import { AdminOverview } from "./_components/admin-overview"
 import { MigrationPanel } from "./_components/migration-panel"
 import { getLatestMigrationReport } from "@/lib/migration/report"
-import { InstitutionPanel } from "@/components/super-admin/institution-panel"
-import { getSuperAdminData } from "@/lib/super-admin/queries"
-import { firstOpenedAtByCourseIds } from "@/lib/instructor-views/queries"
-
-const INSTRUCTOR_PHASE_STATUSES: ReadonlySet<CourseStatus> = new Set([
-  "sent_to_instructor",
-  "instructor_viewing",
-  "instructor_questions",
-  "instructor_approved",
-  "final_approved",
-])
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -46,24 +34,14 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const pageSize = parsePositiveInt(resolvedSearchParams?.pageSize, 50)
   const search = getSingleParam(resolvedSearchParams?.search)
   const status = parseCourseStatus(getSingleParam(resolvedSearchParams?.status))
-  const rawPhase = getSingleParam(resolvedSearchParams?.phase)
-  // A single status (chip) wins. Otherwise a phase tab filters by all its
-  // statuses — and the default landing view is the Staging phase (the active
-  // work, since migration is largely done); `?phase=all` clears the filter.
-  const phase: PipelineStage | undefined =
-    status || rawPhase === "all" ? undefined : (parsePipelineStage(rawPhase) ?? "staging")
-  const phaseStatuses = phase
-    ? WORKFLOW_PHASES.find((p) => p.key === phase)?.groups.flatMap((g) => g.statuses)
-    : undefined
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport, institutionData] = await Promise.all([
+  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
       search,
       status,
-      statuses: phaseStatuses,
       taProfileId,
     }),
     getAdminCoursesPage({
@@ -77,57 +55,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getCourseRepository().listRecentAssignments(20),
     getAdminOverviewData(),
     getLatestMigrationReport(),
-    getSuperAdminData(),
   ])
-
-  // ---- Workflow board data (All Courses tab) -----------------------------
-  // One column per status, derived from the shared WORKFLOW_PHASES so the admin
-  // board and the staff list always show identical columns/labels. Counts come
-  // from the (cheap) status-count aggregate; cards are a recent slice per status,
-  // capped per column — the List view handles full browsing/search.
-  const BOARD_COLUMNS: { key: string; label: string; phase: PipelineStage; statuses: CourseStatus[] }[] =
-    WORKFLOW_PHASES.flatMap((phase) =>
-      phase.groups.map((group) => ({
-        key: group.key,
-        label: group.label,
-        phase: phase.key,
-        statuses: group.statuses,
-      })),
-    )
-  const countByStatus = new Map<CourseStatus, number>(overviewData.statusCounts.map((s) => [s.status, s.count]))
-  const repo = getCourseRepository()
-  const cardStatuses = COURSE_STATUSES.filter((s) => (countByStatus.get(s) ?? 0) > 0)
-  const cardPages = await Promise.all(cardStatuses.map((s) => repo.listAdminCoursesPage(1, 15, { status: s })))
-  const rowsByStatus = new Map<CourseStatus, AdminCourseRow[]>()
-  cardStatuses.forEach((s, i) => rowsByStatus.set(s, cardPages[i].data))
-  // Batched opened-at lookup for the current page rows so the indicator dot in
-  // the All Courses list doesn't N+1. We only ask about rows that are in the
-  // instructor phase — earlier statuses can never have an open.
-  const instructorPhaseIds = coursesPage.data
-    .filter((row) => INSTRUCTOR_PHASE_STATUSES.has(row.status))
-    .map((row) => row.id)
-  const openedAtMap = await firstOpenedAtByCourseIds(instructorPhaseIds)
-  const instructorOpenedAt: Record<string, string> = {}
-  openedAtMap.forEach((v, k) => { instructorOpenedAt[k] = v })
-
-  const boardColumns: BoardColumn[] = BOARD_COLUMNS.map((col) => ({
-    key: col.key,
-    label: col.label,
-    phase: col.phase,
-    count: col.statuses.reduce((n, s) => n + (countByStatus.get(s) ?? 0), 0),
-    cards: col.statuses
-      .flatMap((s) => rowsByStatus.get(s) ?? [])
-      .map((r) => ({
-        id: r.id,
-        title: r.title,
-        sourceCourseId: r.sourceCourseId,
-        taName: r.ta?.name ?? null,
-        status: r.status,
-        updatedAt: r.updatedAt,
-      }))
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-      .slice(0, 18),
-  }))
 
   return (
     <>
@@ -139,14 +67,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             unassignedCount={unassignedPage.total}
             openEscalationsCount={openEscalations.length}
             overviewPanel={<AdminOverview data={overviewData} />}
-            coursesPanel={
-              <CoursesBoard
-                columns={boardColumns}
-                role={context.profile.role}
-                tas={tas}
-                listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} instructorOpenedAt={instructorOpenedAt} />}
-              />
-            }
+            coursesPanel={<AssignedCoursesTable page={coursesPage} tas={tas} />}
             assignPanel={
               <AdminAssignmentPanel
                 courses={unassignedPage.data.filter(c => c.ta === null)}
@@ -160,7 +81,6 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
-            institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
           />
@@ -198,12 +118,4 @@ function parseCourseStatus(value: string | undefined): CourseStatus | undefined 
   }
 
   return COURSE_STATUSES.includes(value as CourseStatus) ? (value as CourseStatus) : undefined
-}
-
-function parsePipelineStage(value: string | undefined): PipelineStage | undefined {
-  if (!value) {
-    return undefined
-  }
-
-  return WORKFLOW_PHASES.some((p) => p.key === value) ? (value as PipelineStage) : undefined
 }

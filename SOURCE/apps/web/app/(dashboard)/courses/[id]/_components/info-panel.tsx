@@ -1,6 +1,7 @@
 "use client"
 import { CheckCircle2, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { useState, useEffect } from "react"
+import type { CourseStatus } from "@coursebridge/workflow"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
 import { cn } from "@/lib/utils"
 import { CourseConversation } from "./course-conversation"
@@ -14,6 +15,7 @@ type SectionProgress = {
 
 type InfoPanelProps = {
   courseId: string
+  courseStatus: CourseStatus
   reviewerId: string
   progress: SectionProgress[]
   lastSavedAt: string | null
@@ -25,6 +27,7 @@ const INFO_PANEL_COLLAPSED_KEY = "coursebridge:course-review-info-panel-collapse
 
 export function InfoPanel({
   courseId,
+  courseStatus,
   reviewerId,
   progress,
   lastSavedAt,

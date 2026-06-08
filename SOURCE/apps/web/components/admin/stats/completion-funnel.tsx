@@ -1,23 +1,29 @@
 import type { StatusCount } from "@/lib/repositories/contracts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getPhaseBreakdown, type CourseStatus } from "@coursebridge/workflow"
-import { PHASE_COLOR } from "./phase-colors"
 
 interface Props {
   statusCounts: StatusCount[]
   totalCourses: number
 }
 
-export function CompletionFunnel({ statusCounts, totalCourses }: Props) {
-  const countByStatus: Partial<Record<CourseStatus, number>> =
-    Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
+const FUNNEL_STAGES = [
+  { label: "Created", statuses: ["course_created", "assigned_to_ta"] },
+  { label: "TA Review", statuses: ["ta_review_in_progress", "submitted_to_admin", "admin_changes_requested"] },
+  { label: "Admin", statuses: ["ready_for_instructor"] },
+  { label: "Instructor", statuses: ["sent_to_instructor", "instructor_questions", "instructor_approved"] },
+  { label: "Approved", statuses: ["final_approved"] },
+] as const
 
-  const stages = getPhaseBreakdown(countByStatus).map((p) => ({
-    label: p.label,
-    count: p.total,
-    pct: totalCourses > 0 ? Math.round((p.total / totalCourses) * 100) : 0,
-    color: PHASE_COLOR[p.key],
-  }))
+const STAGE_COLORS = ["#64748b", "#3b82f6", "#8b5cf6", "#f59e0b", "#10b981"]
+
+export function CompletionFunnel({ statusCounts, totalCourses }: Props) {
+  const countMap = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
+
+  const stages = FUNNEL_STAGES.map((stage, i) => {
+    const count = stage.statuses.reduce((sum, s) => sum + (countMap[s] ?? 0), 0)
+    const pct = totalCourses > 0 ? Math.round((count / totalCourses) * 100) : 0
+    return { label: stage.label, count, pct, color: STAGE_COLORS[i] }
+  })
 
   const maxCount = Math.max(...stages.map((s) => s.count), 1)
 

@@ -3,10 +3,7 @@
 -- 2) GoTrue treats NULL token columns as errors — normalize to empty string.
 
 UPDATE auth.users u
-SET instance_id = COALESCE(
-  (SELECT i.id FROM auth.instances i LIMIT 1),
-  '00000000-0000-0000-0000-000000000000'::uuid
-);
+SET instance_id = (SELECT i.id FROM auth.instances i LIMIT 1);
 
 UPDATE auth.users SET
   confirmation_token = COALESCE(confirmation_token, ''),

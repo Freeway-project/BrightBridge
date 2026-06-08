@@ -1,31 +1,17 @@
 "use client"
 
 import { useActionState } from "react"
-import { ShieldPlus, Search } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Search, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { ROLES } from "@coursebridge/workflow"
-import { createUserAction } from "@/app/(dashboard)/super-admin/actions"
 import { PaginationControls } from "@/components/shared/pagination-controls"
 import type { PaginatedResult } from "@/lib/repositories/contracts"
 import type { UserRow } from "@/lib/super-admin/queries"
-
-const initialManageUserState = {
-  kind: "idle" as const,
-  message: null,
-}
+import { removeUserAccessAction } from "@/app/(dashboard)/super-admin/actions"
 
 const ROLE_BADGE_CLASS: Record<string, string> = {
   standard_user: "bg-blue-500/15 text-blue-400 border-blue-500/20",
@@ -33,7 +19,6 @@ const ROLE_BADGE_CLASS: Record<string, string> = {
   admin_viewer:  "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
   instructor:     "bg-green-500/15 text-green-400 border-green-500/20",
   super_admin:    "bg-red-500/15 text-red-400 border-red-500/20",
-  provost:        "bg-orange-500/15 text-orange-400 border-orange-500/20",
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -42,37 +27,28 @@ const ROLE_LABELS: Record<string, string> = {
   admin_viewer: "Viewer",
   instructor: "Instructor",
   super_admin: "Super Admin",
-  provost: "Provost",
 }
 
 function fmt(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
 
-export function UsersView({ result, search }: { result: PaginatedResult<UserRow>, search: string }) {
+export function UsersView({ result, search, currentUserId }: { result: PaginatedResult<UserRow>, search: string, currentUserId: string }) {
   const { data: users, total, page, totalPages } = result
-  const [createState, createFormAction, createPending] = useActionState(createUserAction, initialManageUserState)
+  const [removeState, removeFormAction, removePending] = useActionState(removeUserAccessAction, {
+    kind: "idle",
+    message: null,
+  })
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-6 overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
-      <Card className="shrink-0">
-        <CardHeader><CardTitle className="text-sm font-medium flex items-center gap-2"><ShieldPlus className="size-4" /> Create User</CardTitle></CardHeader>
-        <CardContent>
-          <form action={createFormAction} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto]">
-            <Input name="fullName" placeholder="Full name" required />
-            <Input name="email" placeholder="Email" required type="email" />
-            <Input name="password" placeholder="Password" required type="password" />
-            <Select name="role" defaultValue="standard_user">
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>)}</SelectContent>
-            </Select>
-            <Button className="w-full md:col-span-2 lg:col-span-1" disabled={createPending}>{createPending ? "Creating..." : "Create User"}</Button>
-          </form>
-          {createState.message && <p className={`mt-2 text-sm ${createState.kind === "error" ? "text-destructive" : "text-green-600"}`}>{createState.message}</p>}
-        </CardContent>
-      </Card>
-
       <div className="flex flex-col flex-1 min-h-0">
+        {removeState.kind !== "idle" && removeState.message && (
+          <div className={`mb-4 rounded-md border px-3 py-2 text-sm ${removeState.kind === "success" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" : "border-destructive/40 bg-destructive/10 text-destructive"}`}>
+            {removeState.message}
+          </div>
+        )}
+
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="shrink-0 text-sm text-muted-foreground">{total} users</p>
           <form method="GET" action="/super-admin/users" className="relative min-w-0 w-full sm:w-64 sm:shrink-0">
@@ -94,12 +70,13 @@ export function UsersView({ result, search }: { result: PaginatedResult<UserRow>
                 <TableHead className="text-xs">Email</TableHead>
                 <TableHead className="text-xs">Role</TableHead>
                 <TableHead className="text-xs">Joined</TableHead>
+                <TableHead className="text-xs text-right pr-4">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
                     No users found.
                   </TableCell>
                 </TableRow>
@@ -110,6 +87,30 @@ export function UsersView({ result, search }: { result: PaginatedResult<UserRow>
                     <TableCell className="max-w-[14rem] whitespace-normal break-words text-xs text-muted-foreground sm:max-w-none">{u.email}</TableCell>
                     <TableCell className="whitespace-normal"><Badge variant="outline" className={`text-xs ${ROLE_BADGE_CLASS[u.role]}`}>{ROLE_LABELS[u.role]}</Badge></TableCell>
                     <TableCell className="whitespace-normal text-xs text-muted-foreground">{fmt(u.created_at)}</TableCell>
+                    <TableCell className="whitespace-normal pr-4 text-right">
+                      <form
+                        action={removeFormAction}
+                        onSubmit={(event) => {
+                          if (!window.confirm(`Remove ${u.email} from CourseBridge access?`)) {
+                            event.preventDefault()
+                          }
+                        }}
+                        className="inline-flex"
+                      >
+                        <input type="hidden" name="userId" value={u.id} />
+                        <Button
+                          type="submit"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                          disabled={removePending || u.id === currentUserId}
+                          title={u.id === currentUserId ? "You cannot remove your own profile" : "Remove user"}
+                        >
+                          <Trash2 className="size-3.5" />
+                          Remove
+                        </Button>
+                      </form>
+                    </TableCell>
                   </TableRow>
                 ))
               )}

@@ -90,6 +90,7 @@ export default async function CourseWorkspaceLayout({
       <MilestoneReward userEmail={ctx.email ?? ""} courseId={id} />
       <InfoPanel
         courseId={id}
+        courseStatus={course.status}
         reviewerId={ctx.userId}
         progress={sectionMeta}
         lastSavedAt={lastSavedAt}

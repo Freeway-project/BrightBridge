@@ -6,7 +6,7 @@ interface StatusBadgeProps {
   className?: string
 }
 
-export const DOT_COLORS: Record<CourseStatus, string> = {
+const DOT_COLORS: Record<CourseStatus, string> = {
   // Migration
   course_created:          "bg-slate-400",
   assigned_to_ta:          "bg-slate-400",
@@ -14,12 +14,10 @@ export const DOT_COLORS: Record<CourseStatus, string> = {
   ta_review_in_progress:   "bg-blue-500",
   submitted_to_admin:      "bg-blue-500",
   admin_changes_requested: "bg-orange-500",
-  waiting_on_admin:        "bg-blue-500",
+  waiting_on_admin:        "bg-orange-500",
   staging_in_progress:     "bg-blue-500",
   ready_for_instructor:    "bg-blue-500",
-  // Instructor (indigo for active viewing; orange where a response is pending)
   sent_to_instructor:      "bg-blue-500",
-  instructor_viewing:      "bg-indigo-500",
   instructor_questions:    "bg-orange-500",
   instructor_approved:     "bg-blue-500",
   // Provision

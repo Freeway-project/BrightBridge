@@ -3,12 +3,10 @@
 import { useTweaks } from "@/components/shared/tweak-provider"
 import { cn } from "@/lib/utils"
 
-const FONT_SIZE_MAP: Record<string, string> = {
+const FONT_SIZE_MAP = {
   small: "14px",
   medium: "16px",
   large: "18px",
-  xl: "20px",
-  xxl: "23px",
 }
 
 export function TweakableContent({ children, className }: { children: React.ReactNode, className?: string }) {
