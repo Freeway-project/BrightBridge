@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@coursebridge/storage": "0.0.0",
     "@coursebridge/ui": "0.0.0",
     "@coursebridge/workflow": "0.0.0",
     "@hookform/resolvers": "^5.2.2",
