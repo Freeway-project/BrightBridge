@@ -34,7 +34,24 @@ import lottie7 from "@/assets/7016fcb6-30c1-11f0-bcf8-57c4a2ec7739.json"
 const LOTTIE_ANIMATIONS = [lottie1, lottie2, lottie3, lottie4, lottie5, lottie6, lottie7]
 
 const MAMMOTH_CDN = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"
-const ACCEPTED = [".pdf", ".doc", ".docx"]
+const JSZIP_CDN = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+
+// Hard ceiling for a single upload. PDFs travel to the API base64-inlined in a
+// JSON body (~33% larger than the file on the wire), so anything much bigger
+// risks a gateway 413 / timeout — we stop it here with a friendly message.
+const MAX_FILE_MB = 25
+
+// How each extension is turned into something the API understands.
+//   pdf  → sent natively as a PDF document block
+//   docx → text extracted in-browser via mammoth
+//   pptx → slide text extracted in-browser via JSZip
+//   text → read directly with File.text()
+const PDF_EXTS = ["pdf"]
+const DOCX_EXTS = ["docx"]
+const PPTX_EXTS = ["pptx"]
+const TEXT_EXTS = ["txt", "md", "markdown", "text", "html", "htm", "csv", "tsv", "rtf", "json"]
+const SUPPORTED_EXTS = [...PDF_EXTS, ...DOCX_EXTS, ...PPTX_EXTS, ...TEXT_EXTS]
+const ACCEPTED = SUPPORTED_EXTS.map((e) => "." + e)
 const TEMPLATE_ORDER: ConverterTemplate[] = [
   "syllabus",
   "introduction",
@@ -87,6 +104,59 @@ async function extractDocxText(file: File): Promise<string> {
   return result.value
 }
 
+function decodeXml(s: string): string {
+  return s
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+}
+
+// JSZip is loaded from a CDN at runtime; this is the minimal shape we use.
+type JSZipFile = { async: (type: "string") => Promise<string> }
+type JSZipInstance = { file: (path: string) => JSZipFile | null; files: Record<string, unknown> }
+type JSZipStatic = { loadAsync: (data: ArrayBuffer) => Promise<JSZipInstance> }
+async function extractPptxText(file: File): Promise<string> {
+  await loadScript(JSZIP_CDN)
+  const JSZip = (window as unknown as { JSZip?: JSZipStatic }).JSZip
+  if (!JSZip) throw new Error("Could not load the PowerPoint reader")
+  const zip = await JSZip.loadAsync(await file.arrayBuffer())
+  // Slides live at ppt/slides/slide1.xml, slide2.xml, … — read them in order.
+  const slidePaths = Object.keys(zip.files)
+    .filter((p) => /^ppt\/slides\/slide\d+\.xml$/.test(p))
+    .sort(
+      (a, b) =>
+        Number(a.match(/slide(\d+)\.xml$/)?.[1] ?? 0) - Number(b.match(/slide(\d+)\.xml$/)?.[1] ?? 0),
+    )
+  const slides: string[] = []
+  for (const path of slidePaths) {
+    const xml = await zip.file(path)?.async("string")
+    if (!xml) continue
+    // Visible text sits in <a:t>…</a:t> runs.
+    const runs = [...xml.matchAll(/<a:t>([\s\S]*?)<\/a:t>/g)].map((m) => decodeXml(m[1]))
+    if (runs.length) slides.push(runs.join(" "))
+  }
+  return slides.join("\n\n")
+}
+
+// Very light RTF → text: drop control words/groups so Claude sees the prose.
+function stripRtf(s: string): string {
+  return s
+    .replace(/\\par[d]?/g, "\n")
+    .replace(/\\'[0-9a-fA-F]{2}/g, " ")
+    .replace(/\\[a-zA-Z]+-?\d* ?/g, "")
+    .replace(/[{}]/g, "")
+    .replace(/\r/g, "")
+    .trim()
+}
+
+async function extractTextFile(file: File, ext: string): Promise<string> {
+  const raw = await file.text()
+  return ext === "rtf" ? stripRtf(raw) : raw
+}
+
 export function ContentConverter() {
   const [file, setFile] = useState<File | null>(null)
   const [template, setTemplate] = useState<ConverterTemplate>("syllabus")
@@ -109,8 +179,23 @@ export function ContentConverter() {
   const handleFile = useCallback(
     (f: File) => {
       const ext = f.name.split(".").pop()?.toLowerCase() ?? ""
-      if (!["pdf", "doc", "docx"].includes(ext)) {
-        log("err", "Please upload a PDF or Word (.docx) file.")
+      if (ext === "doc") {
+        log("err", "Legacy .doc isn't supported — please re-save it as .docx or PDF and try again.")
+        return
+      }
+      if (!SUPPORTED_EXTS.includes(ext)) {
+        log(
+          "err",
+          "Unsupported file type. Upload a PDF, Word (.docx), PowerPoint (.pptx), or a text file (.txt, .md, .html, .csv, .rtf).",
+        )
+        return
+      }
+      if (f.size > MAX_FILE_MB * 1024 * 1024) {
+        log(
+          "err",
+          `That file is ${fmtBytes(f.size)} — please keep uploads under ${MAX_FILE_MB} MB` +
+            (ext === "pdf" ? " (try exporting fewer pages or compressing the PDF)." : "."),
+        )
         return
       }
       setFile(f)
@@ -135,8 +220,22 @@ export function ContentConverter() {
         log("info", "Uploading PDF…")
         payload = { template, extra, kind: "pdf", data }
       } else {
-        log("info", "Extracting Word document text…")
-        const text = await extractDocxText(file)
+        let text: string
+        if (DOCX_EXTS.includes(ext)) {
+          log("info", "Extracting Word document text…")
+          text = await extractDocxText(file)
+        } else if (PPTX_EXTS.includes(ext)) {
+          log("info", "Extracting PowerPoint text…")
+          text = await extractPptxText(file)
+        } else {
+          log("info", "Reading document text…")
+          text = await extractTextFile(file, ext)
+        }
+        if (!text.trim()) {
+          throw new Error(
+            "Couldn't find any text in that file. If it's a scanned document, upload it as a PDF instead.",
+          )
+        }
         setProgress(20)
         payload = { template, extra, kind: "text", text }
       }
@@ -242,7 +341,9 @@ export function ContentConverter() {
               >
                 <UploadCloud className="size-7 text-primary" />
                 <div className="text-sm font-medium">Drop your document here</div>
-                <div className="text-xs text-muted-foreground">PDF or Word document (.docx)</div>
+                <div className="text-xs text-muted-foreground">
+                  PDF, Word, PowerPoint, or text — .pdf .docx .pptx .txt .md .html .csv .rtf
+                </div>
                 <input
                   ref={inputRef}
                   type="file"

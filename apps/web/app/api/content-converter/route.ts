@@ -11,15 +11,17 @@ import {
 } from "@/lib/content-converter/templates"
 
 export const runtime = "nodejs"
-export const maxDuration = 120
+// Large PDFs/decks can take a while for Claude to read end-to-end on a
+// non-streaming request; give the route headroom before it self-aborts.
+export const maxDuration = 300
 
 const CLAUDE_MODEL = "claude-sonnet-4-20250514"
 
 // The Anthropic API always requires a max_tokens ceiling — there is no
 // "unlimited" value. We set it high enough that the token cap is never what
 // truncates a converted document; in practice the binding limit is this route's
-// maxDuration (120s) on a non-streaming request. For genuinely huge documents,
-// switch callClaude to streaming and raise maxDuration.
+// maxDuration on a non-streaming request. For genuinely huge documents,
+// switch callClaude to streaming and raise maxDuration further.
 const MAX_OUTPUT_TOKENS = 16000
 
 // Mirror of the page-level guard. The server holds the Anthropic key, so the
