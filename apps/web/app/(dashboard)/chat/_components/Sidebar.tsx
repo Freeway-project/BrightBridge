@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listConversationsForUser } from "@/lib/chat/queries";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { SidebarSearch } from "./SidebarSearch";
 
 export async function Sidebar({ currentUserId }: { currentUserId: string }) {
   const conversations = await listConversationsForUser(currentUserId);
@@ -9,7 +10,10 @@ export async function Sidebar({ currentUserId }: { currentUserId: string }) {
     <div className="flex h-full flex-col border-r border-border">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
         <span className="text-sm font-semibold">Chat</span>
-        {/* NewConversationMenu added in Task 17 */}
+        <div className="flex items-center gap-1">
+          <SidebarSearch />
+          {/* NewConversationMenu added in Task 17 */}
+        </div>
       </div>
       <ScrollArea className="flex-1">
         <ul>
