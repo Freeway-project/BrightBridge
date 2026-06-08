@@ -354,6 +354,7 @@ export interface CourseRepository {
   listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
+  listAuditEventsPage(page: number, pageSize: number): Promise<PaginatedResult<AuditEvent>>;
   listCourseStatusEvents(courseId: string): Promise<AuditEvent[]>;
   listCourseAuditEntries(courseId: string): Promise<CourseAuditEntry[]>;
   listSubmissionHistory(courseId: string): Promise<SubmissionEvent[]>;
