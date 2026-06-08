@@ -73,6 +73,18 @@ export default async function AdminCourseDetailPage({ params }: Props) {
               title="Course Review"
             >
               <div className="space-y-[var(--card-spacing,1.5rem)]">
+                {(course.status === "sent_to_instructor" ||
+                  course.status === "instructor_viewing" ||
+                  course.status === "instructor_questions" ||
+                  course.status === "instructor_approved" ||
+                  course.status === "final_approved") && (
+                  <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <OpenedDot openedAt={instructorView?.firstOpenedAt ?? null} />
+                    {instructorView
+                      ? `Instructor opened the dashboard · ${new Date(instructorView.lastOpenedAt).toLocaleString()}`
+                      : "Instructor hasn't opened the dashboard yet"}
+                  </p>
+                )}
                 {course.status === "waiting_on_admin" && (
                   <StagingShellBanner courseId={id} />
                 )}
@@ -147,7 +159,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
                   Resend is only available after a failed delivery.
                 </p>
               </div>
-              <EmailsList emails={emails} />
+              <EmailsList emails={emails} instructorFirstOpenedAt={instructorView?.firstOpenedAt ?? null} />
             </div>
           </TabsContent>
         </StickyTabs>

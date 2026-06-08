@@ -2,9 +2,12 @@ import { formatDistanceToNow } from "date-fns"
 
 import type { InstructorEmailRow } from "@/lib/instructor-emails/types"
 import { cn } from "@/lib/utils"
+import { OpenedDot } from "@/components/instructor/opened-dot"
 
 interface Props {
   emails: InstructorEmailRow[]
+  /** First time the instructor opened the dashboard for this course, if ever. */
+  instructorFirstOpenedAt?: string | null
 }
 
 const STATUS_STYLES: Record<
@@ -39,7 +42,7 @@ function truncateError(value: string | null, max = 160): string | null {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
 }
 
-export function EmailsList({ emails }: Props) {
+export function EmailsList({ emails, instructorFirstOpenedAt }: Props) {
   if (emails.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">
@@ -79,6 +82,17 @@ export function EmailsList({ emails }: Props) {
               <span>Created {formatTimestamp(email.createdAt)}</span>
               {email.sentAt ? (
                 <span>· Delivered {formatTimestamp(email.sentAt)}</span>
+              ) : null}
+              {email.status === "sent" && instructorFirstOpenedAt &&
+              new Date(instructorFirstOpenedAt) >= new Date(email.sentAt ?? email.createdAt) ? (
+                <span className="inline-flex items-center gap-1">
+                  · <OpenedDot openedAt={instructorFirstOpenedAt} size="sm" />
+                  Opened {formatTimestamp(instructorFirstOpenedAt)}
+                </span>
+              ) : email.status === "sent" ? (
+                <span className="inline-flex items-center gap-1">
+                  · <OpenedDot openedAt={null} size="sm" /> Not opened yet
+                </span>
               ) : null}
               {email.provider ? (
                 <span className="font-mono">· via {email.provider}</span>

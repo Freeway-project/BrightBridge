@@ -13,6 +13,8 @@ import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
 import { getQuestionRoundHistory } from "@/lib/courses/service"
 import { lastForCourse } from "@/lib/instructor-emails/queries"
+import { viewForCourse } from "@/lib/instructor-views/queries"
+import { OpenedDot } from "@/components/instructor/opened-dot"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -23,11 +25,12 @@ export default async function CommsCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_viewer", "admin_full", "super_admin"])
 
-  const [detail, sharedComments, questionRounds, lastEmail] = await Promise.all([
+  const [detail, sharedComments, questionRounds, lastEmail, instructorView] = await Promise.all([
     getAdminCourseDetail(id),
     getSharedComments(id),
     getQuestionRoundHistory(id),
     lastForCourse(id),
+    viewForCourse(id),
   ])
   if (!detail) notFound()
 
@@ -53,6 +56,18 @@ export default async function CommsCourseDetailPage({ params }: Props) {
 
           <TabsContent value="review" className="flex-1 overflow-y-auto p-6">
             <div className="space-y-[var(--card-spacing,1.5rem)]">
+              {(course.status === "sent_to_instructor" ||
+                course.status === "instructor_viewing" ||
+                course.status === "instructor_questions" ||
+                course.status === "instructor_approved" ||
+                course.status === "final_approved") && (
+                <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <OpenedDot openedAt={instructorView?.firstOpenedAt ?? null} />
+                  {instructorView
+                    ? `Instructor opened the dashboard · last seen ${new Date(instructorView.lastOpenedAt).toLocaleString()}`
+                    : "Instructor hasn't opened the dashboard yet"}
+                </p>
+              )}
               {course.status === "ready_for_instructor" && (
                 <SendToInstructorBanner courseId={id} />
               )}

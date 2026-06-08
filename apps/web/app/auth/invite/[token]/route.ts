@@ -44,6 +44,12 @@ export async function GET(
 
     await markInviteAccepted(invite.id);
 
+    // Record the dashboard open (drives the small indicator). Independent of
+    // the status transition below so re-opens after instructor_viewing still
+    // bump open_count / last_opened_at.
+    const { recordInstructorView } = await import("@/lib/instructor-views/service");
+    await recordInstructorView(invite.courseId, instructorProfileId);
+
     // Auto-advance the course to "instructor_viewing" on first open.
     try {
       const { markInstructorViewingByLink } = await import("@/lib/courses/service");
