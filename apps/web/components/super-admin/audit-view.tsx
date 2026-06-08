@@ -8,50 +8,87 @@ import {
 import { loadMoreAuditEvents } from "@/app/(dashboard)/super-admin/actions"
 import type { AuditEvent, PaginatedResult } from "@/lib/repositories/contracts"
 
+const DEFAULT_PAGE_SIZE = 30
+
 function fmt(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
 
-export function AuditView({ initial }: { initial: PaginatedResult<AuditEvent> }) {
-  const [events, setEvents] = useState<AuditEvent[]>(initial.data)
-  const [page, setPage] = useState(initial.page)
+/**
+ * Audit Trail list with scroll-based pagination.
+ *
+ * Two modes:
+ *  - server-seeded (`initial` provided): fast first paint for the dedicated
+ *    Audit page and the provost card.
+ *  - self-loading (`initial` omitted): the list fetches its own first page on
+ *    the client. Used by the super-admin dashboard tab so the list is fully
+ *    owned by client state and is NOT reset/reloaded by the dashboard's 30s
+ *    auto-refresh (router.refresh re-renders the server tree but can't touch
+ *    this component's accumulated pages).
+ *
+ * Every page is fetched fresh from the DB via the server action — nothing is
+ * cached, so newly written events always show up.
+ */
+export function AuditView({ initial }: { initial?: PaginatedResult<AuditEvent> }) {
+  const pageSize = initial?.pageSize ?? DEFAULT_PAGE_SIZE
+  const [events, setEvents] = useState<AuditEvent[]>(initial?.data ?? [])
+  const [page, setPage] = useState(initial?.page ?? 0)
+  // Unknown (null) until the first page loads when not server-seeded.
+  const [totalPages, setTotalPages] = useState<number | null>(initial?.totalPages ?? null)
   const [loading, setLoading] = useState(false)
-  const hasMore = page < initial.totalPages
+
+  // Before we know the total (self-loading, page 0) assume there's a first page.
+  const hasMore = totalPages === null ? page === 0 : page < totalPages
 
   const sentinelRef = useRef<HTMLDivElement>(null)
-  // Hold latest values for the observer callback without re-subscribing each render.
-  const stateRef = useRef({ loading, hasMore, page })
-  stateRef.current = { loading, hasMore, page }
+  // Synchronous in-flight guard so the mount effect + observer can't double-fetch.
+  const inFlightRef = useRef(false)
+  // Latest values for the observer callback without re-subscribing each render.
+  const stateRef = useRef({ hasMore, page })
+  stateRef.current = { hasMore, page }
 
   const loadMore = useCallback(async () => {
-    if (stateRef.current.loading || !stateRef.current.hasMore) return
+    if (inFlightRef.current || !stateRef.current.hasMore) return
+    inFlightRef.current = true
     setLoading(true)
     const nextPage = stateRef.current.page + 1
     try {
-      const result = await loadMoreAuditEvents(nextPage, initial.pageSize)
+      const result = await loadMoreAuditEvents(nextPage, pageSize)
       setEvents((prev) => [...prev, ...result.data])
       setPage(result.page)
+      setTotalPages(result.totalPages)
     } finally {
+      inFlightRef.current = false
       setLoading(false)
     }
-  }, [initial.pageSize])
+  }, [pageSize])
+
+  // Self-loading mode: pull the first page on mount when not server-seeded.
+  useEffect(() => {
+    if (page === 0) void loadMore()
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const sentinel = sentinelRef.current
     if (!sentinel) return
     // Observe against the viewport (root: null). IntersectionObserver clips by
     // any intervening scroll container, so this works whether the surrounding
-    // page scrolls (dashboard tabs / provost card) or this component owns the
-    // scroll area (dedicated Audit Trail page).
+    // page scrolls (dashboard tab / provost card) or this component owns the
+    // scroll area (dedicated Audit Trail page). The generous rootMargin
+    // prefetches the next page well before the bottom, so scrolling stays smooth.
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) void loadMore()
       },
-      { rootMargin: "200px" },
+      { rootMargin: "400px" },
     )
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [loadMore])
+
+  const initialLoading = loading && events.length === 0
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-background">
@@ -66,7 +103,13 @@ export function AuditView({ initial }: { initial: PaginatedResult<AuditEvent> })
             </TableRow>
           </TableHeader>
           <TableBody>
-            {events.length === 0 ? (
+            {initialLoading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-2"><Loader2 className="size-3.5 animate-spin" /> Loading…</span>
+                </TableCell>
+              </TableRow>
+            ) : events.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
                   No audit events yet.
@@ -87,7 +130,7 @@ export function AuditView({ initial }: { initial: PaginatedResult<AuditEvent> })
       </div>
 
       {/* Sentinel: scrolling it into view fetches the next page. */}
-      {hasMore && (
+      {hasMore && !initialLoading && (
         <div ref={sentinelRef} className="flex items-center justify-center py-4 text-xs text-muted-foreground">
           {loading ? (
             <span className="flex items-center gap-2"><Loader2 className="size-3.5 animate-spin" /> Loading more…</span>
