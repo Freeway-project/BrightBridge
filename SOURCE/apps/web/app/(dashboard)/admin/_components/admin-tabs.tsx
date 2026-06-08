@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 
 type Props = {
   overviewPanel: React.ReactNode
@@ -11,6 +11,7 @@ type Props = {
   escalationsPanel: React.ReactNode
   completedPanel: React.ReactNode
   migrationPanel: React.ReactNode
+  institutionPanel: React.ReactNode
   assignmentLogsPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
@@ -24,11 +25,12 @@ export function AdminTabs({
   escalationsPanel,
   completedPanel,
   migrationPanel,
+  institutionPanel,
   assignmentLogsPanel,
   unassignedCount,
   openEscalationsCount,
 }: Props) {
-  const [tab, setTab] = useState("overview")
+  const [tab, setTab] = useStickyTabState("admin-dashboard", "overview")
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="flex min-w-0 flex-col gap-4">
@@ -54,6 +56,7 @@ export function AdminTabs({
             )}
           </TabsTrigger>
           <TabsTrigger value="migration">Migration</TabsTrigger>
+          <TabsTrigger value="institution">Institution</TabsTrigger>
           <TabsTrigger value="completed">Provision</TabsTrigger>
         </TabsList>
       </div>
@@ -70,6 +73,7 @@ export function AdminTabs({
       </TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
       <TabsContent value="migration">{migrationPanel}</TabsContent>
+      <TabsContent value="institution">{institutionPanel}</TabsContent>
       <TabsContent value="completed">{completedPanel}</TabsContent>
     </Tabs>
   )

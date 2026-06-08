@@ -43,7 +43,7 @@ export const COURSE_TRANSITIONS = [
   },
   {
     from: "submitted_to_admin",
-    to: "ready_for_instructor",
+    to: "waiting_on_admin",
     roles: ["admin_full", "super_admin"]
   },
   {
@@ -52,9 +52,33 @@ export const COURSE_TRANSITIONS = [
     roles: ["standard_user", "admin_full", "super_admin"]
   },
   {
+    from: "waiting_on_admin",
+    to: "staging_in_progress",
+    roles: ["admin_full", "super_admin"]
+  },
+  {
+    from: "staging_in_progress",
+    to: "ready_for_instructor",
+    roles: ["standard_user", "super_admin"]
+  },
+  {
+    // "Provision Complete" — staff finish a course that needs no instructor
+    // review, skipping the entire instructor phase. Mirrors the role set of the
+    // ready_for_instructor branch above.
+    from: "staging_in_progress",
+    to: "final_approved",
+    roles: ["standard_user", "super_admin"]
+  },
+  {
     from: "ready_for_instructor",
     to: "sent_to_instructor",
     roles: ["admin_viewer", "admin_full", "super_admin"]
+  },
+  {
+    // Auto-advanced when the instructor opens their review link.
+    from: "sent_to_instructor",
+    to: "instructor_viewing",
+    roles: ["instructor", "super_admin"]
   },
   {
     from: "sent_to_instructor",
@@ -62,14 +86,24 @@ export const COURSE_TRANSITIONS = [
     roles: ["instructor", "super_admin"]
   },
   {
-    from: "instructor_questions",
-    to: "sent_to_instructor",
-    roles: ["admin_viewer", "admin_full", "super_admin"]
-  },
-  {
     from: "sent_to_instructor",
     to: "instructor_approved",
     roles: ["instructor", "super_admin"]
+  },
+  {
+    from: "instructor_viewing",
+    to: "instructor_questions",
+    roles: ["instructor", "super_admin"]
+  },
+  {
+    from: "instructor_viewing",
+    to: "instructor_approved",
+    roles: ["instructor", "super_admin"]
+  },
+  {
+    from: "instructor_questions",
+    to: "sent_to_instructor",
+    roles: ["admin_viewer", "admin_full", "super_admin"]
   },
   {
     from: "instructor_approved",

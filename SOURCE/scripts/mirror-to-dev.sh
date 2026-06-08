@@ -239,7 +239,7 @@ if auth_on; then
     --no-acl \
     --exit-on-error \
     <"$AUTH_DUMP"
-  docker run --rm -i postgres:17-alpine psql "$DEV_DATABASE_URL" --quiet -v ON_ERROR_STOP=1 -f "$POST_AUTH_SQL"
+  docker run --rm -i postgres:17-alpine psql "$DEV_DATABASE_URL" --quiet -v ON_ERROR_STOP=1 < "$POST_AUTH_SQL"
   echo -e "${GREEN}✓ Auth restored and repaired (instance_id + token columns).${NC}"
 else
   echo ""
@@ -250,24 +250,27 @@ fi
 echo ""
 echo -e "${CYAN}[5/6] Restoring app dump to dev...${NC}"
 set +e
-docker run --rm -i postgres:17-alpine pg_restore \
+RESTORE_OUT="$(docker run --rm -i postgres:17-alpine pg_restore \
   --dbname="$DEV_DATABASE_URL" \
   --no-owner \
   --no-acl \
-  --exit-on-error \
-  <"$DUMP_FILE"
+  <"$DUMP_FILE" 2>&1)"
 RESTORE_STAT=$?
 set -e
-if [ "$RESTORE_STAT" -ne 0 ]; then
-  echo -e "${RED}✗ pg_restore exited $RESTORE_STAT${NC}"
-  exit "$RESTORE_STAT"
+[ -n "$RESTORE_OUT" ] && echo "$RESTORE_OUT"
+# public is pre-created WITH grants in [3/6], so the dump's "CREATE SCHEMA public"
+# raises a benign "already exists" error. Ignore only that; fail on anything else.
+UNEXPECTED="$(printf '%s\n' "$RESTORE_OUT" | grep -i 'error:' | grep -vi 'schema "public" already exists' || true)"
+if [ -n "$UNEXPECTED" ]; then
+  echo -e "${RED}✗ pg_restore hit unexpected errors (see above).${NC}"
+  exit 1
 fi
-echo -e "${GREEN}✓ App restore complete.${NC}"
+echo -e "${GREEN}✓ App restore complete (benign public-schema conflict ignored).${NC}"
 
 echo ""
 echo -e "${CYAN}[6/6] Grants + verification...${NC}"
 if [ -f "$GRANTS_SQL" ]; then
-  docker run --rm -i postgres:17-alpine psql "$DEV_DATABASE_URL" --quiet -v ON_ERROR_STOP=1 -f "$GRANTS_SQL"
+  docker run --rm -i postgres:17-alpine psql "$DEV_DATABASE_URL" --quiet -v ON_ERROR_STOP=1 < "$GRANTS_SQL"
   echo -e "${GREEN}✓ service_role grants applied.${NC}"
 else
   echo -e "${YELLOW}⚠ Missing $GRANTS_SQL — apply service_role migration manually.${NC}"

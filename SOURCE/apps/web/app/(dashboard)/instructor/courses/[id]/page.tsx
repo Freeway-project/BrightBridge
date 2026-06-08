@@ -1,14 +1,21 @@
 import { notFound } from "next/navigation"
+import { Eye } from "lucide-react"
 import { Topbar } from "@/components/layout/topbar"
 import { requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
-import { getCourseRepository } from "@/lib/repositories"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
+import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StickyTabs } from "@/components/ui/sticky-tabs"
 import { IssueTracker } from "@/app/(dashboard)/courses/[id]/_components/issues/issue-tracker"
 import { InstructorCourseActions } from "./_components/instructor-course-actions"
+import { CourseSwitcher } from "./_components/course-switcher"
+import { CourseSwitchSidebar } from "./_components/course-switch-sidebar"
 import { InstructorReviewDetail } from "./_components/instructor-review-detail"
+import { InstructorCourseShell } from "./_components/instructor-course-shell"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
+import { getCourseTimeline } from "@/lib/courses/timeline"
+import { CourseTimeline } from "@/components/courses/course-timeline"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -22,13 +29,32 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
     notFound()
   }
 
-  // Verify instructor is assigned to this course
+  // Assigned instructors get the full workspace. Deans / dept-heads (leadership
+  // titles in the org hierarchy) and super admins get a read-only view of any
+  // course in their department tree.
   const assignedCourse = await getCourseRepository().getAssignedCourseById(id, context.profile.id, "instructor")
-  if (!assignedCourse) notFound()
+  const canViewViaHierarchy =
+    !assignedCourse &&
+    (context.profile.role === "super_admin" ||
+      (await getHierarchyRepository().hasHierarchyAccess(context.profile.id, id)))
+  if (!assignedCourse && !canViewViaHierarchy) notFound()
 
-  const [detail, sharedComments] = await Promise.all([
+  // Read-only when the viewer is not the assigned instructor.
+  const readOnly = !assignedCourse
+
+  // Record the dashboard open for the indicator dot. Only the assigned
+  // instructor counts — hierarchy/super-admin read-only views shouldn't
+  // pollute the "did the instructor open it?" signal.
+  if (assignedCourse && context.profile.role === "instructor") {
+    const { recordInstructorView } = await import("@/lib/instructor-views/service")
+    await recordInstructorView(id, context.profile.id)
+  }
+
+  const [detail, sharedComments, timeline, myCourses] = await Promise.all([
     getAdminCourseDetail(id),
     getSharedComments(id),
+    getCourseTimeline(id, { includeInternalComments: false }),
+    getCourseRepository().listInstructorCourses(context.profile.id),
   ])
   if (!detail) notFound()
 
@@ -41,17 +67,49 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
         subtitle={course.sourceCourseId ?? undefined}
         backHref="/instructor"
         role={context.profile.role}
+        actions={
+          <CourseSwitcher
+            currentId={id}
+            courses={myCourses.map((c) => ({ id: c.id, title: c.title, status: c.status }))}
+            className="md:hidden"
+          />
+        }
       />
       <main className="flex-1 flex overflow-hidden bg-background">
-        <Tabs defaultValue="overview" className="flex-1 flex flex-col overflow-hidden w-full">
+        <CourseSwitchSidebar
+          currentId={id}
+          courses={myCourses.map((c) => ({ id: c.id, title: c.title, status: c.status, term: c.term }))}
+        />
+        <InstructorCourseShell
+          courseId={id}
+          status={course.status}
+          finalSummary={course.instructorSummaryNotes}
+          readOnly={readOnly}
+          reviewNode={
+            <InstructorReviewDetail
+              course={course}
+              responses={responses}
+              sectionKeyById={sectionKeyById}
+            />
+          }
+          full={
+        <StickyTabs storageKey={`instructor-course-${id}`} defaultValue="overview" className="flex-1 flex flex-col overflow-hidden w-full">
           <div className="border-b border-border px-6 pt-4 bg-background flex items-center justify-between">
             <TabsList variant="line">
               <TabsTrigger value="overview" className="text-base">Overview</TabsTrigger>
               <TabsTrigger value="review" className="text-base">Review</TabsTrigger>
               <TabsTrigger value="questions" className="text-base">Questions</TabsTrigger>
               <TabsTrigger value="discussion" className="text-base">Discussion</TabsTrigger>
+              <TabsTrigger value="timeline" className="text-base">Timeline</TabsTrigger>
             </TabsList>
-            <InstructorCourseActions courseId={id} status={course.status} />
+            {readOnly ? (
+              <span className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                <Eye className="size-3.5" aria-hidden />
+                Department view — read only
+              </span>
+            ) : (
+              <InstructorCourseActions courseId={id} status={course.status} finalSummary={course.instructorSummaryNotes} />
+            )}
           </div>
 
           {/* Overview — clean course info only */}
@@ -115,9 +173,17 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               courseId={id}
               comments={sharedComments}
               currentUserId={context.userId}
+              canPost={!readOnly}
             />
           </TabsContent>
-        </Tabs>
+
+          {/* Timeline — full course history (internal comments hidden) */}
+          <TabsContent value="timeline" className="flex-1 overflow-hidden p-6">
+            <CourseTimeline items={timeline} />
+          </TabsContent>
+        </StickyTabs>
+          }
+        />
       </main>
     </>
   )

@@ -1,4 +1,5 @@
 "use client"
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useEffect, useMemo, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
@@ -26,18 +27,36 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Search, SlidersHorizontal, CheckCircle2, Circle, Loader2, Send } from "lucide-react"
+import { Search, SlidersHorizontal, CheckCircle2, Circle, Send } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { CourseStatus } from "@coursebridge/workflow"
+import { WORKFLOW_PHASES, getPipelineStage, COURSE_STATUS_LABELS } from "@coursebridge/workflow"
+import type { CourseStatus, PipelineStage } from "@coursebridge/workflow"
 import { batchApproveToStagingAction } from "../actions"
+import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
+import { OpenedDot } from "@/components/instructor/opened-dot"
 import { toast } from "sonner"
 
 type Props = {
   page: AdminCoursesPage
   tas: ProfileOption[]
+  statusCounts: { status: CourseStatus; count: number }[]
+  /**
+   * Map of courseId -> first-opened timestamp for rows currently in the
+   * instructor phase. Absent keys = not opened. Plain object so it crosses
+   * the server/client boundary without serialization shenanigans.
+   */
+  instructorOpenedAt?: Record<string, string>
 }
 
-export function AssignedCoursesTable({ page, tas }: Props) {
+const INSTRUCTOR_PHASE_STATUSES = new Set<CourseStatus>([
+  "sent_to_instructor",
+  "instructor_viewing",
+  "instructor_questions",
+  "instructor_approved",
+  "final_approved",
+])
+
+export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpenedAt }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -45,11 +64,37 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isBatchPending, startBatchTransition] = useTransition()
+  const [reassignTargets, setReassignTargets] = useState<ReassignTarget[]>([])
+  const [reassignOpen, setReassignOpen] = useState(false)
 
   const search = searchParams.get("search") ?? ""
   const statusFilter = searchParams.get("status") ?? "all"
+  const phaseParam = searchParams.get("phase")
   const taFilter = searchParams.get("ta") ?? "all"
   const currentPage = Math.max(page.page, 1)
+
+  // A selected status chip implies its phase; otherwise honor the phase tab.
+  // No param defaults to the Staging phase (matches the server); the All tab
+  // sets an explicit ?phase=all.
+  const activePhase: PipelineStage | "all" =
+    statusFilter !== "all"
+      ? getPipelineStage(statusFilter as CourseStatus)
+      : phaseParam === "all"
+        ? "all"
+        : ((phaseParam as PipelineStage | null) ?? "staging")
+
+  const countByStatus = useMemo(
+    () => new Map(statusCounts.map((s) => [s.status, s.count])),
+    [statusCounts]
+  )
+  const totalFilterCount = useMemo(
+    () => statusCounts.reduce((n, s) => n + s.count, 0),
+    [statusCounts]
+  )
+  const phaseStatuses = (key: PipelineStage) =>
+    WORKFLOW_PHASES.find((p) => p.key === key)?.groups.flatMap((g) => g.statuses) ?? []
+  const phaseCount = (key: PipelineStage) =>
+    phaseStatuses(key).reduce((n, s) => n + (countByStatus.get(s) ?? 0), 0)
 
   const taOptions = useMemo(
     () =>
@@ -63,8 +108,8 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   )
 
   const filteredCourses = page.data
-  const eligibleIds = useMemo(
-    () => filteredCourses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id),
+  const selectableIds = useMemo(
+    () => filteredCourses.filter((c) => c.ta).map((c) => c.id),
     [filteredCourses]
   )
 
@@ -72,18 +117,17 @@ export function AssignedCoursesTable({ page, tas }: Props) {
     filteredCourses.map((course) => course.ta?.id).filter((value): value is string => Boolean(value))
   ).size
 
-  const migration = filteredCourses.filter((c) => c.status === "course_created" || c.status === "assigned_to_ta" || c.status === "ta_review_in_progress").length
-  const staging = filteredCourses.filter((c) => {
-    const s = c.status
-    return s === "submitted_to_admin" || s === "admin_changes_requested" ||
-           s === "ready_for_instructor" || s === "sent_to_instructor" || s === "instructor_questions" || s === "instructor_approved"
-  }).length
-  const needsAction = filteredCourses.filter((c) => c.status === "submitted_to_admin" || c.status === "instructor_approved").length
-  const provision = filteredCourses.filter((c) => c.status === "final_approved").length
+  // Summary boxes reflect ALL courses (global statusCounts), not just the current
+  // page. phaseCount sums a phase's statuses from countByStatus; Staging includes
+  // the instructor phase (incl. instructor_viewing) to match the prior grouping.
+  const migration = phaseCount("migration")
+  const staging = phaseCount("staging") + phaseCount("instructor")
+  const needsAction = (countByStatus.get("submitted_to_admin") ?? 0) + (countByStatus.get("instructor_approved") ?? 0)
+  const provision = phaseCount("provision")
   const pageStart = page.total === 0 ? 0 : (page.page - 1) * page.pageSize + 1
   const pageEnd = page.total === 0 ? 0 : pageStart + filteredCourses.length - 1
 
-  const allEligibleSelected = eligibleIds.length > 0 && eligibleIds.every((id) => selectedIds.has(id))
+  const allSelectableSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id))
 
   function toggleRow(id: string) {
     setSelectedIds((prev) => {
@@ -94,11 +138,33 @@ export function AssignedCoursesTable({ page, tas }: Props) {
   }
 
   function toggleAll() {
-    setSelectedIds(allEligibleSelected ? new Set() : new Set(eligibleIds))
+    setSelectedIds(allSelectableSelected ? new Set() : new Set(selectableIds))
+  }
+
+  const selectedRows = useMemo(
+    () => page.data.filter((c) => selectedIds.has(c.id)),
+    [page.data, selectedIds],
+  )
+  const approveEligibleSelectedCount = selectedRows.filter((r) => r.status === "submitted_to_admin").length
+
+  const openReassign = (rows: AdminCourseRow[]) => {
+    const targets = rows
+      .filter((r) => r.ta) // only courses that currently have a TA can be reassigned
+      .map((r) => ({ id: r.id, title: r.title }))
+    if (targets.length === 0) {
+      toast.error("Select at least one course that already has a TA.")
+      return
+    }
+    setReassignTargets(targets)
+    setReassignOpen(true)
   }
 
   function handleBatchApprove() {
-    const ids = Array.from(selectedIds)
+    const ids = selectedRows.filter((r) => r.status === "submitted_to_admin").map((r) => r.id)
+    if (ids.length === 0) {
+      toast.warning("None of the selected courses are ready to move to staging.")
+      return
+    }
     startBatchTransition(async () => {
       const { succeeded, failed } = await batchApproveToStagingAction(ids)
       setSelectedIds(new Set())
@@ -117,6 +183,18 @@ export function AssignedCoursesTable({ page, tas }: Props) {
       search: null,
       status: null,
       ta: null,
+    })
+  }
+
+  // Phase tabs write `phase` explicitly (including the "all" sentinel) so it
+  // isn't dropped by setQuery's "all means clear" rule, and clear any status chip.
+  function setPhase(key: PipelineStage | "all") {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("page", "1")
+    params.delete("status")
+    params.set("phase", key)
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`)
     })
   }
 
@@ -206,33 +284,6 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </div>
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
             <Select
-              value={statusFilter}
-              onValueChange={(value) =>
-                setQuery({
-                  page: "1",
-                  status: value === "all" ? null : value,
-                })
-              }
-            >
-              <SelectTrigger className="w-full min-w-0 sm:w-[200px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent className="max-h-64 overflow-y-auto">
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="course_created">Migration — unassigned</SelectItem>
-                <SelectItem value="assigned_to_ta">Migration — assigned to TA</SelectItem>
-                <SelectItem value="ta_review_in_progress">Migration — TA reviewing</SelectItem>
-                <SelectItem value="submitted_to_admin">Staging — waiting on admin</SelectItem>
-                <SelectItem value="admin_changes_requested">Staging — fixes requested</SelectItem>
-                <SelectItem value="ready_for_instructor">Staging — ready to send</SelectItem>
-                <SelectItem value="sent_to_instructor">Staging — instructor reviewing</SelectItem>
-                <SelectItem value="instructor_questions">Staging — instructor questions</SelectItem>
-                <SelectItem value="instructor_approved">Staging — awaiting final sign-off</SelectItem>
-                <SelectItem value="final_approved">Provision — final approved</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
               value={taFilter}
               onValueChange={(value) =>
                 setQuery({
@@ -256,6 +307,88 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </div>
         </div>
 
+        {/* Phase tabs + status-chip drill-down. Labels and grouping derive from
+            WORKFLOW_PHASES / COURSE_STATUS_LABELS so they can never drift from
+            the workflow definition. A phase tab filters by all its statuses; a
+            chip narrows to one. */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPhase("all")}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                activePhase === "all"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:bg-muted"
+              )}
+            >
+              All
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[10px] font-semibold",
+                  activePhase === "all" ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                )}
+              >
+                {totalFilterCount}
+              </span>
+            </button>
+            {WORKFLOW_PHASES.map((p) => {
+              const active = activePhase === p.key
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => setPhase(p.key)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background hover:bg-muted"
+                  )}
+                >
+                  {p.label}
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-[10px] font-semibold",
+                      active ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {phaseCount(p.key)}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          {activePhase !== "all" && (
+            <div className="flex flex-wrap items-center gap-1.5 border-t border-border/60 pt-2">
+              <span className="mr-0.5 text-xs font-medium text-muted-foreground">Status:</span>
+              {phaseStatuses(activePhase).map((s) => {
+                const active = statusFilter === s
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setQuery({ page: "1", status: active ? null : s, phase: activePhase })}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                      active
+                        ? "border-primary bg-primary/10 font-medium text-primary"
+                        : "border-border bg-background text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {COURSE_STATUS_LABELS[s]}
+                    <span className="text-[10px] font-semibold text-muted-foreground">
+                      {countByStatus.get(s) ?? 0}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
         <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>
             {search
@@ -264,17 +397,10 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </p>
           {isPending ? (
             <span className="inline-flex items-center gap-1.5">
-              <Loader2 className="size-3 animate-spin" />
+              <LottieLoader className="size-3 " />
               Searching…
             </span>
           ) : null}
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Migration" value={migration} tone={migration > 0 ? "warn" : "default"} />
-          <SummaryStat label="Staging" value={staging} tone={staging > 0 ? "default" : "default"} />
-          <SummaryStat label="Needs Admin Action" value={needsAction} tone={needsAction > 0 ? "danger" : "default"} />
-          <SummaryStat label="Provision" value={provision} tone={provision > 0 ? "success" : "default"} />
         </div>
 
         {filteredCourses.length === 0 ? (
@@ -300,9 +426,18 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                   Clear
                 </Button>
                 <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => openReassign(selectedRows)}
+                  disabled={isBatchPending}
+                >
+                  Reassign selected
+                </Button>
+                <Button
                   size="sm"
                   className="h-7 gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white"
-                  disabled={isBatchPending}
+                  disabled={isBatchPending || approveEligibleSelectedCount === 0}
                   onClick={handleBatchApprove}
                 >
                   <Send className="size-3" />
@@ -317,11 +452,11 @@ export function AssignedCoursesTable({ page, tas }: Props) {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-10 pl-4">
-                    {eligibleIds.length > 0 && (
+                    {selectableIds.length > 0 && (
                       <Checkbox
-                        checked={allEligibleSelected}
+                        checked={allSelectableSelected}
                         onCheckedChange={toggleAll}
-                        aria-label="Select all eligible"
+                        aria-label="Select all reassignable"
                       />
                     )}
                   </TableHead>
@@ -340,7 +475,7 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                     onClick={() => router.push(`/admin/courses/${course.id}`)}
                   >
                     <TableCell className="w-10 pl-4 align-middle" onClick={(e) => e.stopPropagation()}>
-                      {course.status === "submitted_to_admin" && (
+                      {course.ta && (
                         <Checkbox
                           checked={selectedIds.has(course.id)}
                           onCheckedChange={() => toggleRow(course.id)}
@@ -374,6 +509,17 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                             <p className="text-sm font-medium text-foreground">{course.ta.name ?? "Unnamed TA"}</p>
                             <p className="truncate text-xs text-muted-foreground">{course.ta.email}</p>
                             <p className="text-[11px] text-muted-foreground">Current TA owner</p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="-ml-2 mt-0.5 h-6 px-2 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openReassign([course])
+                              }}
+                            >
+                              Reassign
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -385,7 +531,12 @@ export function AssignedCoursesTable({ page, tas }: Props) {
                     </TableCell>
                     <TableCell className="max-w-sm whitespace-normal break-words align-top">
                       <div className="space-y-2 py-1">
-                        <StatusBadge status={course.status} className="w-fit" />
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={course.status} className="w-fit" />
+                          {INSTRUCTOR_PHASE_STATUSES.has(course.status) && (
+                            <OpenedDot openedAt={instructorOpenedAt?.[course.id] ?? null} size="sm" />
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">{getStatusHint(course.status)}</p>
                       </div>
                     </TableCell>
@@ -460,6 +611,19 @@ export function AssignedCoursesTable({ page, tas }: Props) {
           </div>
         </div>
       </CardContent>
+      <ReassignDialog
+        open={reassignOpen}
+        onOpenChange={setReassignOpen}
+        courses={reassignTargets}
+        tas={tas}
+        onDone={(ids) =>
+          setSelectedIds((prev) => {
+            const next = new Set(prev)
+            ids.forEach((id) => next.delete(id))
+            return next
+          })
+        }
+      />
     </Card>
   )
 }
@@ -468,12 +632,14 @@ type PhaseState = "done" | "active" | "idle"
 
 const MIGRATION_DONE = new Set<CourseStatus>([
   "submitted_to_admin","admin_changes_requested",
+  "waiting_on_admin","staging_in_progress",
   "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved","final_approved"
 ])
 const MIGRATION_ACTIVE = new Set<CourseStatus>(["assigned_to_ta", "ta_review_in_progress"])
 const STAGING_DONE = new Set<CourseStatus>(["final_approved"])
 const STAGING_ACTIVE = new Set<CourseStatus>([
   "submitted_to_admin","admin_changes_requested",
+  "waiting_on_admin","staging_in_progress",
   "ready_for_instructor","sent_to_instructor","instructor_questions","instructor_approved"
 ])
 const PROVISION_DONE = new Set<CourseStatus>(["final_approved"])
@@ -508,37 +674,70 @@ function PhasePill({ label, state }: { label: string; state: PhaseState }) {
     idle:   "bg-muted text-muted-foreground border-border",
   }[state]
 
-  const Icon = state === "done" ? CheckCircle2 : state === "active" ? Loader2 : Circle
+  const Icon = state === "done" ? CheckCircle2 : state === "active" ? ActiveSpinner : Circle
 
   return (
     <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5", styles)}>
-      <Icon className={cn("size-2.5 shrink-0", state === "active" && "animate-spin")} />
+      <Icon className="size-2.5 shrink-0" />
       <span className="text-[10px] font-medium">{label}</span>
     </div>
   )
 }
 
-function SummaryStat({
+// Lightweight CSS spinner for the "active" phase. Replaces a full lottie-react
+// player (647 KB JSON, looping rAF) that was rendered once per active phase per
+// row — at 50 rows that meant dozens of simultaneous animation loops, which
+// locked up the admin table on lower-powered machines (e.g. M1). currentColor
+// keeps it tinted to the surrounding pill.
+function ActiveSpinner({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "inline-block animate-spin rounded-full border-[1.5px] border-current border-t-transparent",
+        className,
+      )}
+    />
+  )
+}
+
+// A clickable phase stat-card: shows a phase's total course count and filters
+// the table to that phase when clicked. The active card is highlighted with a
+// primary ring + tint so the current filter is obvious at a glance.
+function PhaseCard({
   label,
   value,
-  tone,
+  active,
+  onClick,
 }: {
   label: string
   value: number
-  tone: "default" | "warn" | "danger" | "success"
+  active: boolean
+  onClick: () => void
 }) {
-  const toneClass = {
-    default: "border-border bg-muted/30 text-foreground",
-    warn: "border-yellow-500/20 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300",
-    danger: "border-orange-500/20 bg-orange-500/10 text-orange-700 dark:text-orange-300",
-    success: "border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-300",
-  }[tone]
-
   return (
-    <div className={cn("rounded-lg border px-4 py-3", toneClass)}>
-      <p className="text-[11px] uppercase tracking-wide opacity-80">{label}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+        active
+          ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-sm"
+          : "border-border bg-card hover:border-primary/40 hover:bg-muted/50"
+      )}
+    >
+      <span
+        className={cn(
+          "text-[11px] font-medium uppercase tracking-wide",
+          active ? "text-primary" : "text-muted-foreground"
+        )}
+      >
+        {label}
+      </span>
+      <span className="text-2xl font-semibold tabular-nums">{value}</span>
+    </button>
   )
 }
 
@@ -577,6 +776,10 @@ function getStatusHint(status: AdminCourseRow["status"]) {
       return "Staging — awaiting admin review."
     case "admin_changes_requested":
       return "Staging — fixes sent back to TA."
+    case "waiting_on_admin":
+      return "Staging — admin building the staging shell."
+    case "staging_in_progress":
+      return "Staging — TA finalizing the course."
     case "ready_for_instructor":
       return "Staging — ready to send to instructor."
     case "sent_to_instructor":

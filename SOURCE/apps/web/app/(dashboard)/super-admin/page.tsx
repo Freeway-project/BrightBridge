@@ -1,13 +1,12 @@
 import { Topbar } from "@/components/layout/topbar"
-import { OverviewView } from "@/components/super-admin/overview-view"
-import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers } from "@/lib/super-admin/queries"
+import { InstitutionPanel } from "@/components/super-admin/institution-panel"
+import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount, getPaginatedAuditEvents } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
 import { TweakableContent } from "@/components/shared/tweakable-content"
 import { SuperAdminTabs } from "./_components/super-admin-tabs"
 import { CoursesView } from "@/components/super-admin/courses-view"
 import { UsersView } from "@/components/super-admin/users-view"
-import { OrganizationView } from "@/components/super-admin/organization-view"
 import { AuditView } from "@/components/super-admin/audit-view"
 import { MigrationPanel } from "../admin/_components/migration-panel"
 import { AdminAssignmentPanel } from "../admin/_components/admin-assignment-panel"
@@ -19,6 +18,7 @@ import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
 import { getLatestMigrationReport } from "@/lib/migration/report"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
 import { AnalyticsView } from "@/components/super-admin/analytics-view"
+import { SupportMessagesView } from "@/components/super-admin/support-messages-view"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -45,6 +45,9 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     openEscalations,
     tas,
     migrationReport,
+    supportMessagesPage,
+    openSupportCount,
+    auditPage,
   ] = await Promise.all([
     getSuperAdminData(),
     getPaginatedSuperAdminCourses(page, 50, search),
@@ -53,6 +56,9 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     getOpenEscalations(),
     getProfilesByRole("standard_user"),
     getLatestMigrationReport(),
+    getPaginatedSuperAdminSupportMessages(page, 50, search),
+    getOpenSupportMessageCount(),
+    getPaginatedAuditEvents(1, 30),
   ])
 
   return (
@@ -64,9 +70,11 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
           <SuperAdminTabs
             unassignedCount={unassignedPage.total}
             openEscalationsCount={openEscalations.length}
-            overviewPanel={<OverviewView data={data} />}
+            openSupportCount={openSupportCount}
+            supportPanel={<SupportMessagesView result={supportMessagesPage} search={search} />}
+            institutionPanel={<InstitutionPanel data={data} storageKey="super-admin-institution" />}
             coursesPanel={<CoursesView result={coursesPage} search={search} />}
-            usersPanel={<UsersView result={usersPage} search={search} currentUserId={context.profile.id} />}
+            usersPanel={<UsersView result={usersPage} search={search} />}
             assignPanel={
               <AdminAssignmentPanel
                 courses={unassignedPage.data.filter(c => c.ta === null)}
@@ -75,8 +83,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
-            organizationPanel={<OrganizationView data={data} />}
-            auditPanel={<AuditView data={data} />}
+            auditPanel={<AuditView initial={auditPage} />}
             analyticsPanel={<AnalyticsView />}
           />
         </AdminRefreshWrapper>

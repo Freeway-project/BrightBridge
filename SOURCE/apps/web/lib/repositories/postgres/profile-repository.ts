@@ -46,21 +46,6 @@ export function createPostgresProfileRepository(): ProfileRepository {
       return rows[0] ? mapProfile(rows[0]) : null;
     },
 
-    async getProfilesByRole(role) {
-      const pool = getPostgresPool();
-      const { rows } = await pool.query<ProfileRow>(
-        `
-          SELECT id, email, full_name, role
-          FROM profiles
-          WHERE role = $1
-          ORDER BY full_name ASC NULLS LAST
-        `,
-        [role],
-      );
-
-      return rows.map(mapProfile);
-    },
-
     async getProfileByEmail(email) {
       const pool = getPostgresPool();
       const normalizedEmail = email.trim().toLowerCase();
@@ -75,6 +60,21 @@ export function createPostgresProfileRepository(): ProfileRepository {
       );
 
       return rows[0] ? mapProfile(rows[0]) : null;
+    },
+
+    async getProfilesByRole(role) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<ProfileRow>(
+        `
+          SELECT id, email, full_name, role
+          FROM profiles
+          WHERE role = $1
+          ORDER BY full_name ASC NULLS LAST
+        `,
+        [role],
+      );
+
+      return rows.map(mapProfile);
     },
 
     async listUsers(page = 1, pageSize = 20, search = "") {
@@ -167,17 +167,6 @@ export function createPostgresProfileRepository(): ProfileRepository {
           WHERE id = $1
         `,
         [profileId, role],
-      );
-    },
-
-    async deleteProfile(profileId) {
-      const pool = getPostgresPool();
-      await pool.query(
-        `
-          DELETE FROM profiles
-          WHERE id = $1
-        `,
-        [profileId],
       );
     },
   };

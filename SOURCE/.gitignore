@@ -30,3 +30,7 @@ backups/
 *Educator*
 *Heirarchy*
 *.csv
+
+# Supabase CLI local cache
+supabase/.branches/
+supabase/.temp/

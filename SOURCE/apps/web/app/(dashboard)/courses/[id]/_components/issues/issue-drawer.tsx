@@ -1,4 +1,5 @@
 'use client'
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useEffect, useState } from 'react'
 import { CourseIssue, IssueComment, IssuePhase, IssueStatus } from '@/lib/issues/types'
@@ -7,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { X, Loader2, MessageCircle, MessageSquare } from 'lucide-react'
+import { X, MessageCircle, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface IssueDrawerProps {
@@ -130,7 +131,7 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve 
                 onClick={() => handleStatusChange('in_review')}
                 disabled={updatingStatus}
               >
-                {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+                {updatingStatus && <LottieLoader className="w-3 h-3 mr-2 " />}
                 Move to In Review
               </Button>
             )}
@@ -143,7 +144,7 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve 
                 onClick={() => handleStatusChange('resolved')}
                 disabled={updatingStatus}
               >
-                {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+                {updatingStatus && <LottieLoader className="w-3 h-3 mr-2 " />}
                 Mark as Resolved
               </Button>
             )}
@@ -156,7 +157,7 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve 
                 onClick={() => handleStatusChange('open')}
                 disabled={updatingStatus}
               >
-                {updatingStatus && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+                {updatingStatus && <LottieLoader className="w-3 h-3 mr-2 " />}
                 Reopen
               </Button>
             )}
@@ -191,7 +192,7 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve 
       <ScrollArea className="flex-1 p-4 space-y-3 bg-background/50">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            <LottieLoader className="w-4 h-4  text-muted-foreground" />
           </div>
         ) : fullIssue.comments && fullIssue.comments.length > 0 ? (
           fullIssue.comments.map((comment) => (
@@ -237,7 +238,7 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve 
           onClick={handleAddComment}
           disabled={!commentBody.trim() || commenting}
         >
-          {commenting && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+          {commenting && <LottieLoader className="w-3 h-3 mr-2 " />}
           Comment
         </Button>
       </div>

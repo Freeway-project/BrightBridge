@@ -1,4 +1,5 @@
 'use client'
+import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useState, useEffect } from 'react'
 import { CourseIssue, IssuePhase, IssueStatus } from '@/lib/issues/types'
@@ -11,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Loader2, AlertCircle, CheckCircle2, Clock } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock } from 'lucide-react'
 
 interface IssueListProps {
   issues: CourseIssue[]
@@ -118,7 +119,7 @@ export function IssueList({ issues, loading = false, phase, onIssuesChange, canR
         <div className="flex-1 overflow-y-auto space-y-2">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-2">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <LottieLoader className="w-6 h-6  text-muted-foreground" />
               <p className="text-sm text-muted-foreground">Loading issues...</p>
             </div>
           ) : sortedIssues.length === 0 ? (

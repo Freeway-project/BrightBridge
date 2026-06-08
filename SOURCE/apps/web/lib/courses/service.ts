@@ -13,7 +13,7 @@ import { getCourseRepository, getProfileRepository, getReviewRepository, getHier
 import type { CourseSummary, ReviewProgress, SectionProgress, CourseAssignmentRecord, InstructorCourse } from "@/lib/repositories/contracts";
 
 const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
-const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
+const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin", "provost"];
 
 export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse, SubmissionEvent } from "@/lib/repositories/contracts";
 
@@ -55,7 +55,10 @@ export async function getAccessibleCourses() {
     };
   }
 
-  // TAs and instructors only see courses assigned to them
+  // TAs and instructors only see courses assigned to them, but across all
+  // statuses — so a TA can still find courses they reviewed after those courses
+  // advance past the TA stage (e.g. ready_for_instructor). The dashboard tabs
+  // (Staging / With Instructor / Done) bucket the non-actionable ones for them.
   const isScoped = context.profile.role === "standard_user" || context.profile.role === "instructor";
   const summaries = isScoped
     ? await getCourseRepository().listAssignedCourses(
@@ -140,6 +143,32 @@ export async function assignUserToCourse(input: AssignUserToCourseInput) {
   });
 }
 
+export type ReassignCourseStaffInput = {
+  courseId: string;
+  newProfileId: string;
+  reason?: string | null;
+};
+
+export async function reassignCourseStaff(input: ReassignCourseStaffInput) {
+  const context = await requireProfile();
+  requireAnyRole(context, adminRoles); // ["admin_full", "super_admin"]
+
+  const profile = await getProfileRepository().getProfileById(input.newProfileId);
+  if (!profile) {
+    throw new Error("Selected TA does not exist.");
+  }
+  if (profile.role !== "standard_user") {
+    throw new Error("Courses can only be reassigned to a TA.");
+  }
+
+  await getCourseRepository().reassignCourseStaff({
+    courseId: input.courseId,
+    newProfileId: input.newProfileId,
+    actorId: context.profile.id,
+    reason: input.reason ?? null,
+  });
+}
+
 export async function updateCourseDepartment(courseId: string, orgUnitId: string | null) {
   const context = await requireProfile();
   requireAnyRole(context, adminRoles);
@@ -189,6 +218,46 @@ export async function transitionCourseStatus(input: TransitionCourseStatusInput)
     toStatus: input.toStatus,
     actor: context.profile,
     note: cleanOptionalText(input.note)
+  });
+
+  return updatedCourse;
+}
+
+/**
+ * Auto-advances a course to "instructor_viewing" the moment the instructor
+ * opens their emailed review link. System-initiated: the clicker has no normal
+ * session yet (the link itself is the authorization), so this bypasses
+ * requireProfile and records the status event with the instructor as actor.
+ * Idempotent — only transitions from "sent_to_instructor", so re-opening the
+ * dashboard or opening after the instructor already responded is a no-op.
+ */
+export async function markInstructorViewingByLink(input: {
+  courseId: string;
+  instructorProfileId: string;
+}) {
+  const repo = getCourseRepository();
+  const course = await repo.getCourseSummaryById(input.courseId);
+
+  if (course.status !== "sent_to_instructor") {
+    return course;
+  }
+
+  // Sanity-check the move is legal for an instructor before applying it.
+  assertCanTransition({
+    role: "instructor",
+    from: "sent_to_instructor",
+    to: "instructor_viewing"
+  });
+
+  const updatedCourse = await repo.updateCourseStatus(input.courseId, "instructor_viewing");
+
+  await repo.insertStatusEvent({
+    courseId: input.courseId,
+    fromStatus: "sent_to_instructor",
+    toStatus: "instructor_viewing",
+    actorId: input.instructorProfileId,
+    actorRole: "instructor",
+    note: "Instructor opened the review link."
   });
 
   return updatedCourse;

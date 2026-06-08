@@ -1,9 +1,9 @@
 import "server-only";
 
-import { getPostgresPool } from "@/lib/postgres/pool";
 import type { Role } from "@coursebridge/workflow";
 import { getProfileRepository } from "@/lib/repositories";
 import type { ProfileOption } from "@/lib/repositories/contracts";
+import { getPostgresPool } from "@/lib/postgres/pool";
 export type { ProfileOption } from "@/lib/repositories/contracts";
 
 export async function getProfilesByRole(role: Role): Promise<ProfileOption[]> {
@@ -12,12 +12,7 @@ export async function getProfilesByRole(role: Role): Promise<ProfileOption[]> {
 
 export async function getCourseInstructor(courseId: string): Promise<ProfileOption | null> {
   const pool = getPostgresPool();
-  const { rows } = await pool.query<{
-    id: string;
-    email: string;
-    full_name: string | null;
-    role: Role;
-  }>(
+  const { rows } = await pool.query<{ id: string; email: string; full_name: string | null; role: Role }>(
     `
       SELECT p.id, p.email, p.full_name, p.role
       FROM course_assignments ca
@@ -28,13 +23,7 @@ export async function getCourseInstructor(courseId: string): Promise<ProfileOpti
     `,
     [courseId],
   );
-
   const profile = rows[0];
   if (!profile) return null;
-  return {
-    id: profile.id,
-    email: profile.email,
-    fullName: profile.full_name,
-    role: profile.role,
-  };
+  return { id: profile.id, email: profile.email, fullName: profile.full_name, role: profile.role };
 }
