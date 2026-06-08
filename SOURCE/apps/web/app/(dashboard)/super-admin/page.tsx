@@ -17,7 +17,6 @@ import { getProfilesByRole } from "@/lib/services/profiles"
 import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
 import { getLatestMigrationReport } from "@/lib/migration/report"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
-import { AnalyticsView } from "@/components/super-admin/analytics-view"
 import { SupportMessagesView } from "@/components/super-admin/support-messages-view"
 
 type SearchParams = Record<string, string | string[] | undefined>
@@ -84,7 +83,6 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
             auditPanel={<AuditView initial={auditPage} />}
-            analyticsPanel={<AnalyticsView />}
           />
         </AdminRefreshWrapper>
       </TweakableContent>

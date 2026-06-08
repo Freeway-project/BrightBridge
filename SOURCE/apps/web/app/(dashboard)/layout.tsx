@@ -9,7 +9,6 @@ import { NotificationProvider } from "@/components/providers/notification-provid
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContentShell } from "@/components/layout/dashboard-content-shell"
 import { isReadonlyMode } from "@/lib/system-migration"
-import { PostHogIdentifier } from "@/components/providers/posthog-identifier"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
 import { getDeploymentVersion } from "@/lib/deployment-version"
 
@@ -40,7 +39,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <TweakProvider>
-      <PostHogIdentifier userId={context.userId} email={context.email ?? ""} name={context.profile.fullName} role={role} />
       <OnlinePresenceTracker userId={context.userId} name={context.profile.fullName} email={context.email ?? ""} role={role} />
       <NotificationProvider userId={context.userId} role={role}>
         <SidebarProvider defaultOpen={sidebarOpen}>
