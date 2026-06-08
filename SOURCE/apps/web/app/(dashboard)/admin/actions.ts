@@ -346,47 +346,18 @@ export async function createInstructorAndAssignAction(
   }
 
   const { getProfileRepository, getCourseRepository } = await import("@/lib/repositories");
-  const { getAuthService } = await import("@/lib/auth/service");
   const { assignUserToCourse } = await import("@/lib/courses/service");
+  const { randomUUID } = await import("node:crypto");
 
   try {
     const profiles = getProfileRepository();
-    const auth = getAuthService();
 
-    // 1. Check if user exists by email
-    // We don't have a direct getByEmail in contract but we can use listUsers or similar, 
-    // or just try to create and handle conflict.
-    // Actually, upsertProfile works if we have an ID.
-    // For now, let's try to create the auth user. If they exist, we'll get an error.
-    
-    let userId: string;
+    // Look up an existing instructor profile by email; create one if missing.
+    // The OIDC sub assigned to this profile id is a placeholder — auth/context
+    // re-resolves it by email on the first Entra sign-in.
+    const existing = await profiles.getProfileByEmail(email);
+    const userId = existing?.id ?? randomUUID();
 
-    try {
-      const user = await auth.createUserWithPassword({
-        email,
-        password: Math.random().toString(36).slice(-12), // Random password for now
-        emailConfirm: true,
-        userMetadata: {
-          full_name: fullName,
-          role: "instructor",
-        },
-      });
-      userId = user.id;
-    } catch (error: any) {
-      if (error.message?.includes("already registered") || error.message?.includes("already exists")) {
-        // Find existing user ID
-        const admin = (await import("@/lib/supabase/admin")).createAdminClient();
-        if (!admin) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY.");
-        const { data } = await admin.auth.admin.listUsers();
-        const existing = data.users.find(u => u.email?.toLowerCase() === email);
-        if (!existing) throw new Error("User exists in auth but could not be found.");
-        userId = existing.id;
-      } else {
-        throw error;
-      }
-    }
-
-    // 2. Ensure profile exists and has instructor role
     await profiles.upsertProfile({
       id: userId,
       email,

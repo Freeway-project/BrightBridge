@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { ROLES, type Role } from "@coursebridge/workflow"
-import { getAuthService } from "@/lib/auth/service"
+import { randomUUID } from "node:crypto"
 import { requireProfile } from "@/lib/auth/context"
 import { getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
 import { getPaginatedAuditEvents } from "@/lib/super-admin/queries"
@@ -23,11 +23,10 @@ export async function createUserAction(
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase()
   const fullName = String(formData.get("fullName") ?? "").trim()
-  const password = String(formData.get("password") ?? "")
   const role = String(formData.get("role") ?? "") as Role
 
-  if (!email || !password || !fullName) {
-    return { kind: "error", message: "Name, email, and password are required." }
+  if (!email || !fullName) {
+    return { kind: "error", message: "Name and email are required." }
   }
 
   if (!ROLES.includes(role)) {
@@ -35,18 +34,16 @@ export async function createUserAction(
   }
 
   try {
-    const user = await getAuthService().createUserWithPassword({
-      email,
-      password,
-      emailConfirm: true,
-      userMetadata: {
-        full_name: fullName,
-        role,
-      },
-    })
+    // We don't mint credentials — users authenticate via Azure OIDC. This action
+    // just provisions the profile row so PBAC can match them on first sign-in
+    // (auth/context resolves the OIDC sub → profile by email when the id doesn't
+    // match yet).
+    const profiles = getProfileRepository()
+    const existing = await profiles.getProfileByEmail(email)
+    const userId = existing?.id ?? randomUUID()
 
-    await getProfileRepository().upsertProfile({
-      id: user.id,
+    await profiles.upsertProfile({
+      id: userId,
       email,
       fullName,
       role,
@@ -60,7 +57,7 @@ export async function createUserAction(
 
   revalidatePath("/super-admin")
 
-  return { kind: "success", message: `Created ${email} as ${role}.` }
+  return { kind: "success", message: `Provisioned ${email} as ${role}. They sign in via Microsoft.` }
 }
 
 export async function updateUserRoleAction(
@@ -94,10 +91,6 @@ export async function updateUserRoleAction(
 
   try {
     await getProfileRepository().updateProfileRole(userId, role)
-    await getAuthService().updateUserMetadata(userId, {
-      full_name: profile.fullName,
-      role,
-    })
   } catch (error) {
     return {
       kind: "error",
