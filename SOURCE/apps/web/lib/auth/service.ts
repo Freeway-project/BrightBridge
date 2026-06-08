@@ -243,7 +243,7 @@ class OidcAuthService implements AuthService {
 
     cookieStore.set(OIDC_SESSION_COOKIE, sessionValue, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       expires: new Date(exp * 1000),
@@ -252,6 +252,39 @@ class OidcAuthService implements AuthService {
     cookieStore.delete(OIDC_STATE_COOKIE);
     cookieStore.delete(OIDC_NONCE_COOKIE);
   }
+}
+
+export function isDevLoginEnabled(): boolean {
+  return process.env.NODE_ENV !== "production" && process.env.ENABLE_DEV_LOGIN === "1";
+}
+
+export async function mintDevSession(params: {
+  sub: string;
+  email: string;
+  fullName: string | null;
+  role: string;
+}): Promise<void> {
+  if (!isDevLoginEnabled()) {
+    throw new Error("Dev login is disabled.");
+  }
+
+  const exp = Math.floor(Date.now() / 1000) + 8 * 60 * 60;
+  const sessionValue = encodeSession({
+    sub: params.sub,
+    email: params.email,
+    full_name: params.fullName,
+    oidc_roles: [params.role],
+    exp,
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.set(OIDC_SESSION_COOKIE, sessionValue, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(exp * 1000),
+  });
 }
 
 let authService: AuthService | null = null;

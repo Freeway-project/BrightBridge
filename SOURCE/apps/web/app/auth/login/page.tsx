@@ -6,6 +6,52 @@ import { Button } from "@/components/ui/button"
 import { AnimatedBubbleParticles } from "@/components/ui/animated-bubble-particles"
 import { FileCheck, GitMerge, KeyRound, Users } from "lucide-react"
 
+const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN === "1"
+
+const DEV_ROLES = [
+  "super_admin",
+  "provost",
+  "admin_full",
+  "admin_viewer",
+  "standard_user",
+  "instructor",
+] as const
+
+function DevLoginPanel() {
+  return (
+    <form
+      action="/auth/dev/login"
+      method="POST"
+      className="mt-6 space-y-3 rounded-md border border-dashed border-amber-400/60 bg-amber-50/40 p-4 dark:bg-amber-950/20"
+    >
+      <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+        Dev sign-in (local only) — bypasses Microsoft Entra.
+      </p>
+      <input
+        name="email"
+        type="email"
+        required
+        placeholder="email of an existing profile"
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+      />
+      <select
+        name="role"
+        defaultValue="super_admin"
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+      >
+        {DEV_ROLES.map((r) => (
+          <option key={r} value={r}>
+            {r}
+          </option>
+        ))}
+      </select>
+      <Button type="submit" variant="outline" className="w-full h-9 text-sm">
+        Sign in as dev user
+      </Button>
+    </form>
+  )
+}
+
 const BUBBLE_COLORS = [
   "#818cf8",
   "#ec4899",
@@ -156,6 +202,8 @@ export default function LoginPage() {
                 Staff and instructors sign in via Microsoft Entra. Need access? Ask a super admin.
               </p>
             </form>
+
+            {DEV_LOGIN_ENABLED && <DevLoginPanel />}
           </div>
         </div>
       </main>
