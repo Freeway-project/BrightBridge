@@ -154,6 +154,16 @@ try {
   const shouldRewriteSupabaseRoles =
     !roleSet.has("anon") || !roleSet.has("authenticated") || !roleSet.has("service_role");
 
+  // Plain Postgres has no Supabase Realtime service, so the `supabase_realtime`
+  // publication does not exist and `ALTER PUBLICATION supabase_realtime ...`
+  // statements would abort the whole migration file. When the publication is
+  // absent we strip those statements — realtime is replaced by polling at the
+  // app layer, so publication membership is meaningless on the target.
+  const pubResult = await client.query(
+    "SELECT EXISTS(SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') AS exists"
+  );
+  const hasRealtimePublication = pubResult.rows[0].exists;
+
   for (const file of migrationFiles) {
     if (appliedMigrations.has(file)) {
       continue;
@@ -177,6 +187,12 @@ try {
         .replace(/\bauthenticated\b/g, "public")
         .replace(/\bservice_role\b/g, "public")
         .replace(/\banon\b/g, "public");
+    }
+
+    if (!hasRealtimePublication) {
+      // Drop CREATE/ALTER/DROP PUBLICATION supabase_realtime statements so the
+      // rest of the migration still applies on plain Postgres.
+      sql = sql.replace(/\b(?:create|alter|drop)\s+publication\s+supabase_realtime\b[^;]*;/gi, "");
     }
 
     try {

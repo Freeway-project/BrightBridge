@@ -1,6 +1,7 @@
 import "server-only"
 
 import { getCourseRepository, getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
+import { getPostgresPool } from "@/lib/postgres/pool"
 import type {
   AuditEvent,
   StatusCount,
@@ -87,6 +88,94 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
 export async function getPaginatedSuperAdminCourses(page: number, pageSize: number, search: string): Promise<PaginatedResult<CourseRow>> {
   const courseRepository = getCourseRepository()
   return courseRepository.listSuperAdminCourses(page, pageSize, search)
+}
+
+export type SupportMessageRow = {
+  id: string
+  sender_role: string
+  type: "message" | "poke"
+  subject: string | null
+  body: string
+  status: "open" | "read" | "resolved"
+  created_at: string
+  sender:
+    | { full_name: string | null; role: string | null }
+    | { full_name: string | null; role: string | null }[]
+    | null
+}
+
+// Paginated list of every support message (pokes + notes) for the super-admin
+// Support panel — "who asked what". Uses the admin client; access to this data
+// is already gated by the super_admin auth check on the page.
+export async function getPaginatedSuperAdminSupportMessages(
+  page: number,
+  pageSize: number,
+  search: string,
+): Promise<PaginatedResult<SupportMessageRow>> {
+  const pool = getPostgresPool()
+  const values: unknown[] = []
+  let whereSql = ""
+  if (search) {
+    values.push(`%${search}%`)
+    whereSql = `WHERE (s.subject ILIKE $1 OR s.body ILIKE $1)`
+  }
+  const countResult = await pool.query<{ total: string }>(
+    `SELECT COUNT(*)::text AS total FROM support_messages s ${whereSql}`,
+    values,
+  )
+  const total = Number(countResult.rows[0]?.total ?? "0")
+
+  const from = (page - 1) * pageSize
+  values.push(pageSize, from)
+  const limitParam = `$${values.length - 1}`
+  const offsetParam = `$${values.length}`
+  const { rows } = await pool.query<{
+    id: string
+    sender_role: string
+    type: "message" | "poke"
+    subject: string | null
+    body: string
+    status: "open" | "read" | "resolved"
+    created_at: string
+    sender_full_name: string | null
+    sender_profile_role: string | null
+  }>(
+    `
+      SELECT s.id, s.sender_role, s.type, s.subject, s.body, s.status, s.created_at,
+             p.full_name AS sender_full_name, p.role AS sender_profile_role
+      FROM support_messages s
+      LEFT JOIN profiles p ON p.id = s.sender_profile_id
+      ${whereSql}
+      ORDER BY s.created_at DESC
+      LIMIT ${limitParam} OFFSET ${offsetParam}
+    `,
+    values,
+  )
+  return {
+    data: rows.map((row) => ({
+      id: row.id,
+      sender_role: row.sender_role,
+      type: row.type,
+      subject: row.subject,
+      body: row.body,
+      status: row.status,
+      created_at: row.created_at,
+      sender: { full_name: row.sender_full_name, role: row.sender_profile_role },
+    })),
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  }
+}
+
+// Count of unresolved support messages, for the Support tab badge.
+export async function getOpenSupportMessageCount(): Promise<number> {
+  const pool = getPostgresPool()
+  const { rows } = await pool.query<{ count: string }>(
+    `SELECT COUNT(*)::text AS count FROM support_messages WHERE status <> 'resolved'`,
+  )
+  return Number(rows[0]?.count ?? 0)
 }
 
 export async function getPaginatedUsers(page: number, pageSize: number, search: string): Promise<PaginatedResult<UserRow>> {

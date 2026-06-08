@@ -1,11 +1,13 @@
 import "server-only";
 
 import type { AssignmentRole } from "@coursebridge/workflow";
+import { COURSE_STATUSES } from "@coursebridge/workflow";
 import type {
   AdminCourseListFilters,
   AdminCourseRow,
   AssignmentLog,
   AuditEvent,
+  CourseAuditEntry,
   CourseAssignmentRecord,
   CourseRepository,
   CourseSummary,
@@ -17,6 +19,8 @@ import type {
   StuckCourse,
   SuperAdminCourseRow,
   TAWorkload,
+  UnitCourseFacets,
+  UnitCourseListFilters,
 } from "@/lib/repositories/contracts";
 import { cleanOptionalText, getSupabaseAdminClientOrThrow, toCourseStatus } from "./shared";
 
@@ -63,16 +67,21 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return (data ?? []).map((row) => toCourseSummary(row as CourseRow));
     },
 
-    async listAssignedCourses(userId, assignmentRole) {
+    async listAssignedCourses(userId, assignmentRole, filters = {}) {
       const admin = getSupabaseAdminClientOrThrow();
-      const { data, error } = await admin
+      let query = admin
         .from("courses")
         .select(
           "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,course_assignments!inner(profile_id,role)"
         )
         .eq("course_assignments.profile_id", userId)
-        .eq("course_assignments.role", assignmentRole)
-        .order("updated_at", { ascending: false });
+        .eq("course_assignments.role", assignmentRole);
+
+      if (filters.statuses?.length) {
+        query = query.in("status", [...filters.statuses]);
+      }
+
+      const { data, error } = await query.order("updated_at", { ascending: false });
 
       if (error) {
         throw new Error(`getAssignedCourses: ${error.message}`);
@@ -247,6 +256,20 @@ export function createSupabaseCourseRepository(): CourseRepository {
       }
     },
 
+    async reassignCourseStaff(input) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { error } = await admin.rpc("reassign_course_staff", {
+        p_course_id: input.courseId,
+        p_new_profile_id: input.newProfileId,
+        p_actor_id: input.actorId,
+        p_reason: input.reason,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    },
+
     async insertStatusEvent(input: InsertStatusEventInput) {
       const admin = getSupabaseAdminClientOrThrow();
       const { error } = await admin.from("course_status_events").insert({
@@ -291,6 +314,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const to = from + safePageSize - 1;
       const normalizedSearch = normalizeSearchTerm(filters.search);
       const status = filters.status;
+      const statuses = filters.statuses && filters.statuses.length > 0 ? filters.statuses : undefined;
       const taProfileId = filters.taProfileId?.trim() || undefined;
       const assignedOnly = filters.assignedOnly === true;
       const requireStaffJoin = assignedOnly || Boolean(taProfileId);
@@ -315,7 +339,9 @@ export function createSupabaseCourseRepository(): CourseRepository {
           { count: "exact" },
         );
 
-      if (status) {
+      if (statuses) {
+        query = query.in("status", statuses as string[]);
+      } else if (status) {
         query = query.eq("status", status);
       }
 
@@ -369,7 +395,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("courses")
         .select(`
-          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at, instructor_summary_notes,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( id, full_name, email )
@@ -392,6 +418,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         org_unit_id: string | null;
         status: string;
         updated_at: string;
+        instructor_summary_notes: string | null;
         course_assignments?: Array<{
           role: string;
           profiles?: AssignmentProfile | AssignmentProfile[] | null;
@@ -410,6 +437,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         orgUnitId: course.org_unit_id,
         status: toCourseStatus(course.status),
         updatedAt: course.updated_at,
+        instructorSummaryNotes: course.instructor_summary_notes ?? null,
         ta: staffProfile
           ? {
               id: staffProfile.id,
@@ -426,7 +454,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       let query = admin
         .from("courses")
         .select(`
-          id, title, status, term, department, org_unit_id, created_at, updated_at,
+          id, source_course_id, target_course_id, title, status, term, department, org_unit_id, created_at, updated_at,
           course_assignments (
             role,
             profiles!course_assignments_profile_id_fkey ( full_name, email )
@@ -451,6 +479,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const rows = (data ?? []).map((row) => {
         const course = row as unknown as {
           id: string;
+          source_course_id: string | null;
+          target_course_id: string | null;
           title: string;
           status: string;
           term: string | null;
@@ -472,6 +502,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
         return {
           id: course.id,
+          code: course.source_course_id ?? course.target_course_id ?? null,
           title: course.title,
           status: toCourseStatus(course.status),
           term: course.term,
@@ -612,6 +643,129 @@ export function createSupabaseCourseRepository(): CourseRepository {
       });
     },
 
+    async listCourseStatusEvents(courseId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("course_status_events")
+        .select(`
+          id, from_status, to_status, note, created_at, actor_role,
+          courses ( id, title ),
+          profiles!course_status_events_actor_id_fkey ( full_name, email )
+        `)
+        .eq("course_id", courseId)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        throw new Error(`course status events: ${error.message}`);
+      }
+
+      return (data ?? []).map((row) => {
+        const event = row as unknown as {
+          id: string;
+          from_status: string | null;
+          to_status: string;
+          note: string | null;
+          created_at: string;
+          actor_role: string;
+          courses?: { id: string; title: string } | Array<{ id: string; title: string }> | null;
+          profiles?:
+            | { full_name: string | null; email: string }
+            | Array<{ full_name: string | null; email: string }>
+            | null;
+        };
+        const relatedCourse = firstRelation(event.courses);
+        const actorProfile = firstRelation(event.profiles);
+
+        return {
+          id: event.id,
+          course_id: relatedCourse?.id ?? courseId,
+          course_title: relatedCourse?.title ?? "—",
+          from_status: event.from_status,
+          to_status: event.to_status,
+          actor_name: actorProfile?.full_name ?? null,
+          actor_email: actorProfile?.email ?? "",
+          actor_role: event.actor_role,
+          note: event.note,
+          created_at: event.created_at,
+        } satisfies AuditEvent;
+      });
+    },
+
+    async listCourseAuditEntries(courseId): Promise<CourseAuditEntry[]> {
+      const admin = getSupabaseAdminClientOrThrow();
+      const { data, error } = await admin
+        .from("audit_log")
+        .select("id, table_name, action, actor_id, old_data, new_data, changed_at")
+        .eq("course_id", courseId)
+        .in("table_name", [
+          "course_assignments",
+          "course_escalations",
+          "escalation_messages",
+          "course_issue_comments",
+        ])
+        .order("changed_at", { ascending: true });
+
+      if (error) {
+        // The audit_log table may not exist yet (migration not applied). Degrade
+        // gracefully so the timeline never hard-fails — Postgres 42P01 is
+        // "undefined_table". Any other error is logged and also treated as empty.
+        if (error.code !== "42P01") {
+          console.warn(`listCourseAuditEntries: audit_log read failed: ${error.message}`);
+        }
+        return [];
+      }
+
+      type Row = {
+        id: string;
+        table_name: CourseAuditEntry["tableName"];
+        action: CourseAuditEntry["action"];
+        actor_id: string | null;
+        old_data: Record<string, unknown> | null;
+        new_data: Record<string, unknown> | null;
+        changed_at: string;
+      };
+      const rows = (data ?? []) as Row[];
+
+      // Resolve referenced profile ids (the actor, and the assignment target) to
+      // display names in one batched lookup.
+      const ids = new Set<string>();
+      for (const r of rows) {
+        if (r.actor_id) ids.add(r.actor_id);
+        const pid = (r.new_data ?? r.old_data)?.["profile_id"];
+        if (typeof pid === "string") ids.add(pid);
+      }
+      const nameById = new Map<string, string | null>();
+      if (ids.size > 0) {
+        const { data: profs } = await admin
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", [...ids]);
+        for (const p of (profs ?? []) as Array<{ id: string; full_name: string | null; email: string }>) {
+          nameById.set(p.id, p.full_name ?? p.email ?? null);
+        }
+      }
+
+      const str = (v: unknown): string | null => (typeof v === "string" && v.length > 0 ? v : null);
+
+      return rows.map((r) => {
+        const d = (r.new_data ?? r.old_data ?? {}) as Record<string, unknown>;
+        const targetId = str(d["profile_id"]);
+        return {
+          id: r.id,
+          tableName: r.table_name,
+          action: r.action,
+          at: r.changed_at,
+          actorName: r.actor_id ? (nameById.get(r.actor_id) ?? null) : null,
+          role: str(d["role"]),
+          targetName: targetId ? (nameById.get(targetId) ?? null) : null,
+          title: str(d["title"]),
+          body: str(d["body"]),
+          status: str(d["status"]),
+          isSystem: d["is_system_message"] === true,
+        } satisfies CourseAuditEntry;
+      });
+    },
+
     async listSubmissionHistory(courseId) {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
@@ -747,7 +901,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         .select("id, title, term, department, status, updated_at, course_assignments!inner(profile_id, role)")
         .eq("course_assignments.profile_id", profileId)
         .eq("course_assignments.role", "instructor")
-        .in("status", ["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"])
+        .in("status", ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved", "final_approved"])
         .order("updated_at", { ascending: false });
 
       if (error) {
@@ -766,19 +920,29 @@ export function createSupabaseCourseRepository(): CourseRepository {
 
     async listCoursesByUnitAncestry(unitIds) {
       const admin = getSupabaseAdminClientOrThrow();
-      
-      // We join through the org_unit_hierarchy_paths view
+      if (!unitIds.length) return [];
+
+      // org_unit_hierarchy_paths is a recursive VIEW, so PostgREST cannot embed
+      // it through a foreign key. Resolve the descendant units in one query,
+      // then fetch the courses that live in any of them.
+      const { data: paths, error: pathErr } = await admin
+        .from("org_unit_hierarchy_paths")
+        .select("descendant_id")
+        .in("ancestor_id", unitIds);
+
+      if (pathErr) {
+        throw new Error(`listCoursesByUnitAncestry (paths): ${pathErr.message}`);
+      }
+
+      const descendantIds = [...new Set((paths ?? []).map((p) => p.descendant_id))];
+      if (!descendantIds.length) return [];
+
       const { data, error } = await admin
         .from("courses")
-        .select(`
-          id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at,
-          organizational_units!courses_org_unit_id_fkey!inner (
-            org_unit_hierarchy_paths!org_unit_hierarchy_paths_descendant_id_fkey!inner (
-              ancestor_id
-            )
-          )
-        `)
-        .in("organizational_units.org_unit_hierarchy_paths.ancestor_id", unitIds)
+        .select(
+          "id,source_course_id,target_course_id,title,term,department,org_unit_id,status,created_by,created_at,updated_at",
+        )
+        .in("org_unit_id", descendantIds)
         .order("updated_at", { ascending: false });
 
       if (error) {
@@ -786,6 +950,141 @@ export function createSupabaseCourseRepository(): CourseRepository {
       }
 
       return (data ?? []).map((row) => toCourseSummary(row as unknown as CourseRow));
+    },
+
+    async listCoursesByUnit(unitId, page = 1, pageSize = 50, filters: UnitCourseListFilters = {}) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+      const safePageSize = Number.isFinite(pageSize) ? Math.max(1, Math.floor(pageSize)) : 50;
+
+      const descendantIds = await resolveDescendantUnitIds(admin, [unitId]);
+      if (!descendantIds.length) {
+        return { data: [], total: 0, page: safePage, pageSize: safePageSize, totalPages: 0 };
+      }
+
+      const from = (safePage - 1) * safePageSize;
+      const to = from + safePageSize - 1;
+      const normalizedSearch = normalizeSearchTerm(filters.search);
+      const searchMatchingStaffIds = normalizedSearch
+        ? await findMatchingStaffProfileIds(normalizedSearch)
+        : [];
+      const searchMatchingStaffCourseIds = searchMatchingStaffIds.length > 0
+        ? await findStaffAssignedCourseIds(searchMatchingStaffIds)
+        : [];
+
+      let query = admin
+        .from("courses")
+        .select(
+          `
+          id, source_course_id, target_course_id, title, term, department, org_unit_id, status, updated_at,
+          course_assignments (
+            role,
+            profile_id,
+            profiles!course_assignments_profile_id_fkey ( id, full_name, email )
+          )
+        `,
+          { count: "exact" },
+        )
+        .in("org_unit_id", descendantIds);
+
+      if (filters.status) {
+        query = query.eq("status", filters.status);
+      }
+
+      if (filters.term) {
+        query = query.eq("term", filters.term);
+      }
+
+      if (normalizedSearch) {
+        const term = `%${normalizedSearch}%`;
+        const searchPredicates = [
+          `title.ilike.${term}`,
+          `source_course_id.ilike.${term}`,
+          `target_course_id.ilike.${term}`,
+          `term.ilike.${term}`,
+          `department.ilike.${term}`,
+        ];
+        if (searchMatchingStaffCourseIds.length > 0) {
+          searchPredicates.push(`id.in.(${searchMatchingStaffCourseIds.join(",")})`);
+        }
+        query = query.or(searchPredicates.join(","));
+      }
+
+      const { data, error, count } = await query
+        .order("updated_at", { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        throw new Error(`listCoursesByUnit: ${error.message}`);
+      }
+
+      const total = count ?? 0;
+      return {
+        data: mapAdminCourseRows(data ?? []),
+        total,
+        page: safePage,
+        pageSize: safePageSize,
+        totalPages: Math.ceil(total / safePageSize),
+      } satisfies PaginatedResult<AdminCourseRow>;
+    },
+
+    async getUnitCourseFacets(unitId) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const descendantIds = await resolveDescendantUnitIds(admin, [unitId]);
+      if (!descendantIds.length) {
+        return { statusCounts: [], terms: [], total: 0 };
+      }
+
+      const rows = await fetchAllSubtreeCourses(admin, descendantIds, "status, term");
+
+      const counts = new Map<string, number>();
+      const terms = new Set<string>();
+      for (const row of rows as Array<{ status: string; term: string | null }>) {
+        counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
+        const t = row.term?.trim();
+        if (t) terms.add(t);
+      }
+
+      const statusCounts: StatusCount[] = COURSE_STATUSES.filter((s) => counts.has(s)).map((s) => ({
+        status: s,
+        count: counts.get(s) ?? 0,
+      }));
+
+      return {
+        statusCounts,
+        terms: [...terms].sort((a, b) => b.localeCompare(a)),
+        total: rows.length,
+      } satisfies UnitCourseFacets;
+    },
+
+    async getChildUnitCourseCounts(childUnitIds) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const result: Record<string, number> = {};
+      for (const id of childUnitIds) result[id] = 0;
+      if (!childUnitIds.length) return result;
+
+      // Siblings' subtrees are disjoint, so each descendant maps to exactly one
+      // child. Resolve all child subtrees in one paths query, then tally courses.
+      const { data: paths, error: pathErr } = await admin
+        .from("org_unit_hierarchy_paths")
+        .select("ancestor_id, descendant_id")
+        .in("ancestor_id", childUnitIds);
+
+      if (pathErr) {
+        throw new Error(`getChildUnitCourseCounts (paths): ${pathErr.message}`);
+      }
+
+      const descendantToChild = new Map<string, string>();
+      for (const p of paths ?? []) descendantToChild.set(p.descendant_id, p.ancestor_id);
+      const descendantIds = [...descendantToChild.keys()];
+      if (!descendantIds.length) return result;
+
+      const rows = await fetchAllSubtreeCourses(admin, descendantIds, "org_unit_id");
+      for (const row of rows as Array<{ org_unit_id: string | null }>) {
+        const child = row.org_unit_id ? descendantToChild.get(row.org_unit_id) : undefined;
+        if (child) result[child] = (result[child] ?? 0) + 1;
+      }
+      return result;
     },
   };
 }
@@ -851,6 +1150,49 @@ async function findStaffAssignedCourseIds(profileIds: string[]): Promise<string[
   return Array.from(new Set((data ?? []).map((row) => row.course_id)));
 }
 
+type AdminClient = ReturnType<typeof getSupabaseAdminClientOrThrow>;
+
+// Resolves a unit (or units) to its whole subtree of unit ids via the recursive
+// org_unit_hierarchy_paths view (each unit is its own descendant at depth 0).
+async function resolveDescendantUnitIds(admin: AdminClient, unitIds: string[]): Promise<string[]> {
+  if (!unitIds.length) return [];
+  const { data, error } = await admin
+    .from("org_unit_hierarchy_paths")
+    .select("descendant_id")
+    .in("ancestor_id", unitIds);
+  if (error) {
+    throw new Error(`resolveDescendantUnitIds: ${error.message}`);
+  }
+  return [...new Set((data ?? []).map((p) => p.descendant_id))];
+}
+
+// Fetches every course in the given units, paging past PostgREST's 1000-row cap.
+// `columns` selects only what the caller needs (e.g. "status, term") to keep the
+// payload small over large subtrees.
+async function fetchAllSubtreeCourses(
+  admin: AdminClient,
+  unitIds: string[],
+  columns: string,
+): Promise<unknown[]> {
+  if (!unitIds.length) return [];
+  const PAGE = 1000;
+  const all: unknown[] = [];
+  for (let offset = 0; ; offset += PAGE) {
+    const { data, error } = await admin
+      .from("courses")
+      .select(columns)
+      .in("org_unit_id", unitIds)
+      .range(offset, offset + PAGE - 1);
+    if (error) {
+      throw new Error(`fetchAllSubtreeCourses: ${error.message}`);
+    }
+    const batch = (data ?? []) as unknown[];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return all;
+}
+
 function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
   return data.map((row) => {
     const course = row as {
@@ -881,6 +1223,7 @@ function mapAdminCourseRows(data: unknown[]): AdminCourseRow[] {
       orgUnitId: course.org_unit_id,
       status: toCourseStatus(course.status),
       updatedAt: course.updated_at,
+      instructorSummaryNotes: null,
       ta: staffProfile
         ? {
             id: staffProfile.id,
@@ -899,41 +1242,63 @@ function isMissingRelationError(error: { code?: string; message?: string } | nul
 
 async function fallbackStatusCounts(): Promise<StatusCount[]> {
   const admin = getSupabaseAdminClientOrThrow();
-  const { data, error } = await admin.from("courses").select("status");
 
-  if (error) {
-    throw new Error(`status counts fallback: ${error.message}`);
-  }
+  // The course_status_counts view is missing — count each status server-side
+  // with head/count queries instead of pulling rows. A plain
+  // `select("status")` is silently capped at PostgREST's default ~1000 rows, so
+  // it undercounts any table larger than that (the cause of the prod "874 vs
+  // 2286" Staging bug). head:true transfers no rows and returns exact totals.
+  const results = await Promise.all(
+    COURSE_STATUSES.map(async (status) => {
+      const { count, error } = await admin
+        .from("courses")
+        .select("*", { count: "exact", head: true })
+        .eq("status", status);
 
-  const counts = new Map<string, number>();
-  for (const row of data ?? []) {
-    const key = String((row as { status: string }).status);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
+      if (error) {
+        throw new Error(`status counts fallback: ${error.message}`);
+      }
 
-  return Array.from(counts.entries()).map(([status, count]) => ({
-    status: toCourseStatus(status),
-    count,
-  }));
+      return { status: toCourseStatus(status), count: count ?? 0 } satisfies StatusCount;
+    }),
+  );
+
+  // Match the view's shape: omit statuses with no courses.
+  return results.filter((row) => row.count > 0);
 }
 
 async function fallbackTAWorkload(): Promise<TAWorkload[]> {
   const admin = getSupabaseAdminClientOrThrow();
-  const { data, error } = await admin
-    .from("course_assignments")
-    .select(`
-      profile_id, role,
-      courses!inner ( status ),
-      profiles!course_assignments_profile_id_fkey ( full_name, email )
-    `)
-    .eq("role", "staff");
 
-  if (error) {
-    throw new Error(`ta workload fallback: ${error.message}`);
+  // The ta_workload_stats view is missing — aggregate the staff assignments
+  // here. A single select is capped at PostgREST's default ~1000 rows, so page
+  // through (ordered by the PK for stable paging) to avoid undercounting on
+  // installs with more than 1000 staff assignments.
+  const PAGE = 1000;
+  const rows: unknown[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await admin
+      .from("course_assignments")
+      .select(`
+        profile_id, role,
+        courses!inner ( status ),
+        profiles!course_assignments_profile_id_fkey ( full_name, email )
+      `)
+      .eq("role", "staff")
+      .order("id", { ascending: true })
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      throw new Error(`ta workload fallback: ${error.message}`);
+    }
+
+    const batch = data ?? [];
+    rows.push(...batch);
+    if (batch.length < PAGE) break;
   }
 
   const byProfile = new Map<string, TAWorkload>();
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const typed = row as {
       profile_id: string;
       courses?: { status: string } | Array<{ status: string }> | null;

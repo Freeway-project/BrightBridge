@@ -6,6 +6,7 @@ import { ROLES, type Role } from "@coursebridge/workflow"
 import { getAuthService } from "@/lib/auth/service"
 import { requireProfile } from "@/lib/auth/context"
 import { getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
+import { syncRoleChannel } from "@/lib/chat/membership"
 
 export type ManageUserState = {
   kind: "idle" | "success" | "error"
@@ -14,13 +15,50 @@ export type ManageUserState = {
 
 export async function createUserAction(
   _state: ManageUserState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ManageUserState> {
   await requireSuperAdmin()
-  return {
-    kind: "error",
-    message: "Create user is disabled. Users are managed in Azure Entra.",
+
+  const email = String(formData.get("email") ?? "").trim().toLowerCase()
+  const fullName = String(formData.get("fullName") ?? "").trim()
+  const password = String(formData.get("password") ?? "")
+  const role = String(formData.get("role") ?? "") as Role
+
+  if (!email || !password || !fullName) {
+    return { kind: "error", message: "Name, email, and password are required." }
   }
+
+  if (!ROLES.includes(role)) {
+    return { kind: "error", message: "Select a valid role." }
+  }
+
+  try {
+    const user = await getAuthService().createUserWithPassword({
+      email,
+      password,
+      emailConfirm: true,
+      userMetadata: {
+        full_name: fullName,
+        role,
+      },
+    })
+
+    await getProfileRepository().upsertProfile({
+      id: user.id,
+      email,
+      fullName,
+      role,
+    })
+  } catch (error) {
+    return {
+      kind: "error",
+      message: error instanceof Error ? error.message : "Could not create user.",
+    }
+  }
+
+  revalidatePath("/super-admin")
+
+  return { kind: "success", message: `Created ${email} as ${role}.` }
 }
 
 export async function updateUserRoleAction(
@@ -50,6 +88,8 @@ export async function updateUserRoleAction(
     return { kind: "error", message: "User profile not found." }
   }
 
+  const oldRole = profile.role
+
   try {
     await getProfileRepository().updateProfileRole(userId, role)
     await getAuthService().updateUserMetadata(userId, {
@@ -63,55 +103,21 @@ export async function updateUserRoleAction(
     }
   }
 
+  try {
+    if (oldRole) await syncRoleChannel(oldRole)
+    await syncRoleChannel(role)
+  } catch (e) { console.error("syncRoleChannel failed:", e) }
+
   revalidatePath("/super-admin")
 
   return { kind: "success", message: `Updated ${profile.email} to ${role}.` }
-}
-
-export async function removeUserAccessAction(
-  _state: ManageUserState,
-  formData: FormData,
-): Promise<ManageUserState> {
-  const context = await requireSuperAdmin()
-
-  const userId = String(formData.get("userId") ?? "")
-
-  if (!userId) {
-    return { kind: "error", message: "Missing user." }
-  }
-
-  if (userId === context.profile.id) {
-    return { kind: "error", message: "You cannot remove your own profile." }
-  }
-
-  const profile = await getProfileRepository().getProfileById(userId)
-
-  if (!profile) {
-    return { kind: "error", message: "User profile not found." }
-  }
-
-  try {
-    await getProfileRepository().deleteProfile(userId)
-  } catch (error) {
-    return {
-      kind: "error",
-      message: error instanceof Error
-        ? error.message
-        : "Could not remove user profile."
-    }
-  }
-
-  revalidatePath("/super-admin")
-  revalidatePath("/super-admin/users")
-
-  return { kind: "success", message: `Removed ${profile.email} from CourseBridge access.` }
 }
 
 export async function createUnitAction(
   _state: ManageUserState,
   formData: FormData,
 ): Promise<ManageUserState> {
-  await requireSuperAdmin()
+  await requireOrgManager()
 
   const name = String(formData.get("name") ?? "").trim()
   const type = String(formData.get("type") ?? "").trim()
@@ -131,6 +137,7 @@ export async function createUnitAction(
   }
 
   revalidatePath("/super-admin")
+  revalidatePath("/provost")
   return { kind: "success", message: `Created unit ${name}.` }
 }
 
@@ -138,7 +145,7 @@ export async function addUnitMemberAction(
   _state: ManageUserState,
   formData: FormData,
 ): Promise<ManageUserState> {
-  await requireSuperAdmin()
+  await requireOrgManager()
 
   const profileId = String(formData.get("profileId") ?? "")
   const orgUnitId = String(formData.get("orgUnitId") ?? "")
@@ -158,19 +165,37 @@ export async function addUnitMemberAction(
   }
 
   revalidatePath("/super-admin")
+  revalidatePath("/provost")
   return { kind: "success", message: "Added member to unit." }
 }
 
 export async function removeUnitMemberAction(memberId: string): Promise<void> {
-  await requireSuperAdmin()
+  await requireOrgManager()
   await getHierarchyRepository().removeMember(memberId)
   revalidatePath("/super-admin")
+  revalidatePath("/provost")
 }
 
 async function requireSuperAdmin() {
   const context = await requireProfile()
 
   if (context.profile.role !== "super_admin") {
+    redirect("/dashboard")
+  }
+
+  return context
+}
+
+// Org-chart management is shared by super_admin, provost, and admin_full
+// (institution-wide oversight). User/role management stays super_admin-only.
+async function requireOrgManager() {
+  const context = await requireProfile()
+
+  if (
+    context.profile.role !== "super_admin" &&
+    context.profile.role !== "provost" &&
+    context.profile.role !== "admin_full"
+  ) {
     redirect("/dashboard")
   }
 

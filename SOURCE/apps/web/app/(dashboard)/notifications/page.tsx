@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, MessageSquare, TriangleAlert } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, LifeBuoy, MessageSquare, TriangleAlert } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Topbar } from "@/components/layout/topbar";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,18 @@ const KIND_ICON = {
   course_action: Clock,
   issue: TriangleAlert,
   comment: MessageSquare,
+  support: LifeBuoy,
 };
+
+// Section headers for grouping "All notifications" by where each item came
+// from (its `kind`). Order here is the order the groups render in.
+const KIND_LABEL: { kind: NotificationItem["kind"]; label: string }[] = [
+  { kind: "course_action", label: "Course actions" },
+  { kind: "assignment", label: "Assignments" },
+  { kind: "issue", label: "Issues" },
+  { kind: "comment", label: "Comments" },
+  { kind: "support", label: "Support" },
+];
 
 const TONE_STYLES = {
   default: "border-border bg-card",
@@ -24,7 +35,7 @@ const TONE_STYLES = {
 };
 
 export default async function NotificationsPage() {
-  const { notifications, pendingCount } = await getNotificationsPageData();
+  const { notifications, pendingCount, error } = await getNotificationsPageData();
   const pending = notifications.filter((item) => item.pending);
   const recent = notifications.filter((item) => !item.pending);
 
@@ -33,6 +44,17 @@ export default async function NotificationsPage() {
       <Topbar title="Notifications" subtitle="Pending work, issue updates, and recent activity" />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+          {error && (
+            <div className="flex items-start gap-3 rounded-md border border-orange-400/30 bg-orange-500/5 p-4 text-sm">
+              <CircleAlert className="mt-0.5 size-4 shrink-0 text-orange-400" />
+              <div>
+                <p className="font-medium text-foreground">Couldn&apos;t load notifications</p>
+                <p className="text-muted-foreground">
+                  There was a temporary problem reaching the server. Refresh the page to try again.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="grid gap-3 sm:grid-cols-3">
             <SummaryCard label="Pending" value={pendingCount} icon={CircleAlert} emphasize />
             <SummaryCard label="All Notifications" value={notifications.length} icon={Bell} />
@@ -69,7 +91,7 @@ export default async function NotificationsPage() {
               {notifications.length === 0 ? (
                 <EmptyState title="No notifications yet" description="New assignments, open issues, and comments will appear here." />
               ) : (
-                <NotificationList items={notifications} />
+                <GroupedNotificationList items={notifications} />
               )}
             </CardContent>
           </Card>
@@ -111,6 +133,31 @@ function NotificationList({ items }: { items: NotificationItem[] }) {
       {items.map((item) => (
         <NotificationRow key={item.id} item={item} />
       ))}
+    </div>
+  );
+}
+
+// Groups notifications by `kind` (the source they came from) into labelled
+// sections. Items keep their incoming date-descending order within each group;
+// empty groups are skipped.
+function GroupedNotificationList({ items }: { items: NotificationItem[] }) {
+  return (
+    <div className="divide-y divide-border/70">
+      {KIND_LABEL.map(({ kind, label }) => {
+        const group = items.filter((item) => item.kind === kind);
+        if (group.length === 0) return null;
+        const Icon = KIND_ICON[kind];
+        return (
+          <section key={kind}>
+            <div className="flex items-center gap-2 bg-muted/30 px-4 py-2">
+              <Icon className="size-3.5 text-muted-foreground" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+              <Badge variant="outline" className="h-5 px-1.5 text-[10px]">{group.length}</Badge>
+            </div>
+            <NotificationList items={group} />
+          </section>
+        );
+      })}
     </div>
   );
 }

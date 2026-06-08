@@ -4,7 +4,7 @@ import { getCourseStatusLabel, type CourseStatus, type Role } from "@coursebridg
 import { requireProfile } from "@/lib/auth/context";
 import { getPostgresPool } from "@/lib/postgres/pool";
 
-type NotificationKind = "assignment" | "course_action" | "issue" | "comment";
+type NotificationKind = "assignment" | "course_action" | "issue" | "comment" | "support";
 type NotificationTone = "default" | "warning" | "danger" | "success";
 
 export type NotificationItem = {
@@ -39,9 +39,8 @@ type IssueRow = {
   status: "open" | "in_review" | "resolved";
   created_at: string;
   updated_at: string;
-  course_title: string | null;
-  created_by_full_name: string | null;
-  created_by_role: string | null;
+  courses: { title: string | null } | { title: string | null }[] | null;
+  created_by_profile: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
 };
 
 type CommentRow = {
@@ -50,11 +49,39 @@ type CommentRow = {
   author_id: string;
   body: string;
   created_at: string;
+  course_issues:
+    | {
+        course_id: string;
+        title: string | null;
+        courses: { title: string | null } | { title: string | null }[] | null;
+      }
+    | Array<{
+        course_id: string;
+        title: string | null;
+        courses: { title: string | null } | { title: string | null }[] | null;
+      }>
+    | null;
+  author: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
+};
+
+type SupportMessageRow = {
+  id: string;
+  sender_role: string;
+  type: "message" | "poke";
+  subject: string | null;
+  body: string;
+  status: "open" | "read" | "resolved";
+  created_at: string;
+  sender: { full_name: string | null; role: string | null } | { full_name: string | null; role: string | null }[] | null;
+};
+
+type ReassignmentRow = {
+  id: string;
   course_id: string;
-  issue_title: string | null;
-  course_title: string | null;
-  author_full_name: string | null;
-  author_role: string | null;
+  to_profile_id: string;
+  created_at: string;
+  courses: { title: string | null } | { title: string | null }[] | null;
+  to_profile: { full_name: string | null } | { full_name: string | null }[] | null;
 };
 
 const ADMIN_ROLES: readonly Role[] = ["admin_full", "admin_viewer", "super_admin"];
@@ -62,6 +89,7 @@ const STAFF_PENDING_STATUSES = new Set<CourseStatus>([
   "assigned_to_ta",
   "ta_review_in_progress",
   "admin_changes_requested",
+  "staging_in_progress",
 ]);
 const INSTRUCTOR_PENDING_STATUSES = new Set<CourseStatus>([
   "sent_to_instructor",
@@ -70,234 +98,281 @@ const INSTRUCTOR_PENDING_STATUSES = new Set<CourseStatus>([
 const ADMIN_PENDING_STATUSES = new Set<CourseStatus>([
   "course_created",
   "submitted_to_admin",
+  "waiting_on_admin",
+  "ready_for_instructor",
   "instructor_questions",
   "instructor_approved",
 ]);
 
-export async function getNotificationsPageData() {
+export type NotificationsPageData = {
+  notifications: NotificationItem[];
+  pendingCount: number;
+  role: Role;
+  /** True when the data could not be loaded (e.g. a transient Supabase/network failure). */
+  error: boolean;
+};
+
+export async function getNotificationsPageData(): Promise<NotificationsPageData> {
   const context = await requireProfile();
-  const pool = getPostgresPool();
   const role = context.profile.role;
   const isAdmin = ADMIN_ROLES.includes(role);
 
-  const accessibleCourseIds = isAdmin
-    ? null
-    : await getAssignedCourseIds(context.profile.id, role);
+  try {
+    const accessibleCourseIds = isAdmin
+      ? null
+      : await getAssignedCourseIds(context.profile.id, role);
 
-  if (accessibleCourseIds && accessibleCourseIds.length === 0) {
+    if (accessibleCourseIds && accessibleCourseIds.length === 0) {
+      return { notifications: [], pendingCount: 0, role, error: false };
+    }
+
+    const [courses, issues, comments, supportMessages, reassignments] = await Promise.all([
+      getRelevantCourses(accessibleCourseIds, role),
+      getRelevantIssues(accessibleCourseIds),
+      getRecentComments(accessibleCourseIds, context.profile.id),
+      role === "super_admin" ? getOpenSupportMessages() : Promise.resolve([]),
+      getRecentReassignments(context.profile.id, isAdmin),
+    ]);
+
+    const notifications = [
+      ...courses.map((course) => courseToNotification(course, role)),
+      ...issues.map((issue) => issueToNotification(issue, role)),
+      ...comments.map((comment) => commentToNotification(comment, role)),
+      ...supportMessages.map(supportMessageToNotification),
+      ...reassignments.map((r) => reassignmentToNotification(r, isAdmin)),
+    ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+
     return {
-      notifications: [] as NotificationItem[],
-      pendingCount: 0,
+      notifications,
+      pendingCount: notifications.filter((item) => item.pending).length,
       role,
+      error: false,
     };
+  } catch (err) {
+    // A transient Supabase/network failure ("fetch failed") should degrade to an
+    // empty state rather than crash the entire notifications page with a 500.
+    console.error("Could not load notifications page data:", err);
+    return { notifications: [], pendingCount: 0, role, error: true };
   }
-
-  const [courses, issues, comments] = await Promise.all([
-    getRelevantCourses(accessibleCourseIds, role),
-    getRelevantIssues(accessibleCourseIds),
-    getRecentComments(accessibleCourseIds, context.profile.id),
-  ]);
-
-  const notifications = [
-    ...courses.map((course) => courseToNotification(course, role)),
-    ...issues.map((issue) => issueToNotification(issue, role)),
-    ...comments.map((comment) => commentToNotification(comment, role)),
-  ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
-
-  return {
-    notifications,
-    pendingCount: notifications.filter((item) => item.pending).length,
-    role,
-  };
 
   async function getAssignedCourseIds(profileId: string, profileRole: Role) {
     const assignmentRole = profileRole === "instructor" ? "instructor" : "staff";
+    const pool = getPostgresPool();
     const { rows } = await pool.query<{ course_id: string }>(
-      `
-        SELECT course_id
-        FROM course_assignments
-        WHERE profile_id = $1
-          AND role = $2
-      `,
+      `SELECT course_id FROM course_assignments WHERE profile_id = $1 AND role = $2`,
       [profileId, assignmentRole],
     );
-
     return rows.map((row) => row.course_id);
   }
 }
 
-async function getRelevantCourses(courseIds: string[] | null, role: Role): Promise<CourseRow[]> {
+async function getRecentReassignments(
+  forProfileId: string,
+  isAdmin: boolean,
+): Promise<ReassignmentRow[]> {
   const pool = getPostgresPool();
+  const values: unknown[] = [];
+  let whereSql = "";
+  if (!isAdmin) {
+    values.push(forProfileId);
+    whereSql = `WHERE r.to_profile_id = $1`;
+  }
+  const { rows } = await pool.query<{
+    id: string;
+    course_id: string;
+    to_profile_id: string;
+    created_at: string;
+    course_title: string | null;
+    to_full_name: string | null;
+  }>(
+    `
+      SELECT r.id, r.course_id, r.to_profile_id, r.created_at,
+             c.title AS course_title, p.full_name AS to_full_name
+      FROM course_reassignments r
+      LEFT JOIN courses c ON c.id = r.course_id
+      LEFT JOIN profiles p ON p.id = r.to_profile_id
+      ${whereSql}
+      ORDER BY r.created_at DESC
+      LIMIT 50
+    `,
+    values,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    course_id: row.course_id,
+    to_profile_id: row.to_profile_id,
+    created_at: row.created_at,
+    courses: { title: row.course_title },
+    to_profile: { full_name: row.to_full_name },
+  }));
+}
+
+async function getOpenSupportMessages(): Promise<SupportMessageRow[]> {
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{
+    id: string;
+    sender_role: string;
+    type: "message" | "poke";
+    subject: string | null;
+    body: string;
+    status: "open" | "read" | "resolved";
+    created_at: string;
+    sender_full_name: string | null;
+    sender_profile_role: string | null;
+  }>(
+    `
+      SELECT s.id, s.sender_role, s.type, s.subject, s.body, s.status, s.created_at,
+             p.full_name AS sender_full_name, p.role AS sender_profile_role
+      FROM support_messages s
+      LEFT JOIN profiles p ON p.id = s.sender_profile_id
+      WHERE s.status <> 'resolved'
+      ORDER BY s.created_at DESC
+      LIMIT 50
+    `,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    sender_role: row.sender_role,
+    type: row.type,
+    subject: row.subject,
+    body: row.body,
+    status: row.status,
+    created_at: row.created_at,
+    sender: { full_name: row.sender_full_name, role: row.sender_profile_role },
+  }));
+}
+
+async function getRelevantCourses(courseIds: string[] | null, role: Role): Promise<CourseRow[]> {
   const pendingStatuses = getPendingStatuses(role);
-
-  if (pendingStatuses.length === 0) {
-    return [];
-  }
-
-  const whereClauses = ["c.status::text = ANY($1::text[])"];
-  const params: Array<string[] | string | number> = [pendingStatuses];
-
+  const pool = getPostgresPool();
+  const values: unknown[] = [pendingStatuses];
+  let courseFilter = "";
   if (courseIds) {
-    params.push(courseIds);
-    whereClauses.push(`c.id = ANY($${params.length}::uuid[])`);
+    values.push(courseIds);
+    courseFilter = `AND id = ANY($${values.length}::uuid[])`;
   }
-
   const { rows } = await pool.query<CourseRow>(
     `
-      SELECT c.id, c.title, c.term, c.department, c.status, c.updated_at
-      FROM courses c
-      WHERE ${whereClauses.join(" AND ")}
-      ORDER BY c.updated_at DESC
+      SELECT id, title, term, department, status, updated_at
+      FROM courses
+      WHERE status = ANY($1::text[]) ${courseFilter}
+      ORDER BY updated_at DESC
       LIMIT 100
     `,
-    params,
+    values,
   );
+  const courses = rows as CourseRow[];
 
-  const courses = rows;
-
-  // For submitted_to_admin courses, count how many times each was submitted
-  const submittedIds = courses
-    .filter((c) => c.status === "submitted_to_admin")
-    .map((c) => c.id);
-
+  const submittedIds = courses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id);
   if (submittedIds.length > 0) {
-    const { rows: events } = await pool.query<{ course_id: string; submission_count: string }>(
-      `
-        SELECT course_id, COUNT(*)::text AS submission_count
-        FROM course_status_events
-        WHERE course_id = ANY($1::uuid[])
-          AND to_status = 'submitted_to_admin'
-        GROUP BY course_id
-      `,
+    const { rows: events } = await pool.query<{ course_id: string }>(
+      `SELECT course_id FROM course_status_events WHERE course_id = ANY($1::uuid[]) AND to_status = 'submitted_to_admin'`,
       [submittedIds],
     );
-
     const countMap = new Map<string, number>();
-    for (const ev of events) {
-      countMap.set(ev.course_id, Number(ev.submission_count));
-    }
+    for (const ev of events) countMap.set(ev.course_id, (countMap.get(ev.course_id) ?? 0) + 1);
     for (const course of courses) {
-      if (countMap.has(course.id)) {
-        course.submission_count = countMap.get(course.id);
-      }
+      if (countMap.has(course.id)) course.submission_count = countMap.get(course.id);
     }
   }
-
   return courses;
 }
 
 async function getRelevantIssues(courseIds: string[] | null): Promise<IssueRow[]> {
   const pool = getPostgresPool();
-  if (!(await tableExists("course_issues"))) {
-    return [];
-  }
-  const params: Array<string[] | string> = [];
-  const where: string[] = [];
-
+  const values: unknown[] = [];
+  let courseFilter = "";
   if (courseIds) {
-    params.push(courseIds);
-    where.push(`i.course_id = ANY($${params.length}::uuid[])`);
+    values.push(courseIds);
+    courseFilter = `WHERE i.course_id = ANY($${values.length}::uuid[])`;
   }
-
-  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
-
-  try {
-    const { rows } = await pool.query<IssueRow>(
-      `
-        SELECT
-          i.id,
-          i.course_id,
-          i.title,
-          i.type,
-          i.severity,
-          i.status,
-          i.created_at,
-          i.updated_at,
-          c.title AS course_title,
-          p.full_name AS created_by_full_name,
-          p.role AS created_by_role
-        FROM course_issues i
-        LEFT JOIN courses c ON c.id = i.course_id
-        LEFT JOIN profiles p ON p.id = i.created_by
-        ${whereSql}
-        ORDER BY i.updated_at DESC
-        LIMIT 125
-      `,
-      params,
-    );
-
-    return rows;
-  } catch (error) {
-    if (isUndefinedTableError(error)) {
-      return [];
-    }
-    throw error;
-  }
+  const { rows } = await pool.query<{
+    id: string;
+    course_id: string;
+    title: string;
+    type: string;
+    severity: string;
+    status: "open" | "in_review" | "resolved";
+    created_at: string;
+    updated_at: string;
+    course_title: string | null;
+    cb_full_name: string | null;
+    cb_role: string | null;
+  }>(
+    `
+      SELECT i.id, i.course_id, i.title, i.type, i.severity, i.status, i.created_at, i.updated_at,
+             c.title AS course_title,
+             p.full_name AS cb_full_name, p.role AS cb_role
+      FROM course_issues i
+      LEFT JOIN courses c ON c.id = i.course_id
+      LEFT JOIN profiles p ON p.id = i.created_by
+      ${courseFilter}
+      ORDER BY i.updated_at DESC
+      LIMIT 125
+    `,
+    values,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    course_id: row.course_id,
+    title: row.title,
+    type: row.type,
+    severity: row.severity,
+    status: row.status,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    courses: { title: row.course_title },
+    created_by_profile: { full_name: row.cb_full_name, role: row.cb_role },
+  }));
 }
 
 async function getRecentComments(courseIds: string[] | null, currentUserId: string): Promise<CommentRow[]> {
   const pool = getPostgresPool();
-  const hasIssueComments = await tableExists("course_issue_comments");
-  const hasCourseIssues = await tableExists("course_issues");
-  if (!hasIssueComments || !hasCourseIssues) {
-    return [];
-  }
-  const params: Array<string[] | string> = [currentUserId];
-  const where: string[] = [
-    "cic.is_system_message = false",
-    "cic.author_id <> $1",
-  ];
-
+  const values: unknown[] = [currentUserId];
+  let courseFilter = "";
   if (courseIds) {
-    params.push(courseIds);
-    where.push(`ci.course_id = ANY($${params.length}::uuid[])`);
+    values.push(courseIds);
+    courseFilter = `AND i.course_id = ANY($${values.length}::uuid[])`;
   }
-
-  try {
-    const { rows } = await pool.query<CommentRow>(
-      `
-        SELECT
-          cic.id,
-          cic.issue_id,
-          cic.author_id,
-          cic.body,
-          cic.created_at,
-          ci.course_id,
-          ci.title AS issue_title,
-          c.title AS course_title,
-          p.full_name AS author_full_name,
-          p.role AS author_role
-        FROM course_issue_comments cic
-        INNER JOIN course_issues ci ON ci.id = cic.issue_id
-        LEFT JOIN courses c ON c.id = ci.course_id
-        LEFT JOIN profiles p ON p.id = cic.author_id
-        WHERE ${where.join(" AND ")}
-        ORDER BY cic.created_at DESC
-        LIMIT 25
-      `,
-      params,
-    );
-
-    return rows;
-  } catch (error) {
-    if (isUndefinedTableError(error)) {
-      return [];
-    }
-    throw error;
-  }
-}
-
-async function tableExists(tableName: string): Promise<boolean> {
-  const pool = getPostgresPool();
-  const { rows } = await pool.query<{ exists: string | null }>(
-    "SELECT to_regclass($1) AS exists",
-    [`public.${tableName}`],
+  const { rows } = await pool.query<{
+    id: string;
+    issue_id: string;
+    author_id: string;
+    body: string;
+    created_at: string;
+    course_id: string;
+    issue_title: string | null;
+    course_title: string | null;
+    author_full_name: string | null;
+    author_role: string | null;
+  }>(
+    `
+      SELECT c.id, c.issue_id, c.author_id, c.body, c.created_at,
+             i.course_id, i.title AS issue_title, crs.title AS course_title,
+             p.full_name AS author_full_name, p.role AS author_role
+      FROM course_issue_comments c
+      INNER JOIN course_issues i ON i.id = c.issue_id
+      LEFT JOIN courses crs ON crs.id = i.course_id
+      LEFT JOIN profiles p ON p.id = c.author_id
+      WHERE c.is_system_message = false AND c.author_id <> $1 ${courseFilter}
+      ORDER BY c.created_at DESC
+      LIMIT 25
+    `,
+    values,
   );
-  return Boolean(rows[0]?.exists);
-}
-
-function isUndefinedTableError(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "42P01";
+  return rows.map((row) => ({
+    id: row.id,
+    issue_id: row.issue_id,
+    author_id: row.author_id,
+    body: row.body,
+    created_at: row.created_at,
+    course_issues: {
+      course_id: row.course_id,
+      title: row.issue_title,
+      courses: { title: row.course_title },
+    },
+    author: { full_name: row.author_full_name, role: row.author_role },
+  }));
 }
 
 function formatAuthorName(fullName: string | null | undefined, role: string | null | undefined): string {
@@ -323,6 +398,11 @@ function courseToNotification(course: CourseRow, role: Role): NotificationItem {
     tone = "success";
   }
 
+  // ready_for_instructor is informational for everyone EXCEPT admins, who must
+  // act on it (send the finalized staging to the instructor) — so it's pending
+  // for them, in step with ADMIN_PENDING_STATUSES.
+  const adminMustSend = course.status === "ready_for_instructor" && ADMIN_ROLES.includes(role);
+
   return {
     id: `course-${course.id}-${course.status}`,
     kind: "course_action",
@@ -333,13 +413,18 @@ function courseToNotification(course: CourseRow, role: Role): NotificationItem {
     meta: [label, course.department, course.term].filter(Boolean).join(" · "),
     href: getCourseHref(course.id, role),
     createdAt: course.updated_at,
-    pending: course.status !== "final_approved" && course.status !== "instructor_approved" && course.status !== "ready_for_instructor",
+    pending:
+      adminMustSend ||
+      (course.status !== "final_approved" &&
+        course.status !== "instructor_approved" &&
+        course.status !== "ready_for_instructor"),
   };
 }
 
 function issueToNotification(issue: IssueRow, role: Role): NotificationItem {
-  const courseTitle = issue.course_title;
-  const authorName = formatAuthorName(issue.created_by_full_name, issue.created_by_role);
+  const courseTitle = firstRelation(issue.courses)?.title ?? null;
+  const authorProfile = firstRelation(issue.created_by_profile);
+  const authorName = formatAuthorName(authorProfile?.full_name, authorProfile?.role);
 
   let tone: NotificationTone = "warning";
   if (issue.status === "resolved") {
@@ -363,21 +448,64 @@ function issueToNotification(issue: IssueRow, role: Role): NotificationItem {
 }
 
 function commentToNotification(comment: CommentRow, role: Role): NotificationItem {
-  const courseTitle = comment.course_title;
-  const authorName = formatAuthorName(comment.author_full_name, comment.author_role);
+  const issue = firstRelation(comment.course_issues);
+  const courseTitle = firstRelation(issue?.courses)?.title ?? null;
+  const authorProfile = firstRelation(comment.author);
+  const authorName = formatAuthorName(authorProfile?.full_name, authorProfile?.role);
   const preview = comment.body.length > 120 ? `${comment.body.slice(0, 120)}...` : comment.body;
 
   return {
     id: `comment-${comment.id}`,
     kind: "comment",
     tone: "default",
-    title: `New comment on ${comment.issue_title ?? "an issue"}`,
+    title: `New comment on ${issue?.title ?? "an issue"}`,
     description: preview,
     courseTitle,
     meta: `By ${authorName}`,
-    href: getIssueHref(comment.course_id ?? "", role),
+    href: getIssueHref(issue?.course_id ?? "", role),
     createdAt: comment.created_at,
     pending: true,
+  };
+}
+
+function supportMessageToNotification(message: SupportMessageRow): NotificationItem {
+  const senderProfile = firstRelation(message.sender);
+  const senderName = formatAuthorName(senderProfile?.full_name, senderProfile?.role ?? message.sender_role);
+  const preview = message.body.length > 120 ? message.body.slice(0, 120) + "..." : message.body;
+  const isPoke = message.type === "poke";
+
+  return {
+    id: "support-" + message.id,
+    kind: "support",
+    tone: isPoke ? "warning" : "default",
+    title: isPoke ? "IT support poke" : message.subject ?? "New support message",
+    description: isPoke ? senderName + " poked IT support." : preview,
+    courseTitle: null,
+    meta: "By " + senderName + " · " + formatIssueStatus(message.status),
+    href: "/notifications",
+    createdAt: message.created_at,
+    pending: message.status !== "resolved",
+  };
+}
+
+function reassignmentToNotification(row: ReassignmentRow, viewerIsAdmin: boolean): NotificationItem {
+  const courseTitle = firstRelation(row.courses)?.title ?? null;
+  const toName = firstRelation(row.to_profile)?.full_name ?? "a TA";
+  return {
+    id: `reassign-${row.id}`,
+    kind: "assignment",
+    tone: viewerIsAdmin ? "default" : "success",
+    title: viewerIsAdmin
+      ? `Course reassigned to ${toName}`
+      : `You've been assigned ${courseTitle ?? "a course"}`,
+    description: viewerIsAdmin
+      ? `${courseTitle ?? "A course"} was reassigned to ${toName}.`
+      : `${courseTitle ?? "A course"} was reassigned to you. Open it when you're ready.`,
+    courseTitle,
+    meta: "Reassignment",
+    href: viewerIsAdmin ? `/admin/courses/${row.course_id}` : `/courses/${row.course_id}/metadata`,
+    createdAt: row.created_at,
+    pending: !viewerIsAdmin, // actionable for the new TA, informational for admins
   };
 }
 
@@ -396,6 +524,7 @@ function getCourseActionLabel(status: CourseStatus, role: Role, submissionCount?
       : "Course is ready for admin review";
   }
   if (status === "instructor_approved") return "Course is ready for final approval";
+  if (status === "ready_for_instructor") return "Staging finalized — send to instructor";
   if (status === "sent_to_instructor") return "Course is waiting for instructor review";
   if (status === "instructor_questions") return role === "instructor" ? "Questions need follow-up" : "Instructor questions need review";
   if (status === "admin_changes_requested") return "Changes were requested";
@@ -426,3 +555,7 @@ function formatIssueStatus(status: string) {
   return status.replace(/_/g, " ");
 }
 
+function firstRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
+}

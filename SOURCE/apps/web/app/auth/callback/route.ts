@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get("next") ?? "/dashboard";
 
   if (code) {
+    // Supabase Auth ignores `state`; Azure OIDC validates it against the cookie.
     await getAuthService().exchangeCodeForSession(code, state);
   }
 
