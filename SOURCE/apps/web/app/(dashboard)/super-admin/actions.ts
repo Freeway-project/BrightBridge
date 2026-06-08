@@ -6,6 +6,8 @@ import { ROLES, type Role } from "@coursebridge/workflow"
 import { getAuthService } from "@/lib/auth/service"
 import { requireProfile } from "@/lib/auth/context"
 import { getProfileRepository, getHierarchyRepository } from "@/lib/repositories"
+import { getPaginatedAuditEvents } from "@/lib/super-admin/queries"
+import type { PaginatedResult, AuditEvent } from "@/lib/repositories/contracts"
 import { syncRoleChannel } from "@/lib/chat/membership"
 
 export type ManageUserState = {
@@ -174,6 +176,16 @@ export async function removeUnitMemberAction(memberId: string): Promise<void> {
   await getHierarchyRepository().removeMember(memberId)
   revalidatePath("/super-admin")
   revalidatePath("/provost")
+}
+
+// Fetches one page of audit events for the Audit Trail's infinite scroll.
+// Gated to super_admin like the rest of this panel.
+export async function loadMoreAuditEvents(
+  page: number,
+  pageSize: number,
+): Promise<PaginatedResult<AuditEvent>> {
+  await requireSuperAdmin()
+  return getPaginatedAuditEvents(page, pageSize)
 }
 
 async function requireSuperAdmin() {

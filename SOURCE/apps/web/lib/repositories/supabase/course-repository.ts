@@ -49,6 +49,43 @@ function firstRelation<T>(value: T | T[] | null | undefined): T | null {
   return value ?? null;
 }
 
+const AUDIT_EVENT_SELECT = `
+  id, from_status, to_status, note, created_at, actor_role,
+  courses ( id, title ),
+  profiles!course_status_events_actor_id_fkey ( full_name, email )
+`;
+
+function mapAuditEventRow(row: unknown): AuditEvent {
+  const event = row as {
+    id: string;
+    from_status: string | null;
+    to_status: string;
+    note: string | null;
+    created_at: string;
+    actor_role: string;
+    courses?: { id: string; title: string } | Array<{ id: string; title: string }> | null;
+    profiles?:
+      | { full_name: string | null; email: string }
+      | Array<{ full_name: string | null; email: string }>
+      | null;
+  };
+  const relatedCourse = firstRelation(event.courses);
+  const actorProfile = firstRelation(event.profiles);
+
+  return {
+    id: event.id,
+    course_id: relatedCourse?.id ?? "",
+    course_title: relatedCourse?.title ?? "—",
+    from_status: event.from_status,
+    to_status: event.to_status,
+    actor_name: actorProfile?.full_name ?? null,
+    actor_email: actorProfile?.email ?? "",
+    actor_role: event.actor_role,
+    note: event.note,
+    created_at: event.created_at,
+  } satisfies AuditEvent;
+}
+
 export function createSupabaseCourseRepository(): CourseRepository {
   return {
     async listAccessibleCourses() {
@@ -599,11 +636,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("course_status_events")
-        .select(`
-          id, from_status, to_status, note, created_at, actor_role,
-          courses ( id, title ),
-          profiles!course_status_events_actor_id_fkey ( full_name, email )
-        `)
+        .select(AUDIT_EVENT_SELECT)
         .order("created_at", { ascending: false })
         .limit(limit);
 
@@ -611,36 +644,33 @@ export function createSupabaseCourseRepository(): CourseRepository {
         throw new Error(`audit: ${error.message}`);
       }
 
-      return (data ?? []).map((row) => {
-        const event = row as unknown as {
-          id: string;
-          from_status: string | null;
-          to_status: string;
-          note: string | null;
-          created_at: string;
-          actor_role: string;
-          courses?: { id: string; title: string } | Array<{ id: string; title: string }> | null;
-          profiles?:
-            | { full_name: string | null; email: string }
-            | Array<{ full_name: string | null; email: string }>
-            | null;
-        };
-        const relatedCourse = firstRelation(event.courses);
-        const actorProfile = firstRelation(event.profiles);
+      return (data ?? []).map(mapAuditEventRow);
+    },
 
-        return {
-          id: event.id,
-          course_id: relatedCourse?.id ?? "",
-          course_title: relatedCourse?.title ?? "—",
-          from_status: event.from_status,
-          to_status: event.to_status,
-          actor_name: actorProfile?.full_name ?? null,
-          actor_email: actorProfile?.email ?? "",
-          actor_role: event.actor_role,
-          note: event.note,
-          created_at: event.created_at,
-        } satisfies AuditEvent;
-      });
+    async listAuditEventsPage(page, pageSize) {
+      const admin = getSupabaseAdminClientOrThrow();
+      const safePage = Math.max(1, Math.floor(page));
+      const from = (safePage - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await admin
+        .from("course_status_events")
+        .select(AUDIT_EVENT_SELECT, { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        throw new Error(`audit: ${error.message}`);
+      }
+
+      const total = count ?? 0;
+      return {
+        data: (data ?? []).map(mapAuditEventRow),
+        total,
+        page: safePage,
+        pageSize,
+        totalPages: Math.max(1, Math.ceil(total / pageSize)),
+      };
     },
 
     async listCourseStatusEvents(courseId) {

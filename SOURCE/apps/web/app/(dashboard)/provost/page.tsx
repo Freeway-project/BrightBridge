@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
 import { ProvostDashboard } from "@/components/provost/provost-dashboard"
-import { getSuperAdminData } from "@/lib/super-admin/queries"
+import { getSuperAdminData, getPaginatedAuditEvents } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 
 // Provost = institution-wide oversight. Sees every college, dean, department,
@@ -19,12 +19,15 @@ export default async function ProvostOverviewPage() {
     redirect("/dashboard")
   }
 
-  const data = await getSuperAdminData()
+  const [data, auditInitial] = await Promise.all([
+    getSuperAdminData(),
+    getPaginatedAuditEvents(1, 30),
+  ])
 
   return (
     <>
       <Topbar title="Provost Overview" subtitle="Institution-wide review status" />
-      <ProvostDashboard data={data} provostName={context.profile.fullName} />
+      <ProvostDashboard data={data} auditInitial={auditInitial} provostName={context.profile.fullName} />
     </>
   )
 }

@@ -139,6 +139,52 @@ function nonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
 
+type AuditEventQueryRow = {
+  id: string;
+  from_status: string | null;
+  to_status: string;
+  note: string | null;
+  created_at: string;
+  actor_role: string;
+  course_id: string;
+  course_title: string | null;
+  actor_name: string | null;
+  actor_email: string | null;
+};
+
+// Shared SELECT/JOINs for audit events (newest-first ordering applied by callers).
+const AUDIT_EVENT_FROM_SQL = `
+  SELECT
+    e.id,
+    e.from_status,
+    e.to_status,
+    e.note,
+    e.created_at,
+    e.actor_role,
+    c.id AS course_id,
+    c.title AS course_title,
+    p.full_name AS actor_name,
+    p.email AS actor_email
+  FROM course_status_events e
+  LEFT JOIN courses c ON c.id = e.course_id
+  LEFT JOIN profiles p ON p.id = e.actor_id
+`;
+
+function mapAuditEventRow(row: AuditEventQueryRow): AuditEvent {
+  return {
+    id: row.id,
+    course_id: row.course_id,
+    course_title: row.course_title ?? "—",
+    from_status: row.from_status,
+    to_status: row.to_status,
+    actor_name: row.actor_name,
+    actor_email: row.actor_email ?? "",
+    actor_role: row.actor_role,
+    note: row.note,
+    created_at: row.created_at,
+  };
+}
+
 export function createPostgresCourseRepository(): CourseRepository {
   return {
     async listAccessibleCourses() {
@@ -667,51 +713,37 @@ export function createPostgresCourseRepository(): CourseRepository {
 
     async listAuditEvents(limit) {
       const pool = getPostgresPool();
-      const { rows } = await pool.query<{
-        id: string;
-        from_status: string | null;
-        to_status: string;
-        note: string | null;
-        created_at: string;
-        actor_role: string;
-        course_id: string;
-        course_title: string;
-        actor_name: string | null;
-        actor_email: string | null;
-      }>(
-        `
-          SELECT
-            e.id,
-            e.from_status,
-            e.to_status,
-            e.note,
-            e.created_at,
-            e.actor_role,
-            c.id AS course_id,
-            c.title AS course_title,
-            p.full_name AS actor_name,
-            p.email AS actor_email
-          FROM course_status_events e
-          LEFT JOIN courses c ON c.id = e.course_id
-          LEFT JOIN profiles p ON p.id = e.actor_id
-          ORDER BY e.created_at DESC
-          LIMIT $1
-        `,
+      const { rows } = await pool.query<AuditEventQueryRow>(
+        `${AUDIT_EVENT_FROM_SQL} ORDER BY e.created_at DESC LIMIT $1`,
         [limit],
       );
 
-      return rows.map((row) => ({
-        id: row.id,
-        course_id: row.course_id,
-        course_title: row.course_title ?? "—",
-        from_status: row.from_status,
-        to_status: row.to_status,
-        actor_name: row.actor_name,
-        actor_email: row.actor_email ?? "",
-        actor_role: row.actor_role,
-        note: row.note,
-        created_at: row.created_at,
-      })) satisfies AuditEvent[];
+      return rows.map(mapAuditEventRow);
+    },
+
+    async listAuditEventsPage(page, pageSize) {
+      const pool = getPostgresPool();
+      const safePage = Math.max(1, Math.floor(page));
+      const offset = (safePage - 1) * pageSize;
+
+      const [countResult, pageResult] = await Promise.all([
+        pool.query<{ total: string }>(
+          `SELECT COUNT(*)::text AS total FROM course_status_events`,
+        ),
+        pool.query<AuditEventQueryRow>(
+          `${AUDIT_EVENT_FROM_SQL} ORDER BY e.created_at DESC LIMIT $1 OFFSET $2`,
+          [pageSize, offset],
+        ),
+      ]);
+
+      const total = Number(countResult.rows[0]?.total ?? "0");
+      return {
+        data: pageResult.rows.map(mapAuditEventRow),
+        total,
+        page: safePage,
+        pageSize,
+        totalPages: Math.max(1, Math.ceil(total / pageSize)),
+      };
     },
 
     async listCourseStatusEvents(courseId) {
