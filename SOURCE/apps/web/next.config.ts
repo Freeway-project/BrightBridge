@@ -2,10 +2,6 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Lets the deploy build into a staging dir (.next-build) and atomically swap
-  // it into place, so the running server never serves against a half-built
-  // .next. deploy.sh sets NEXT_DIST_DIR; everywhere else this is plain ".next".
-  distDir: process.env.NEXT_DIST_DIR || ".next",
   transpilePackages: ["@coursebridge/ui", "@coursebridge/workflow"],
   async headers() {
     return [

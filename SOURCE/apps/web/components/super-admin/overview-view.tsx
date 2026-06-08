@@ -1,34 +1,68 @@
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
+import { StatusBadge } from "@/components/courses/status-badge"
 import { StatCard } from "@/components/shared/stat-card"
-import { PhaseBreakdown } from "@/components/admin/stats/phase-breakdown"
-import { getPhaseBreakdown, type CourseStatus } from "@coursebridge/workflow"
+import { type CourseStatus } from "@coursebridge/workflow"
 import type { SuperAdminData } from "@/lib/super-admin/queries"
+
+const STATUS_ORDER: CourseStatus[] = [
+  "course_created", "assigned_to_ta", "ta_review_in_progress",
+  "submitted_to_admin", "admin_changes_requested", "ready_for_instructor",
+  "sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved",
+]
 
 export function OverviewView({ data }: { data: SuperAdminData }) {
   const { totalCourses, statusCounts, taWorkload } = data
 
-  const countByStatus: Partial<Record<CourseStatus, number>> =
-    Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
-
+  const countByStatus = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
+  
+  const inProgress = 
+    (countByStatus["assigned_to_ta"] ?? 0) + 
+    (countByStatus["ta_review_in_progress"] ?? 0) + 
+    (countByStatus["admin_changes_requested"] ?? 0)
+    
+  const pendingAdmin = 
+    (countByStatus["submitted_to_admin"] ?? 0) + 
+    (countByStatus["ready_for_instructor"] ?? 0) + 
+    (countByStatus["instructor_approved"] ?? 0)
+    
+  const withInstructor = 
+    (countByStatus["sent_to_instructor"] ?? 0) + 
+    (countByStatus["instructor_questions"] ?? 0)
+    
   const completed = countByStatus["final_approved"] ?? 0
-  const completedPct = totalCourses > 0 ? Math.round((completed / totalCourses) * 100) : 0
-  const breakdown = getPhaseBreakdown(countByStatus)
 
   return (
     <div className="min-w-0 flex-1 space-y-8 overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
-      <div className="grid grid-cols-2 gap-6 max-w-md">
-        <StatCard label="Total Courses" value={totalCourses} icon="book-open" />
-        <StatCard label="Completed" value={completed} icon="check-square" sub={`${completedPct}% of total`} />
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <StatCard label="Total Courses"    value={totalCourses}    icon="book-open" />
+        <StatCard label="Staff In Progress"   value={inProgress}      icon="clock" />
+        <StatCard label="Pending Admin"    value={pendingAdmin}    icon="check-square" />
+        <StatCard label="With Instructor"  value={withInstructor}  icon="book-open" />
+        <StatCard label="Provision"        value={completed}       icon="check-square" />
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-1">
-          <PhaseBreakdown breakdown={breakdown} />
-        </div>
+        <Card className="lg:col-span-1 shadow-sm border-border/60">
+          <CardHeader className="pb-3 px-4 pt-4">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 space-y-3">
+            {STATUS_ORDER.map((status) => {
+              const count = countByStatus[status] ?? 0
+              if (count === 0) return null
+              return (
+                <div key={status} className="flex items-center justify-between">
+                  <StatusBadge status={status} />
+                  <span className="text-sm font-medium tabular-nums">{count}</span>
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
 
         <Card className="lg:col-span-2 shadow-sm border-border/60">
           <CardHeader className="pb-3 px-4 pt-4">

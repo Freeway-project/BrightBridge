@@ -1,12 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import {
-  AutoUpdateOverlay,
-  UpdateAppliedOverlay,
-  UpdateAvailablePill,
-} from "./deployment-notification"
+import { useEffect, useRef, useState } from "react"
+import { AutoUpdateOverlay, UpdateAppliedOverlay } from "./deployment-notification"
 import { AnimatePresence } from "motion/react"
+import { usePathname } from "next/navigation"
 
 interface DeploymentDetectorProps {
   initialVersion: string
@@ -16,21 +13,10 @@ const CHECK_INTERVAL = 1000 * 60 * 3 // 3 minutes
 const UPDATE_APPLIED_FLAG = "coursebridge:update-applied"
 
 export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) {
-  // A new build is available. Drives the persistent Refresh pill.
-  const [showUpdateAvailable, setShowUpdateAvailable] = useState(false)
-  // Brief, non-blocking meteor burst played once when the update is detected.
-  const [showMeteorBurst, setShowMeteorBurst] = useState(false)
-  // Post-reload celebratory meteors, shown after the user refreshed.
+  const pathname = usePathname()
+  const [showAutoUpdate, setShowAutoUpdate] = useState(false)
   const [showUpdatedOverlay, setShowUpdatedOverlay] = useState(false)
   const updatePending = useRef(false)
-
-  // Reload is user-initiated only — triggered from the pill's Refresh button.
-  const applyUpdate = useCallback(() => {
-    if (typeof window !== "undefined") {
-      window.sessionStorage.setItem(UPDATE_APPLIED_FLAG, "1")
-    }
-    window.location.reload()
-  }, [])
 
   // 1. Check if we just refreshed after an update
   useEffect(() => {
@@ -42,24 +28,23 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
 
   // 2. Listen for version changes
   useEffect(() => {
+    if (pathname.startsWith("/auth") || pathname.startsWith("/maintenance")) {
+      return
+    }
+
     if (initialVersion === "development" || initialVersion === "dev") return
 
     const triggerUpdate = () => {
       if (updatePending.current) return
       updatePending.current = true
 
-      const reveal = () => {
-        setShowUpdateAvailable(true)
-        setShowMeteorBurst(true)
-      }
-
-      // Only reveal while the user is actively watching the tab.
+      // Only trigger the bubble animation if the user is actively watching the tab
       if (document.visibilityState === "visible") {
-        reveal()
+        setShowAutoUpdate(true)
       } else {
         const onVisible = () => {
           if (document.visibilityState === "visible") {
-            reveal()
+            setShowAutoUpdate(true)
             document.removeEventListener("visibilitychange", onVisible)
           }
         }
@@ -81,32 +66,49 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       }
     }
 
-    // Use a robust reconnecting SSE or aggressive fallback when disconnected
-    let es: EventSource | null = new EventSource("/api/version/stream")
-
-    es.onmessage = (e) => {
+    // Preflight prevents noisy console errors when middleware redirects stream requests.
+    let es: EventSource | null = null
+    const initStream = async () => {
       try {
-        const data = JSON.parse(e.data)
-        if (data.version && data.version !== initialVersion && data.version !== "development") {
-          triggerUpdate()
-          if (es) {
-            es.close()
-            es = null
+        const res = await fetch("/api/version/stream", {
+          cache: "no-store",
+          redirect: "follow",
+        })
+        const contentType = (res.headers.get("content-type") ?? "").toLowerCase()
+        if (!res.ok || !contentType.includes("text/event-stream")) {
+          return
+        }
+
+        es = new EventSource("/api/version/stream")
+
+        es.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data)
+            if (data.version && data.version !== initialVersion && data.version !== "development") {
+              triggerUpdate()
+              if (es) {
+                es.close()
+                es = null
+              }
+            }
+          } catch {
+            // Ignore malformed frames
           }
         }
+
+        es.onerror = () => {
+          // The server likely just went down for a restart.
+          // Browser auto-reconnect handles most cases; keep polling as backup.
+          setTimeout(() => void checkVersion(), 4000)
+          setTimeout(() => void checkVersion(), 10000)
+          setTimeout(() => void checkVersion(), 20000)
+        }
       } catch {
-        // Ignore malformed frames
+        // Ignore stream bootstrap failures.
       }
     }
 
-    es.onerror = () => {
-      // The server likely just went down for a PM2 restart.
-      // We do NOT close the EventSource, so the browser will auto-reconnect!
-      // But we also manually check a few times while it's restarting to be safe.
-      setTimeout(() => void checkVersion(), 4000)
-      setTimeout(() => void checkVersion(), 10000)
-      setTimeout(() => void checkVersion(), 20000)
-    }
+    void initStream()
 
     const interval = setInterval(() => void checkVersion(), CHECK_INTERVAL)
 
@@ -123,7 +125,7 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     window.addEventListener("error", handleChunkError)
 
     // For local testing: run `window.__triggerUpdate()` in the browser console
-    ;(window as any).__triggerUpdate = triggerUpdate
+    ;(window as any).__triggerUpdate = triggerUpdate;
 
     return () => {
       if (es) {
@@ -132,26 +134,23 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       clearInterval(interval)
       window.removeEventListener("error", handleChunkError)
     }
-  }, [initialVersion])
+  }, [initialVersion, pathname])
 
   return (
     <>
-      {/* Non-blocking meteor burst (plays once, then self-removes) */}
       <AnimatePresence>
-        {showMeteorBurst && <AutoUpdateOverlay onDone={() => setShowMeteorBurst(false)} />}
-      </AnimatePresence>
-
-      {/* Persistent, dismissible Refresh pill — the only interactive piece */}
-      <AnimatePresence>
-        {showUpdateAvailable && (
-          <UpdateAvailablePill
-            onRefresh={applyUpdate}
-            onDismiss={() => setShowUpdateAvailable(false)}
+        {showAutoUpdate && (
+          <AutoUpdateOverlay
+            onDone={() => {
+              if (typeof window !== "undefined") {
+                window.sessionStorage.setItem(UPDATE_APPLIED_FLAG, "1")
+              }
+              window.location.reload()
+            }}
           />
         )}
       </AnimatePresence>
 
-      {/* Post-reload celebratory meteors */}
       <AnimatePresence>
         {showUpdatedOverlay && (
           <UpdateAppliedOverlay

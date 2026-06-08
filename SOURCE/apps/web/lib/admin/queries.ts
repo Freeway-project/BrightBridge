@@ -33,7 +33,6 @@ export type AdminCoursesPageParams = {
   pageSize?: number
   search?: string
   status?: CourseStatus
-  statuses?: readonly CourseStatus[]
   taProfileId?: string
   assignedOnly?: boolean
 }
@@ -78,7 +77,6 @@ export async function getAdminCoursesPage(
   const pageResult = await getCourseRepository().listAdminCoursesPage(params.page, params.pageSize, {
     search: params.search,
     status: params.status,
-    statuses: params.statuses,
     taProfileId: params.taProfileId,
     assignedOnly: params.assignedOnly,
   })

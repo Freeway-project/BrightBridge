@@ -5,8 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 export type ThemeId = "blush" | "ocean" | "sunset" | "monochrome" | "aurora"
 
 type TweakSettings = {
-  fontSize: "small" | "medium" | "large" | "xl" | "xxl"
-  spacing: "compact" | "normal" | "spacious"
+  fontSize: "small" | "medium" | "large"
   theme: ThemeId
 }
 
@@ -24,19 +23,10 @@ const FONT_SIZE_MAP: Record<TweakSettings["fontSize"], string> = {
   small: "14px",
   medium: "16px",
   large: "18px",
-  xl: "20px",
-  xxl: "23px",
-}
-
-const SPACING_MAP: Record<TweakSettings["spacing"], { cardSpacing: string; leading: string }> = {
-  compact: { cardSpacing: "1rem", leading: "1.45" },
-  normal: { cardSpacing: "1.5rem", leading: "1.65" },
-  spacious: { cardSpacing: "2rem", leading: "1.85" },
 }
 
 const DEFAULT_SETTINGS: TweakSettings = {
   fontSize: "medium",
-  spacing: "normal",
   theme: "ocean",
 }
 
@@ -76,9 +66,6 @@ export function TweakProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const root = document.documentElement
     root.style.setProperty("--base-font-size", FONT_SIZE_MAP[settings.fontSize])
-    const spacing = SPACING_MAP[settings.spacing] ?? SPACING_MAP.normal
-    root.style.setProperty("--card-spacing", spacing.cardSpacing)
-    root.style.setProperty("--reading-leading", spacing.leading)
     root.setAttribute("data-theme", settings.theme)
   }, [settings])
 

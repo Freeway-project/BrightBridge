@@ -12,11 +12,7 @@ for var_name in $(env | awk -F= '/_FILE=/{print $1}'); do
   export "$target_var_name=$target_var_value"
 done
 
-# Run CourseBridge test migrations first so missing additive tables are
-# created even on pre-existing schemas.
-node scripts/run-coursebridge-test-migrations.mjs
-
-# Then run the generic migration bootstrap before starting the application.
+# Run database migrations before starting the application.
 node scripts/db-migrate-all.mjs
 
 exec "$@"

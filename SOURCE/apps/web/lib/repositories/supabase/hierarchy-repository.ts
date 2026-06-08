@@ -88,32 +88,39 @@ export function createSupabaseHierarchyRepository(): HierarchyRepository {
     async hasHierarchyAccess(profileId, courseId) {
       const admin = getSupabaseAdminClientOrThrow();
 
-      // The course must live in an org unit.
-      const { data: course, error: courseError } = await admin
-        .from("courses")
-        .select("org_unit_id")
-        .eq("id", courseId)
-        .single();
+      // Check if user is a member of an org unit that is an ancestor of the course's org unit
+      // This uses the flattened org_unit_hierarchy_paths view
+      const { data, error } = await admin.rpc("check_hierarchy_access", {
+        p_profile_id: profileId,
+        p_course_id: courseId,
+      });
 
-      if (courseError || !course?.org_unit_id) return false;
+      if (error) {
+        // Fallback to manual check if RPC is not yet created
+        const { data: access, error: accessError } = await admin
+          .from("courses")
+          .select(`
+            org_unit_id,
+            organizational_units!courses_org_unit_id_fkey (
+              org_unit_hierarchy_paths!org_unit_hierarchy_paths_descendant_id_fkey (
+                ancestor_id
+              )
+            )
+          `)
+          .eq("id", courseId)
+          .single();
 
-      // The user must belong to at least one org unit.
-      const userUnits = await this.getUserUnits(profileId);
-      const userUnitIds = userUnits.map((u) => u.orgUnitId);
-      if (!userUnitIds.length) return false;
+        if (accessError || !access.org_unit_id) return false;
 
-      // Access if any of the user's units is an ancestor of (or equal to) the
-      // course's unit. org_unit_hierarchy_paths is a VIEW, so we query it
-      // directly rather than embedding it through a foreign key.
-      const { data: paths, error: pathError } = await admin
-        .from("org_unit_hierarchy_paths")
-        .select("ancestor_id")
-        .eq("descendant_id", course.org_unit_id)
-        .in("ancestor_id", userUnitIds)
-        .limit(1);
+        const userUnits = await this.getUserUnits(profileId);
+        const userUnitIds = userUnits.map((u) => u.orgUnitId);
 
-      if (pathError) return false;
-      return (paths ?? []).length > 0;
+        // Check if any of user's unit IDs are ancestors of course's unit
+        const ancestors = (access.organizational_units as any)?.org_unit_hierarchy_paths ?? [];
+        return ancestors.some((p: any) => userUnitIds.includes(p.ancestor_id));
+      }
+
+      return Boolean(data);
     },
 
     async createUnit(input) {

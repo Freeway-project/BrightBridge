@@ -1,5 +1,4 @@
 "use client";
-import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, Search, UserPlus } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, Search, UserPlus } from "lucide-react";
 import { createInstructorAndAssignAction, searchCoursesForInstructorAction, type AssignTaState } from "../actions";
 
 type AssignableCourse = {
@@ -216,7 +215,7 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
                         className="h-10 pl-9 pr-8"
                       />
                       {isSearching ? (
-                        <LottieLoader className="absolute right-2 top-1/2 -translate-y-1/2 size-4  text-muted-foreground" />
+                        <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />
                       ) : courseSearch ? (
                         <button
                           type="button"
@@ -275,7 +274,7 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
             <Button className="h-10 w-full sm:w-auto" disabled={!canSubmit} type="submit">
               {pending ? (
                 <>
-                  <LottieLoader className="mr-2 size-4 " />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   Creating...
                 </>
               ) : (

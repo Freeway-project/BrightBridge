@@ -22,7 +22,10 @@ export async function DevRoleSwitcher() {
     return null;
   }
 
-  const profile = await getProfileRepository().getProfileById(user.id);
+  const profileRepository = getProfileRepository();
+  const profile =
+    (await profileRepository.getProfileById(user.id)) ??
+    (user.email ? await profileRepository.getProfileByEmail(user.email) : null);
   const currentRole = profile?.role as Role | undefined;
 
   return (

@@ -49,22 +49,16 @@ WHERE NOT EXISTS (
 
 -- 8. Create Pharmacy Technician Department under Business (primary)
 INSERT INTO public.organizational_units (name, type, parent_id)
-SELECT 'Pharmacy Technician Department', 'department', s.id
-FROM public.organizational_units s
-WHERE s.name = 'Hall School of Business and Entrepreneurship' AND s.type = 'school'
-  AND NOT EXISTS (
-    SELECT 1 FROM public.organizational_units d
-    WHERE d.name = 'Pharmacy Technician Department' AND d.type = 'department' AND d.parent_id = s.id
-  );
+VALUES (
+  'Pharmacy Technician Department', 'department',
+  (SELECT id FROM public.organizational_units WHERE name = 'Hall School of Business and Entrepreneurship' AND type = 'school')
+);
 
 -- 9. Create Pharmacy Technician Department under Trades (dual listing)
 INSERT INTO public.organizational_units (name, type, parent_id)
-SELECT 'Pharmacy Technician Department', 'department', s.id
-FROM public.organizational_units s
-WHERE s.name = 'Trades & Apprenticeship' AND s.type = 'school'
-  AND NOT EXISTS (
-    SELECT 1 FROM public.organizational_units d
-    WHERE d.name = 'Pharmacy Technician Department' AND d.type = 'department' AND d.parent_id = s.id
-  );
+VALUES (
+  'Pharmacy Technician Department', 'department',
+  (SELECT id FROM public.organizational_units WHERE name = 'Trades & Apprenticeship' AND type = 'school')
+);
 
 COMMIT;

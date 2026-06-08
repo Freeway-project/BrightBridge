@@ -3,8 +3,14 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import type { StatusCount } from "@/lib/repositories/contracts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getPhaseBreakdown, type CourseStatus } from "@coursebridge/workflow"
-import { PHASE_COLOR } from "./phase-colors"
+
+const STAGE_GROUPS = [
+  { label: "Created",    statuses: ["course_created", "assigned_to_ta"],                                                    color: "#64748b" },
+  { label: "TA Review",  statuses: ["ta_review_in_progress", "submitted_to_admin", "admin_changes_requested"],              color: "#3b82f6" },
+  { label: "Admin",      statuses: ["ready_for_instructor"],                                                                color: "#8b5cf6" },
+  { label: "Instructor", statuses: ["sent_to_instructor", "instructor_questions", "instructor_approved"],                   color: "#f59e0b" },
+  { label: "Approved",   statuses: ["final_approved"],                                                                      color: "#10b981" },
+]
 
 interface Props {
   statusCounts: StatusCount[]
@@ -27,11 +33,14 @@ function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, count, total }: 
 }
 
 export function StatusPieChart({ statusCounts, totalCourses }: Props) {
-  const countByStatus: Partial<Record<CourseStatus, number>> =
-    Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
+  const countMap = Object.fromEntries(statusCounts.map((s) => [s.status, s.count]))
 
-  const data = getPhaseBreakdown(countByStatus)
-    .map((p) => ({ name: p.label, count: p.total, color: PHASE_COLOR[p.key] }))
+  const data = STAGE_GROUPS
+    .map((g) => ({
+      name: g.label,
+      count: g.statuses.reduce((sum, s) => sum + (countMap[s] ?? 0), 0),
+      color: g.color,
+    }))
     .filter((d) => d.count > 0)
 
   if (data.length === 0) {

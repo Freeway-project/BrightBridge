@@ -1,12 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { OIDC_NEXT_COOKIE, OIDC_NONCE_COOKIE, OIDC_STATE_COOKIE, getAzureOidcConfigOrThrow, isAzureOidcEnabled } from "@/lib/auth/service";
-
-function safeNext(raw: string | null): string {
-  if (!raw) return "/dashboard";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
-  return raw;
-}
+import { OIDC_NONCE_COOKIE, OIDC_STATE_COOKIE, getAzureOidcConfigOrThrow, isAzureOidcEnabled } from "@/lib/auth/service";
 
 export async function GET(request: NextRequest) {
   if (!isAzureOidcEnabled()) {
@@ -24,7 +18,6 @@ export async function GET(request: NextRequest) {
 
   const state = randomUUID();
   const nonce = randomUUID();
-  const nextPath = safeNext(request.nextUrl.searchParams.get("next"));
 
   const authUrl = new URL(authorizationEndpoint);
   authUrl.searchParams.set("client_id", config.clientId);
@@ -36,16 +29,20 @@ export async function GET(request: NextRequest) {
   authUrl.searchParams.set("nonce", nonce);
 
   const response = NextResponse.redirect(authUrl);
-  const cookieOpts = {
+  response.cookies.set(OIDC_STATE_COOKIE, state, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax" as const,
+    sameSite: "lax",
     path: "/",
     maxAge: 10 * 60,
-  };
-  response.cookies.set(OIDC_STATE_COOKIE, state, cookieOpts);
-  response.cookies.set(OIDC_NONCE_COOKIE, nonce, cookieOpts);
-  response.cookies.set(OIDC_NEXT_COOKIE, nextPath, cookieOpts);
+  });
+  response.cookies.set(OIDC_NONCE_COOKIE, nonce, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 10 * 60,
+  });
 
   return response;
 }

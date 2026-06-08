@@ -2,15 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { LogOut, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
 import { signOut } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
-import { SupportMessageDialog } from "./support-message-dialog"
-import Lottie from "lottie-react"
-import aiAnimationData from "@/assets/3c6d4dc5-50cf-45ba-9775-ab665ca5923d.json"
+import { UpdateStatusTab } from "./update-status-tab"
+import { useMemeModal } from "@/components/providers/meme-provider"
 import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
 import {
   Sidebar,
@@ -56,12 +55,29 @@ function BrandLogo() {
   )
 }
 
+const CREATIVE_MESSAGES = [
+  "Hey click!",
+  "Why so serious?",
+  "Time to dance! 💃",
+  "Laugh time! 🎉",
+  "Click me! 🚀",
+  "Smile break 😊",
+  "Fun incoming! ✨",
+  "Brighten up! 🌟",
+  "Quote time! ✨",
+  "Stay grounded! 🌿",
+  "Click for joy! 🎪",
+  "Break time! 🎭",
+]
+
 export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) {
   const pathname = usePathname()
   const items = NAV_ITEMS[role]
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
-  const canPokeSupport = role === "standard_user" || role === "admin_full"
+  const { openMemeModal } = useMemeModal()
+  const isTaOrStaff = role === "standard_user"
+  const randomMessage = CREATIVE_MESSAGES[Math.floor(Math.random() * CREATIVE_MESSAGES.length)]
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/50 backdrop-blur-xl">
@@ -107,10 +123,37 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {!collapsed && (role === "admin_full" || role === "standard_user") && (
-          <div className="mt-auto mb-4 px-4 flex justify-center">
-            <Lottie animationData={aiAnimationData} loop={true} className="w-full max-w-[120px]" />
-          </div>
+        {isTaOrStaff && (
+          <SidebarGroup className="mt-auto">
+            <SidebarGroupContent>
+              <button
+                onClick={openMemeModal}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black uppercase tracking-widest text-[10px]",
+                  "text-white shadow-lg hover:shadow-2xl transition-all duration-300",
+                  "hover:scale-105 hover:brightness-110",
+                  "relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:animate-shimmer",
+                  collapsed && "justify-center"
+                )}
+                style={{
+                  background: "linear-gradient(90deg, #ec4899 0%, #a855f7 50%, #ec4899 100%)",
+                  backgroundSize: "200% 200%",
+                  animation: "gradient-shift 3s ease-in-out infinite",
+                  boxShadow: "0 0 30px rgba(236, 72, 153, 0.7), 0 0 60px rgba(168, 85, 247, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.15)"
+                }}
+                title="Get a refreshing quote!"
+              >
+                <Sparkles className="size-4 shrink-0" style={{
+                  animation: "dance 0.6s ease-in-out infinite"
+                }} />
+                {!collapsed && <span style={{
+                  animation: "bounce 0.8s ease-in-out infinite"
+                }}>
+                  {randomMessage}
+                </span>}
+              </button>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
       </SidebarContent>
 
@@ -124,8 +167,8 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
               </span>
             </div>
           )}
-          {canPokeSupport && <SupportMessageDialog collapsed={collapsed} />}
           <DisplaySettings />
+          {!collapsed && <UpdateStatusTab initialVersion={initialVersion} />}
           <form action={signOut}>
             <button
               type="submit"

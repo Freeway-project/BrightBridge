@@ -8,11 +8,9 @@
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.9.0",
-    "vitest": "^4.1.8"
+    "typescript": "^5.9.0"
   }
 }

@@ -1,7 +1,8 @@
 "use client"
-import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import { motion } from "framer-motion"
+import { Loader2 } from "lucide-react"
+
 export default function CourseWorkspaceLoading() {
   return (
     <div className="flex h-[calc(100vh-4rem)] w-full flex-col items-center justify-center bg-background/50 backdrop-blur-sm">
@@ -11,15 +12,27 @@ export default function CourseWorkspaceLoading() {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="flex flex-col items-center gap-8"
       >
-        <div className="relative flex items-center justify-center w-[60vw] max-w-[500px] aspect-square">
+        <div className="relative flex items-center justify-center">
+          {/* Outer rotating dashed ring */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className="w-full h-full drop-shadow-2xl"
-          >
-            <LottieLoader className="w-full h-full text-primary" />
-          </motion.div>
+            className="absolute size-28 rounded-full border-t-2 border-r-2 border-dashed border-primary/40"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          />
+          {/* Inner rotating solid ring */}
+          <motion.div
+            className="absolute size-20 rounded-full border-l-2 border-b-2 border-teal-500/70"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          />
+          {/* Center glowing orb */}
+          <motion.div
+            className="absolute size-12 rounded-full bg-primary/20 blur-xl"
+            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          {/* Center spinner */}
+          <Loader2 className="relative z-10 size-8 text-primary animate-spin" />
         </div>
         
         <div className="space-y-3 text-center">

@@ -2,7 +2,6 @@
 -- registered in auth.users, so the FK would reject every profile upsert.
 -- Grant BYPASSRLS to the app role so RLS policies referencing auth.uid()
 -- (which returns NULL on plain PostgreSQL) do not silently filter all rows.
--- Authorization is enforced at the application layer instead.
 
 ALTER TABLE IF EXISTS public.profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;
 

@@ -8,6 +8,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { NotificationBell } from "./notification-bell"
 import { StatusBadge } from "@/components/courses/status-badge"
 import type { CourseStatus } from "@coursebridge/workflow"
+import { useMemeModal } from "@/components/providers/meme-provider"
+
 import type { Role } from "@coursebridge/workflow"
 
 interface TopbarProps {
@@ -20,6 +22,9 @@ interface TopbarProps {
 }
 
 export function Topbar({ title, subtitle, actions, backHref, courseStatus, role }: TopbarProps) {
+  const { openMemeModal } = useMemeModal()
+  const isTaOrStaff = role === "standard_user"
+
   return (
     <header className="sticky top-0 z-40 flex h-12 items-center gap-2 border-b border-sidebar-border bg-background/50 backdrop-blur-xl px-4">
       <SidebarTrigger className="-ml-1 shrink-0 md:hidden" />
@@ -46,6 +51,17 @@ export function Topbar({ title, subtitle, actions, backHref, courseStatus, role 
           <StatusBadge status={courseStatus} className="text-[10px]" />
         )}
         {actions}
+        {isTaOrStaff && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Refreshing quote"
+            onClick={openMemeModal}
+            title="Need a reset? Get a refreshing quote!"
+          >
+            <Smile className="size-4" />
+          </Button>
+        )}
         <NotificationBell />
       </div>
     </header>

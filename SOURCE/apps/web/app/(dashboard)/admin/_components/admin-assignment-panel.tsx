@@ -1,5 +1,4 @@
 "use client";
-import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, Search, X } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { batchAssignTaAction, searchAssignableCoursesAction, type AssignTaState } from "../actions";
 
@@ -376,7 +375,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                             className="h-10 pl-9 pr-8"
                           />
                           {isSearching ? (
-                            <LottieLoader className="absolute right-2 top-1/2 -translate-y-1/2 size-4  text-muted-foreground" />
+                            <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />
                           ) : courseSearch ? (
                             <button
                               type="button"
@@ -483,7 +482,7 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
               <Button className="h-11 px-8 font-semibold shadow-sm" disabled={!canSubmit} type="submit">
                 {pending ? (
                   <>
-                    <LottieLoader className="mr-2 size-4 " />
+                    <Loader2 className="mr-2 size-4 animate-spin" />
                     Assigning…
                   </>
                 ) : (

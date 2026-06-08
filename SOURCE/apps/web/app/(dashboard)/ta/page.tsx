@@ -6,7 +6,6 @@ import { getIssueCountsForCoursesAction } from "@/lib/issues/actions";
 import { requireProfile } from "@/lib/auth/context";
 import { TaDashboardInsights } from "@/components/shared/ta-dashboard-insights";
 import { TaDashboardHeader } from "./_components/ta-dashboard-header";
-import { ScrollCollapsibleHeader } from "./_components/scroll-collapsible-header";
 
 export default async function TADashboardPage() {
   const { courses } = await getAccessibleCourses();
@@ -20,19 +19,13 @@ export default async function TADashboardPage() {
 
   return (
     <TweakableContent className="min-w-0 flex-1 overflow-hidden">
-      <div id="ta-dashboard-scroll" className="relative h-full overflow-y-auto overflow-x-hidden p-6 sm:p-8">
-        <ScrollCollapsibleHeader>
-          <TaDashboardHeader firstName={firstName} />
-          <TaDashboardInsights courses={courses} issueCounts={issueCounts} />
-        </ScrollCollapsibleHeader>
+      <div className="relative h-full overflow-y-auto overflow-x-hidden p-6 sm:p-8">
+        <TaDashboardHeader firstName={firstName} />
+
+        <TaDashboardInsights courses={courses} issueCounts={issueCounts} />
 
         <TaRefreshWrapper>
-          <CourseListView
-            initialCourses={courses}
-            issueCounts={issueCounts}
-            canExport={ctx.profile.role === "admin_full" || ctx.profile.role === "super_admin"}
-            scrollable={false}
-          />
+          <CourseListView initialCourses={courses} issueCounts={issueCounts} />
         </TaRefreshWrapper>
       </div>
     </TweakableContent>

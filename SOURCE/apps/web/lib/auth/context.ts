@@ -17,12 +17,9 @@ export type AuthContext =
   | { kind: "missing_profile"; userId: string; email: string | null }
   | { kind: "profile"; userId: string; email: string | null; profile: AppProfile };
 
-// Maps Azure Entra app-role claim values to internal CourseBridge roles. Keys are
-// normalized (lowercased, spaces/hyphens -> underscore) before lookup.
 const ROLE_CLAIM_MAP: Record<string, Role> = {
   super_admin: "super_admin",
   superadmin: "super_admin",
-  provost: "provost",
   admin_full: "admin_full",
   adminfull: "admin_full",
   admin_viewer: "admin_viewer",
@@ -121,7 +118,7 @@ export async function getAuthContext(): Promise<AuthContext> {
     return {
       kind: "missing_profile",
       userId: user.id,
-      email: user.email,
+      email: user.email
     };
   }
 
@@ -163,8 +160,8 @@ export async function getAuthContext(): Promise<AuthContext> {
       id: effectiveProfile.id,
       email: effectiveProfile.email,
       fullName: effectiveProfile.fullName,
-      role: effectiveProfile.role,
-    },
+      role: effectiveProfile.role
+    }
   };
 }
 
