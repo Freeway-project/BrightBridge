@@ -21,7 +21,7 @@ The running system differs from `CLAUDE.md` (which describes the original Vercel
 | Realtime | **Supabase Realtime in active use** — 5 `postgres_changes` channels + presence (`notification-provider.tsx`, `online-presence.ts`) |
 | File storage | **Not implemented** (no R2/S3 SDK, no upload routes) |
 | Export | ExcelJS (server) + browser-print PDF — **no Puppeteer/Chromium** ✅ |
-| External services | Anthropic (content-converter), Groq (mindfresh), Sentry, PostHog |
+| External services | Anthropic (content-converter), Groq (mindfresh), Sentry |
 | Secrets | `.env.production` / `.env.mirror` are **gitignored** (not committed) ✅ |
 
 **Key insight:** the app is stateless *except* that Supabase provides three platform services it depends on — **Auth, RLS-based authorization, and Realtime**. "Moving to Azure" is really "move the app container" + "bring those three services into Azure."
@@ -104,7 +104,7 @@ Severity: 🔴 must-fix blocker · 🟡 needs work · 🟢 minor.
 | 20 | **Networking / private access** | 🟡 | Put Azure PG on a VNet with private endpoint; Container Apps environment joined to the same VNet. Lock PG firewall to the app subnet, not public. |
 | 21 | **Stateless scaling** | 🟢 | The web app holds no local state (sessions are cookies; Realtime is browser→service). Safe to scale to N replicas — *unless* Option B's WS gateway is colocated. |
 | 22 | **File uploads (future)** | 🟢 | Not built yet. When added, target **Azure Blob Storage** (the empty `packages/storage` stub is the natural home). |
-| 23 | **Observability** | 🟢 | Sentry/PostHog already external and Azure-friendly. Switch PM2 file logs → stdout; wire Container Apps → Azure Monitor / Log Analytics. Health probe: `GET /api/version`. |
+| 23 | **Observability** | 🟢 | Sentry already external and Azure-friendly. Switch PM2 file logs → stdout; wire Container Apps → Azure Monitor / Log Analytics. Health probe: `GET /api/version`. |
 | 24 | **CI/CD** | 🟡 | Current CI only builds. Add: build image → push to **ACR** → deploy to Container Apps (GitHub Actions `azure/container-apps-deploy` or `az containerapp update`). Replaces `scripts/deploy.sh`. |
 
 ---

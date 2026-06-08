@@ -85,7 +85,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xj_1Zi4KAcUiKoAP-SxAUQ_PCA8o
 SUPABASE_SERVICE_ROLE_KEY=<new project sb_secret_…>
 DATABASE_URL=<new project session-mode URL>
 ```
-Keep the OLD values commented above them for instant rollback. Leave Sentry/PostHog/Resend/
+Keep the OLD values commented above them for instant rollback. Leave Sentry/Resend/
 `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` unchanged.
 
 ## Step 5 — Rebuild + redeploy (REBUILD is required, not just restart)
