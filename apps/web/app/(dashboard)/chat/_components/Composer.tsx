@@ -1,19 +1,15 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, type KeyboardEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { AtSign } from "lucide-react";
+import { AtSign, Paperclip } from "lucide-react";
 import { sendMessageAction } from "@/lib/chat/actions";
 import { EmojiPicker } from "./EmojiPicker";
-import { AttachmentDropzone } from "./AttachmentDropzone";
 
-interface Attachment {
-  storageKey: string;
-  filename: string;
-  mimeType: string;
-  sizeBytes: number;
-}
+// Attachments are disabled for Phase 1 — the @coursebridge/storage R2 wiring
+// isn't in place yet. The backend routes and the AttachmentDropzone component
+// stay in the tree so the wiring task is a one-line re-enable here.
 
 export function Composer({
   conversationId,
@@ -23,20 +19,16 @@ export function Composer({
   parentId?: string | null;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const body = textareaRef.current?.value.trim() ?? "";
     if (!body) return;
     if (textareaRef.current) textareaRef.current.value = "";
-    const attachments = pendingAttachments;
-    setPendingAttachments([]);
     await sendMessageAction({
       conversationId,
       body,
       parentId,
-      ...(attachments.length > 0 ? { attachments } : {}),
     });
   }
 
@@ -63,29 +55,6 @@ export function Composer({
       onSubmit={handleSubmit}
       className="border-t border-border p-3 flex flex-col gap-2"
     >
-      {pendingAttachments.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {pendingAttachments.map((a) => (
-            <span
-              key={a.storageKey}
-              className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs"
-            >
-              {a.filename}
-              <button
-                type="button"
-                className="ml-1 text-muted-foreground hover:text-foreground"
-                onClick={() =>
-                  setPendingAttachments((prev) =>
-                    prev.filter((p) => p.storageKey !== a.storageKey),
-                  )
-                }
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
       <Textarea
         ref={textareaRef}
         placeholder="Message…"
@@ -99,11 +68,16 @@ export function Composer({
           <Button type="button" variant="ghost" size="icon" disabled aria-label="Mention">
             <AtSign className="h-4 w-4" />
           </Button>
-          <AttachmentDropzone
-            onAttach={(attachments) =>
-              setPendingAttachments((prev) => [...prev, ...attachments])
-            }
-          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            disabled
+            aria-label="Attach files (disabled — storage not yet wired)"
+            title="Attachments coming soon"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
         </div>
         <Button type="submit" size="sm">
           Send
