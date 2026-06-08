@@ -27,6 +27,7 @@
     "driver.js": "^1.4.0",
     "exceljs": "^4.4.0",
     "framer-motion": "^12.38.0",
+    "frimousse": "^0.3.0",
     "geist": "^1.7.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^1.14.0",
