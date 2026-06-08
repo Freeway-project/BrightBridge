@@ -1,3 +1,4 @@
+import "server-only";
 import { EventEmitter } from "node:events";
 
 type ChatEvent = { type: string; payload: unknown };
