@@ -470,16 +470,48 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
 }
 
 /**
- * Generates and emails a fresh magic-link invite to every instructor assigned
- * to the course. Best-effort — failures are logged inside issueInstructorInvites
- * and never throw, so they can't roll back a status transition.
+ * Generates a fresh magic-link invite for every assigned instructor AND sends
+ * the "course is ready" email through the logged instructor-emails service —
+ * so every attempt shows up in the admin Emails tab regardless of outcome.
+ *
+ * Best-effort at the per-recipient level: a failure to one instructor is
+ * logged + persisted (status='failed') but never throws, so it can't roll
+ * back the surrounding status transition.
  */
 async function emailInstructorInvites(courseId: string, createdBy: string): Promise<void> {
   try {
-    const { issueInstructorInvites } = await import("@/lib/invites/send");
+    const [{ createReviewInvite, getCourseInstructorRecipients }, { buildInviteLink }, { notifyInstructor }] = await Promise.all([
+      import("@/lib/invites/service"),
+      import("@/lib/email/templates/instructor-invite"),
+      import("@/lib/instructor-emails/service"),
+    ]);
+
     const detail = await getAdminCourseDetail(courseId);
     const courseTitle = detail?.course.title ?? "your migrated course";
-    await issueInstructorInvites({ courseId, courseTitle, createdBy });
+    const recipients = await getCourseInstructorRecipients(courseId);
+
+    for (const recipient of recipients) {
+      try {
+        const { token } = await createReviewInvite({
+          courseId,
+          email: recipient.email,
+          createdBy,
+        });
+        await notifyInstructor({
+          courseId,
+          sentBy: createdBy,
+          recipient: recipient.email,
+          instructorName: recipient.fullName,
+          courseTitle,
+          dashboardUrl: buildInviteLink(token),
+        });
+      } catch (innerErr) {
+        console.error(
+          `[sendToInstructor] Failed to notify ${recipient.email} for course ${courseId}:`,
+          innerErr,
+        );
+      }
+    }
   } catch (error) {
     console.error(`[sendToInstructor] Failed to issue instructor invites for course ${courseId}:`, error);
   }
@@ -510,7 +542,26 @@ export async function sendToInstructorAction(courseId: string): Promise<void> {
 export async function resendInstructorInviteAction(courseId: string): Promise<void> {
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+
+  // Resend is only allowed after a failed send. A successful prior send means
+  // the instructor already has a working magic link; a still-pending send
+  // shouldn't be duplicated. The Emails tab UI also hides the resend button
+  // unless the last send failed, but the guard lives here too because the
+  // action is exported.
+  const { lastForCourse } = await import("@/lib/instructor-emails/queries");
+  const last = await lastForCourse(courseId);
+  if (!last) {
+    throw new Error("No previous send to resend — use the initial send action.");
+  }
+  if (last.status !== "failed") {
+    throw new Error(
+      `Resend is only available after a failed send (last send: ${last.status}).`,
+    );
+  }
+
   await emailInstructorInvites(courseId, ctx.userId);
+  revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath(`/admin/courses/${courseId}/emails`);
 }
 
 export async function grantFinalApprovalAction(courseId: string): Promise<void> {

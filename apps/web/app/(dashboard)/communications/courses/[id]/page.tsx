@@ -12,6 +12,7 @@ import { QuestionRoundBanner } from "@/app/(dashboard)/admin/courses/[id]/_compo
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { getSharedComments } from "@/lib/services/comments"
 import { getQuestionRoundHistory } from "@/lib/courses/service"
+import { lastForCourse } from "@/lib/instructor-emails/queries"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -22,14 +23,17 @@ export default async function CommsCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_viewer", "admin_full", "super_admin"])
 
-  const [detail, sharedComments, questionRounds] = await Promise.all([
+  const [detail, sharedComments, questionRounds, lastEmail] = await Promise.all([
     getAdminCourseDetail(id),
     getSharedComments(id),
     getQuestionRoundHistory(id),
+    lastForCourse(id),
   ])
   if (!detail) notFound()
 
   const { course, responses, sectionKeyById } = detail
+  const lastSendFailed = lastEmail?.status === "failed"
+  const lastSendError = lastEmail?.sendError ?? null
 
   return (
     <>
@@ -53,7 +57,11 @@ export default async function CommsCourseDetailPage({ params }: Props) {
                 <SendToInstructorBanner courseId={id} />
               )}
               {(course.status === "sent_to_instructor" || course.status === "instructor_viewing") && (
-                <ResendInviteBanner courseId={id} />
+                <ResendInviteBanner
+                  courseId={id}
+                  lastSendFailed={lastSendFailed}
+                  lastSendError={lastSendError}
+                />
               )}
               {course.status === "instructor_questions" && (
                 <>
