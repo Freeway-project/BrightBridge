@@ -18,7 +18,12 @@ import { ROLE_TITLE_LABELS, ROLE_TITLE_RANK } from "@/lib/super-admin/roles"
 async function requireOrgViewer() {
   const context = await requireProfile()
   const role = context.profile.role
-  if (role !== "super_admin" && role !== "provost" && role !== "admin_full") {
+  if (
+    role !== "super_admin" &&
+    role !== "provost" &&
+    role !== "admin_full" &&
+    role !== "admin_viewer"
+  ) {
     throw new Error("Unauthorized")
   }
   return context
