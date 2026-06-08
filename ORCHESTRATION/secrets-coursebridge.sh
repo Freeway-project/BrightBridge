@@ -56,6 +56,9 @@ while IFS='=' read -r key value; do
   fi
 
   value=$(echo "$value" | sed 's/^"//' | sed 's/"$//' | sed "s/^'//" | sed "s/'$//" | tr -d '\r')
+  if [ -z "$value" ]; then
+    continue
+  fi
   secret_name="$(echo "$key" | tr '[:upper:]' '[:lower:]')_${SECRET_SUFFIX}"
 
   if $DOCKER secret ls --format "{{.Name}}" | grep -q "^${secret_name}$"; then

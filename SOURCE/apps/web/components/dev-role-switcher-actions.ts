@@ -22,14 +22,8 @@ export async function switchDevRole(formData: FormData) {
     throw new Error("You must be signed in to switch roles.");
   }
 
-  const profileRepository = getProfileRepository();
-  const existingProfile =
-    (await profileRepository.getProfileById(user.id)) ??
-    (await profileRepository.getProfileByEmail(user.email));
-  const profileId = existingProfile?.id ?? user.id;
-
-  await profileRepository.upsertProfile({
-    id: profileId,
+  await getProfileRepository().upsertProfile({
+    id: user.id,
     email: user.email,
     fullName:
       typeof user.userMetadata.full_name === "string"

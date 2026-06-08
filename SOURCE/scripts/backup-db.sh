@@ -25,6 +25,11 @@
 #   DATABASE_URL='postgresql://...' ./scripts/backup-db.sh
 #   PROD_DATABASE_URL='postgresql://...' ./scripts/backup-db.sh --prod
 #
+# Tag the output filename (folded in after the timestamp, sanitized):
+#   BACKUP_TAG='abc1234-pr111' ./scripts/backup-db.sh --prod
+#     → backups/prod-full-<timestamp>-abc1234-pr111.dump
+#   (autodeploy uses this to stamp each pre-deploy backup with the commit/PR.)
+#
 # If local pg_dump is older than the server (Supabase PG 17), either install
 # client 17+ or use Docker (recommended): the script retries with Postgres 17
 # in Docker on "server version mismatch". Force Docker with:
@@ -52,6 +57,19 @@ PROD_MODE=0
 if [ "${1:-}" = "--prod" ]; then
   PROD_MODE=1
   shift || true
+fi
+
+# Optional label folded into the output filename (e.g. the commit/PR being
+# deployed). Set via BACKUP_TAG env. Sanitized to a filename-safe token so a
+# stray slash or space in a commit subject can't break the path.
+sanitize_tag() {
+  # keep alnum, dash, underscore, dot; collapse everything else to '-'
+  echo "$1" | tr -c 'A-Za-z0-9._-' '-' | sed -E 's/-+/-/g; s/^-+//; s/-+$//'
+}
+TAG_SUFFIX=""
+if [ -n "${BACKUP_TAG:-}" ]; then
+  CLEAN_TAG="$(sanitize_tag "$BACKUP_TAG")"
+  [ -n "$CLEAN_TAG" ] && TAG_SUFFIX="-${CLEAN_TAG}"
 fi
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
@@ -158,7 +176,7 @@ if [ "$PROD_MODE" -eq 1 ]; then
   NS="$(date +%N 2>/dev/null | cut -c1-9)"
   case "$NS" in '' | *[!0-9]*) NS="0" ;; esac
   TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)-$$-${NS}"
-  OUT="$BACKUP_DIR/prod-full-${TIMESTAMP}.dump"
+  OUT="$BACKUP_DIR/prod-full-${TIMESTAMP}${TAG_SUFFIX}.dump"
   LABEL="production"
 else
   URL="${DEV_DATABASE_URL:-${DATABASE_URL:-}}"
@@ -170,7 +188,7 @@ else
   NS="$(date +%N 2>/dev/null | cut -c1-9)"
   case "$NS" in '' | *[!0-9]*) NS="0" ;; esac
   TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)-$$-${NS}"
-  OUT="$BACKUP_DIR/db-dev-${TIMESTAMP}.dump"
+  OUT="$BACKUP_DIR/db-dev-${TIMESTAMP}${TAG_SUFFIX}.dump"
   LABEL="dev / default"
 fi
 

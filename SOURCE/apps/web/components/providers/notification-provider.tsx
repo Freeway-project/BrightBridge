@@ -73,6 +73,12 @@ type NotificationFeedResponse = {
   pendingCount: number
 }
 
+// Polling notification provider. Replaces the Supabase Realtime channel
+// subscriptions (which don't work against self-hosted Postgres) with a 15s poll
+// of /api/notifications/feed, which is backed by getNotificationsPageData and
+// therefore covers every source (issues, comments, status events, assignments,
+// support messages, reassignments) under both DB providers. New items since the
+// last poll are toasted; a change in pendingCount refreshes server components.
 export function NotificationProvider({ children, userId, role }: NotificationProviderProps) {
   const router = useRouter()
   const seenIds = useRef(new Set<string>())
@@ -130,6 +136,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       }
       if (item.kind === "comment") return "💬"
       if (item.kind === "assignment") return "📚"
+      if (item.kind === "support") return "🛟"
       return "📌"
     }
 
@@ -142,6 +149,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
       }
       if (item.kind === "comment") return "Comment"
       if (item.kind === "assignment") return "Assignment"
+      if (item.kind === "support") return "Support"
       return "Course"
     }
 
@@ -185,6 +193,7 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
         const data = (await response.json()) as NotificationFeedResponse
         const items = data.notifications ?? []
 
+        // First load: seed the seen set so we don't toast the whole backlog.
         if (!initialLoadDone.current) {
           for (const item of items) {
             seenIds.current.add(item.id)

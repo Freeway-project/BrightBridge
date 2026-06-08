@@ -5,7 +5,6 @@ import { GraduationCap, Search } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { StatusBadge } from "@/components/courses/status-badge"
-import { StatCard } from "@/components/shared/stat-card"
 import type { InstructorCourse } from "@/lib/courses/service"
 
 interface Props {
@@ -23,12 +22,6 @@ export function InstructorCourseList({ courses }: Props) {
     )
   }, [courses, search])
 
-  const pending = courses.filter((c) => c.status === "sent_to_instructor").length
-  const questions = courses.filter((c) => c.status === "instructor_questions").length
-  const approved = courses.filter((c) =>
-    c.status === "instructor_approved" || c.status === "final_approved"
-  ).length
-
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
@@ -36,12 +29,6 @@ export function InstructorCourseList({ courses }: Props) {
           <h2 className="text-lg font-semibold">My Courses</h2>
           <p className="text-sm text-muted-foreground">Courses sent to you for review</p>
         </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <StatCard label="Awaiting Review" value={pending} icon="clock" />
-        <StatCard label="Questions" value={questions} icon="alert-triangle" />
-        <StatCard label="Approved" value={approved} icon="check-square" />
       </div>
 
       <div className="relative mb-4 max-w-sm">

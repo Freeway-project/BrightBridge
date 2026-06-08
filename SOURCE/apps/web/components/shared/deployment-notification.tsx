@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion } from "motion/react"
-import { RefreshCw } from "lucide-react"
-import { AnimatedBubbleParticles } from "@/components/ui/animated-bubble-particles"
+import { RefreshCw, X } from "lucide-react"
+import { Meteors } from "@/components/ui/meteors"
 
 const AUTO_UPDATE_COLORS = [
   "#818cf8", // violet
@@ -22,144 +22,95 @@ const UPDATE_APPLIED_COLORS = [
   "#a3e635", // lime
 ]
 
-interface DeploymentNotificationProps {
-  onRefresh: () => void
-  onDismiss: () => void
+/**
+ * Colorful, non-blocking meteor burst shown when a new build is detected.
+ * pointer-events-none + no backdrop, so the user can keep working. It plays
+ * briefly then calls onDone to stop rendering; it never reloads — the reload is
+ * user-initiated from UpdateAvailablePill.
+ */
+export function AutoUpdateOverlay({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const t = window.setTimeout(onDone, 6000)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[120] overflow-hidden">
+      <Meteors number={30} colors={AUTO_UPDATE_COLORS} />
+    </div>
+  )
 }
 
-export function DeploymentNotification({ onRefresh, onDismiss }: DeploymentNotificationProps) {
+/**
+ * Post-reload celebratory meteors (non-blocking). Only sequences the follow-up
+ * modal via onDone — no reload here.
+ */
+export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const t = window.setTimeout(onDone, 5000)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
-      />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      className="pointer-events-none fixed inset-0 z-[110] overflow-hidden"
+    >
+      <Meteors number={26} colors={UPDATE_APPLIED_COLORS} />
+    </motion.div>
+  )
+}
 
-      <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 10, scale: 0.98 }}
-        transition={{ duration: 0.2 }}
-        className="pointer-events-auto relative w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-[0_20px_80px_rgba(0,0,0,0.45)]"
-      >
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 rounded-full bg-primary/15 p-2 text-primary">
-            <RefreshCw className="size-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-semibold text-foreground">Update available</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              A newer build is available on this server. Refresh when ready to load it.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/40"
-          >
-            Later
-          </button>
+/**
+ * Colorful, dismissible "Update available" pill (bottom-right). This is the only
+ * interactive piece — clicking Refresh reloads, the × dismisses. Non-blocking:
+ * it floats above the UI without locking it.
+ */
+export function UpdateAvailablePill({
+  onRefresh,
+  onDismiss,
+}: {
+  onRefresh: () => void
+  onDismiss: () => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 12, scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      className="pointer-events-auto fixed bottom-5 right-5 z-[130]"
+    >
+      <div className="relative overflow-hidden rounded-full p-[1.5px] shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+        {/* Colorful gradient ring */}
+        <div className="absolute inset-0 bg-[conic-gradient(from_0deg,#818cf8,#ec4899,#f59e0b,#34d399,#38bdf8,#818cf8)]" />
+        <div className="relative flex items-center gap-2 rounded-full bg-card/95 px-2 py-1.5 backdrop-blur">
+          <span className="ml-1.5 flex items-center gap-1.5 text-xs font-semibold text-foreground">
+            <RefreshCw className="size-3.5 text-primary" />
+            Update available
+          </span>
           <button
             type="button"
             onClick={onRefresh}
-            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+            className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Refresh now
+            Refresh
+          </button>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={onDismiss}
+            className="grid size-6 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          >
+            <X className="size-3.5" />
           </button>
         </div>
-      </motion.div>
-    </div>
-  )
-}
-
-export function MinimizedUpdatePill({ onClick }: { onClick: () => void }) {
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.03 }}
-      className="fixed bottom-5 right-5 z-[90] rounded-full border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-lg"
-    >
-      Update available
-    </motion.button>
-  )
-}
-
-export function AutoUpdateOverlay({ onDone }: { onDone: () => void }) {
-  const [colorIndex, setColorIndex] = useState(0)
-  const colorTimer = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  useEffect(() => {
-    colorTimer.current = setInterval(() => {
-      setColorIndex((i) => (i + 1) % AUTO_UPDATE_COLORS.length)
-    }, 800)
-
-    // Auto-dismiss after 5 s then call onDone to trigger reload
-    const dismiss = window.setTimeout(onDone, 5000)
-
-    return () => {
-      if (colorTimer.current) clearInterval(colorTimer.current)
-      window.clearTimeout(dismiss)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  return (
-    <div className="pointer-events-none fixed inset-0 z-[120]">
-      <AnimatedBubbleParticles
-        particleColor={AUTO_UPDATE_COLORS[colorIndex]}
-        particleSize={34}
-        spawnInterval={150}
-        blurStrength={13}
-        enableGooEffect
-        width="100vw"
-        height="100vh"
-        className="bg-black/75 backdrop-blur-sm"
-        zIndex={120}
-      />
-    </div>
-  )
-}
-
-export function UpdateAppliedOverlay({ onDone }: { onDone: () => void }) {
-  const [colorIndex, setColorIndex] = useState(0)
-  const colorTimer = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  useEffect(() => {
-    colorTimer.current = setInterval(() => {
-      setColorIndex((i) => (i + 1) % UPDATE_APPLIED_COLORS.length)
-    }, 600)
-
-    // Let bubbles play for 5 s, THEN call onDone to open the modal
-    const dismiss = window.setTimeout(onDone, 5000)
-
-    return () => {
-      if (colorTimer.current) clearInterval(colorTimer.current)
-      window.clearTimeout(dismiss)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  return (
-    <div className="pointer-events-none fixed inset-0 z-[110]">
-      <AnimatedBubbleParticles
-        particleColor={UPDATE_APPLIED_COLORS[colorIndex]}
-        particleSize={28}
-        spawnInterval={120}
-        blurStrength={11}
-        enableGooEffect
-        width="100vw"
-        height="100vh"
-        className="bg-black/60 backdrop-blur-sm"
-        zIndex={110}
-      />
-    </div>
+      </div>
+    </motion.div>
   )
 }

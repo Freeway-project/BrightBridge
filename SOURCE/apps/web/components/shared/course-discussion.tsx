@@ -16,6 +16,7 @@ const ROLE_LABELS: Record<string, string> = {
   admin_full:    "Admin",
   admin_viewer:  "Comms",
   super_admin:   "Admin",
+  provost:       "Provost",
   standard_user: "TA",
 }
 
@@ -24,6 +25,7 @@ const ROLE_COLORS: Record<string, string> = {
   admin_full:    "bg-blue-500/15 text-blue-700 dark:text-blue-300",
   admin_viewer:  "bg-teal-500/15 text-teal-700 dark:text-teal-300",
   super_admin:   "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+  provost:       "bg-orange-500/15 text-orange-700 dark:text-orange-300",
   standard_user: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
 }
 
