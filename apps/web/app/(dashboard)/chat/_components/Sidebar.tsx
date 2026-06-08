@@ -3,6 +3,7 @@ import { listConversationsForUser } from "@/lib/chat/queries";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { SidebarSearch } from "./SidebarSearch";
+import { NewConversationMenu } from "./NewConversationMenu";
 
 export async function Sidebar({ currentUserId }: { currentUserId: string }) {
   const conversations = await listConversationsForUser(currentUserId);
@@ -12,7 +13,7 @@ export async function Sidebar({ currentUserId }: { currentUserId: string }) {
         <span className="text-sm font-semibold">Chat</span>
         <div className="flex items-center gap-1">
           <SidebarSearch />
-          {/* NewConversationMenu added in Task 17 */}
+          <NewConversationMenu />
         </div>
       </div>
       <ScrollArea className="flex-1">
