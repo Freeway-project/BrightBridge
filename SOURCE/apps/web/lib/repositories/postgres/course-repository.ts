@@ -2,6 +2,9 @@ import "server-only";
 
 import type { AssignmentRole } from "@coursebridge/workflow";
 import type {
+  AccessibleCourseAggregates,
+  AccessibleCourseListFilters,
+  AccessibleCourseScope,
   AdminCourseListFilters,
   AdminCourseRow,
   AssignmentLog,
@@ -144,6 +147,55 @@ function mapAdminCourseRow(row: AdminCourseJoinRow): AdminCourseRow {
   };
 }
 
+// Subject prefix derived from `source_course_id` ("CHEM101" → "CHEM"). Mirrors
+// the regex used by the client list view so admin and dropdown values agree.
+const SUBJECT_EXPR = `UPPER(substring(c.source_course_id from '^[A-Za-z]+'))`;
+
+// Build the shared WHERE for the accessible-courses page + aggregate queries.
+// `omit` lets callers drop a single dimension (used by aggregates so the status
+// filter doesn't suppress the very counts we're computing).
+function buildAccessibleWhere(
+  filters: AccessibleCourseListFilters,
+  omit: "status" | null = null,
+) {
+  const values: unknown[] = [];
+  const where: string[] = [];
+
+  if (filters.scope.kind === "assigned") {
+    values.push(filters.scope.profileId, filters.scope.role);
+    where.push(
+      `EXISTS (SELECT 1 FROM course_assignments ca WHERE ca.course_id = c.id AND ca.profile_id = $${values.length - 1} AND ca.role = $${values.length})`,
+    );
+  }
+
+  if (omit !== "status" && filters.status) {
+    values.push(filters.status);
+    where.push(`c.status = $${values.length}`);
+  }
+
+  if (filters.subject?.trim()) {
+    values.push(filters.subject.trim().toUpperCase());
+    where.push(`${SUBJECT_EXPR} = $${values.length}`);
+  }
+
+  if (filters.term?.trim()) {
+    values.push(filters.term.trim());
+    where.push(`c.term = $${values.length}`);
+  }
+
+  const normalizedSearch = normalizeSearchTerm(filters.search);
+  if (normalizedSearch) {
+    values.push(`%${normalizedSearch}%`);
+    const p = `$${values.length}`;
+    where.push(`(c.title ILIKE ${p} OR c.source_course_id ILIKE ${p})`);
+  }
+
+  return {
+    whereSql: where.length > 0 ? `WHERE ${where.join(" AND ")}` : "",
+    values,
+  };
+}
+
 function normalizeSearchTerm(value: string | undefined) {
   if (!value) return "";
   return value
@@ -240,6 +292,101 @@ export function createPostgresCourseRepository(): CourseRepository {
         values,
       );
       return rows.map(toCourseSummary);
+    },
+
+    async listAccessibleCoursesPage(page, pageSize, filters) {
+      const pool = getPostgresPool();
+      const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+      const safePageSize = Number.isFinite(pageSize) ? Math.max(1, Math.floor(pageSize)) : 20;
+      const offset = (safePage - 1) * safePageSize;
+      const { whereSql, values } = buildAccessibleWhere(filters);
+
+      const countResult = await pool.query<{ total: string }>(
+        `SELECT COUNT(*)::text AS total FROM courses c ${whereSql}`,
+        values,
+      );
+      const total = Number(countResult.rows[0]?.total ?? "0");
+
+      values.push(safePageSize);
+      values.push(offset);
+      const limitParam = `$${values.length - 1}`;
+      const offsetParam = `$${values.length}`;
+
+      const { rows } = await pool.query<CourseRow>(
+        `
+          SELECT c.id, c.source_course_id, c.target_course_id, c.title, c.term, c.department, c.org_unit_id, c.status, c.created_by, c.created_at, c.updated_at
+          FROM courses c
+          ${whereSql}
+          ORDER BY c.updated_at DESC
+          LIMIT ${limitParam} OFFSET ${offsetParam}
+        `,
+        values,
+      );
+
+      return {
+        data: rows.map(toCourseSummary),
+        total,
+        page: safePage,
+        pageSize: safePageSize,
+        totalPages: safePageSize > 0 ? Math.ceil(total / safePageSize) : 0,
+      } satisfies PaginatedResult<CourseSummary>;
+    },
+
+    async getAccessibleCourseAggregates(scope: AccessibleCourseScope, filters = {}) {
+      const pool = getPostgresPool();
+      // Status counts respect the active search/subject/term filters so the tab
+      // badges reflect what the user would see when they switch tabs. Subjects
+      // and terms are scoped to the user's accessible set only (no search/term/
+      // subject filter) — same UX as the previous "all subjects derived from the
+      // loaded list" behaviour, just sourced from a DB query.
+      const fullFilters: AccessibleCourseListFilters = { scope, ...filters };
+      const scopeOnly: AccessibleCourseListFilters = { scope };
+
+      const { whereSql, values } = buildAccessibleWhere(fullFilters, "status");
+      const scopeWhere = buildAccessibleWhere(scopeOnly);
+
+      const [statusCountsResult, subjectsResult, termsResult, totalResult] = await Promise.all([
+        pool.query<{ status: string; count: string }>(
+          `SELECT c.status, COUNT(*)::text AS count FROM courses c ${whereSql} GROUP BY c.status`,
+          values,
+        ),
+        pool.query<{ subject: string | null }>(
+          `
+            SELECT DISTINCT ${SUBJECT_EXPR} AS subject
+            FROM courses c
+            ${scopeWhere.whereSql}
+            ${scopeWhere.whereSql ? "AND" : "WHERE"} c.source_course_id ~ '^[A-Za-z]'
+            ORDER BY subject
+          `,
+          scopeWhere.values,
+        ),
+        pool.query<{ term: string | null }>(
+          `
+            SELECT DISTINCT c.term
+            FROM courses c
+            ${scopeWhere.whereSql}
+            ${scopeWhere.whereSql ? "AND" : "WHERE"} c.term IS NOT NULL AND c.term <> ''
+            ORDER BY c.term
+          `,
+          scopeWhere.values,
+        ),
+        pool.query<{ total: string }>(
+          `SELECT COUNT(*)::text AS total FROM courses c ${whereSql}`,
+          values,
+        ),
+      ]);
+
+      const statusCounts: Partial<Record<CourseStatus, number>> = {};
+      for (const row of statusCountsResult.rows) {
+        statusCounts[toCourseStatus(row.status)] = Number(row.count);
+      }
+
+      return {
+        statusCounts,
+        subjects: subjectsResult.rows.map((r) => r.subject).filter((s): s is string => !!s),
+        terms: termsResult.rows.map((r) => r.term).filter((t): t is string => !!t),
+        total: Number(totalResult.rows[0]?.total ?? "0"),
+      } satisfies AccessibleCourseAggregates;
     },
 
     async getAssignedCourseById(courseId, userId, assignmentRole) {
