@@ -57,31 +57,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  mirror-to-azdo:
-    name: Mirror ft-AzureMigration -> azdo/testing
-    runs-on: ubuntu-latest
-    needs: [verify, docker-build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/ft-AzureMigration'
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Push to Azure DevOps testing branch
-        env:
-          AZDO_PAT: ${{ secrets.AZDO_PAT }}
-        run: |
-          if [ -z "${AZDO_PAT}" ]; then
-            echo "AZDO_PAT secret is not set. Add it under repo Settings -> Secrets and variables -> Actions." >&2
-            exit 1
-          fi
-          # Pre-populate git credential store so push to Azure DevOps uses the
-          # PAT non-interactively. Same mechanism actions/checkout uses for
-          # github.com; scoped via credentialUrl so it only matches azdo.
-          ASKPASS="${RUNNER_TEMP}/askpass.sh"
-          printf '#!/bin/bash\ncase "$1" in *Username*) echo pat ;; *Password*) echo "$AZDO_PAT" ;; esac\n' > "${ASKPASS}"
-          chmod +x "${ASKPASS}"
-          AZDO_URL="https://okanagan.visualstudio.com/DefaultCollection/CourseBridge/_git/CourseBridge"
-          GIT_ASKPASS="${ASKPASS}" GIT_TERMINAL_PROMPT=0 \
-            git -c credential.helper= push "${AZDO_URL}" "HEAD:refs/heads/testing"
+# Auto-mirror to azdo/testing removed — Azure DevOps blocks GitHub-hosted
+# runner IPs. After CI passes, mirror locally with:
+#
+#   scripts/push-to-azdo.sh
+#
+# (or re-add a self-hosted runner inside the Azure tenant and restore the
+# mirror job here)
