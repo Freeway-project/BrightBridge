@@ -835,8 +835,9 @@ export function createPostgresCourseRepository(): CourseRepository {
       }
     },
 
-    async listStuckCourses(cutoffIso) {
+    async listStuckCourses(cutoffIso, limit = 50) {
       const pool = getPostgresPool();
+      const safeLimit = Math.max(1, Math.min(500, Math.floor(limit)));
       const { rows } = await pool.query<{
         id: string;
         title: string;
@@ -849,8 +850,9 @@ export function createPostgresCourseRepository(): CourseRepository {
           WHERE status <> 'final_approved'
             AND updated_at < $1::timestamptz
           ORDER BY updated_at ASC
+          LIMIT $2
         `,
-        [cutoffIso],
+        [cutoffIso, safeLimit],
       );
 
       return rows.map((row) => ({
@@ -860,6 +862,20 @@ export function createPostgresCourseRepository(): CourseRepository {
         days_stuck: Math.floor((Date.now() - new Date(row.updated_at).getTime()) / 86_400_000),
         updated_at: row.updated_at,
       })) satisfies StuckCourse[];
+    },
+
+    async countStuckCourses(cutoffIso) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{ count: string }>(
+        `
+          SELECT COUNT(*)::text AS count
+          FROM courses
+          WHERE status <> 'final_approved'
+            AND updated_at < $1::timestamptz
+        `,
+        [cutoffIso],
+      );
+      return Number(rows[0]?.count ?? "0");
     },
 
     async listTAWorkload() {

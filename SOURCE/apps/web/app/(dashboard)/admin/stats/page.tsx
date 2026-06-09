@@ -26,7 +26,7 @@ export default async function AdminStatsPage() {
             totalCourses={data.totalCourses}
             statusCounts={data.statusCounts}
             taWorkload={data.taWorkload}
-            stuckCourses={data.stuckCourses}
+            stuckCount={data.stuckCount}
           />
 
           {/* Full-width pipeline */}
@@ -45,7 +45,7 @@ export default async function AdminStatsPage() {
           </div>
 
           {/* Stuck courses full width */}
-          <StuckCoursesList stuckCourses={data.stuckCourses} />
+          <StuckCoursesList stuckCourses={data.stuckCourses} totalStuck={data.stuckCount} />
         </div>
       </TweakableContent>
     </>
