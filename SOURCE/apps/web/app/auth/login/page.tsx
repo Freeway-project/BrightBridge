@@ -1,10 +1,11 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
+import { FileCheck, GitMerge, KeyRound, Users } from "lucide-react"
 import { startAzureOidcSignInAction } from "./actions"
 import { Button } from "@/components/ui/button"
+import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
 import { AnimatedBubbleParticles } from "@/components/ui/animated-bubble-particles"
-import { FileCheck, GitMerge, KeyRound, Users } from "lucide-react"
 
 const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN === "1"
 
@@ -16,6 +17,34 @@ const DEV_ROLES = [
   "standard_user",
   "instructor",
 ] as const
+
+const BUBBLE_COLORS = [
+  "#818cf8",
+  "#ec4899",
+  "#34d399",
+  "#f59e0b",
+  "#38bdf8",
+  "#a78bfa",
+  "#fb7185",
+]
+
+const FEATURES = [
+  {
+    icon: GitMerge,
+    title: "Structured migration reviews",
+    desc: "Step-by-step TA checklists for every Moodle -> Brightspace course.",
+  },
+  {
+    icon: Users,
+    title: "Controlled role access",
+    desc: "Super admins manage account creation and role changes centrally.",
+  },
+  {
+    icon: FileCheck,
+    title: "Full audit trail",
+    desc: "Every workflow handoff and decision stays tied to the course record.",
+  },
+]
 
 function DevLoginPanel() {
   return (
@@ -51,34 +80,6 @@ function DevLoginPanel() {
     </form>
   )
 }
-
-const BUBBLE_COLORS = [
-  "#818cf8",
-  "#ec4899",
-  "#34d399",
-  "#f59e0b",
-  "#38bdf8",
-  "#a78bfa",
-  "#fb7185",
-]
-
-const FEATURES = [
-  {
-    icon: GitMerge,
-    title: "Structured migration reviews",
-    desc: "Step-by-step TA checklists for every Moodle -> Brightspace course.",
-  },
-  {
-    icon: Users,
-    title: "Controlled role access",
-    desc: "Super admins manage account creation and role changes centrally.",
-  },
-  {
-    icon: FileCheck,
-    title: "Full audit trail",
-    desc: "Every workflow handoff and decision stays tied to the course record.",
-  },
-]
 
 function SigningInOverlay({ visible }: { visible: boolean }) {
   const [colorIndex, setColorIndex] = useState(0)
@@ -145,10 +146,8 @@ export default function LoginPage() {
 
       <main className="min-h-screen bg-background flex">
         <div className="hidden lg:flex w-1/2 flex-col justify-between bg-sidebar border-r border-sidebar-border px-12 py-14">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-              CB
-            </div>
+          <div className="flex items-center gap-1">
+            <OCLoadingLogo className="size-12 shrink-0" />
             <span className="text-lg font-semibold text-sidebar-foreground">CourseBridge</span>
           </div>
 
@@ -189,19 +188,31 @@ export default function LoginPage() {
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight">Sign in</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Use your Microsoft account to continue.
+                Use your institutional account through Microsoft Entra ID.
               </p>
             </div>
 
-            <form action={startAzureOidcSignInAction} onSubmit={() => setPending(true)} className="space-y-4">
+            <form
+              action={startAzureOidcSignInAction}
+              onSubmit={() => setPending(true)}
+              className="space-y-4"
+            >
+              <div className="rounded-lg border border-border bg-muted/20 px-4 py-3">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Authenticate with your Microsoft account to continue.
+                </p>
+              </div>
               <Button className="w-full h-10 gap-2" type="submit" disabled={pending}>
                 <KeyRound className="size-4" />
                 Sign in with Microsoft
               </Button>
-              <p className="text-xs text-muted-foreground text-center">
-                Staff and instructors sign in via Microsoft Entra. Need access? Ask a super admin.
-              </p>
             </form>
+
+            <div className="rounded-lg border border-dashed border-border px-4 py-3">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Need access? Ask a super admin to create your account and assign your role.
+              </p>
+            </div>
 
             {DEV_LOGIN_ENABLED && <DevLoginPanel />}
           </div>
