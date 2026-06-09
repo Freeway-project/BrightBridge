@@ -76,7 +76,9 @@ jobs:
             echo "AZDO_PAT secret is not set. Add it under repo Settings -> Secrets and variables -> Actions." >&2
             exit 1
           fi
-          # PAT-auth URL; user component is ignored by Azure DevOps but required by git.
-          AZDO_URL="https://anything:${AZDO_PAT}@okanagan.visualstudio.com/DefaultCollection/CourseBridge/_git/CourseBridge"
-          # Fast-forward push HEAD to azdo testing. Will fail (correctly) if not a descendant.
-          git push "${AZDO_URL}" "HEAD:refs/heads/testing"
+          # Azure DevOps PAT auth via Basic Authorization header (more reliable
+          # than embedding the PAT in the URL inside CI shells).
+          AUTH_B64=$(printf '%s' ":${AZDO_PAT}" | base64 -w 0)
+          AZDO_URL="https://okanagan.visualstudio.com/DefaultCollection/CourseBridge/_git/CourseBridge"
+          git -c http.extraheader="Authorization: Basic ${AUTH_B64}" \
+              push "${AZDO_URL}" "HEAD:refs/heads/testing"
