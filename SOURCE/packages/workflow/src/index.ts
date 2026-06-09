@@ -20,6 +20,8 @@ export {
   isFinalStatus,
   isInstructorActionableStatus,
   isInstructorVisibleStatus,
+  PHASE_DESCRIPTIONS,
+  PHASE_KPI_LABELS,
   WORKFLOW_PHASES,
   type BallInCourt,
   type CourseStatus,

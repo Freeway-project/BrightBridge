@@ -1,12 +1,12 @@
 "use client"
 
-import { AlertTriangle, BookOpen, CheckSquare, Clock, type LucideIcon } from "lucide-react"
+import { AlertTriangle, BookOpen, CheckSquare, Clock, UserCheck, type LucideIcon } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 
-export type StatCardIcon = "book-open" | "clock" | "check-square" | "alert-triangle"
+export type StatCardIcon = "book-open" | "clock" | "check-square" | "alert-triangle" | "user-check"
 
 interface StatCardProps {
   label: string
@@ -23,6 +23,7 @@ const ICONS: Record<StatCardIcon, LucideIcon> = {
   "clock": Clock,
   "check-square": CheckSquare,
   "alert-triangle": AlertTriangle,
+  "user-check": UserCheck,
 }
 
 const ACCENT_DEFAULTS: Record<StatCardIcon, string> = {
@@ -30,6 +31,7 @@ const ACCENT_DEFAULTS: Record<StatCardIcon, string> = {
   "check-square":   "#10b981",
   "alert-triangle": "#ef4444",
   "clock":          "#8b5cf6",
+  "user-check":     "#f59e0b",
 }
 
 export function StatCard({ label, value, icon, className, index = 0, accent, sub }: StatCardProps) {
