@@ -75,7 +75,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  runtime: "nodejs",
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|api/version|api/metrics|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
