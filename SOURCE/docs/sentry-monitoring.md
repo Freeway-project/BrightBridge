@@ -37,7 +37,7 @@
 - ✅ IP address (for geolocation)
 
 ### 5. **Application Context**
-- ✅ User ID (if identified via PostHog)
+- ✅ User ID (from OIDC session)
 - ✅ Environment (production/staging)
 - ✅ Release version
 - ✅ Source maps for minified code

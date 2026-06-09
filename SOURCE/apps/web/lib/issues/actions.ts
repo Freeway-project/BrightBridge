@@ -62,16 +62,7 @@ export async function createIssueAction(
     const inserted = await pool.query<IssueRow>(
       `
         INSERT INTO course_issues (
-          course_id,
-          phase,
-          title,
-          type,
-          severity,
-          description,
-          location,
-          direct_link,
-          owner_id,
-          created_by
+          course_id, phase, title, type, severity, description, location, direct_link, owner_id, created_by
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
@@ -91,7 +82,6 @@ export async function createIssueAction(
     )
     const data = inserted.rows[0]
 
-    // Insert system message "Issue opened by X"
     const profileResult = await pool.query<{ full_name: string | null }>(
       'SELECT full_name FROM profiles WHERE id = $1 LIMIT 1',
       [ctx.profile.id],
@@ -109,8 +99,6 @@ export async function createIssueAction(
       console.error('[createIssueAction] Comment insert error:', commentError)
     }
 
-    // If instructor creates a provision-phase issue while course is sent_to_instructor,
-    // auto-transition to instructor_questions so admin is visibly blocked
     if (phase === 'provision') {
       const courseResult = await pool.query<{ status: string }>(
         'SELECT status FROM courses WHERE id = $1 LIMIT 1',
@@ -152,7 +140,6 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
     const ctx = await requireProfile()
     const pool = getPostgresPool()
 
-    // Get the course for this issue
     const issueResult = await pool.query<{ course_id: string }>(
       'SELECT course_id FROM course_issues WHERE id = $1 LIMIT 1',
       [issueId],
@@ -163,7 +150,6 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
       throw new Error('Issue not found')
     }
 
-    // Only admins can change issue status
     const isAdmin = ['super_admin', 'admin_full', 'admin_viewer'].includes(ctx.profile.role)
     if (!isAdmin) {
       throw new Error('Only admins can resolve issues')
@@ -172,11 +158,7 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
     const updatedResult = await pool.query<IssueRow>(
       `
         UPDATE course_issues
-        SET
-          status = $2,
-          resolved_by = $3,
-          resolved_at = $4,
-          updated_at = NOW()
+        SET status = $2, resolved_by = $3, resolved_at = $4, updated_at = NOW()
         WHERE id = $1
         RETURNING *
       `,
@@ -189,7 +171,6 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
     )
     const updatedIssue = updatedResult.rows[0]
 
-    // Insert system comment
     const statusLabel = newStatus === 'in_review' ? 'In Review' : newStatus === 'resolved' ? 'Resolved' : 'Open'
     const profileResult = await pool.query<{ full_name: string | null }>(
       'SELECT full_name FROM profiles WHERE id = $1 LIMIT 1',
@@ -235,7 +216,6 @@ export async function addCommentAction(issueId: string, input: AddCommentInput):
     )
     const comment = commentResult.rows[0]
 
-    // Insert mentions
     if (input.mentions && input.mentions.length > 0) {
       try {
         await pool.query(
@@ -280,22 +260,10 @@ export async function getIssuesForCourseAction(
     const clauses = ['i.course_id = $1']
     const values: Array<string> = [courseId]
 
-    if (filters?.phase) {
-      values.push(filters.phase)
-      clauses.push(`i.phase = $${values.length}`)
-    }
-    if (filters?.status) {
-      values.push(filters.status)
-      clauses.push(`i.status = $${values.length}`)
-    }
-    if (filters?.type) {
-      values.push(filters.type)
-      clauses.push(`i.type = $${values.length}`)
-    }
-    if (filters?.severity) {
-      values.push(filters.severity)
-      clauses.push(`i.severity = $${values.length}`)
-    }
+    if (filters?.phase) { values.push(filters.phase); clauses.push(`i.phase = $${values.length}`) }
+    if (filters?.status) { values.push(filters.status); clauses.push(`i.status = $${values.length}`) }
+    if (filters?.type) { values.push(filters.type); clauses.push(`i.type = $${values.length}`) }
+    if (filters?.severity) { values.push(filters.severity); clauses.push(`i.severity = $${values.length}`) }
 
     const { rows } = await pool.query<IssueListRow>(
       `
@@ -420,10 +388,7 @@ export async function getIssueWithCommentsAction(issueId: string): Promise<Cours
       mentions: mentionMap.get(comment.id) ?? [],
     }))
 
-    return {
-      ...mappedIssue,
-      comments,
-    }
+    return { ...mappedIssue, comments }
   } catch (err) {
     console.error('[getIssueWithCommentsAction] Error:', err)
     throw err instanceof Error ? err : new Error('Failed to fetch issue details')

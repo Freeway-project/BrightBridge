@@ -28,7 +28,7 @@ export default async function SuperAdminUsersPage({ searchParams }: Props) {
     <>
       <Topbar title="User Management" subtitle="Super Admin" backHref="/super-admin" />
       <TweakableContent className="min-w-0 flex-1 overflow-hidden">
-        <UsersView result={paginatedResult} search={search ?? ""} currentUserId={context.profile.id} />
+        <UsersView result={paginatedResult} search={search ?? ""} />
       </TweakableContent>
     </>
   )

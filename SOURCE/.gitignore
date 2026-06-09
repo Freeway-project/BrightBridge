@@ -3,6 +3,7 @@ node_modules/
 
 # build output
 .next/
+.next-build/
 out/
 dist/
 coverage/
@@ -30,3 +31,7 @@ backups/
 *Educator*
 *Heirarchy*
 *.csv
+
+# Supabase CLI local cache
+supabase/.branches/
+supabase/.temp/

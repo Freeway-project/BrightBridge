@@ -1,7 +1,32 @@
-import { FileCheck, GitMerge, KeyRound, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { OCLoadingLogo } from "@/components/shared/oc-loading-logo";
-import { startAzureOidcSignInAction } from "./actions";
+"use client"
+
+import { useEffect, useRef, useState } from "react"
+import { FileCheck, GitMerge, KeyRound, Users } from "lucide-react"
+import { startAzureOidcSignInAction } from "./actions"
+import { Button } from "@/components/ui/button"
+import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
+import { AnimatedBubbleParticles } from "@/components/ui/animated-bubble-particles"
+
+const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN === "1"
+
+const DEV_ROLES = [
+  "super_admin",
+  "provost",
+  "admin_full",
+  "admin_viewer",
+  "standard_user",
+  "instructor",
+] as const
+
+const BUBBLE_COLORS = [
+  "#818cf8",
+  "#ec4899",
+  "#34d399",
+  "#f59e0b",
+  "#38bdf8",
+  "#a78bfa",
+  "#fb7185",
+]
 
 const FEATURES = [
   {
@@ -19,77 +44,180 @@ const FEATURES = [
     title: "Full audit trail",
     desc: "Every workflow handoff and decision stays tied to the course record.",
   },
-];
+]
+
+function DevLoginPanel() {
+  return (
+    <form
+      action="/auth/dev/login"
+      method="POST"
+      className="mt-6 space-y-3 rounded-md border border-dashed border-amber-400/60 bg-amber-50/40 p-4 dark:bg-amber-950/20"
+    >
+      <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+        Dev sign-in (local only) — bypasses Microsoft Entra.
+      </p>
+      <input
+        name="email"
+        type="email"
+        required
+        placeholder="email of an existing profile"
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+      />
+      <select
+        name="role"
+        defaultValue="super_admin"
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+      >
+        {DEV_ROLES.map((r) => (
+          <option key={r} value={r}>
+            {r}
+          </option>
+        ))}
+      </select>
+      <Button type="submit" variant="outline" className="w-full h-9 text-sm">
+        Sign in as dev user
+      </Button>
+    </form>
+  )
+}
+
+function SigningInOverlay({ visible }: { visible: boolean }) {
+  const [colorIndex, setColorIndex] = useState(0)
+  const [dots, setDots] = useState(".")
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const dotsRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (!visible) return
+    timerRef.current = setInterval(() => {
+      setColorIndex((i) => (i + 1) % BUBBLE_COLORS.length)
+    }, 800)
+    dotsRef.current = setInterval(() => {
+      setDots((d) => (d.length >= 3 ? "." : d + "."))
+    }, 400)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+      if (dotsRef.current) clearInterval(dotsRef.current)
+    }
+  }, [visible])
+
+  if (!visible) return null
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      aria-live="polite"
+      aria-label="Signing in, please wait"
+    >
+      <AnimatedBubbleParticles
+        particleColor={BUBBLE_COLORS[colorIndex]}
+        particleSize={36}
+        spawnInterval={140}
+        blurStrength={14}
+        enableGooEffect
+        width="100vw"
+        height="100vh"
+        className="bg-black/70 backdrop-blur-sm"
+        zIndex={50}
+      >
+        <div className="flex flex-col items-center gap-4 select-none">
+          <div
+            className="flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold text-white shadow-xl"
+            style={{ background: BUBBLE_COLORS[colorIndex], transition: "background 0.8s ease" }}
+          >
+            CB
+          </div>
+          <p className="text-xl font-semibold tracking-tight text-white">
+            Signing in{dots}
+          </p>
+          <p className="text-sm text-white/50">Taking you to your dashboard</p>
+        </div>
+      </AnimatedBubbleParticles>
+    </div>
+  )
+}
 
 export default function LoginPage() {
+  const [pending, setPending] = useState(false)
+
   return (
-    <main className="min-h-screen bg-background flex">
-      <div className="hidden lg:flex w-1/2 flex-col justify-between bg-sidebar border-r border-sidebar-border px-12 py-14">
-        <div className="flex items-center gap-1">
-          <OCLoadingLogo className="size-12 shrink-0" />
-          <span className="text-lg font-semibold text-sidebar-foreground">CourseBridge</span>
-        </div>
+    <>
+      <SigningInOverlay visible={pending} />
 
-        <div className="space-y-8">
-          <div className="space-y-3">
-            <h1 className="text-4xl font-bold leading-tight text-sidebar-foreground">
-              Course migration,
-              <br />
-              <span className="text-primary">done right.</span>
-            </h1>
-            <p className="text-base text-sidebar-foreground/60 leading-relaxed max-w-sm">
-              Internal review workspace for moving Moodle courses into Brightspace with clear ownership and staged approval.
-            </p>
+      <main className="min-h-screen bg-background flex">
+        <div className="hidden lg:flex w-1/2 flex-col justify-between bg-sidebar border-r border-sidebar-border px-12 py-14">
+          <div className="flex items-center gap-1">
+            <OCLoadingLogo className="size-12 shrink-0" />
+            <span className="text-lg font-semibold text-sidebar-foreground">CourseBridge</span>
           </div>
 
-          <div className="space-y-5">
-            {FEATURES.map((feature) => (
-              <div key={feature.title} className="flex items-start gap-3">
-                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                  <feature.icon className="size-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-sidebar-foreground">{feature.title}</p>
-                  <p className="text-xs text-sidebar-foreground/50 leading-relaxed">{feature.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-xs text-sidebar-foreground/30">
-          © {new Date().getFullYear()} CourseBridge. Internal platform.
-        </p>
-      </div>
-
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm space-y-8">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold tracking-tight">Sign in</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Use your institutional account through Microsoft Entra ID.
-            </p>
-          </div>
-
-          <form action={startAzureOidcSignInAction} className="space-y-4">
-            <div className="rounded-lg border border-border bg-muted/20 px-4 py-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Authenticate with your Microsoft account to continue.
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <h1 className="text-4xl font-bold leading-tight text-sidebar-foreground">
+                Course migration,
+                <br />
+                <span className="text-primary">done right.</span>
+              </h1>
+              <p className="text-base text-sidebar-foreground/60 leading-relaxed max-w-sm">
+                Internal review workspace for moving Moodle courses into Brightspace with clear ownership and staged approval.
               </p>
             </div>
-            <Button className="w-full h-10 gap-2" type="submit">
-              <KeyRound className="size-4" />
-              Sign in with Microsoft
-            </Button>
-          </form>
 
-          <div className="rounded-lg border border-dashed border-border px-4 py-3">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Need access? Ask a super admin to create your account and assign your role.
-            </p>
+            <div className="space-y-5">
+              {FEATURES.map((feature) => (
+                <div key={feature.title} className="flex items-start gap-3">
+                  <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                    <feature.icon className="size-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-sidebar-foreground">{feature.title}</p>
+                    <p className="text-xs text-sidebar-foreground/50 leading-relaxed">{feature.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-xs text-sidebar-foreground/30">
+            © {new Date().getFullYear()} CourseBridge. Internal platform.
+          </p>
+        </div>
+
+        <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+          <div className="w-full max-w-sm space-y-8">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold tracking-tight">Sign in</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Use your institutional account through Microsoft Entra ID.
+              </p>
+            </div>
+
+            <form
+              action={startAzureOidcSignInAction}
+              onSubmit={() => setPending(true)}
+              className="space-y-4"
+            >
+              <div className="rounded-lg border border-border bg-muted/20 px-4 py-3">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Authenticate with your Microsoft account to continue.
+                </p>
+              </div>
+              <Button className="w-full h-10 gap-2" type="submit" disabled={pending}>
+                <KeyRound className="size-4" />
+                Sign in with Microsoft
+              </Button>
+            </form>
+
+            <div className="rounded-lg border border-dashed border-border px-4 py-3">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Need access? Ask a super admin to create your account and assign your role.
+              </p>
+            </div>
+
+            {DEV_LOGIN_ENABLED && <DevLoginPanel />}
           </div>
         </div>
-      </div>
-    </main>
-  );
+      </main>
+    </>
+  )
 }

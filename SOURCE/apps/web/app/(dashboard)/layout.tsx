@@ -9,9 +9,7 @@ import { NotificationProvider } from "@/components/providers/notification-provid
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardContentShell } from "@/components/layout/dashboard-content-shell"
 import { isReadonlyMode } from "@/lib/system-migration"
-import { PostHogIdentifier } from "@/components/providers/posthog-identifier"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
-import { MemeProvider } from "@/components/providers/meme-provider"
 import { getDeploymentVersion } from "@/lib/deployment-version"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -29,7 +27,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   if (context.kind === "missing_profile") {
-    redirect("/auth/login")
+    // Signed in via Azure but no CourseBridge profile/role — send to a terminal
+    // page instead of /auth/login, which would silently SSO back here and loop.
+    redirect("/auth/no-access")
   }
 
   const role = context.profile.role
@@ -41,19 +41,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <TweakProvider>
-      <PostHogIdentifier userId={context.userId} email={context.email ?? ""} name={context.profile.fullName} role={role} />
       <OnlinePresenceTracker userId={context.userId} name={context.profile.fullName} email={context.email ?? ""} role={role} />
       <NotificationProvider userId={context.userId} role={role}>
-        <MemeProvider>
-          <SidebarProvider defaultOpen={sidebarOpen}>
-            <div className="flex h-screen w-full overflow-hidden bg-background">
-              <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
-              <DashboardContentShell>
-                {children}
-              </DashboardContentShell>
-            </div>
-          </SidebarProvider>
-        </MemeProvider>
+        <SidebarProvider defaultOpen={sidebarOpen}>
+          <div className="flex h-screen w-full overflow-hidden bg-background">
+            <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
+            <DashboardContentShell>
+              {children}
+            </DashboardContentShell>
+          </div>
+        </SidebarProvider>
       </NotificationProvider>
     </TweakProvider>
   )

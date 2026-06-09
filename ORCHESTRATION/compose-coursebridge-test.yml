@@ -21,9 +21,6 @@ services:
       - azure_oidc_post_logout_redirect_uri_coursebridge-test
       - azure_oidc_scopes_coursebridge-test
       - azure_oidc_allowed_tenant_id_coursebridge-test
-      - next_public_supabase_url_coursebridge-test
-      - next_public_supabase_publishable_key_coursebridge-test
-      - supabase_service_role_key_coursebridge-test
       - next_server_actions_encryption_key_coursebridge-test
       - next_public_posthog_token_coursebridge-test
       - next_public_posthog_key_coursebridge-test
@@ -57,9 +54,6 @@ services:
       - AZURE_OIDC_POST_LOGOUT_REDIRECT_URI_FILE=/run/secrets/azure_oidc_post_logout_redirect_uri_coursebridge-test
       - AZURE_OIDC_SCOPES_FILE=/run/secrets/azure_oidc_scopes_coursebridge-test
       - AZURE_OIDC_ALLOWED_TENANT_ID_FILE=/run/secrets/azure_oidc_allowed_tenant_id_coursebridge-test
-      - NEXT_PUBLIC_SUPABASE_URL_FILE=/run/secrets/next_public_supabase_url_coursebridge-test
-      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_FILE=/run/secrets/next_public_supabase_publishable_key_coursebridge-test
-      - SUPABASE_SERVICE_ROLE_KEY_FILE=/run/secrets/supabase_service_role_key_coursebridge-test
       - NEXT_SERVER_ACTIONS_ENCRYPTION_KEY_FILE=/run/secrets/next_server_actions_encryption_key_coursebridge-test
       - NEXT_PUBLIC_POSTHOG_TOKEN_FILE=/run/secrets/next_public_posthog_token_coursebridge-test
       - NEXT_PUBLIC_POSTHOG_KEY_FILE=/run/secrets/next_public_posthog_key_coursebridge-test
@@ -137,12 +131,6 @@ secrets:
   azure_oidc_scopes_coursebridge-test:
     external: true
   azure_oidc_allowed_tenant_id_coursebridge-test:
-    external: true
-  next_public_supabase_url_coursebridge-test:
-    external: true
-  next_public_supabase_publishable_key_coursebridge-test:
-    external: true
-  supabase_service_role_key_coursebridge-test:
     external: true
   next_server_actions_encryption_key_coursebridge-test:
     external: true

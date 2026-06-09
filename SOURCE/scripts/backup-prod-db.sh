@@ -2,22 +2,16 @@
 # =============================================================================
 # backup-prod-db.sh
 #
-# Full logical backup of your production Postgres database (e.g. Supabase)
-# before applying migrations. Writes a single pg_dump custom-format file.
+# Full logical backup of your production Postgres database before applying
+# migrations. Writes a single pg_dump custom-format file.
 #
 # WHAT YOU GET (so a bad migration can be rolled back from data + “links”):
 #   • Every row in every table you have permission to dump (your app data).
 #   • Table definitions, PRIMARY KEYs, FOREIGN KEYs, UNIQUE — relationships
 #     between rows are stored in the dump and come back correctly on restore.
 #   • Sequences (serial / identity) so new inserts won’t collide after restore.
-#   • Typically includes auth.* on Supabase when dumping as the DB owner, so
-#     auth.users lines up with public.profiles again after a full restore.
 #
-# USE A DIRECT SESSION URL (recommended by Supabase for pg_dump), not the
-# transaction-pooler port, e.g.:
-#   postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
-#   — or —
-#   postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+# USE A DIRECT SESSION URL (port 5432), not a transaction-pooler port.
 #
 # USAGE:
 #   export PROD_DATABASE_URL='postgresql://...'
@@ -37,8 +31,7 @@
 #   pg_restore --clean --if-exists --no-owner --no-acl --verbose -d "$TARGET_URL" backups/prod-full-....dump
 #
 # LIMITS:
-#   - Does not download Storage bucket files (objects live outside Postgres).
-#   - For Supabase Pro, Dashboard → Database → Backups is an additional safety net.
+#   - Does not download object storage / blob files (they live outside Postgres).
 # =============================================================================
 
 set -euo pipefail
@@ -106,7 +99,7 @@ run_dump() {
   fi
 
   if command -v docker >/dev/null 2>&1; then
-    # Same pattern as scripts/mirror-to-dev.sh — custom format on stdout
+    # Fallback: run pg_dump inside Docker — custom format on stdout
     docker run --rm -i \
       -e PGSSLMODE="${PGSSLMODE:-require}" \
       postgres:17-alpine \

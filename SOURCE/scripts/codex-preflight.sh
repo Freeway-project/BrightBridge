@@ -43,22 +43,6 @@ check_command() {
   fi
 }
 
-check_supabase_cli() {
-  if command -v supabase >/dev/null 2>&1 || [ -x "$HOME/.local/bin/supabase" ]; then
-    ok "command available: supabase"
-    return
-  fi
-
-  if command -v npx >/dev/null 2>&1; then
-    if npx supabase --version >/dev/null 2>&1; then
-      ok "Supabase CLI available through npx"
-      return
-    fi
-  fi
-
-  warn "missing optional command: supabase (use npx supabase as fallback)"
-}
-
 printf 'Codex preflight for BrightBridge\n'
 printf 'Project root: %s\n\n' "$ROOT_DIR"
 
@@ -88,7 +72,6 @@ check_command "rg" "fail"
 check_command "node" "fail"
 check_command "npm" "fail"
 check_command "graphify" "warn"
-check_supabase_cli
 
 if [ -f "graphify-out/GRAPH_REPORT.md" ]; then
   ok "found graphify-out/GRAPH_REPORT.md"
@@ -103,9 +86,9 @@ else
 fi
 
 if [ -f ".env.local" ] || [ -f "apps/web/.env.local" ]; then
-  ok "found Supabase env file (.env.local or apps/web/.env.local)"
+  ok "found env file (.env.local or apps/web/.env.local)"
 else
-  warn "missing Supabase env file (.env.local or apps/web/.env.local)"
+  warn "missing env file (.env.local or apps/web/.env.local)"
 fi
 
 if [ -d "node_modules" ]; then

@@ -1,5 +1,9 @@
+# syntax=docker/dockerfile:1.7
 FROM node:22-alpine AS base
 WORKDIR /app
+ENV NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_LOGLEVEL=error
 
 FROM base AS deps
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
@@ -13,35 +17,27 @@ COPY packages/workflow/package.json packages/workflow/package.json
 RUN npm ci
 
 FROM deps AS build
-ARG NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
-ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=build-placeholder
-ARG SUPABASE_SERVICE_ROLE_KEY=build-placeholder
-ARG NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=build-placeholder-32-byte-base64
-ARG NEXT_PUBLIC_POSTHOG_TOKEN=
-ARG NEXT_PUBLIC_POSTHOG_KEY=
-ARG NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+# Non-secret build args: safe as ARG/ENV (used by Next at build time).
 ARG NEXT_PUBLIC_SENTRY_DSN=
 ARG SENTRY_ORG=
 ARG SENTRY_PROJECT=
 ARG NEXT_PUBLIC_RAPIDAPI_KEY=
-ARG GROQ_API_KEY=
 
-ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-ENV SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
-ENV NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=$NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
-ENV NEXT_PUBLIC_POSTHOG_TOKEN=$NEXT_PUBLIC_POSTHOG_TOKEN
-ENV NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
-ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
 ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ENV SENTRY_ORG=$SENTRY_ORG
 ENV SENTRY_PROJECT=$SENTRY_PROJECT
 ENV NEXT_PUBLIC_RAPIDAPI_KEY=$NEXT_PUBLIC_RAPIDAPI_KEY
-ENV GROQ_API_KEY=$GROQ_API_KEY
 
 COPY apps apps
 COPY packages packages
-RUN npm run build --workspace=@coursebridge/web
+# Secrets are mounted only for this RUN (not baked into any image layer or
+# ARG/ENV). If a secret isn't provided (e.g. in plain CI image-verify builds),
+# fall back to a placeholder so `next build` still completes.
+RUN --mount=type=secret,id=next_server_actions_encryption_key \
+    --mount=type=secret,id=groq_api_key \
+    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="$(cat /run/secrets/next_server_actions_encryption_key 2>/dev/null || echo build-placeholder-32-byte-base64)" \
+    GROQ_API_KEY="$(cat /run/secrets/groq_api_key 2>/dev/null || echo '')" \
+    npm run build --workspace=@coursebridge/web
 
 FROM base AS runtime
 ENV NODE_ENV=production
@@ -55,7 +51,7 @@ COPY --from=build /app/apps/web ./apps/web
 COPY --from=build /app/packages ./packages
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY scripts ./scripts
-COPY supabase ./supabase
+COPY db ./db
 
 RUN chmod +x /docker-entrypoint.sh \
     && npm prune --omit=dev

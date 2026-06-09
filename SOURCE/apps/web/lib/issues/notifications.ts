@@ -11,14 +11,13 @@ export async function notifyMentionedUsersAction(
   try {
     if (!issueId || !commentId) throw new Error('Issue ID and comment ID are required')
     if (!mentionedProfileIds || mentionedProfileIds.length === 0) return
-    const pool = getPostgresPool()
 
-    // Get issue context
+    const pool = getPostgresPool()
     const issueResult = await pool.query<{ id: string; title: string; course_id: string; phase: string }>(
       'SELECT id, title, course_id, phase FROM course_issues WHERE id = $1 LIMIT 1',
       [issueId],
     )
-    const issue = issueResult.rows[0]
+    const issue = issueResult.rows[0] ?? null
 
     if (!issue) {
       console.error('[notifyMentionedUsersAction] Failed to fetch issue for mention notification')
@@ -41,10 +40,6 @@ export async function notifyMentionedUsersAction(
     })
 
     // TODO: Implement notification system
-    // This could be done via:
-    // 1. Database notifications table (records to be read by UI)
-    // 2. Email service integration
-    // 3. Push notification service
   } catch (err) {
     console.error('[notifyMentionedUsersAction] Error:', err)
     // Don't throw - notifications are non-critical
@@ -54,9 +49,8 @@ export async function notifyMentionedUsersAction(
 export async function getUnreadMentionsAction(userId: string): Promise<number> {
   try {
     if (!userId) throw new Error('User ID is required')
-    const pool = getPostgresPool()
 
-    // Get count of comments where user is mentioned but hasn't viewed
+    const pool = getPostgresPool()
     const { rows } = await pool.query<{ count: string }>(
       `
         SELECT COUNT(*)::text AS count
@@ -65,7 +59,6 @@ export async function getUnreadMentionsAction(userId: string): Promise<number> {
       `,
       [userId],
     )
-
     return Number(rows[0]?.count ?? 0)
   } catch (err) {
     console.error('[getUnreadMentionsAction] Error:', err)
@@ -85,8 +78,8 @@ export async function getMentionsForUserAction(userId: string, limit = 20): Prom
 > {
   try {
     if (!userId) throw new Error('User ID is required')
-    const pool = getPostgresPool()
 
+    const pool = getPostgresPool()
     const { rows } = await pool.query<{
       comment_id: string
       issue_id: string

@@ -6,8 +6,7 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
 import { GlobalPointer } from "@/components/shared/global-pointer";
-import { CSPostHogProvider, PostHogPageview } from "@/components/providers/posthog-provider";
-import { Suspense, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { getDeploymentVersion } from "@/lib/deployment-version";
 
 export const metadata: Metadata = {
@@ -25,32 +24,27 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", GeistSans.className)}>
       <body>
-        <CSPostHogProvider>
-          <Suspense fallback={null}>
-            <PostHogPageview />
-          </Suspense>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
-          <DeploymentDetector initialVersion={currentVersion} />
-          <GlobalPointer />
-          <Toaster
-            closeButton
-            position="top-right"
-            expand
-            visibleToasts={8}
-            toastOptions={{
-              classNames: {
-                toast: "cb-toast",
-                title: "cb-toast-title",
-                description: "cb-toast-description",
-                actionButton: "cb-toast-action",
-                cancelButton: "cb-toast-cancel",
-                closeButton: "cb-toast-close"
-              }
-            }}
-          />
-        </CSPostHogProvider>
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
+        <DeploymentDetector initialVersion={currentVersion} />
+        <GlobalPointer />
+        <Toaster
+          closeButton
+          position="top-right"
+          expand
+          visibleToasts={8}
+          toastOptions={{
+            classNames: {
+              toast: "cb-toast",
+              title: "cb-toast-title",
+              description: "cb-toast-description",
+              actionButton: "cb-toast-action",
+              cancelButton: "cb-toast-cancel",
+              closeButton: "cb-toast-close"
+            }
+          }}
+        />
       </body>
     </html>
   );

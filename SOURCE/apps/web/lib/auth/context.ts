@@ -17,9 +17,12 @@ export type AuthContext =
   | { kind: "missing_profile"; userId: string; email: string | null }
   | { kind: "profile"; userId: string; email: string | null; profile: AppProfile };
 
+// Maps Azure Entra app-role claim values to internal CourseBridge roles. Keys are
+// normalized (lowercased, spaces/hyphens -> underscore) before lookup.
 const ROLE_CLAIM_MAP: Record<string, Role> = {
   super_admin: "super_admin",
   superadmin: "super_admin",
+  provost: "provost",
   admin_full: "admin_full",
   adminfull: "admin_full",
   admin_viewer: "admin_viewer",
@@ -85,7 +88,37 @@ export async function getAuthContext(): Promise<AuthContext> {
 
   const profileRepository = getProfileRepository();
   const profileById = await profileRepository.getProfileById(user.id);
-  const profile = profileById ?? (user.email ? await profileRepository.getProfileByEmail(user.email) : null);
+  const profileByEmail = profileById
+    ? null
+    : user.email
+      ? await profileRepository.getProfileByEmail(user.email)
+      : null;
+
+  // Link-by-email on first Azure OIDC sign-in: legacy profile rows carry the
+  // old Supabase auth UUID. Re-key the row to the Entra `oid` so subsequent
+  // requests hit the fast id path. Skipped if id already matches or the row
+  // somehow already has the new id under a different shape.
+  if (profileByEmail && profileByEmail.id !== user.id) {
+    try {
+      await profileRepository.relinkProfileId(profileByEmail.id, user.id);
+      profileByEmail.id = user.id;
+    } catch (error) {
+      // If the rewrite collides (e.g. another row already owns user.id) just
+      // proceed with the legacy id — the session still works, we just keep
+      // taking the email-lookup path. The error is worth surfacing.
+      console.warn(
+        "[auth] relink_failed",
+        JSON.stringify({
+          oldId: profileByEmail.id,
+          newId: user.id,
+          email: user.email,
+          message: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    }
+  }
+
+  const profile = profileById ?? profileByEmail;
   const claimedRole = resolveRoleFromClaims(user.userMetadata);
   const claimedFullNameRaw = typeof user.userMetadata.full_name === "string"
     ? user.userMetadata.full_name.trim()
@@ -115,10 +148,20 @@ export async function getAuthContext(): Promise<AuthContext> {
       };
     }
 
+    console.warn(
+      "[auth] missing_profile",
+      JSON.stringify({
+        userId: user.id,
+        email: user.email,
+        hasClaimedRole: Boolean(claimedRole),
+        rawRoles: user.userMetadata.oidc_roles ?? null,
+      }),
+    );
+
     return {
       kind: "missing_profile",
       userId: user.id,
-      email: user.email
+      email: user.email,
     };
   }
 
@@ -160,8 +203,8 @@ export async function getAuthContext(): Promise<AuthContext> {
       id: effectiveProfile.id,
       email: effectiveProfile.email,
       fullName: effectiveProfile.fullName,
-      role: effectiveProfile.role
-    }
+      role: effectiveProfile.role,
+    },
   };
 }
 
@@ -169,7 +212,7 @@ export async function requireProfile() {
   const context = await getAuthContext();
 
   if (context.kind === "anonymous") redirect("/auth/login");
-  if (context.kind === "missing_profile") redirect("/auth/login");
+  if (context.kind === "missing_profile") redirect("/auth/no-access");
 
   return context;
 }

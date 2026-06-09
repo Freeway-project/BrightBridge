@@ -3,7 +3,7 @@ import process from "node:process";
 import pg from "pg";
 
 const migrationPath =
-  process.argv[2] ?? "supabase/migrations/20260428121500_initial_schema.sql";
+  process.argv[2] ?? "db/migrations/20260428121500_initial_schema.sql";
 
 loadEnvFiles([
   ".env.local",
@@ -90,11 +90,11 @@ function parseDatabaseUrl(value) {
       connectionString: value
     };
   } catch {
-    return parseSupabaseDatabaseUrl(value);
+    return parseManualDatabaseUrl(value);
   }
 }
 
-function parseSupabaseDatabaseUrl(value) {
+function parseManualDatabaseUrl(value) {
   const protocolMatch = value.match(/^postgres(?:ql)?:\/\//);
 
   if (!protocolMatch) {

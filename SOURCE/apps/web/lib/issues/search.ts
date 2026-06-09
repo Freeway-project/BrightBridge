@@ -1,4 +1,5 @@
-import { getPostgresPool } from '@/lib/postgres/pool'
+import "server-only"
+import { getPostgresPool } from "@/lib/postgres/pool"
 import { CourseIssue } from './types'
 
 type IssueSearchRow = CourseIssue & {
@@ -32,6 +33,7 @@ export async function searchIssuesAction(
 ): Promise<CourseIssue[]> {
   try {
     if (!courseId) throw new Error('Course ID is required')
+
     const pool = getPostgresPool()
     const clauses = ['i.course_id = $1']
     const values: string[] = [courseId]
@@ -42,23 +44,10 @@ export async function searchIssuesAction(
       const searchParam = `$${values.length}`
       clauses.push(`(LOWER(i.title) LIKE ${searchParam} OR LOWER(COALESCE(i.description, '')) LIKE ${searchParam})`)
     }
-
-    if (filters?.phase) {
-      values.push(filters.phase)
-      clauses.push(`i.phase = $${values.length}`)
-    }
-    if (filters?.status) {
-      values.push(filters.status)
-      clauses.push(`i.status = $${values.length}`)
-    }
-    if (filters?.type) {
-      values.push(filters.type)
-      clauses.push(`i.type = $${values.length}`)
-    }
-    if (filters?.severity) {
-      values.push(filters.severity)
-      clauses.push(`i.severity = $${values.length}`)
-    }
+    if (filters?.phase) { values.push(filters.phase); clauses.push(`i.phase = $${values.length}`) }
+    if (filters?.status) { values.push(filters.status); clauses.push(`i.status = $${values.length}`) }
+    if (filters?.type) { values.push(filters.type); clauses.push(`i.type = $${values.length}`) }
+    if (filters?.severity) { values.push(filters.severity); clauses.push(`i.severity = $${values.length}`) }
 
     const { rows } = await pool.query<IssueSearchRow>(
       `
@@ -77,7 +66,6 @@ export async function searchIssuesAction(
       `,
       values,
     )
-
     return rows.map(mapIssueRow)
   } catch (err) {
     console.error('[searchIssuesAction] Error:', err)
@@ -88,8 +76,8 @@ export async function searchIssuesAction(
 export async function getRecentIssuesAction(courseId: string, limit = 10): Promise<CourseIssue[]> {
   try {
     if (!courseId) throw new Error('Course ID is required')
-    const pool = getPostgresPool()
 
+    const pool = getPostgresPool()
     const { rows } = await pool.query<IssueSearchRow>(
       `
         SELECT
@@ -108,7 +96,6 @@ export async function getRecentIssuesAction(courseId: string, limit = 10): Promi
       `,
       [courseId, limit],
     )
-
     return rows.map(mapIssueRow)
   } catch (err) {
     console.error('[getRecentIssuesAction] Error:', err)
@@ -119,6 +106,7 @@ export async function getRecentIssuesAction(courseId: string, limit = 10): Promi
 export async function getOpenIssuesCountAction(courseId: string): Promise<number> {
   try {
     if (!courseId) throw new Error('Course ID is required')
+
     const pool = getPostgresPool()
     const { rows } = await pool.query<{ count: string }>(
       `
@@ -128,7 +116,6 @@ export async function getOpenIssuesCountAction(courseId: string): Promise<number
       `,
       [courseId],
     )
-
     return Number(rows[0]?.count ?? 0)
   } catch (err) {
     console.error('[getOpenIssuesCountAction] Error:', err)

@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Building2, Search } from "lucide-react"
+import Link from "next/link"
+import { Building2, ChevronRight, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { StatusBadge } from "@/components/courses/status-badge"
-import { StatCard } from "@/components/shared/stat-card"
 import type { CourseSummary } from "@/lib/courses/service"
 
 interface Props {
@@ -22,16 +22,6 @@ export function DepartmentMonitor({ courses }: Props) {
     )
   }, [courses, search])
 
-  const withInstructor = courses.filter((c) =>
-    ["sent_to_instructor", "instructor_questions"].includes(c.status)
-  ).length
-  const approved = courses.filter((c) =>
-    ["instructor_approved", "final_approved"].includes(c.status)
-  ).length
-  const inProgress = courses.filter((c) =>
-    ["ta_review_in_progress", "submitted_to_admin", "admin_changes_requested", "ready_for_instructor"].includes(c.status)
-  ).length
-
   return (
     <section>
       <div className="mb-4">
@@ -42,12 +32,6 @@ export function DepartmentMonitor({ courses }: Props) {
         <p className="text-sm text-muted-foreground">
           All courses under your department — read only
         </p>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <StatCard label="With Instructor" value={withInstructor} icon="book-open" />
-        <StatCard label="In Review" value={inProgress} icon="clock" />
-        <StatCard label="Approved" value={approved} icon="check-square" />
       </div>
 
       <div className="relative mb-4 max-w-sm">
@@ -71,18 +55,22 @@ export function DepartmentMonitor({ courses }: Props) {
       ) : (
         <div className="space-y-2">
           {filtered.map((course) => (
-            <div
+            <Link
               key={course.id}
-              className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50"
+              href={`/instructor/courses/${course.id}`}
+              className="group flex items-center justify-between p-4 rounded-lg border border-border bg-card/50 transition-colors hover:bg-muted hover:border-primary/30"
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate">{course.title}</p>
+                <p className="text-sm font-medium truncate group-hover:text-foreground">{course.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {[course.department, course.term].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              <StatusBadge status={course.status} className="ml-4 shrink-0" />
-            </div>
+              <div className="ml-4 flex shrink-0 items-center gap-2">
+                <StatusBadge status={course.status} />
+                <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </div>
+            </Link>
           ))}
         </div>
       )}

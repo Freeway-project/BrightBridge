@@ -141,5 +141,4 @@ run_restore
 
 echo ""
 echo -e "${GREEN}✓ pg_restore finished.${NC}"
-echo -e "  Re-apply any ${CYAN}supabase/migrations${NC} grants or RLS fixes your project expects"
-echo "  (e.g. service_role grants) if the dump predates them."
+echo -e "  Re-apply any ${CYAN}db/migrations${NC} grants your project expects if the dump predates them."

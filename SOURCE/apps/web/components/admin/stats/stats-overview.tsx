@@ -1,29 +1,63 @@
 "use client"
 
+import type { PhaseBreakdown } from "@coursebridge/workflow"
 import { StatCard } from "@/components/shared/stat-card"
-import type { StatusCount, TAWorkload, StuckCourse } from "@/lib/repositories/contracts"
 
 interface Props {
   totalCourses: number
-  statusCounts: StatusCount[]
-  taWorkload: TAWorkload[]
-  stuckCourses: StuckCourse[]
+  phases: PhaseBreakdown[]
 }
 
-export function StatsOverview({ totalCourses, statusCounts, taWorkload, stuckCourses }: Props) {
-  const completedCount = statusCounts.find((s) => s.status === "final_approved")?.count ?? 0
-  const completedPct = totalCourses > 0 ? Math.round((completedCount / totalCourses) * 100) : 0
-  const activeStaff = taWorkload.filter((ta) => ta.active_courses > 0).length
-  const inProgressCount = statusCounts
-    .filter((s) => !["course_created", "final_approved"].includes(s.status))
-    .reduce((sum, s) => sum + s.count, 0)
+/**
+ * Four plain-English KPIs for admin/provost readers — derived from the
+ * canonical phase breakdown so they always sum back to totalCourses.
+ *
+ *   Imported            = totalCourses
+ *   Awaiting review     = migration + staging phase totals
+ *   With instructor     = instructor phase total
+ *   Live in Brightspace = provision phase total
+ */
+export function StatsOverview({ totalCourses, phases }: Props) {
+  const phaseTotal = (key: PhaseBreakdown["key"]) =>
+    phases.find((p) => p.key === key)?.total ?? 0
+
+  const awaitingReview = phaseTotal("migration") + phaseTotal("staging")
+  const withInstructor = phaseTotal("instructor")
+  const live = phaseTotal("provision")
+
+  const pct = (n: number) =>
+    totalCourses > 0 ? `${Math.max(1, Math.round((n / totalCourses) * 100))}% of total` : "—"
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <StatCard label="Total Courses" value={totalCourses} icon="book-open" index={0} sub="across all stages" />
-      <StatCard label={`Completed`} value={completedCount} icon="check-square" index={1} sub={`${completedPct}% of total`} />
-      <StatCard label="In Progress" value={inProgressCount} icon="clock" index={2} sub="active in pipeline" />
-      <StatCard label="Stuck" value={stuckCourses.length} icon="alert-triangle" index={3} sub="needs attention" />
+      <StatCard
+        label="Imported"
+        value={totalCourses}
+        icon="book-open"
+        index={0}
+        sub="courses migrated from Moodle"
+      />
+      <StatCard
+        label="Awaiting review"
+        value={awaitingReview}
+        icon="clock"
+        index={1}
+        sub={awaitingReview > 0 ? pct(awaitingReview) : "nothing in queue"}
+      />
+      <StatCard
+        label="With instructor"
+        value={withInstructor}
+        icon="user-check"
+        index={2}
+        sub={withInstructor > 0 ? "instructor action needed" : "none in instructor stage"}
+      />
+      <StatCard
+        label="Live in Brightspace"
+        value={live}
+        icon="check-square"
+        index={3}
+        sub={live > 0 ? `${pct(live)} provisioned` : "no courses provisioned yet"}
+      />
     </div>
   )
 }

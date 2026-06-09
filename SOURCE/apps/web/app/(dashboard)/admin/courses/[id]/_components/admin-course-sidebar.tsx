@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send, Building2, ChevronDown, ChevronRight, ChevronLeft, Layout } from "lucide-react"
+import { CheckCircle2, MessageSquare, AlertTriangle, Clock, User, Send, Building2, ChevronDown, ChevronRight, ChevronLeft, Layout, FileDown, FileSpreadsheet } from "lucide-react"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Separator } from "@/components/ui/separator"
 import type { CourseComment } from "@/lib/services/comments"
@@ -228,6 +228,28 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
           {/* Admin Actions */}
           <section className="space-y-4">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">Review Control</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-start h-10 font-black uppercase tracking-widest text-[10px] border border-border-icy"
+              >
+                <a href={`/print/courses/${course.id}`} target="_blank" rel="noopener noreferrer">
+                  <FileDown className="mr-2 size-4" />
+                  Export PDF
+                </a>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-start h-10 font-black uppercase tracking-widest text-[10px] border border-border-icy"
+              >
+                <a href={`/api/courses/${course.id}/xlsx`}>
+                  <FileSpreadsheet className="mr-2 size-4" />
+                  Export Excel
+                </a>
+              </Button>
+            </div>
             {!fixesOpen ? (
               <div className="grid grid-cols-1 gap-2">
                 <Button

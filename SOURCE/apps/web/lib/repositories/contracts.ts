@@ -78,18 +78,52 @@ export type AdminCourseRow = {
   status: CourseStatus;
   updatedAt: string;
   ta: { id: string; name: string | null; email: string } | null;
+  instructor: { id: string; name: string | null; email: string } | null;
+  instructorSummaryNotes: string | null;
   reviewProgress?: ReviewProgress;
 };
 
 export type AdminCourseListFilters = {
   search?: string;
   status?: CourseStatus;
+  /** Filter to any of these statuses (whole-phase filter). Takes precedence over `status`. */
+  statuses?: readonly CourseStatus[];
   taProfileId?: string;
   assignedOnly?: boolean;
 };
 
+export type AssignedCourseListFilters = {
+  statuses?: readonly CourseStatus[];
+};
+
+export type AccessibleCourseScope =
+  | { kind: "all" }
+  | { kind: "assigned"; profileId: string; role: AssignmentRole };
+
+export type AccessibleCourseListFilters = {
+  scope: AccessibleCourseScope;
+  status?: CourseStatus;
+  search?: string;
+  subject?: string;
+  term?: string;
+};
+
+export type AccessibleCourseAggregates = {
+  statusCounts: Partial<Record<CourseStatus, number>>;
+  subjects: string[];
+  terms: string[];
+  total: number;
+};
+
+export type UnitCourseListFilters = {
+  search?: string;
+  status?: CourseStatus;
+  term?: string;
+};
+
 export type SuperAdminCourseRow = {
   id: string;
+  code: string | null;
   title: string;
   status: CourseStatus;
   term: string | null;
@@ -103,6 +137,15 @@ export type SuperAdminCourseRow = {
 export type StatusCount = {
   status: CourseStatus;
   count: number;
+};
+
+export type UnitCourseFacets = {
+  /** Status breakdown over the unit's whole subtree (unfiltered). */
+  statusCounts: StatusCount[];
+  /** Distinct, non-empty course terms in the subtree (for the term filter). */
+  terms: string[];
+  /** Total courses in the subtree. */
+  total: number;
 };
 
 export type StuckCourse = {
@@ -132,6 +175,32 @@ export type AuditEvent = {
   actor_role: string;
   note: string | null;
   created_at: string;
+};
+
+/**
+ * A normalized entry from the generic `audit_log` table, used to surface the
+ * activity that course_status_events / issues / comments don't already cover
+ * (assignments, escalations, escalation messages, issue comments). Profile ids
+ * are pre-resolved to display names by the repository. The repository returns
+ * an empty list if the audit_log table/migration isn't present yet — it never
+ * throws into the timeline.
+ */
+export type CourseAuditEntry = {
+  id: string;
+  tableName:
+    | "course_assignments"
+    | "course_escalations"
+    | "escalation_messages"
+    | "course_issue_comments";
+  action: "INSERT" | "UPDATE" | "DELETE" | "BACKFILL";
+  at: string;
+  actorName: string | null;
+  role: string | null; // assignment role
+  targetName: string | null; // who was assigned
+  title: string | null; // escalation title
+  body: string | null; // message / comment body
+  status: string | null; // escalation status (e.g. on resolve)
+  isSystem: boolean; // system-generated issue comment
 };
 
 export type SuperAdminData = {
@@ -213,6 +282,13 @@ export type AssignUserToCourseRecordInput = {
   assignedBy: string;
 };
 
+export type ReassignCourseStaffRecordInput = {
+  courseId: string;
+  newProfileId: string;
+  actorId: string;
+  reason: string | null;
+};
+
 export type InsertStatusEventInput = {
   courseId: string;
   fromStatus: CourseStatus | null;
@@ -266,7 +342,22 @@ export type AssignmentLog = {
 
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
-  listAssignedCourses(userId: string, assignmentRole: AssignmentRole): Promise<CourseSummary[]>;
+  /** Paginated accessible-courses query for the `/courses` list view. */
+  listAccessibleCoursesPage(
+    page: number,
+    pageSize: number,
+    filters: AccessibleCourseListFilters,
+  ): Promise<PaginatedResult<CourseSummary>>;
+  /** Status-count map + distinct subjects/terms for the `/courses` list tabs and filter dropdowns. */
+  getAccessibleCourseAggregates(
+    scope: AccessibleCourseScope,
+    filters?: Pick<AccessibleCourseListFilters, "search" | "subject" | "term">,
+  ): Promise<AccessibleCourseAggregates>;
+  listAssignedCourses(
+    userId: string,
+    assignmentRole: AssignmentRole,
+    filters?: AssignedCourseListFilters,
+  ): Promise<CourseSummary[]>;
   getAssignedCourseById(
     courseId: string,
     userId: string,
@@ -279,6 +370,7 @@ export interface CourseRepository {
   getCourseAssignment(courseId: string, profileId: string): Promise<CourseAssignmentRecord | null>;
   hasAssignment(courseId: string, profileId: string, role: AssignmentRole): Promise<boolean>;
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;
+  reassignCourseStaff(input: ReassignCourseStaffRecordInput): Promise<void>;
   insertStatusEvent(input: InsertStatusEventInput): Promise<void>;
   listAdminCourses(): Promise<AdminCourseRow[]>;
   listAdminCoursesPage(
@@ -290,14 +382,29 @@ export interface CourseRepository {
   listSuperAdminCourses(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<SuperAdminCourseRow>>;
   countCourses(): Promise<number>;
   listStatusCounts(): Promise<StatusCount[]>;
-  listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
+  listStuckCourses(cutoffIso: string, limit?: number): Promise<StuckCourse[]>;
+  countStuckCourses(cutoffIso: string): Promise<number>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
+  listAuditEventsPage(page: number, pageSize: number): Promise<PaginatedResult<AuditEvent>>;
+  listCourseStatusEvents(courseId: string): Promise<AuditEvent[]>;
+  listCourseAuditEntries(courseId: string): Promise<CourseAuditEntry[]>;
   listSubmissionHistory(courseId: string): Promise<SubmissionEvent[]>;
   listChangeRequestHistory(courseId: string): Promise<SubmissionEvent[]>;
   listQuestionRoundHistory(courseId: string): Promise<SubmissionEvent[]>;
   listRecentAssignments(limit: number): Promise<AssignmentLog[]>;
   listCoursesByUnitAncestry(unitIds: string[]): Promise<CourseSummary[]>;
+  /** Paginated courses across a unit's whole subtree, with search/status/term filters. */
+  listCoursesByUnit(
+    unitId: string,
+    page?: number,
+    pageSize?: number,
+    filters?: UnitCourseListFilters,
+  ): Promise<PaginatedResult<AdminCourseRow>>;
+  /** Status breakdown + distinct terms + total over a unit's subtree (drives KPIs/term filter). */
+  getUnitCourseFacets(unitId: string): Promise<UnitCourseFacets>;
+  /** Subtree course count for each of the given (sibling) child units, keyed by unit id. */
+  getChildUnitCourseCounts(childUnitIds: string[]): Promise<Record<string, number>>;
   listInstructorCourses(profileId: string): Promise<InstructorCourse[]>;
 }
 
@@ -313,7 +420,12 @@ export interface ProfileRepository {
     role: Role;
   }): Promise<void>;
   updateProfileRole(profileId: string, role: Role): Promise<void>;
-  deleteProfile(profileId: string): Promise<void>;
+  /**
+   * Rewrite a profile's primary key. Used on first OIDC sign-in to re-key a
+   * legacy Supabase-auth UUID to the Entra `oid`. Relies on ON UPDATE CASCADE
+   * on every FK referencing profiles(id).
+   */
+  relinkProfileId(oldId: string, newId: string): Promise<void>;
 }
 
 export interface ReviewRepository {

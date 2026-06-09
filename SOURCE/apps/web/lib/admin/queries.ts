@@ -25,14 +25,19 @@ export type AdminStatsData = {
   statusCounts: StatusCount[]
   taWorkload: TAWorkload[]
   stuckCourses: StuckCourse[]
+  /** Total rows matching the stuck-courses cutoff; stuckCourses is a top-N slice. */
+  stuckCount: number
   auditEvents: AuditEvent[]
 }
+
+const STUCK_COURSES_LIST_LIMIT = 50
 
 export type AdminCoursesPageParams = {
   page?: number
   pageSize?: number
   search?: string
   status?: CourseStatus
+  statuses?: readonly CourseStatus[]
   taProfileId?: string
   assignedOnly?: boolean
 }
@@ -46,14 +51,15 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
 export async function getAdminStatsData(): Promise<AdminStatsData> {
   const repository = getCourseRepository()
   const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-  const [totalCourses, statusCounts, taWorkload, stuckCourses, auditEvents] = await Promise.all([
+  const [totalCourses, statusCounts, taWorkload, stuckCourses, stuckCount, auditEvents] = await Promise.all([
     repository.countCourses(),
     repository.listStatusCounts(),
     repository.listTAWorkload(),
-    repository.listStuckCourses(cutoff),
+    repository.listStuckCourses(cutoff, STUCK_COURSES_LIST_LIMIT),
+    repository.countStuckCourses(cutoff),
     repository.listAuditEvents(200),
   ])
-  return { totalCourses, statusCounts, taWorkload, stuckCourses, auditEvents }
+  return { totalCourses, statusCounts, taWorkload, stuckCourses, stuckCount, auditEvents }
 }
 
 export async function getAdminOverviewData(): Promise<AdminOverviewData> {
@@ -77,6 +83,7 @@ export async function getAdminCoursesPage(
   const pageResult = await getCourseRepository().listAdminCoursesPage(params.page, params.pageSize, {
     search: params.search,
     status: params.status,
+    statuses: params.statuses,
     taProfileId: params.taProfileId,
     assignedOnly: params.assignedOnly,
   })
