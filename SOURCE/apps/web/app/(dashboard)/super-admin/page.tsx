@@ -18,6 +18,7 @@ import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
 import { getLatestMigrationReport } from "@/lib/migration/report"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
 import { SupportMessagesView } from "@/components/super-admin/support-messages-view"
+import { SystemPanel } from "@/components/super-admin/system-panel"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -83,6 +84,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
             auditPanel={<AuditView initial={auditPage} />}
+            systemPanel={<SystemPanel />}
           />
         </AdminRefreshWrapper>
       </TweakableContent>
