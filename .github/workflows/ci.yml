@@ -76,19 +76,12 @@ jobs:
             echo "AZDO_PAT secret is not set. Add it under repo Settings -> Secrets and variables -> Actions." >&2
             exit 1
           fi
-          # Authenticate via a GIT_ASKPASS helper. URL has placeholder user so
-          # git doesn't fall through to the terminal prompt; askpass supplies
-          # the real PAT for the password challenge.
-          cat > "${RUNNER_TEMP}/askpass.sh" <<'EOF'
-#!/bin/bash
-case "$1" in
-  *Username*) echo "pat" ;;
-  *Password*) echo "${AZDO_PAT}" ;;
-esac
-EOF
-          chmod +x "${RUNNER_TEMP}/askpass.sh"
+          # Pre-populate git credential store so push to Azure DevOps uses the
+          # PAT non-interactively. Same mechanism actions/checkout uses for
+          # github.com; scoped via credentialUrl so it only matches azdo.
+          ASKPASS="${RUNNER_TEMP}/askpass.sh"
+          printf '#!/bin/bash\ncase "$1" in *Username*) echo pat ;; *Password*) echo "$AZDO_PAT" ;; esac\n' > "${ASKPASS}"
+          chmod +x "${ASKPASS}"
           AZDO_URL="https://okanagan.visualstudio.com/DefaultCollection/CourseBridge/_git/CourseBridge"
-          GIT_ASKPASS="${RUNNER_TEMP}/askpass.sh" \
-          GIT_TERMINAL_PROMPT=0 \
-          AZDO_PAT="${AZDO_PAT}" \
-          git -c credential.helper= push "${AZDO_URL}" "HEAD:refs/heads/testing"
+          GIT_ASKPASS="${ASKPASS}" GIT_TERMINAL_PROMPT=0 \
+            git -c credential.helper= push "${AZDO_URL}" "HEAD:refs/heads/testing"
