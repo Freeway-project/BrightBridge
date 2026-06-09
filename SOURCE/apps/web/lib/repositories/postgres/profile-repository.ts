@@ -169,5 +169,19 @@ export function createPostgresProfileRepository(): ProfileRepository {
         [profileId, role],
       );
     },
+
+    async relinkProfileId(oldId, newId) {
+      if (oldId === newId) return;
+      const pool = getPostgresPool();
+      await pool.query(
+        `
+          UPDATE profiles
+          SET id = $2,
+              updated_at = NOW()
+          WHERE id = $1
+        `,
+        [oldId, newId],
+      );
+    },
   };
 }

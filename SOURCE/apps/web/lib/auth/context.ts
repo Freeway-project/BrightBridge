@@ -88,7 +88,37 @@ export async function getAuthContext(): Promise<AuthContext> {
 
   const profileRepository = getProfileRepository();
   const profileById = await profileRepository.getProfileById(user.id);
-  const profile = profileById ?? (user.email ? await profileRepository.getProfileByEmail(user.email) : null);
+  const profileByEmail = profileById
+    ? null
+    : user.email
+      ? await profileRepository.getProfileByEmail(user.email)
+      : null;
+
+  // Link-by-email on first Azure OIDC sign-in: legacy profile rows carry the
+  // old Supabase auth UUID. Re-key the row to the Entra `oid` so subsequent
+  // requests hit the fast id path. Skipped if id already matches or the row
+  // somehow already has the new id under a different shape.
+  if (profileByEmail && profileByEmail.id !== user.id) {
+    try {
+      await profileRepository.relinkProfileId(profileByEmail.id, user.id);
+      profileByEmail.id = user.id;
+    } catch (error) {
+      // If the rewrite collides (e.g. another row already owns user.id) just
+      // proceed with the legacy id — the session still works, we just keep
+      // taking the email-lookup path. The error is worth surfacing.
+      console.warn(
+        "[auth] relink_failed",
+        JSON.stringify({
+          oldId: profileByEmail.id,
+          newId: user.id,
+          email: user.email,
+          message: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    }
+  }
+
+  const profile = profileById ?? profileByEmail;
   const claimedRole = resolveRoleFromClaims(user.userMetadata);
   const claimedFullNameRaw = typeof user.userMetadata.full_name === "string"
     ? user.userMetadata.full_name.trim()
