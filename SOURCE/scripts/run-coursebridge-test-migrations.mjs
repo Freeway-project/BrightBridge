@@ -42,7 +42,7 @@ try {
     "SELECT rolname FROM pg_roles WHERE rolname IN ('anon', 'authenticated', 'service_role')",
   );
   const roleSet = new Set(roleRows.rows.map((row) => row.rolname));
-  const shouldRewriteSupabaseRoles =
+  const shouldRewriteLegacyAuthRoles =
     !roleSet.has("anon") || !roleSet.has("authenticated") || !roleSet.has("service_role");
 
   const publicationRows = await client.query(
@@ -61,7 +61,7 @@ try {
       continue;
     }
 
-    const migrationPath = path.join("supabase/migrations", migration.file);
+    const migrationPath = path.join("db/migrations", migration.file);
 
     if (!existsSync(migrationPath)) {
       throw new Error(`Migration file not found: ${migrationPath}`);
@@ -70,7 +70,7 @@ try {
     console.log(`Applying migration: ${migrationPath}`);
     let sql = readFileSync(migrationPath, "utf8");
 
-    if (shouldRewriteSupabaseRoles) {
+    if (shouldRewriteLegacyAuthRoles) {
       sql = sql
         .replace(/\bauthenticated\b/g, "public")
         .replace(/\bservice_role\b/g, "public")
@@ -152,11 +152,11 @@ function parseDatabaseUrl(value) {
       connectionString: value,
     };
   } catch {
-    return parseSupabaseDatabaseUrl(value);
+    return parseManualDatabaseUrl(value);
   }
 }
 
-function parseSupabaseDatabaseUrl(value) {
+function parseManualDatabaseUrl(value) {
   const protocolMatch = value.match(/^postgres(?:ql)?:\/\//);
 
   if (!protocolMatch) {

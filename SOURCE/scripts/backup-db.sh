@@ -2,16 +2,15 @@
 # =============================================================================
 # backup-db.sh
 #
-# Logical Postgres backup (pg_dump custom format) for Supabase / local dev.
+# Logical Postgres backup (pg_dump custom format) for shared dev / prod.
 # Writes under repo-root backups/ (gitignored).
 #
 # Connection URL resolution matches scripts/apply-migration.mjs (first wins
 # per variable from env files, then DEV_DATABASE_URL || DATABASE_URL).
 #
-# Supabase pooler:
-#   • Session mode (pooler host, port 5432) or direct db.*.supabase.co:5432
-#     are what we recommend for pg_dump.
-#   • Transaction pool (often port 6543) breaks pg_dump; this script warns.
+# Connection pooler note:
+#   • Use session-mode (port 5432) or a direct DB connection for pg_dump.
+#   • Transaction-pool ports (often 6543) break pg_dump; this script warns.
 #
 # Password in URI userinfo must be percent-encoded if it contains reserved
 # characters (e.g. $ → %24, / → %2F, ) → %29). Otherwise libpq mis-parses and
@@ -30,7 +29,7 @@
 #     → backups/prod-full-<timestamp>-abc1234-pr111.dump
 #   (autodeploy uses this to stamp each pre-deploy backup with the commit/PR.)
 #
-# If local pg_dump is older than the server (Supabase PG 17), either install
+# If local pg_dump is older than the server (e.g. PG 17), either install
 # client 17+ or use Docker (recommended): the script retries with Postgres 17
 # in Docker on "server version mismatch". Force Docker with:
 #   BACKUP_USE_DOCKER=1 ./scripts/backup-db.sh
@@ -144,7 +143,7 @@ warn_pooler() {
   local url="$1"
   if echo "$url" | grep -qE '(:6543)(/|$|\?)'; then
     echo -e "${YELLOW}Warning:${NC} URL uses port 6543 (transaction pool). pg_dump usually fails here." >&2
-    echo -e "  Use Session mode (pooler ${CYAN}:5432${NC}) or direct ${CYAN}db.<project-ref>.supabase.co:5432${NC}." >&2
+    echo -e "  Use Session mode (port ${CYAN}5432${NC}) or a direct DB connection." >&2
     echo "" >&2
   fi
 }

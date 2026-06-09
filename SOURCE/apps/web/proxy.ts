@@ -1,10 +1,25 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { isReadonlyMode } from "@/lib/system-migration";
-import { updateSession } from "@/lib/supabase/middleware";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SKIP_METRIC_PREFIXES = ["/api/metrics", "/api/health"];
+
+// Cookie set by lib/auth/service.ts after a successful Azure OIDC (or dev)
+// sign-in. Middleware only checks presence — signature/expiry validation
+// happens in the auth service on the server-side request path.
+const OIDC_SESSION_COOKIE = "coursebridge_auth_session";
+
+// Paths that must be reachable without a session: OIDC callback/login routes,
+// maintenance + health/metrics/version endpoints, the marketing root, and the
+// /login page itself.
+const PUBLIC_PATH_PREFIXES = ["/auth/", "/api/version", "/api/metrics", "/api/health"];
+const PUBLIC_EXACT_PATHS = new Set(["/", "/login", "/maintenance", "/auth"]);
+
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_EXACT_PATHS.has(pathname)) return true;
+  return PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
 
 function sanitizeRoute(pathname: string): string {
   const stripped = pathname.split("?")[0].replace(/\/+$/, "") || "/";
@@ -25,7 +40,13 @@ async function handle(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(url);
   }
 
-  return await updateSession(request);
+  const hasSession = Boolean(request.cookies.get(OIDC_SESSION_COOKIE)?.value);
+  if (!hasSession && !isPublicPath(request.nextUrl.pathname)) {
+    const loginUrl = new URL("/auth/oidc/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return NextResponse.next();
 }
 
 export async function proxy(request: NextRequest) {

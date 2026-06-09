@@ -1,7 +1,5 @@
 import "server-only";
 import { getPostgresPool } from "@/lib/postgres/pool";
-import { isPostgresProvider } from "@/lib/repositories/provider";
-import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared";
 
 export type CreateConversationInput =
   | { type: "dm"; memberIds: [string, string] }
@@ -161,6 +159,3 @@ export async function leaveConversation(conversationId: string, userId: string):
   );
 }
 
-function notImplementedOnSupabase(op: string): never {
-  throw new Error(`chat/${op}: Supabase provider not implemented; chat requires DB_PROVIDER=postgres in this phase.`);
-}

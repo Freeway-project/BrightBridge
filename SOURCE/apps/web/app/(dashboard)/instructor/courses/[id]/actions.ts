@@ -5,7 +5,7 @@ import { requireProfile } from "@/lib/auth/context"
 import { transitionCourseStatus } from "@/lib/courses/service"
 import { createIssueAction } from "@/lib/issues/actions"
 import { getCourseRepository } from "@/lib/repositories"
-import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
+import { getPostgresPool } from "@/lib/postgres/pool"
 
 function assertInstructor(role: string) {
   if (role !== "instructor" && role !== "super_admin") {
@@ -75,15 +75,19 @@ export async function instructorSignOffAction(
   assertInstructor(ctx.profile.role)
 
   if (acknowledgedIssueIds.length > 0) {
-    const admin = getSupabaseAdminClientOrThrow()
-    const rows = acknowledgedIssueIds.map((issueId) => ({
-      issue_id: issueId,
-      author_id: ctx.profile.id,
-      body: "Acknowledged by instructor at sign-off.",
-      is_system_message: true,
-    }))
-    const { error } = await admin.from("course_issue_comments").insert(rows)
-    if (error) {
+    try {
+      const pool = getPostgresPool()
+      const params: unknown[] = []
+      const valueRows = acknowledgedIssueIds.map((issueId) => {
+        params.push(issueId, ctx.profile.id)
+        const n = params.length
+        return `($${n - 1}, $${n}, 'Acknowledged by instructor at sign-off.', true)`
+      })
+      await pool.query(
+        `INSERT INTO course_issue_comments (issue_id, author_id, body, is_system_message) VALUES ${valueRows.join(", ")}`,
+        params,
+      )
+    } catch (error) {
       console.error("[instructorSignOffAction] Failed to record acknowledgements:", error)
     }
   }

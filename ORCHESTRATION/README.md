@@ -1,6 +1,6 @@
 # CourseBridge Non-Production Orchestration (test)
 
-This stack is prepared for Azure OIDC user authentication while keeping Supabase for internal application data access.
+This stack runs CourseBridge with Azure OIDC user authentication and a shared Postgres backend.
 
 ## Auth Contract (Azure OIDC)
 
@@ -21,26 +21,14 @@ Populate these values in `.env-coursebridge-test`:
 - `AZURE_OIDC_SCOPES`
 - `AZURE_OIDC_ALLOWED_TENANT_ID`
 
-## Internal App Contract (Supabase)
+## Data Layer (Postgres)
 
-Supabase remains configured for internal app access and service-role operations:
+CourseBridge connects directly to a shared Postgres instance:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-
-## Data Provider Migration Contract
-
-CourseBridge supports a phased data-layer migration with these variables:
-
-- `DB_PROVIDER`
-   - `supabase` (current default)
-   - `postgres` (target shared-postgres mode)
+- `DB_PROVIDER=postgres`
 - `DATABASE_URL`
    - PostgreSQL connection string to shared service, for example:
    - `postgresql://coursebridge_user:<password>@shared-services_postgres-test:5432/coursebridge`
-
-During migration, keep Supabase values populated until application repository implementation is fully switched to direct Postgres.
 
 ## Deploy Flow
 
@@ -48,5 +36,3 @@ During migration, keep Supabase values populated until application repository im
 2. Run from orchestration directory:
    - `./rsync-to-remote.sh api/coursebridge/`
    - `ssh oracle-proxies-non-prod "cd /data && sudo ./deploy.sh redeploy api/coursebridge-test"`
-
-This stack contract is ready for the app-layer auth migration to Azure OIDC.

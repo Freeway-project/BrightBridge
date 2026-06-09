@@ -3,7 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import pg from "pg";
 
-const MIGRATIONS_DIR = "supabase/migrations";
+const MIGRATIONS_DIR = "db/migrations";
 
 loadEnvFiles([
   ".env.local",
@@ -146,19 +146,20 @@ try {
   const appliedResult = await client.query("SELECT name FROM schema_migrations");
   const appliedMigrations = new Set(appliedResult.rows.map(r => r.name));
 
-  // On restricted DB roles (no CREATEROLE), Supabase-style roles may not exist.
+  // Legacy migration files reference auth roles (anon/authenticated/service_role).
+  // On plain Postgres these roles do not exist; detect their absence so we can
+  // rewrite references to PUBLIC before applying.
   const roleRows = await client.query(
     "SELECT rolname FROM pg_roles WHERE rolname IN ('anon', 'authenticated', 'service_role')"
   );
   const roleSet = new Set(roleRows.rows.map((row) => row.rolname));
-  const shouldRewriteSupabaseRoles =
+  const shouldRewriteLegacyAuthRoles =
     !roleSet.has("anon") || !roleSet.has("authenticated") || !roleSet.has("service_role");
 
-  // Plain Postgres has no Supabase Realtime service, so the `supabase_realtime`
-  // publication does not exist and `ALTER PUBLICATION supabase_realtime ...`
-  // statements would abort the whole migration file. When the publication is
-  // absent we strip those statements — realtime is replaced by polling at the
-  // app layer, so publication membership is meaningless on the target.
+  // Legacy migration files target a `supabase_realtime` publication that does
+  // not exist on plain Postgres. When the publication is absent we strip those
+  // statements so the rest of the migration file still applies — realtime is
+  // replaced by polling at the app layer, so publication membership is moot.
   const pubResult = await client.query(
     "SELECT EXISTS(SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') AS exists"
   );
@@ -181,8 +182,8 @@ try {
     const migrationPath = path.join(MIGRATIONS_DIR, file);
     let sql = readFileSync(migrationPath, "utf8");
 
-    if (shouldRewriteSupabaseRoles && file !== AUTH_COMPAT_FILE) {
-      // Replace Supabase role references with PUBLIC where those roles are absent.
+    if (shouldRewriteLegacyAuthRoles && file !== AUTH_COMPAT_FILE) {
+      // Replace legacy auth role references with PUBLIC where those roles are absent.
       sql = sql
         .replace(/\bauthenticated\b/g, "public")
         .replace(/\bservice_role\b/g, "public")
@@ -190,8 +191,9 @@ try {
     }
 
     if (!hasRealtimePublication) {
-      // Drop CREATE/ALTER/DROP PUBLICATION supabase_realtime statements so the
-      // rest of the migration still applies on plain Postgres.
+      // Drop CREATE/ALTER/DROP PUBLICATION statements targeting the legacy
+      // realtime publication so the rest of the migration still applies on
+      // plain Postgres.
       sql = sql.replace(/\b(?:create|alter|drop)\s+publication\s+supabase_realtime\b[^;]*;/gi, "");
     }
 
@@ -260,11 +262,11 @@ function parseDatabaseUrl(value) {
       connectionString: value
     };
   } catch {
-    return parseSupabaseDatabaseUrl(value);
+    return parseManualDatabaseUrl(value);
   }
 }
 
-function parseSupabaseDatabaseUrl(value) {
+function parseManualDatabaseUrl(value) {
   const protocolMatch = value.match(/^postgres(?:ql)?:\/\//);
 
   if (!protocolMatch) {

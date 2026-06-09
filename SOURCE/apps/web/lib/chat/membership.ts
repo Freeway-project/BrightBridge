@@ -1,31 +1,16 @@
 import "server-only";
 import { getPostgresPool } from "@/lib/postgres/pool";
-import { isPostgresProvider } from "@/lib/repositories/provider";
-import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared";
 import { ChatPermissionError } from "./types";
 
 export async function assertMember(conversationId: string, userId: string): Promise<void> {
-  if (isPostgresProvider()) {
-    const { rows } = await getPostgresPool().query<{ exists: boolean }>(
-      `select exists(
-         select 1 from public.conversation_members
-         where conversation_id = $1 and user_id = $2 and removed_at is null
-       ) as exists`,
-      [conversationId, userId],
-    );
-    if (!rows[0]?.exists) throw new ChatPermissionError();
-    return;
-  }
-  const supabase = getSupabaseAdminClientOrThrow();
-  const { data, error } = await supabase
-    .from("conversation_members")
-    .select("conversation_id")
-    .eq("conversation_id", conversationId)
-    .eq("user_id", userId)
-    .is("removed_at", null)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data) throw new ChatPermissionError();
+  const { rows } = await getPostgresPool().query<{ exists: boolean }>(
+    `select exists(
+       select 1 from public.conversation_members
+       where conversation_id = $1 and user_id = $2 and removed_at is null
+     ) as exists`,
+    [conversationId, userId],
+  );
+  if (!rows[0]?.exists) throw new ChatPermissionError();
 }
 
 /** Ensures the course channel exists and its membership matches assignments. Idempotent. */

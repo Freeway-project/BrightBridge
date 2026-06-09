@@ -2,8 +2,8 @@
 // apps/web/app/auth/login/dev-accounts.ts plus a few sample courses, so `npm run
 // dev` with AUTH_PROVIDER=dev has something to log into. Idempotent.
 //
-// Unlike scripts/seed-dev.mjs (which targets Supabase/GoTrue), this writes plain
-// rows directly — no auth.users needed (the postgres_compat migration drops that FK).
+// Writes profile/course rows directly via pg — no auth schema needed
+// (the postgres_compat migration drops the auth.users FK).
 
 import { createHash } from "node:crypto";
 import process from "node:process";

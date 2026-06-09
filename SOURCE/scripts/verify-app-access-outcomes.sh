@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Validate app-level record access behavior on Postgres after Supabase migration.
+# Validate app-level record access behavior on Postgres.
 # This script does not require local npm dependencies.
 #
 # Required env (one of):
