@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { OIDC_NEXT_COOKIE, OIDC_NONCE_COOKIE, OIDC_STATE_COOKIE, getAzureOidcConfigOrThrow, isAzureOidcEnabled } from "@/lib/auth/service";
+import { oidcLoginStartedTotal } from "@/lib/observability/metrics";
 
 function safeNext(raw: string | null): string {
   if (!raw) return "/dashboard";
@@ -46,6 +47,12 @@ export async function GET(request: NextRequest) {
   response.cookies.set(OIDC_STATE_COOKIE, state, cookieOpts);
   response.cookies.set(OIDC_NONCE_COOKIE, nonce, cookieOpts);
   response.cookies.set(OIDC_NEXT_COOKIE, nextPath, cookieOpts);
+
+  try {
+    oidcLoginStartedTotal.inc();
+  } catch {
+    // Never let metrics break the login flow.
+  }
 
   return response;
 }

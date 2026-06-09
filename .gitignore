@@ -13,3 +13,6 @@ backups/
 .codex/
 .gemini/
 .playwright-mcp/
+.worktrees/
+ORCHESTRATION/monitoring/secrets/
+ORCHESTRATION/monitoring/.env
