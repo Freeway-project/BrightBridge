@@ -96,6 +96,25 @@ export type AssignedCourseListFilters = {
   statuses?: readonly CourseStatus[];
 };
 
+export type AccessibleCourseScope =
+  | { kind: "all" }
+  | { kind: "assigned"; profileId: string; role: AssignmentRole };
+
+export type AccessibleCourseListFilters = {
+  scope: AccessibleCourseScope;
+  status?: CourseStatus;
+  search?: string;
+  subject?: string;
+  term?: string;
+};
+
+export type AccessibleCourseAggregates = {
+  statusCounts: Partial<Record<CourseStatus, number>>;
+  subjects: string[];
+  terms: string[];
+  total: number;
+};
+
 export type UnitCourseListFilters = {
   search?: string;
   status?: CourseStatus;
@@ -323,6 +342,17 @@ export type AssignmentLog = {
 
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
+  /** Paginated accessible-courses query for the `/courses` list view. */
+  listAccessibleCoursesPage(
+    page: number,
+    pageSize: number,
+    filters: AccessibleCourseListFilters,
+  ): Promise<PaginatedResult<CourseSummary>>;
+  /** Status-count map + distinct subjects/terms for the `/courses` list tabs and filter dropdowns. */
+  getAccessibleCourseAggregates(
+    scope: AccessibleCourseScope,
+    filters?: Pick<AccessibleCourseListFilters, "search" | "subject" | "term">,
+  ): Promise<AccessibleCourseAggregates>;
   listAssignedCourses(
     userId: string,
     assignmentRole: AssignmentRole,

@@ -88,6 +88,12 @@ function mapAuditEventRow(row: unknown): AuditEvent {
 
 export function createSupabaseCourseRepository(): CourseRepository {
   return {
+    async listAccessibleCoursesPage() {
+      throw new Error("listAccessibleCoursesPage is only implemented for the Postgres provider.");
+    },
+    async getAccessibleCourseAggregates() {
+      throw new Error("getAccessibleCourseAggregates is only implemented for the Postgres provider.");
+    },
     async listAccessibleCourses() {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
