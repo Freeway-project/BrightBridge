@@ -76,9 +76,12 @@ jobs:
             echo "AZDO_PAT secret is not set. Add it under repo Settings -> Secrets and variables -> Actions." >&2
             exit 1
           fi
-          # Azure DevOps PAT auth via Basic Authorization header (more reliable
-          # than embedding the PAT in the URL inside CI shells).
+          # Azure DevOps PAT auth via Basic Authorization header. URL carries a
+          # placeholder username so git doesn't prompt; the extraheader overrides
+          # with the real credential. credential.helper= disables any inherited
+          # helper from actions/checkout that could intercept the request.
           AUTH_B64=$(printf '%s' ":${AZDO_PAT}" | base64 -w 0)
-          AZDO_URL="https://okanagan.visualstudio.com/DefaultCollection/CourseBridge/_git/CourseBridge"
-          git -c http.extraheader="Authorization: Basic ${AUTH_B64}" \
+          AZDO_URL="https://x-pat:placeholder@okanagan.visualstudio.com/DefaultCollection/CourseBridge/_git/CourseBridge"
+          git -c credential.helper= \
+              -c http.extraheader="Authorization: Basic ${AUTH_B64}" \
               push "${AZDO_URL}" "HEAD:refs/heads/testing"
