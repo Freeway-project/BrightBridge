@@ -118,6 +118,16 @@ export async function getAuthContext(): Promise<AuthContext> {
       };
     }
 
+    console.warn(
+      "[auth] missing_profile",
+      JSON.stringify({
+        userId: user.id,
+        email: user.email,
+        hasClaimedRole: Boolean(claimedRole),
+        rawRoles: user.userMetadata.oidc_roles ?? null,
+      }),
+    );
+
     return {
       kind: "missing_profile",
       userId: user.id,
@@ -172,7 +182,7 @@ export async function requireProfile() {
   const context = await getAuthContext();
 
   if (context.kind === "anonymous") redirect("/auth/login");
-  if (context.kind === "missing_profile") redirect("/auth/login");
+  if (context.kind === "missing_profile") redirect("/auth/no-access");
 
   return context;
 }
