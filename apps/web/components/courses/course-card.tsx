@@ -199,7 +199,7 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
               </div>
               
               {/* Title */}
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground transition-colors group-hover/card:text-primary leading-tight">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground transition-all duration-300 group-hover/card:bg-gradient-to-r group-hover/card:from-primary group-hover/card:to-indigo-500 group-hover/card:bg-clip-text group-hover/card:text-transparent leading-tight">
                 {course.title}
               </h2>
 
@@ -222,24 +222,8 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                   )}
                   title={`In this stage for ${age} day${age === 1 ? "" : "s"} (updated ${new Date(course.updatedAt).toLocaleDateString()})`}
                 >
-                  <Clock className={cn("size-3.5", stale ? "text-amber-500" : "text-muted-foreground/60")} />
+                  <Clock className={cn("size-3.5", stale ? "text-amber-500" : "text-primary/60")} />
                   <span>{formatAge(age)} in stage</span>
-                </div>
-
-                {/* Issues Pills */}
-                <div className="flex items-center gap-2">
-                  {issueCounts && issueCounts.open > 0 && (
-                    <div className="flex items-center gap-1.5 rounded-full border border-destructive/30 bg-destructive/10 px-2.5 py-1 text-[10px] font-bold text-destructive animate-pulse-subtle">
-                      <AlertCircle className="size-3" />
-                      {issueCounts.open} OPEN
-                    </div>
-                  )}
-                  {issueCounts && issueCounts.resolved > 0 && (
-                    <div className="flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-[10px] font-bold text-success">
-                      <CheckCircle2 className="size-3" />
-                      {issueCounts.resolved} RESOLVED
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -273,15 +257,29 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
             </div>
 
             {/* Actions Sidebar */}
-            <div className="flex sm:flex-col shrink-0 gap-3 justify-end sm:justify-start w-full sm:w-auto">
+            <div className="flex flex-col shrink-0 gap-3 justify-end sm:justify-start w-full sm:w-auto">
+              {issueCounts && issueCounts.open > 0 && (
+                <div className="flex items-center gap-1.5 rounded-md border border-red-500/30 bg-red-50 dark:bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-700 dark:text-red-400 shadow-sm animate-pulse-subtle">
+                  <AlertCircle className="size-4" />
+                  <span className="hidden sm:inline">{issueCounts.open} Action Required</span>
+                  <span className="sm:hidden">{issueCounts.open}</span>
+                </div>
+              )}
+              {issueCounts && issueCounts.resolved > 0 && issueCounts.open === 0 && (
+                <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 shadow-sm">
+                  <CheckCircle2 className="size-4" />
+                  All clear
+                </div>
+              )}
+
               <Button
                 size="default"
                 asChild
                 className={cn(
                   "font-bold transition-all duration-300 border-none w-full sm:w-auto h-10 px-5",
                   owner === "TA"
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25"
-                    : "bg-zinc-800 text-white hover:bg-zinc-700 shadow-md hover:shadow-lg"
+                    ? "bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5"
+                    : "bg-zinc-800 text-white hover:bg-zinc-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 dark:bg-zinc-800 dark:hover:bg-zinc-700"
                 )}
               >
                 <Link href={`/courses/${course.id}/metadata`}>
@@ -289,21 +287,6 @@ export function CourseCard({ course, issueCounts, index = 0, canExport = false }
                   <ArrowRight className="ml-2 size-4 transition-transform group-hover/card:translate-x-1" />
                 </Link>
               </Button>
-              
-              {canExport && (
-                <div className="flex gap-2 sm:flex-col w-full sm:w-auto">
-                  <Button variant="outline" size="sm" asChild className="flex-1 sm:w-full">
-                    <a href={`/api/courses/${course.id}/xlsx`}>
-                      <FileSpreadsheet className="mr-2 size-4" /> Excel
-                    </a>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild className="flex-1 sm:w-full">
-                    <a href={`/print/courses/${course.id}`} target="_blank" rel="noopener noreferrer">
-                      <FileDown className="mr-2 size-4" /> PDF
-                    </a>
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -368,14 +351,14 @@ function ProgressItem({ label, value, status }: { label: string; value: string; 
     },
     in_progress: {
       dot: "bg-blue-500 animate-pulse",
-      bg: "bg-blue-500/5",
-      text: "text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-500/10",
+      text: "text-blue-700 dark:text-blue-400",
       border: "border-blue-500/20"
     },
     submitted: {
       dot: "bg-emerald-500",
-      bg: "bg-emerald-500/5",
-      text: "text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-500/10",
+      text: "text-emerald-700 dark:text-emerald-400",
       border: "border-emerald-500/20"
     },
   }

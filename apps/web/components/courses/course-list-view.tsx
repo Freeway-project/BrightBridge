@@ -41,7 +41,7 @@ interface CourseListViewProps {
   stats?: CourseStat[]
   issueCounts?: IssueCountMap
   /** Show Excel/PDF export buttons on cards — admin/super_admin only (export routes are gated). */
-  canExport?: boolean
+  
   /** Whether the list should scroll internally. Defaults to true. */
   scrollable?: boolean
 }
@@ -185,7 +185,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
                   <CourseGrid
                     courses={phase.groups[0].courses}
                     issueCounts={issueCounts}
-                    canExport={canExport}
+                    
                     onClear={onClear}
                   />
                 </TabsContent>
@@ -223,7 +223,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
                       <CourseGrid
                         courses={group.courses}
                         issueCounts={issueCounts}
-                        canExport={canExport}
+                        
                         onClear={onClear}
                       />
                     </TabsContent>
@@ -253,7 +253,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
               <CourseGrid
                 courses={issueCourses}
                 issueCounts={issueCounts}
-                canExport={canExport}
+                
                 onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
                 sortBy={issueSort}
               />
@@ -311,7 +311,7 @@ function CourseGrid({
   issueCounts: IssueCountMap
   onClear: () => void
   sortBy?: "latest" | "replies" | "open"
-  canExport?: boolean
+  
 }) {
   const sortedCourses = useMemo(() => {
     const arr = [...courses]
@@ -372,7 +372,7 @@ function CourseGrid({
     <>
       <div className="grid grid-cols-1 gap-4 sm:gap-6">
         {shown.map((course, i) => (
-          <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i % BATCH} canExport={canExport} />
+          <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i % BATCH}  />
         ))}
       </div>
       {hasMore && (
