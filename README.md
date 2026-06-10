@@ -169,8 +169,3 @@ APP_DB_PASSWORD='***' \
 ./scripts/db-provision.sh
 ```
 
-## Codex Setup
-
-Project-specific Codex setup and preflight checks are documented in:
-
-- `docs/codex-setup.md`
