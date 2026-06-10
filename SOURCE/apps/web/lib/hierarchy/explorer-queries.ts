@@ -3,7 +3,7 @@ import "server-only"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { requireProfile } from "@/lib/auth/context"
 import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
-import { getPostgresPool } from "@/lib/postgres/pool"
+import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
 import type {
   AdminCourseRow,
   OrgUnit,
@@ -16,12 +16,7 @@ import { ROLE_TITLE_LABELS, ROLE_TITLE_RANK } from "@/lib/super-admin/roles"
 async function requireOrgViewer() {
   const context = await requireProfile()
   const role = context.profile.role
-  if (
-    role !== "super_admin" &&
-    role !== "provost" &&
-    role !== "admin_full" &&
-    role !== "admin_viewer"
-  ) {
+  if (role !== "super_admin" && role !== "provost" && role !== "admin_full") {
     throw new Error("Unauthorized")
   }
   return context
@@ -110,16 +105,14 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   if (effectiveUnitId) {
     const unitMembers = allMembers.filter((m) => m.orgUnitId === effectiveUnitId)
     if (unitMembers.length) {
-      const memberIds = unitMembers.map((m) => m.profileId)
-      const pool = getPostgresPool()
-      const { rows: profiles } = await pool.query<{ id: string; full_name: string | null; email: string }>(
-        `SELECT id, full_name, email FROM profiles WHERE id = ANY($1::uuid[])`,
-        [memberIds],
-      )
-
+      const admin = getSupabaseAdminClientOrThrow()
+      const { data: profiles } = await admin
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", unitMembers.map((m) => m.profileId))
       const nameById = new Map<string, string>()
-      for (const p of profiles) {
-        nameById.set(p.id, p.full_name?.trim() || p.email)
+      for (const p of profiles ?? []) {
+        nameById.set(p.id, (p.full_name as string)?.trim() || (p.email as string))
       }
       leadership = unitMembers
         .map((m) => ({

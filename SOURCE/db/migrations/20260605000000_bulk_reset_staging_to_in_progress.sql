@@ -13,13 +13,10 @@
 begin;
 
 -- Guard: we attribute the canonical status events to a system super_admin actor.
--- On a fresh/clean install there is no super_admin and no legacy staging data to
--- reset, so the status-event INSERT and course UPDATE below naturally affect 0
--- rows — continue as a no-op rather than hard-failing (was: raise exception).
 do $$
 begin
   if not exists (select 1 from public.profiles where role = 'super_admin') then
-    raise notice 'bulk_reset_staging_to_in_progress: no super_admin profile present; skipping (nothing to reset on a fresh install).';
+    raise exception 'No super_admin profile found to attribute the bulk reset events to';
   end if;
 end $$;
 

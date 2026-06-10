@@ -42,14 +42,6 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
   // Read-only when the viewer is not the assigned instructor.
   const readOnly = !assignedCourse
 
-  // Record the dashboard open for the indicator dot. Only the assigned
-  // instructor counts — hierarchy/super-admin read-only views shouldn't
-  // pollute the "did the instructor open it?" signal.
-  if (assignedCourse && context.profile.role === "instructor") {
-    const { recordInstructorView } = await import("@/lib/instructor-views/service")
-    await recordInstructorView(id, context.profile.id)
-  }
-
   const [detail, sharedComments, timeline, myCourses] = await Promise.all([
     getAdminCourseDetail(id),
     getSharedComments(id),

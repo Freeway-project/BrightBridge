@@ -1,8 +1,8 @@
 import "server-only";
 
+import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared";
 import { getCourseRepository } from "@/lib/repositories";
 import { requireProfile } from "@/lib/auth/context";
-import { getPostgresPool } from "@/lib/postgres/pool";
 import type { CourseStatus, Role } from "@coursebridge/workflow";
 
 /** Statuses during which the TA may author the Final Summary for Instructor. */
@@ -11,12 +11,17 @@ const ADMIN_ROLES: readonly Role[] = ["admin_full", "admin_viewer", "super_admin
 const MAX_SUMMARY_LENGTH = 5000;
 
 export async function getFinalSummaryNotes(courseId: string): Promise<string | null> {
-  const pool = getPostgresPool();
-  const { rows } = await pool.query<{ instructor_summary_notes: string | null }>(
-    `SELECT instructor_summary_notes FROM courses WHERE id = $1 LIMIT 1`,
-    [courseId],
-  );
-  return rows[0]?.instructor_summary_notes ?? null;
+  const admin = getSupabaseAdminClientOrThrow();
+  const { data, error } = await admin
+    .from("courses")
+    .select("instructor_summary_notes")
+    .eq("id", courseId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Could not load final summary: ${error.message}`);
+  }
+  return (data?.instructor_summary_notes as string | null) ?? null;
 }
 
 /**
@@ -48,8 +53,13 @@ export async function saveFinalSummaryNotes(courseId: string, notes: string): Pr
   }
 
   const trimmed = notes.trim();
-  const value = trimmed.length ? trimmed : null;
+  const admin = getSupabaseAdminClientOrThrow();
+  const { error } = await admin
+    .from("courses")
+    .update({ instructor_summary_notes: trimmed.length ? trimmed : null })
+    .eq("id", courseId);
 
-  const pool = getPostgresPool();
-  await pool.query(`UPDATE courses SET instructor_summary_notes = $2 WHERE id = $1`, [courseId, value]);
+  if (error) {
+    throw new Error(`Could not save final summary: ${error.message}`);
+  }
 }

@@ -30,7 +30,6 @@ export default async function HierarchyPage({ searchParams }: Props) {
   if (
     context.kind !== "profile" ||
     (context.profile.role !== "admin_full" &&
-      context.profile.role !== "admin_viewer" &&
       context.profile.role !== "provost" &&
       context.profile.role !== "super_admin")
   ) {

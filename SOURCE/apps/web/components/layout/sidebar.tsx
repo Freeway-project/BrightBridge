@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { LogOut, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
@@ -11,7 +11,6 @@ import { DisplaySettings } from "./display-settings"
 import { SupportMessageDialog } from "./support-message-dialog"
 import Lottie from "lottie-react"
 import aiAnimationData from "@/assets/3c6d4dc5-50cf-45ba-9775-ab665ca5923d.json"
-import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
 import {
   Sidebar,
   SidebarContent,
@@ -43,10 +42,12 @@ function BrandLogo() {
   const collapsed = state === "collapsed"
   return (
     <div className="flex h-14 items-center gap-1 border-b border-sidebar-border px-3 bg-white/[0.01]">
-      <div className="flex min-w-0 flex-1 items-center gap-1 px-1">
-        <OCLoadingLogo className="size-10 shrink-0" />
+      <div className="flex min-w-0 flex-1 items-center gap-2.5 px-1">
+        <div className="size-7 rounded-lg bg-primary flex items-center justify-center text-[11px] font-black text-primary-foreground shrink-0 shadow-lg shadow-primary/40">
+          CB
+        </div>
         {!collapsed && (
-          <span className="text-xs font-semibold tracking-normal text-foreground truncate">
+          <span className="text-xs font-black uppercase tracking-[0.2em] text-foreground truncate">
             CourseBridge
           </span>
         )}
@@ -106,7 +107,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
+        
         {!collapsed && (role === "admin_full" || role === "standard_user") && (
           <div className="mt-auto mb-4 px-4 flex justify-center">
             <Lottie animationData={aiAnimationData} loop={true} className="w-full max-w-[120px]" />

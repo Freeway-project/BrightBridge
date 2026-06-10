@@ -27,11 +27,13 @@ graphify-out/cache/
 # local DB dumps (never commit)
 backups/
 
+# deploy marker — written by scripts/deploy.sh, watched at runtime for live update detection
+apps/web/.deployment-version
+
 # sensitive data
 *Educator*
 *Heirarchy*
 *.csv
 
-# Supabase CLI local cache
-supabase/.branches/
-supabase/.temp/
+# next.js auto-generated types (regenerated on build)
+next-env.d.ts

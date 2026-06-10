@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { CourseCard } from "./course-card"
 import type { CourseSummary } from "@/lib/courses/service"
 import { Button } from "@/components/ui/button"
@@ -41,7 +41,7 @@ interface CourseListViewProps {
   stats?: CourseStat[]
   issueCounts?: IssueCountMap
   /** Show Excel/PDF export buttons on cards — admin/super_admin only (export routes are gated). */
-  canExport?: boolean
+  
   /** Whether the list should scroll internally. Defaults to true. */
   scrollable?: boolean
 }
@@ -185,7 +185,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
                   <CourseGrid
                     courses={phase.groups[0].courses}
                     issueCounts={issueCounts}
-                    canExport={canExport}
+                    
                     onClear={onClear}
                   />
                 </TabsContent>
@@ -223,7 +223,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
                       <CourseGrid
                         courses={group.courses}
                         issueCounts={issueCounts}
-                        canExport={canExport}
+                        
                         onClear={onClear}
                       />
                     </TabsContent>
@@ -253,7 +253,7 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
               <CourseGrid
                 courses={issueCourses}
                 issueCounts={issueCounts}
-                canExport={canExport}
+                
                 onClear={() => { setSearch(""); setSubject("all"); setTerm("all") }}
                 sortBy={issueSort}
               />
@@ -311,7 +311,7 @@ function CourseGrid({
   issueCounts: IssueCountMap
   onClear: () => void
   sortBy?: "latest" | "replies" | "open"
-  canExport?: boolean
+  
 }) {
   const sortedCourses = useMemo(() => {
     const arr = [...courses]
@@ -323,6 +323,31 @@ function CourseGrid({
     }
     return arr
   }, [courses, sortBy, issueCounts])
+
+  // Render in batches and grow on scroll instead of mounting every card (each
+  // card animates), so large lists stay snappy.
+  const BATCH = 12
+  const [visible, setVisible] = useState(BATCH)
+  // Reset the window whenever the course set changes (filter/tab/sort change).
+  useEffect(() => { setVisible(BATCH) }, [sortedCourses])
+
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const total = sortedCourses.length
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) setVisible((v) => Math.min(v + BATCH, total))
+      },
+      { rootMargin: "600px" },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [total])
+
+  const shown = sortedCourses.slice(0, visible)
+  const hasMore = visible < total
 
   if (courses.length === 0) {
     return (
@@ -344,10 +369,17 @@ function CourseGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:gap-6">
-      {sortedCourses.map((course, i) => (
-        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i} canExport={canExport} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:gap-6">
+        {shown.map((course, i) => (
+          <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i % BATCH}  />
+        ))}
+      </div>
+      {hasMore && (
+        <div ref={sentinelRef} className="flex items-center justify-center py-6 text-xs text-muted-foreground">
+          Showing {shown.length} of {total} — scroll to load more
+        </div>
+      )}
+    </>
   )
 }

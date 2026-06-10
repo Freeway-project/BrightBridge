@@ -1,15 +1,14 @@
-import type { CourseStatus } from "@coursebridge/workflow"
-import { getPhaseBreakdown } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminStatsData } from "@/lib/admin/queries"
 import { Topbar } from "@/components/layout/topbar"
 import { TweakableContent } from "@/components/shared/tweakable-content"
-import { ActivityTrend } from "@/components/admin/stats/activity-trend"
-import { PhaseDetailDonut } from "@/components/admin/stats/phase-detail-donut"
-import { PipelineTimeline } from "@/components/admin/stats/pipeline-timeline"
 import { StatsOverview } from "@/components/admin/stats/stats-overview"
-import { StuckCoursesList } from "@/components/admin/stats/stuck-courses-list"
+import { StagePipeline } from "@/components/admin/stats/stage-pipeline"
 import { WorkloadChart } from "@/components/admin/stats/workload-chart"
+import { ActivityTrend } from "@/components/admin/stats/activity-trend"
+import { StuckCoursesList } from "@/components/admin/stats/stuck-courses-list"
+import { CompletionFunnel } from "@/components/admin/stats/completion-funnel"
+import { StatusPieChart } from "@/components/admin/stats/status-pie"
 
 export default async function AdminStatsPage() {
   const context = await requireProfile()
@@ -17,40 +16,36 @@ export default async function AdminStatsPage() {
 
   const data = await getAdminStatsData()
 
-  const countByStatus: Partial<Record<CourseStatus, number>> = Object.fromEntries(
-    data.statusCounts.map((s) => [s.status, s.count]),
-  )
-  const phases = getPhaseBreakdown(countByStatus)
-  const stagingPhase = phases.find((p) => p.key === "staging")
-
   return (
     <>
-      <Topbar
-        title="Stats"
-        subtitle="Where every migrated course sits in the pipeline"
-        role={context.profile.role}
-      />
+      <Topbar title="Stats" subtitle="Pipeline overview, workload, and activity trends" role={context.profile.role} />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background">
         <div className="mx-auto max-w-7xl space-y-6">
-          <PipelineTimeline phases={phases} totalCourses={data.totalCourses} />
+          {/* KPI cards */}
+          <StatsOverview
+            totalCourses={data.totalCourses}
+            statusCounts={data.statusCounts}
+            taWorkload={data.taWorkload}
+            stuckCourses={data.stuckCourses}
+          />
 
-          <StatsOverview totalCourses={data.totalCourses} phases={phases} />
+          {/* Full-width pipeline */}
+          <StagePipeline statusCounts={data.statusCounts} totalCourses={data.totalCourses} />
 
+          {/* Workload + Activity side by side */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {stagingPhase && (
-              <PhaseDetailDonut
-                phase={stagingPhase}
-                title="Staging breakdown"
-                caption="Where the bulk of in-flight work sits today"
-              />
-            )}
             <WorkloadChart taWorkload={data.taWorkload} />
+            <ActivityTrend auditEvents={data.auditEvents} />
           </div>
 
+          {/* Pie + Funnel side by side */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <ActivityTrend auditEvents={data.auditEvents} />
-            <StuckCoursesList stuckCourses={data.stuckCourses} totalStuck={data.stuckCount} />
+            <StatusPieChart statusCounts={data.statusCounts} totalCourses={data.totalCourses} />
+            <CompletionFunnel statusCounts={data.statusCounts} totalCourses={data.totalCourses} />
           </div>
+
+          {/* Stuck courses full width */}
+          <StuckCoursesList stuckCourses={data.stuckCourses} />
         </div>
       </TweakableContent>
     </>
