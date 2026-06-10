@@ -40,6 +40,7 @@ export {
   canTransition,
   COURSE_TRANSITIONS,
   getAllowedTransitions,
+  isAdminOverride,
   type AllowedTransitionsInput,
   type CourseTransition,
   type EffectiveRole,
