@@ -4,7 +4,7 @@ import { getCourseStatusLabel, type CourseStatus, type Role } from "@coursebridg
 import { requireProfile } from "@/lib/auth/context";
 import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared";
 
-type NotificationKind = "assignment" | "course_action" | "issue" | "comment" | "support";
+type NotificationKind = "assignment" | "course_action" | "issue" | "comment" | "support" | "status_override";
 type NotificationTone = "default" | "warning" | "danger" | "success";
 
 export type NotificationItem = {
@@ -127,12 +127,13 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       return { notifications: [], pendingCount: 0, role, error: false };
     }
 
-    const [courses, issues, comments, supportMessages, reassignments] = await Promise.all([
+    const [courses, issues, comments, supportMessages, reassignments, overrides] = await Promise.all([
       getRelevantCourses(accessibleCourseIds, role),
       getRelevantIssues(accessibleCourseIds),
       getRecentComments(accessibleCourseIds, context.profile.id),
       role === "super_admin" ? getOpenSupportMessages() : Promise.resolve([]),
       getRecentReassignments(context.profile.id, isAdmin),
+      getRecentOverridesForUser(context.profile.id),
     ]);
 
     const notifications = [
@@ -141,11 +142,22 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       ...comments.map((comment) => commentToNotification(comment, role)),
       ...supportMessages.map(supportMessageToNotification),
       ...reassignments.map((r) => reassignmentToNotification(r, isAdmin)),
+      ...overrides.map(overrideToNotification),
     ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
+    const dismissed = await admin
+      .from("dismissed_notifications")
+      .select("notification_id")
+      .eq("user_id", context.profile.id);
+
+    const dismissedIds = new Set<string>(
+      (dismissed.data ?? []).map((d: { notification_id: string }) => d.notification_id),
+    );
+    const filtered = notifications.filter((n) => !dismissedIds.has(n.id));
+
     return {
-      notifications,
-      pendingCount: notifications.filter((item) => item.pending).length,
+      notifications: filtered,
+      pendingCount: filtered.filter((item) => item.pending).length,
       role,
       error: false,
     };
@@ -154,6 +166,30 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
     // empty state rather than crash the entire notifications page with a 500.
     console.error("Could not load notifications page data:", err);
     return { notifications: [], pendingCount: 0, role, error: true };
+  }
+
+  async function getRecentOverridesForUser(profileId: string) {
+    // Override events where the current user is the assigned TA on that
+    // course. Last 14 days only — older overrides shouldn't ring on the bell.
+    const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await admin
+      .from("course_status_events")
+      .select(`
+        id, course_id, from_status, to_status, note, created_at, actor_role,
+        actor:profiles!course_status_events_actor_id_fkey ( full_name ),
+        courses!inner ( title, assignments:course_assignments!inner ( user_id, role ) )
+      `)
+      .eq("kind", "admin_override")
+      .gte("created_at", since)
+      .eq("courses.assignments.user_id", profileId)
+      .eq("courses.assignments.role", "staff")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) {
+      console.error("notifications: override fetch failed", error);
+      return [];
+    }
+    return data ?? [];
   }
 
   async function getAssignedCourseIds(profileId: string, profileRole: Role) {
@@ -453,6 +489,36 @@ function reassignmentToNotification(row: ReassignmentRow, viewerIsAdmin: boolean
     href: viewerIsAdmin ? `/admin/courses/${row.course_id}` : `/courses/${row.course_id}/metadata`,
     createdAt: row.created_at,
     pending: !viewerIsAdmin, // actionable for the new TA, informational for admins
+  };
+}
+
+function overrideToNotification(row: {
+  id: string;
+  course_id: string;
+  from_status: string | null;
+  to_status: string;
+  note: string | null;
+  created_at: string;
+  actor: { full_name: string | null } | { full_name: string | null }[] | null;
+  courses: { title: string | null } | { title: string | null }[] | null;
+}): NotificationItem {
+  const actor = Array.isArray(row.actor) ? row.actor[0] : row.actor;
+  const course = Array.isArray(row.courses) ? row.courses[0] : row.courses;
+  const fromLabel = row.from_status
+    ? getCourseStatusLabel(row.from_status as CourseStatus)
+    : "—";
+  const toLabel = getCourseStatusLabel(row.to_status as CourseStatus);
+  return {
+    id: `override:${row.id}`,
+    kind: "status_override",
+    tone: "warning",
+    title: "Status changed by admin",
+    description: `${actor?.full_name ?? "An admin"} moved this course from ${fromLabel} to ${toLabel}. Reason: ${row.note ?? "(none)"}`,
+    courseTitle: course?.title ?? null,
+    meta: "Admin override",
+    href: `/courses/${row.course_id}`,
+    createdAt: row.created_at,
+    pending: true,
   };
 }
 

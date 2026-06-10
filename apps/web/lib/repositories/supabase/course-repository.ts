@@ -56,7 +56,7 @@ function firstRelation<T>(value: T | T[] | null | undefined): T | null {
 }
 
 const AUDIT_EVENT_SELECT = `
-  id, from_status, to_status, note, created_at, actor_role,
+  id, kind, from_status, to_status, note, created_at, actor_role,
   courses ( id, title ),
   profiles!course_status_events_actor_id_fkey ( full_name, email )
 `;
@@ -64,6 +64,7 @@ const AUDIT_EVENT_SELECT = `
 function mapAuditEventRow(row: unknown): AuditEvent {
   const event = row as {
     id: string;
+    kind: string | null;
     from_status: string | null;
     to_status: string;
     note: string | null;
@@ -84,6 +85,7 @@ function mapAuditEventRow(row: unknown): AuditEvent {
     course_title: relatedCourse?.title ?? "—",
     from_status: event.from_status,
     to_status: event.to_status,
+    kind: event.kind === "admin_override" ? "admin_override" : "transition",
     actor_name: actorProfile?.full_name ?? null,
     actor_email: actorProfile?.email ?? "",
     actor_role: event.actor_role,
@@ -685,7 +687,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const { data, error } = await admin
         .from("course_status_events")
         .select(`
-          id, from_status, to_status, note, created_at, actor_role,
+          id, kind, from_status, to_status, note, created_at, actor_role,
           courses ( id, title ),
           profiles!course_status_events_actor_id_fkey ( full_name, email )
         `)
@@ -699,6 +701,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       return (data ?? []).map((row) => {
         const event = row as unknown as {
           id: string;
+          kind: string | null;
           from_status: string | null;
           to_status: string;
           note: string | null;
@@ -719,6 +722,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
           course_title: relatedCourse?.title ?? "—",
           from_status: event.from_status,
           to_status: event.to_status,
+          kind: event.kind === "admin_override" ? "admin_override" : "transition",
           actor_name: actorProfile?.full_name ?? null,
           actor_email: actorProfile?.email ?? "",
           actor_role: event.actor_role,

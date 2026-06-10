@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache"
 import { requireProfile } from "@/lib/auth/context"
 import { postCourseComment } from "@/lib/services/comments"
 import { addEscalationMessage, resolveEscalation } from "@/lib/services/escalations"
+import { overrideCourseStatus } from "@/lib/services/course-status-override"
+import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
+import type { CourseStatus } from "@coursebridge/workflow"
 
 export async function postCommentAction(courseId: string, body: string) {
   const profile = await requireProfile()
@@ -83,4 +86,43 @@ export async function resolveEscalationAction(escalationId: string, courseId: st
     console.error("[escalation] resolveEscalationAction:", err)
     throw new Error("Could not resolve escalation. Please ensure the database migration has been applied.")
   }
+}
+
+const OVERRIDE_ROLES = new Set(["admin_full", "super_admin"])
+
+export async function overrideCourseStatusAction(input: {
+  courseId: string
+  to: CourseStatus
+  reason: string
+}) {
+  const profile = await requireProfile()
+  if (profile.kind !== "profile" || !OVERRIDE_ROLES.has(profile.profile.role)) {
+    throw new Error("Forbidden")
+  }
+
+  try {
+    await overrideCourseStatus(getSupabaseAdminClientOrThrow(), {
+      courseId: input.courseId,
+      to: input.to,
+      reason: input.reason,
+      actorId: profile.userId,
+      actorRole: profile.profile.role,
+    })
+  } catch (err) {
+    Sentry.withScope((scope) => {
+      scope.setTag("area", "admin_course_detail")
+      scope.setTag("action", "override_course_status")
+      scope.setContext("override", {
+        actorId: profile.userId,
+        courseId: input.courseId,
+        to: input.to,
+      })
+      Sentry.captureException(err instanceof Error ? err : new Error("overrideCourseStatusAction failed"))
+    })
+    throw err
+  }
+
+  revalidatePath(`/admin/courses/${input.courseId}`)
+  revalidatePath(`/admin`)
+  revalidatePath(`/courses/${input.courseId}`)
 }

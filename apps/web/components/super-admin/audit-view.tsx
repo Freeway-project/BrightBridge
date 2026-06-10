@@ -119,7 +119,14 @@ export function AuditView({ initial }: { initial?: PaginatedResult<AuditEvent> }
               events.map((e) => (
                 <TableRow key={e.id} className="border-border">
                   <TableCell className="pl-4 text-sm font-medium">{e.course_title}</TableCell>
-                  <TableCell className="text-xs">{e.from_status ?? "Initial"} → {e.to_status}</TableCell>
+                  <TableCell className="text-xs">
+                    {e.from_status ?? "Initial"} → {e.to_status}
+                    {e.kind === "admin_override" && (
+                      <span className="ml-2 inline-flex items-center rounded border border-orange-400/30 bg-orange-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-orange-500">
+                        Admin override
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-xs">{e.actor_name ?? e.actor_email}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">{fmt(e.created_at)}</TableCell>
                 </TableRow>

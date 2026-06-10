@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { CelebrationOverlay } from "@/components/mindfresh/CelebrationOverlay"
+import { StatusOverrideDialog } from "./status-override-dialog"
 
 interface Props {
   course: AdminCourseRow
@@ -142,6 +143,13 @@ export function AdminCourseSidebar({ course, escalations, currentUserId, departm
             <div className="flex items-center justify-between">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">Current Status</h3>
               <StatusBadge status={course.status} className="h-5" />
+            </div>
+            <div className="mt-3">
+              <StatusOverrideDialog
+                courseId={course.id}
+                courseTitle={course.title}
+                currentStatus={course.status}
+              />
             </div>
             <Separator className="bg-border-icy" />
           </section>

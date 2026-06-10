@@ -154,6 +154,7 @@ export type AuditEvent = {
   course_title: string;
   from_status: string | null;
   to_status: string;
+  kind: "transition" | "admin_override";
   actor_name: string | null;
   actor_email: string;
   actor_role: string;
