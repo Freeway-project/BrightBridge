@@ -1,9 +1,14 @@
+const path = require("path");
+// __dirname resolves to SOURCE/ — all paths are relative to it so this config
+// works regardless of where the repo is cloned on the VPS.
+const root = __dirname;
+
 module.exports = {
   apps: [
     {
       name: "brightbridge",
-      cwd: "/mnt/external/BrightBridge/apps/web",
-      script: "/mnt/external/BrightBridge/node_modules/.bin/next",
+      cwd: path.join(root, "apps/web"),
+      script: path.join(root, "node_modules/.bin/next"),
       args: "start",
 
       env_production: {
@@ -31,7 +36,7 @@ module.exports = {
     },
     {
       name: "brightbridge-autodeploy",
-      script: "/mnt/external/BrightBridge/scripts/autodeploy.sh",
+      script: path.join(root, "scripts/autodeploy.sh"),
       interpreter: "/bin/bash",
 
       // Never auto-restart on crash — avoids rapid-fire deploy loops

@@ -114,17 +114,15 @@ log "Writing deploy marker..."
 git rev-parse HEAD > "$REPO_ROOT/apps/web/.deployment-version"
 
 # ---------------------------------------------------------------------------
-# 5. Reload PM2
+# 5. Reload PM2 (re-reads ecosystem.config.cjs so new SOURCE/ paths take effect)
 # ---------------------------------------------------------------------------
-if pm2 id brightbridge &>/dev/null; then
-  log "Reloading PM2 process 'brightbridge'..."
-  pm2 reload brightbridge
-  pm2 list
-else
-  log "PM2 process 'brightbridge' not found — starting fresh..."
-  pm2 start ecosystem.config.cjs --env production
-  pm2 save
-fi
+# startOrReload applies the config file (cwd, script paths) on every deploy.
+# Plain `pm2 reload <name>` reuses the old config and would keep pointing at
+# pre-restructure paths after the SOURCE/ migration.
+log "Reloading PM2 with updated config..."
+pm2 startOrReload "$REPO_ROOT/ecosystem.config.cjs" --env production
+pm2 save
+pm2 list
 
 # ---------------------------------------------------------------------------
 # 6. Remove the previous build now that the new process has taken over
