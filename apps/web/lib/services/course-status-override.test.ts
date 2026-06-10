@@ -107,4 +107,80 @@ describe("overrideCourseStatus", () => {
       }),
     ).rejects.toThrow(/forbidden/i);
   });
+
+  it("throws when reading the course returns an error", async () => {
+    const client = {
+      from() {
+        return {
+          select() {
+            return {
+              eq() {
+                return { single: async () => ({ data: null, error: new Error("db read fail") }) };
+              },
+            };
+          },
+        };
+      },
+    };
+    await expect(
+      overrideCourseStatus(client as never, {
+        courseId: "c1",
+        to: "ta_review_in_progress",
+        reason: "Reverting to fix metadata",
+        actorId: "u1",
+        actorRole: "admin_full",
+      }),
+    ).rejects.toThrow(/db read fail/);
+  });
+
+  it("throws when the course is not found", async () => {
+    const client = {
+      from() {
+        return {
+          select() {
+            return {
+              eq() {
+                return { single: async () => ({ data: null, error: null }) };
+              },
+            };
+          },
+        };
+      },
+    };
+    await expect(
+      overrideCourseStatus(client as never, {
+        courseId: "missing",
+        to: "ta_review_in_progress",
+        reason: "Reverting to fix metadata",
+        actorId: "u1",
+        actorRole: "admin_full",
+      }),
+    ).rejects.toThrow(/not found/);
+  });
+
+  it("propagates the insert error", async () => {
+    const { client } = makeClient({ insertError: new Error("insert boom") });
+    await expect(
+      overrideCourseStatus(client as never, {
+        courseId: "c1",
+        to: "ta_review_in_progress",
+        reason: "Reverting to fix metadata",
+        actorId: "u1",
+        actorRole: "admin_full",
+      }),
+    ).rejects.toThrow(/insert boom/);
+  });
+
+  it("propagates the update error", async () => {
+    const { client } = makeClient({ updateError: new Error("update boom") });
+    await expect(
+      overrideCourseStatus(client as never, {
+        courseId: "c1",
+        to: "ta_review_in_progress",
+        reason: "Reverting to fix metadata",
+        actorId: "u1",
+        actorRole: "admin_full",
+      }),
+    ).rejects.toThrow(/update boom/);
+  });
 });
