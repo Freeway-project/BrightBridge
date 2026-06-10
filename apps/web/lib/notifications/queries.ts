@@ -177,11 +177,11 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       .select(`
         id, course_id, from_status, to_status, note, created_at, actor_role,
         actor:profiles!course_status_events_actor_id_fkey ( full_name ),
-        courses!inner ( title, assignments:course_assignments!inner ( user_id, role ) )
+        courses!inner ( title, assignments:course_assignments!inner ( profile_id, role ) )
       `)
       .eq("kind", "admin_override")
       .gte("created_at", since)
-      .eq("courses.assignments.user_id", profileId)
+      .eq("courses.assignments.profile_id", profileId)
       .eq("courses.assignments.role", "staff")
       .order("created_at", { ascending: false })
       .limit(50);
