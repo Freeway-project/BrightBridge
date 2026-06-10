@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TweakableContent } from "@/components/shared/tweakable-content";
 import { getNotificationsPageData, type NotificationItem } from "@/lib/notifications/queries";
 import { cn } from "@/lib/utils";
+import { HideButton } from "./_components/notification-row-client";
+import { ClearAllButton } from "./_components/clear-all-button";
 
 const KIND_ICON = {
   assignment: Bell,
@@ -86,7 +88,10 @@ export default async function NotificationsPage() {
             <CardHeader className="border-b border-border/70 px-4 py-3">
               <CardTitle className="flex items-center justify-between gap-3 text-sm">
                 <span>All notifications</span>
-                <Badge variant="outline">{notifications.length}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{notifications.length}</Badge>
+                  <ClearAllButton disabled={notifications.length === 0} />
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -186,13 +191,14 @@ function NotificationRow({ item }: { item: NotificationItem }) {
           </div>
         </div>
       </div>
-      <div className="flex items-center sm:justify-end">
+      <div className="flex items-start gap-1 sm:justify-end">
         <Button asChild size="sm" variant="outline" className="h-8 gap-1.5">
           <Link href={item.href}>
             <ExternalLink className="size-3.5" />
             Open
           </Link>
         </Button>
+        <HideButton notificationId={item.id} />
       </div>
     </div>
   );
