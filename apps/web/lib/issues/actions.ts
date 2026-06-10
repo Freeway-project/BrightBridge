@@ -6,7 +6,9 @@ import { createClient } from '@supabase/supabase-js'
 import { CourseIssue, IssueComment, CreateIssueInput, AddCommentInput, IssueStatus } from './types'
 import { transitionCourseStatus } from '@/lib/courses/service'
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+function getClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+}
 
 export type IssueCountSummary = { open: number; resolved: number }
 
@@ -15,7 +17,7 @@ export async function getIssueCountsForCoursesAction(
 ): Promise<Map<string, IssueCountSummary>> {
   if (!courseIds.length) return new Map()
 
-  const { data, error } = await supabase
+  const { data, error } = await getClient()
     .from('course_issues')
     .select('course_id, status')
     .in('course_id', courseIds)
@@ -44,7 +46,7 @@ export async function createIssueAction(
 
     const ctx = await requireProfile()
 
-    const { data, error } = await supabase
+    const { data, error } = await getClient()
       .from('course_issues')
       .insert({
         course_id: courseId,
@@ -67,13 +69,13 @@ export async function createIssueAction(
     }
 
     // Insert system message "Issue opened by X"
-    const { data: profile } = await supabase
+    const { data: profile } = await getClient()
       .from('profiles')
       .select('full_name')
       .eq('id', ctx.profile.id)
       .single()
 
-    const commentError = await supabase.from('course_issue_comments').insert({
+    const commentError = await getClient().from('course_issue_comments').insert({
       issue_id: data.id,
       author_id: ctx.profile.id,
       body: `Issue opened by ${profile?.full_name || 'User'}`,
@@ -87,7 +89,7 @@ export async function createIssueAction(
     // If instructor creates a provision-phase issue while course is sent_to_instructor,
     // auto-transition to instructor_questions so admin is visibly blocked
     if (phase === 'provision') {
-      const { data: course } = await supabase
+      const { data: course } = await getClient()
         .from('courses')
         .select('status')
         .eq('id', courseId)
@@ -127,7 +129,7 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
     const ctx = await requireProfile()
 
     // Get the course for this issue
-    const { data: issue, error: issueError } = await supabase
+    const { data: issue, error: issueError } = await getClient()
       .from('course_issues')
       .select('course_id')
       .eq('id', issueId)
@@ -143,7 +145,7 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
       throw new Error('Only admins can resolve issues')
     }
 
-    const { data: updatedIssue, error } = await supabase
+    const { data: updatedIssue, error } = await getClient()
       .from('course_issues')
       .update({
         status: newStatus,
@@ -162,13 +164,13 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
 
     // Insert system comment
     const statusLabel = newStatus === 'in_review' ? 'In Review' : newStatus === 'resolved' ? 'Resolved' : 'Open'
-    const { data: profile } = await supabase
+    const { data: profile } = await getClient()
       .from('profiles')
       .select('full_name')
       .eq('id', ctx.profile.id)
       .single()
 
-    const commentError = await supabase.from('course_issue_comments').insert({
+    const commentError = await getClient().from('course_issue_comments').insert({
       issue_id: issueId,
       author_id: ctx.profile.id,
       body: `Status changed to ${statusLabel} by ${profile?.full_name || 'User'}`,
@@ -195,7 +197,7 @@ export async function addCommentAction(issueId: string, input: AddCommentInput):
 
     const ctx = await requireProfile()
 
-    const { data: comment, error: commentError } = await supabase
+    const { data: comment, error: commentError } = await getClient()
       .from('course_issue_comments')
       .insert({
         issue_id: issueId,
@@ -218,13 +220,13 @@ export async function addCommentAction(issueId: string, input: AddCommentInput):
         mentioned_profile_id: profileId,
       }))
 
-      const mentionError = await supabase.from('issue_comment_mentions').insert(mentions)
+      const mentionError = await getClient().from('issue_comment_mentions').insert(mentions)
       if (mentionError.error) {
         console.error('[addCommentAction] Mention insert error:', mentionError.error)
       }
     }
 
-    const issue = await supabase.from('course_issues').select('course_id').eq('id', issueId).single()
+    const issue = await getClient().from('course_issues').select('course_id').eq('id', issueId).single()
     if (issue.data?.course_id) {
       revalidatePath(`/courses/${issue.data.course_id}/issue-log`)
     }
@@ -248,7 +250,7 @@ export async function getIssuesForCourseAction(
   try {
     if (!courseId) throw new Error('Course ID is required')
 
-    let query = supabase
+    let query = getClient()
       .from('course_issues')
       .select(
         `*,
@@ -288,7 +290,7 @@ export async function getIssueWithCommentsAction(issueId: string): Promise<Cours
   try {
     if (!issueId) throw new Error('Issue ID is required')
 
-    const { data: issue, error: issueError } = await supabase
+    const { data: issue, error: issueError } = await getClient()
       .from('course_issues')
       .select(
         `*,
@@ -303,7 +305,7 @@ export async function getIssueWithCommentsAction(issueId: string): Promise<Cours
       throw new Error(issueError.message || 'Issue not found')
     }
 
-    const { data: comments, error: commentsError } = await supabase
+    const { data: comments, error: commentsError } = await getClient()
       .from('course_issue_comments')
       .select(
         `*,

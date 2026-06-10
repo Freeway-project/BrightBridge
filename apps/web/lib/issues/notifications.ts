@@ -2,7 +2,9 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+function getClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+}
 
 interface MentionNotification {
   issued_id: string
@@ -25,7 +27,7 @@ export async function notifyMentionedUsersAction(
     if (!mentionedProfileIds || mentionedProfileIds.length === 0) return
 
     // Get issue context
-    const { data: issue, error: issueError } = await supabase
+    const { data: issue, error: issueError } = await getClient()
       .from('course_issues')
       .select('id, title, course_id, phase')
       .eq('id', issueId)
@@ -67,7 +69,7 @@ export async function getUnreadMentionsAction(userId: string): Promise<number> {
     if (!userId) throw new Error('User ID is required')
 
     // Get count of comments where user is mentioned but hasn't viewed
-    const { count, error } = await supabase
+    const { count, error } = await getClient()
       .from('issue_comment_mentions')
       .select('*', { count: 'exact', head: true })
       .eq('mentioned_profile_id', userId)
@@ -98,7 +100,7 @@ export async function getMentionsForUserAction(userId: string, limit = 20): Prom
   try {
     if (!userId) throw new Error('User ID is required')
 
-    const { data, error } = await supabase
+    const { data, error } = await getClient()
       .rpc('get_user_mentions', {
         p_user_id: userId,
         p_limit: limit,

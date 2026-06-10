@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import { CourseIssue } from './types'
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+function getClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+}
 
 export async function searchIssuesAction(
   courseId: string,
@@ -16,7 +18,7 @@ export async function searchIssuesAction(
   try {
     if (!courseId) throw new Error('Course ID is required')
 
-    let query = supabase
+    let query = getClient()
       .from('course_issues')
       .select(
         `*,
@@ -56,7 +58,7 @@ export async function getRecentIssuesAction(courseId: string, limit = 10): Promi
   try {
     if (!courseId) throw new Error('Course ID is required')
 
-    const { data, error } = await supabase
+    const { data, error } = await getClient()
       .from('course_issues')
       .select(
         `*,
@@ -84,7 +86,7 @@ export async function getOpenIssuesCountAction(courseId: string): Promise<number
   try {
     if (!courseId) throw new Error('Course ID is required')
 
-    const { count, error } = await supabase
+    const { count, error } = await getClient()
       .from('course_issues')
       .select('*', { count: 'exact', head: true })
       .eq('course_id', courseId)
