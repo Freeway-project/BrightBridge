@@ -1,3 +1,4 @@
+go
 # Admin Status Override + Notification Dismissal — Design
 
 **Date:** 2026-06-10
