@@ -12,6 +12,7 @@ import { requireAnyRole, requireProfile } from "@/lib/auth/context";
 import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
 import { resolveEscalation } from "@/lib/services/escalations";
 import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow";
+import { syncCourseChannel } from "@/lib/chat/membership";
 
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
@@ -119,6 +120,12 @@ export async function batchAssignTaAction(
   revalidatePath("/ta");
   courseIds.forEach(id => revalidatePath(`/courses/${id}`));
 
+  for (const { courseId, success } of results) {
+    if (success) {
+      try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
+    }
+  }
+
   if (successCount === courseIds.length) {
     return {
       kind: "success",
@@ -203,6 +210,8 @@ export async function assignTaToCourseAction(
     revalidatePath("/admin");
     revalidatePath("/ta");
     revalidatePath(`/courses/${courseId}`);
+
+    try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
 
     console.info("[assignTaToCourseAction] Attempt succeeded", {
       requestId,
@@ -294,6 +303,12 @@ export async function batchReassignCourseAction(
   revalidatePath("/ta");
   courseIds.forEach((id) => revalidatePath(`/courses/${id}`));
 
+  for (const { courseId, success } of results) {
+    if (success) {
+      try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
+    }
+  }
+
   if (successCount === courseIds.length) {
     return { kind: "success", message: `Reassigned ${successCount} course(s).`, results };
   }
@@ -331,47 +346,18 @@ export async function createInstructorAndAssignAction(
   }
 
   const { getProfileRepository, getCourseRepository } = await import("@/lib/repositories");
-  const { getAuthService } = await import("@/lib/auth/service");
   const { assignUserToCourse } = await import("@/lib/courses/service");
+  const { randomUUID } = await import("node:crypto");
 
   try {
     const profiles = getProfileRepository();
-    const auth = getAuthService();
 
-    // 1. Check if user exists by email
-    // We don't have a direct getByEmail in contract but we can use listUsers or similar, 
-    // or just try to create and handle conflict.
-    // Actually, upsertProfile works if we have an ID.
-    // For now, let's try to create the auth user. If they exist, we'll get an error.
-    
-    let userId: string;
+    // Look up an existing instructor profile by email; create one if missing.
+    // The OIDC sub assigned to this profile id is a placeholder — auth/context
+    // re-resolves it by email on the first Entra sign-in.
+    const existing = await profiles.getProfileByEmail(email);
+    const userId = existing?.id ?? randomUUID();
 
-    try {
-      const user = await auth.createUserWithPassword({
-        email,
-        password: Math.random().toString(36).slice(-12), // Random password for now
-        emailConfirm: true,
-        userMetadata: {
-          full_name: fullName,
-          role: "instructor",
-        },
-      });
-      userId = user.id;
-    } catch (error: any) {
-      if (error.message?.includes("already registered") || error.message?.includes("already exists")) {
-        // Find existing user ID
-        const admin = (await import("@/lib/supabase/admin")).createAdminClient();
-        if (!admin) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY.");
-        const { data } = await admin.auth.admin.listUsers();
-        const existing = data.users.find(u => u.email?.toLowerCase() === email);
-        if (!existing) throw new Error("User exists in auth but could not be found.");
-        userId = existing.id;
-      } else {
-        throw error;
-      }
-    }
-
-    // 2. Ensure profile exists and has instructor role
     await profiles.upsertProfile({
       id: userId,
       email,
@@ -388,6 +374,8 @@ export async function createInstructorAndAssignAction(
 
     revalidatePath("/admin");
     revalidatePath(`/courses/${courseId}`);
+
+    try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
 
     return {
       kind: "success",
@@ -470,16 +458,48 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
 }
 
 /**
- * Generates and emails a fresh magic-link invite to every instructor assigned
- * to the course. Best-effort — failures are logged inside issueInstructorInvites
- * and never throw, so they can't roll back a status transition.
+ * Generates a fresh magic-link invite for every assigned instructor AND sends
+ * the "course is ready" email through the logged instructor-emails service —
+ * so every attempt shows up in the admin Emails tab regardless of outcome.
+ *
+ * Best-effort at the per-recipient level: a failure to one instructor is
+ * logged + persisted (status='failed') but never throws, so it can't roll
+ * back the surrounding status transition.
  */
 async function emailInstructorInvites(courseId: string, createdBy: string): Promise<void> {
   try {
-    const { issueInstructorInvites } = await import("@/lib/invites/send");
+    const [{ createReviewInvite, getCourseInstructorRecipients }, { buildInviteLink }, { notifyInstructor }] = await Promise.all([
+      import("@/lib/invites/service"),
+      import("@/lib/email/templates/instructor-invite"),
+      import("@/lib/instructor-emails/service"),
+    ]);
+
     const detail = await getAdminCourseDetail(courseId);
     const courseTitle = detail?.course.title ?? "your migrated course";
-    await issueInstructorInvites({ courseId, courseTitle, createdBy });
+    const recipients = await getCourseInstructorRecipients(courseId);
+
+    for (const recipient of recipients) {
+      try {
+        const { token } = await createReviewInvite({
+          courseId,
+          email: recipient.email,
+          createdBy,
+        });
+        await notifyInstructor({
+          courseId,
+          sentBy: createdBy,
+          recipient: recipient.email,
+          instructorName: recipient.fullName,
+          courseTitle,
+          dashboardUrl: buildInviteLink(token),
+        });
+      } catch (innerErr) {
+        console.error(
+          `[sendToInstructor] Failed to notify ${recipient.email} for course ${courseId}:`,
+          innerErr,
+        );
+      }
+    }
   } catch (error) {
     console.error(`[sendToInstructor] Failed to issue instructor invites for course ${courseId}:`, error);
   }
@@ -510,7 +530,26 @@ export async function sendToInstructorAction(courseId: string): Promise<void> {
 export async function resendInstructorInviteAction(courseId: string): Promise<void> {
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+
+  // Resend is only allowed after a failed send. A successful prior send means
+  // the instructor already has a working magic link; a still-pending send
+  // shouldn't be duplicated. The Emails tab UI also hides the resend button
+  // unless the last send failed, but the guard lives here too because the
+  // action is exported.
+  const { lastForCourse } = await import("@/lib/instructor-emails/queries");
+  const last = await lastForCourse(courseId);
+  if (!last) {
+    throw new Error("No previous send to resend — use the initial send action.");
+  }
+  if (last.status !== "failed") {
+    throw new Error(
+      `Resend is only available after a failed send (last send: ${last.status}).`,
+    );
+  }
+
   await emailInstructorInvites(courseId, ctx.userId);
+  revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath(`/admin/courses/${courseId}/emails`);
 }
 
 export async function grantFinalApprovalAction(courseId: string): Promise<void> {

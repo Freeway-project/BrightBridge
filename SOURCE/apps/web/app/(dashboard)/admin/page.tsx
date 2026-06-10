@@ -21,6 +21,15 @@ import { MigrationPanel } from "./_components/migration-panel"
 import { getLatestMigrationReport } from "@/lib/migration/report"
 import { InstitutionPanel } from "@/components/super-admin/institution-panel"
 import { getSuperAdminData } from "@/lib/super-admin/queries"
+import { firstOpenedAtByCourseIds } from "@/lib/instructor-views/queries"
+
+const INSTRUCTOR_PHASE_STATUSES: ReadonlySet<CourseStatus> = new Set([
+  "sent_to_instructor",
+  "instructor_viewing",
+  "instructor_questions",
+  "instructor_approved",
+  "final_approved",
+])
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -91,6 +100,16 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const cardPages = await Promise.all(cardStatuses.map((s) => repo.listAdminCoursesPage(1, 15, { status: s })))
   const rowsByStatus = new Map<CourseStatus, AdminCourseRow[]>()
   cardStatuses.forEach((s, i) => rowsByStatus.set(s, cardPages[i].data))
+  // Batched opened-at lookup for the current page rows so the indicator dot in
+  // the All Courses list doesn't N+1. We only ask about rows that are in the
+  // instructor phase — earlier statuses can never have an open.
+  const instructorPhaseIds = coursesPage.data
+    .filter((row) => INSTRUCTOR_PHASE_STATUSES.has(row.status))
+    .map((row) => row.id)
+  const openedAtMap = await firstOpenedAtByCourseIds(instructorPhaseIds)
+  const instructorOpenedAt: Record<string, string> = {}
+  openedAtMap.forEach((v, k) => { instructorOpenedAt[k] = v })
+
   const boardColumns: BoardColumn[] = BOARD_COLUMNS.map((col) => ({
     key: col.key,
     label: col.label,
@@ -125,7 +144,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
                 columns={boardColumns}
                 role={context.profile.role}
                 tas={tas}
-                listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} />}
+                listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} instructorOpenedAt={instructorOpenedAt} />}
               />
             }
             assignPanel={

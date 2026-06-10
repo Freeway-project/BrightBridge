@@ -7,10 +7,6 @@ import { TweakableContent } from "@/components/shared/tweakable-content"
 
 const AUDIT_PAGE_SIZE = 30
 
-// Always render fresh — never serve a cached audit trail.
-export const dynamic = "force-dynamic"
-export const revalidate = 0
-
 export default async function SuperAdminAuditPage() {
   const context = await getAuthContext()
 

@@ -1,20 +1,6 @@
 'use server'
 
-import { createClient } from '@supabase/supabase-js'
-
-function getClient() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-}
-
-interface MentionNotification {
-  issued_id: string
-  comment_id: string
-  mentioner_id: string
-  mentioner_name: string
-  issue_title: string
-  course_id: string
-  phase: string
-}
+import { getPostgresPool } from '@/lib/postgres/pool'
 
 export async function notifyMentionedUsersAction(
   issueId: string,
@@ -26,15 +12,15 @@ export async function notifyMentionedUsersAction(
     if (!issueId || !commentId) throw new Error('Issue ID and comment ID are required')
     if (!mentionedProfileIds || mentionedProfileIds.length === 0) return
 
-    // Get issue context
-    const { data: issue, error: issueError } = await getClient()
-      .from('course_issues')
-      .select('id, title, course_id, phase')
-      .eq('id', issueId)
-      .single()
+    const pool = getPostgresPool()
+    const issueResult = await pool.query<{ id: string; title: string; course_id: string; phase: string }>(
+      'SELECT id, title, course_id, phase FROM course_issues WHERE id = $1 LIMIT 1',
+      [issueId],
+    )
+    const issue = issueResult.rows[0] ?? null
 
-    if (issueError) {
-      console.error('[notifyMentionedUsersAction] Failed to fetch issue:', issueError)
+    if (!issue) {
+      console.error('[notifyMentionedUsersAction] Failed to fetch issue for mention notification')
       return
     }
 
@@ -54,10 +40,6 @@ export async function notifyMentionedUsersAction(
     })
 
     // TODO: Implement notification system
-    // This could be done via:
-    // 1. Database notifications table (records to be read by UI)
-    // 2. Email service integration
-    // 3. Push notification service
   } catch (err) {
     console.error('[notifyMentionedUsersAction] Error:', err)
     // Don't throw - notifications are non-critical
@@ -68,19 +50,16 @@ export async function getUnreadMentionsAction(userId: string): Promise<number> {
   try {
     if (!userId) throw new Error('User ID is required')
 
-    // Get count of comments where user is mentioned but hasn't viewed
-    const { count, error } = await getClient()
-      .from('issue_comment_mentions')
-      .select('*', { count: 'exact', head: true })
-      .eq('mentioned_profile_id', userId)
-      // TODO: Add viewed_at column to track which mentions have been read
-
-    if (error) {
-      console.error('[getUnreadMentionsAction] Query error:', error)
-      throw new Error(error.message || 'Failed to get mentions count')
-    }
-
-    return count || 0
+    const pool = getPostgresPool()
+    const { rows } = await pool.query<{ count: string }>(
+      `
+        SELECT COUNT(*)::text AS count
+        FROM issue_comment_mentions
+        WHERE mentioned_profile_id = $1
+      `,
+      [userId],
+    )
+    return Number(rows[0]?.count ?? 0)
   } catch (err) {
     console.error('[getUnreadMentionsAction] Error:', err)
     throw err instanceof Error ? err : new Error('Failed to get mentions count')
@@ -100,19 +79,42 @@ export async function getMentionsForUserAction(userId: string, limit = 20): Prom
   try {
     if (!userId) throw new Error('User ID is required')
 
-    const { data, error } = await getClient()
-      .rpc('get_user_mentions', {
-        p_user_id: userId,
-        p_limit: limit,
-      })
+    const pool = getPostgresPool()
+    const { rows } = await pool.query<{
+      comment_id: string
+      issue_id: string
+      issue_title: string | null
+      comment_author: string | null
+      course_id: string
+      created_at: string
+    }>(
+      `
+        SELECT
+          c.id AS comment_id,
+          c.issue_id,
+          i.title AS issue_title,
+          p.full_name AS comment_author,
+          i.course_id,
+          c.created_at
+        FROM issue_comment_mentions m
+        INNER JOIN course_issue_comments c ON c.id = m.comment_id
+        INNER JOIN course_issues i ON i.id = c.issue_id
+        LEFT JOIN profiles p ON p.id = c.author_id
+        WHERE m.mentioned_profile_id = $1
+        ORDER BY c.created_at DESC
+        LIMIT $2
+      `,
+      [userId, limit],
+    )
 
-    if (error) {
-      console.error('[getMentionsForUserAction] Query error:', error)
-      // RPC might not exist yet, so return empty array gracefully
-      return []
-    }
-
-    return data || []
+    return rows.map((row) => ({
+      comment_id: row.comment_id,
+      issue_id: row.issue_id,
+      issue_title: row.issue_title ?? 'Untitled issue',
+      comment_author: row.comment_author ?? 'Unknown user',
+      course_id: row.course_id,
+      created_at: row.created_at,
+    }))
   } catch (err) {
     console.error('[getMentionsForUserAction] Error:', err)
     return []

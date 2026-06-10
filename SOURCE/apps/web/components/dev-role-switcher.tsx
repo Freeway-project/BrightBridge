@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { getAuthService } from "@/lib/auth/service";
 import { getProfileRepository } from "@/lib/repositories";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function DevRoleSwitcher() {
   if (process.env.NODE_ENV !== "development") {
@@ -21,22 +20,6 @@ export async function DevRoleSwitcher() {
 
   if (!user) {
     return null;
-  }
-
-  const admin = createAdminClient();
-
-  if (!admin) {
-    return (
-      <Card className="fixed bottom-4 right-4 z-50 w-80 border-destructive/40">
-        <CardHeader>
-          <CardTitle>Dev role switcher unavailable</CardTitle>
-          <CardDescription>
-            Add SUPABASE_SERVICE_ROLE_KEY to your local env to enable role
-            switching.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
   }
 
   const profile = await getProfileRepository().getProfileById(user.id);
