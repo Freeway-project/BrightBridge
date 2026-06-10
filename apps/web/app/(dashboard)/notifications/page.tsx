@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, LifeBuoy, MessageSquare, TriangleAlert } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, LifeBuoy, MessageSquare, ShieldAlert, TriangleAlert } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Topbar } from "@/components/layout/topbar";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +15,13 @@ const KIND_ICON = {
   issue: TriangleAlert,
   comment: MessageSquare,
   support: LifeBuoy,
+  status_override: ShieldAlert,
 };
 
 // Section headers for grouping "All notifications" by where each item came
 // from (its `kind`). Order here is the order the groups render in.
 const KIND_LABEL: { kind: NotificationItem["kind"]; label: string }[] = [
+  { kind: "status_override", label: "Admin overrides" },
   { kind: "course_action", label: "Course actions" },
   { kind: "assignment", label: "Assignments" },
   { kind: "issue", label: "Issues" },
