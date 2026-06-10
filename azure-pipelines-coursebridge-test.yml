@@ -22,7 +22,7 @@ variables:
   # Variable group should contain secrets such as:
   # - DOCKERHUB_USERNAME
   # - DOCKERHUB_PAT
-  - group: coursebridge-deploy
+  - group: coursebridge-deploy-testing
 
 stages:
   - stage: BuildAndPush
