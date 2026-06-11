@@ -78,7 +78,8 @@ export type AdminCourseRow = {
   status: CourseStatus;
   updatedAt: string;
   ta: { id: string; name: string | null; email: string } | null;
-  instructor: { id: string; name: string | null; email: string } | null;
+  /** Assigned instructor — populated by getAdminCourse (single-course read), not list queries. */
+  instructor?: { id: string; name: string | null; email: string } | null;
   instructorSummaryNotes: string | null;
   reviewProgress?: ReviewProgress;
 };
@@ -173,6 +174,8 @@ export type AuditEvent = {
   actor_name: string | null;
   actor_email: string;
   actor_role: string;
+  /** Name of the instructor this transition was performed on behalf of (delegation), if any. */
+  on_behalf_of_name: string | null;
   note: string | null;
   created_at: string;
 };
@@ -237,6 +240,12 @@ export type CourseComment = {
   author_name?: string;
   author_role?: string;
   author_email?: string;
+  /** Author's highest org-hierarchy leadership title (e.g. "dean"), when they hold one. */
+  author_title?: string | null;
+  /** Raw profile id this comment was posted on behalf of (delegation). */
+  acting_on_behalf_of?: string | null;
+  /** Display name of the instructor this comment was posted on behalf of, when delegated. */
+  on_behalf_of_name?: string | null;
   body: string;
   visibility: "internal" | "instructor_visible";
   parent_comment_id: string | null;
@@ -296,6 +305,8 @@ export type InsertStatusEventInput = {
   actorId: string;
   actorRole: Role;
   note?: string | null;
+  /** Set when a hierarchy leader performed this transition on behalf of the assigned instructor. */
+  actingOnBehalfOf?: string | null;
 };
 
 export type PostCourseCommentInput = {
@@ -304,6 +315,8 @@ export type PostCourseCommentInput = {
   body: string;
   visibility?: "internal" | "instructor_visible";
   parentCommentId?: string | null;
+  /** Set when a hierarchy leader posted on behalf of the assigned instructor. */
+  actingOnBehalfOf?: string | null;
 };
 
 export type UpsertReviewResponseInput = {

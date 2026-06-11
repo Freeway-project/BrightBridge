@@ -20,6 +20,7 @@ export function createPostgresCommentRepository(): CommentRepository {
         author_name: string | null;
         author_email: string | null;
         author_role: string | null;
+        acting_on_behalf_of: string | null;
       }>(
         `
           SELECT
@@ -30,6 +31,7 @@ export function createPostgresCommentRepository(): CommentRepository {
             c.visibility,
             c.parent_comment_id,
             c.created_at,
+            c.acting_on_behalf_of,
             p.full_name AS author_name,
             p.email AS author_email,
             p.role AS author_role
@@ -62,12 +64,13 @@ export function createPostgresCommentRepository(): CommentRepository {
         author_name: string | null;
         author_email: string | null;
         author_role: string | null;
+        acting_on_behalf_of: string | null;
       }>(
         `
           WITH inserted AS (
-            INSERT INTO course_comments (course_id, author_id, body, visibility, parent_comment_id)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING id, course_id, author_id, body, visibility, parent_comment_id, created_at
+            INSERT INTO course_comments (course_id, author_id, body, visibility, parent_comment_id, acting_on_behalf_of)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, course_id, author_id, body, visibility, parent_comment_id, created_at, acting_on_behalf_of
           )
           SELECT
             i.id,
@@ -77,6 +80,7 @@ export function createPostgresCommentRepository(): CommentRepository {
             i.visibility,
             i.parent_comment_id,
             i.created_at,
+            i.acting_on_behalf_of,
             p.full_name AS author_name,
             p.email AS author_email,
             p.role AS author_role
@@ -89,6 +93,7 @@ export function createPostgresCommentRepository(): CommentRepository {
           input.body,
           input.visibility ?? "internal",
           input.parentCommentId ?? null,
+          input.actingOnBehalfOf ?? null,
         ],
       );
 

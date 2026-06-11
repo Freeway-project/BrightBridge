@@ -20,13 +20,75 @@ import type {
   CourseAssignmentRecord,
   InstructorCourse,
 } from "@/lib/repositories/contracts";
+import { LEADERSHIP_TITLES, highestLeadershipTitle } from "@/lib/hierarchy/leadership";
 
 const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
 const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin", "provost"];
 
 export type { CourseSummary, ReviewProgress, SectionProgress, InstructorCourse, SubmissionEvent } from "@/lib/repositories/contracts";
 
-const LEADERSHIP_TITLES = new Set(["dean", "assistant_dean", "dept_head", "chair"]);
+/**
+ * Result of checking whether an actor is acting as an org-hierarchy leader on a
+ * course they don't own. `delegated` true means: not the assigned instructor,
+ * holds a leadership title, and has hierarchy access over the course's unit.
+ * `onBehalfOf` is the assigned instructor's profile id (null if the course has
+ * none — the leader may still act, on-behalf simply stays null).
+ */
+export type DelegationContext = {
+  delegated: boolean;
+  onBehalfOf: string | null;
+  onBehalfOfName: string | null;
+  leaderTitle: string | null;
+};
+
+const NO_DELEGATION: DelegationContext = {
+  delegated: false,
+  onBehalfOf: null,
+  onBehalfOfName: null,
+  leaderTitle: null,
+};
+
+/**
+ * Resolves whether `profile` may act on `courseId` via org-hierarchy delegation
+ * (a dean / dept-head acting for an instructor). Wide roles and the assigned
+ * instructor are NOT delegation — they have direct authority — so this returns
+ * a non-delegated context for them.
+ */
+export async function resolveDelegationContext({
+  courseId,
+  profile,
+}: {
+  courseId: string;
+  profile: AppProfile;
+}): Promise<DelegationContext> {
+  // Wide roles already have direct authority; never a delegated action.
+  if ((roleWideCourseRoles as readonly Role[]).includes(profile.role)) {
+    return NO_DELEGATION;
+  }
+
+  const hierarchy = getHierarchyRepository();
+  const units = await hierarchy.getUserUnits(profile.id);
+  const leaderTitle = highestLeadershipTitle(units.map((u) => u.title));
+  if (!leaderTitle) return NO_DELEGATION;
+
+  if (!(await hierarchy.hasHierarchyAccess(profile.id, courseId))) {
+    return NO_DELEGATION;
+  }
+
+  const course = await getCourseRepository().getAdminCourse(courseId);
+  const instructor = course?.instructor ?? null;
+
+  // If the leader IS the assigned instructor, they act directly (assignment
+  // path), not on anyone's behalf.
+  if (instructor && instructor.id === profile.id) return NO_DELEGATION;
+
+  return {
+    delegated: true,
+    onBehalfOf: instructor?.id ?? null,
+    onBehalfOfName: instructor?.name ?? null,
+    leaderTitle,
+  };
+}
 
 function toAssignmentRole(profileRole: Role): AssignmentRole {
   if (profileRole === "standard_user") return "staff";
@@ -277,7 +339,7 @@ export async function transitionCourseStatus(input: TransitionCourseStatusInput)
     to: input.toStatus
   });
 
-  await assertCanActOnCourse({
+  const delegation = await assertCanActOnCourse({
     courseId: course.id,
     profile: context.profile,
     assignment
@@ -290,7 +352,8 @@ export async function transitionCourseStatus(input: TransitionCourseStatusInput)
     fromStatus,
     toStatus: input.toStatus,
     actor: context.profile,
-    note: cleanOptionalText(input.note)
+    note: cleanOptionalText(input.note),
+    actingOnBehalfOf: delegation?.onBehalfOf ?? null
   });
 
   return updatedCourse;
@@ -336,6 +399,12 @@ export async function markInstructorViewingByLink(input: {
   return updatedCourse;
 }
 
+/**
+ * Authorizes the actor to act on the course and returns the delegation context
+ * (non-null only when they acted as an org-hierarchy leader, so the caller can
+ * record the on-behalf-of instructor). Throws when the actor has neither an
+ * assignment, a wide role, nor hierarchy delegation.
+ */
 async function assertCanActOnCourse({
   courseId,
   profile,
@@ -344,14 +413,23 @@ async function assertCanActOnCourse({
   courseId: string;
   profile: AppProfile;
   assignment: CourseAssignmentRecord | null;
-}) {
+}): Promise<DelegationContext | null> {
   if ((roleWideCourseRoles as readonly Role[]).includes(profile.role)) {
-    return;
+    return null;
   }
 
-  if (!assignment) {
-    throw new Error("You are not assigned to this course.");
+  // Directly assigned (TA or assigned instructor) — direct authority, no on-behalf.
+  if (assignment) {
+    return null;
   }
+
+  // Not assigned: allow only when acting as a leader over the course's subtree.
+  const delegation = await resolveDelegationContext({ courseId, profile });
+  if (delegation.delegated) {
+    return delegation;
+  }
+
+  throw new Error("You are not assigned to this course.");
 }
 
 async function insertStatusEvent({
@@ -359,13 +437,15 @@ async function insertStatusEvent({
   fromStatus,
   toStatus,
   actor,
-  note
+  note,
+  actingOnBehalfOf
 }: {
   courseId: string;
   fromStatus: CourseStatus | null;
   toStatus: CourseStatus;
   actor: AppProfile;
   note?: string | null;
+  actingOnBehalfOf?: string | null;
 }) {
   await getCourseRepository().insertStatusEvent({
     courseId,
@@ -373,7 +453,8 @@ async function insertStatusEvent({
     toStatus,
     actorId: actor.id,
     actorRole: actor.role,
-    note: cleanOptionalText(note)
+    note: cleanOptionalText(note),
+    actingOnBehalfOf: actingOnBehalfOf ?? null
   });
 }
 

@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState, type ReactNode } from "react"
-import { HelpCircle, PanelsTopLeft, Sparkles } from "lucide-react"
+import { HelpCircle, PanelsTopLeft, ShieldCheck, Sparkles } from "lucide-react"
+import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 import { getInstructorSimpleState } from "@/lib/courses/instructor-view"
@@ -21,6 +22,10 @@ interface Props {
   reviewNode: ReactNode
   /** The existing 5-tab workspace, rendered when "Full details" is chosen. */
   full: ReactNode
+  /** Assigned instructor's name when a hierarchy leader is acting on their behalf. */
+  actingOnBehalfOfName?: string | null
+  /** The acting leader's org title (e.g. "dean") when delegating. */
+  actingAsTitle?: string | null
 }
 
 /**
@@ -37,6 +42,8 @@ export function InstructorCourseShell({
   readOnly,
   reviewNode,
   full,
+  actingOnBehalfOfName,
+  actingAsTitle,
 }: Props) {
   const [mode, setMode] = useStickyTabState("instructor-view-mode", "simple")
   const [step, setStep] = useState(0)
@@ -75,8 +82,29 @@ export function InstructorCourseShell({
     }
   }, [tourAvailable, isSimple, startTour])
 
+  const actingAsLeader = !!actingAsTitle
+  const leaderLabel = actingAsTitle ? (ROLE_TITLE_LABELS[actingAsTitle] ?? "Leader") : null
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Acting-on-behalf banner — a hierarchy leader is standing in for the
+          assigned instructor. Actions are recorded under their own name on the
+          instructor's behalf. */}
+      {actingAsLeader && (
+        <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 px-6 py-2 text-sm text-amber-800 dark:text-amber-200">
+          <ShieldCheck className="size-4 shrink-0" aria-hidden />
+          <span>
+            Acting as <span className="font-semibold">{leaderLabel}</span>
+            {actingOnBehalfOfName ? (
+              <> on behalf of <span className="font-semibold">{actingOnBehalfOfName}</span></>
+            ) : (
+              <> for this course</>
+            )}
+            . Your actions are recorded under your name.
+          </span>
+        </div>
+      )}
+
       {/* Toggle + help bar */}
       <div className="flex items-center justify-between gap-2 border-b border-border bg-background px-6 py-2">
         <div

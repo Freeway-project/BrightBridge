@@ -3,6 +3,7 @@ import { Eye } from "lucide-react"
 import { Topbar } from "@/components/layout/topbar"
 import { requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
+import { resolveDelegationContext } from "@/lib/courses/service"
 import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StickyTabs } from "@/components/ui/sticky-tabs"
@@ -29,18 +30,25 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
     notFound()
   }
 
-  // Assigned instructors get the full workspace. Deans / dept-heads (leadership
-  // titles in the org hierarchy) and super admins get a read-only view of any
-  // course in their department tree.
+  // Assigned instructors get the full workspace. Org-hierarchy leaders (dean /
+  // dept-head / etc.) may ACT on the assigned instructor's behalf — approve, ask,
+  // talk to the TA — for any course in their subtree. Super admins keep a
+  // read-only hierarchy view.
   const assignedCourse = await getCourseRepository().getAssignedCourseById(id, context.profile.id, "instructor")
+  const delegation = assignedCourse
+    ? null
+    : await resolveDelegationContext({ courseId: id, profile: context.profile })
+  const canActViaDelegation = delegation?.delegated ?? false
   const canViewViaHierarchy =
     !assignedCourse &&
     (context.profile.role === "super_admin" ||
+      canActViaDelegation ||
       (await getHierarchyRepository().hasHierarchyAccess(context.profile.id, id)))
   if (!assignedCourse && !canViewViaHierarchy) notFound()
 
-  // Read-only when the viewer is not the assigned instructor.
-  const readOnly = !assignedCourse
+  // Read-only unless you're the assigned instructor OR a leader acting on their
+  // behalf. (Super-admin hierarchy views stay read-only.)
+  const readOnly = !assignedCourse && !canActViaDelegation
 
   // Record the dashboard open for the indicator dot. Only the assigned
   // instructor counts — hierarchy/super-admin read-only views shouldn't
@@ -85,6 +93,8 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           status={course.status}
           finalSummary={course.instructorSummaryNotes}
           readOnly={readOnly}
+          actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
+          actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
           reviewNode={
             <InstructorReviewDetail
               course={course}

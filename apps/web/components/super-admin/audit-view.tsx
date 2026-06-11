@@ -9,7 +9,7 @@ import { loadMoreAuditEvents } from "@/app/(dashboard)/super-admin/actions"
 import type { AuditEvent, PaginatedResult } from "@/lib/repositories/contracts"
 
 function fmt(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+  return new Date(dateStr).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
 }
 
 export function AuditView({ initial }: { initial: PaginatedResult<AuditEvent> }) {
@@ -77,7 +77,12 @@ export function AuditView({ initial }: { initial: PaginatedResult<AuditEvent> })
                 <TableRow key={e.id} className="border-border">
                   <TableCell className="pl-4 text-sm font-medium">{e.course_title}</TableCell>
                   <TableCell className="text-xs">{e.from_status ?? "Initial"} → {e.to_status}</TableCell>
-                  <TableCell className="text-xs">{e.actor_name ?? e.actor_email}</TableCell>
+                  <TableCell className="text-xs">
+                    {e.actor_name ?? e.actor_email}
+                    {e.on_behalf_of_name && (
+                      <span className="text-muted-foreground"> → on behalf of {e.on_behalf_of_name}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-xs text-muted-foreground">{fmt(e.created_at)}</TableCell>
                 </TableRow>
               ))

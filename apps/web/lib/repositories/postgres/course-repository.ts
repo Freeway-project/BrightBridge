@@ -224,6 +224,7 @@ type AuditEventQueryRow = {
   course_title: string | null;
   actor_name: string | null;
   actor_email: string | null;
+  on_behalf_of_name: string | null;
 };
 
 // Shared SELECT/JOINs for audit events (newest-first ordering applied by callers).
@@ -238,10 +239,12 @@ const AUDIT_EVENT_FROM_SQL = `
     c.id AS course_id,
     c.title AS course_title,
     p.full_name AS actor_name,
-    p.email AS actor_email
+    p.email AS actor_email,
+    ob.full_name AS on_behalf_of_name
   FROM course_status_events e
   LEFT JOIN courses c ON c.id = e.course_id
   LEFT JOIN profiles p ON p.id = e.actor_id
+  LEFT JOIN profiles ob ON ob.id = e.acting_on_behalf_of
 `;
 
 function mapAuditEventRow(row: AuditEventQueryRow): AuditEvent {
@@ -254,6 +257,7 @@ function mapAuditEventRow(row: AuditEventQueryRow): AuditEvent {
     actor_name: row.actor_name,
     actor_email: row.actor_email ?? "",
     actor_role: row.actor_role,
+    on_behalf_of_name: row.on_behalf_of_name,
     note: row.note,
     created_at: row.created_at,
   };
@@ -540,8 +544,8 @@ export function createPostgresCourseRepository(): CourseRepository {
       const pool = getPostgresPool();
       await pool.query(
         `
-          INSERT INTO course_status_events (course_id, from_status, to_status, actor_id, actor_role, note)
-          VALUES ($1, $2, $3, $4, $5, $6)
+          INSERT INTO course_status_events (course_id, from_status, to_status, actor_id, actor_role, note, acting_on_behalf_of)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
         `,
         [
           input.courseId,
@@ -550,6 +554,7 @@ export function createPostgresCourseRepository(): CourseRepository {
           input.actorId,
           input.actorRole,
           cleanOptionalText(input.note),
+          input.actingOnBehalfOf ?? null,
         ],
       );
     },
@@ -956,6 +961,7 @@ export function createPostgresCourseRepository(): CourseRepository {
         course_title: string | null;
         actor_name: string | null;
         actor_email: string | null;
+        on_behalf_of_name: string | null;
       }>(
         `
           SELECT
@@ -968,10 +974,12 @@ export function createPostgresCourseRepository(): CourseRepository {
             c.id AS course_id,
             c.title AS course_title,
             p.full_name AS actor_name,
-            p.email AS actor_email
+            p.email AS actor_email,
+            ob.full_name AS on_behalf_of_name
           FROM course_status_events e
           LEFT JOIN courses c ON c.id = e.course_id
           LEFT JOIN profiles p ON p.id = e.actor_id
+          LEFT JOIN profiles ob ON ob.id = e.acting_on_behalf_of
           WHERE e.course_id = $1
           ORDER BY e.created_at ASC
         `,
@@ -987,6 +995,7 @@ export function createPostgresCourseRepository(): CourseRepository {
         actor_name: row.actor_name,
         actor_email: row.actor_email ?? "",
         actor_role: row.actor_role,
+        on_behalf_of_name: row.on_behalf_of_name,
         note: row.note,
         created_at: row.created_at,
       })) satisfies AuditEvent[];
