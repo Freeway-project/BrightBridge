@@ -1,16 +1,8 @@
 import "server-only"
 
-import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
+import { getPostgresPool } from "@/lib/postgres/pool"
 import { getCourseRepository } from "@/lib/repositories"
 import type { SuperAdminCourseRow } from "@/lib/repositories/contracts"
-
-/**
- * Bulk data assembly for the "Export All Courses" feature (super-admin Courses tab).
- *
- * Everything here is aggregate — three table scans, no per-course N+1 — so it stays
- * fast even across the full portfolio (~2400+ courses). Both the Excel route and the
- * PDF print page consume these helpers so the two surfaces stay in sync.
- */
 
 export type SectionStatus = "draft" | "submitted" | null
 
@@ -22,8 +14,6 @@ export type CourseExportRow = SuperAdminCourseRow & {
   resolvedIssues: number
 }
 
-// Supabase caps a single response at ~1000 rows, so anything that can exceed that
-// (the course list, review_responses, course_issues) is fetched by looping pages.
 const PAGE_SIZE = 1000
 
 /** Fetch every course by looping the existing paginated super-admin query. */
@@ -42,56 +32,32 @@ export async function getAllSuperAdminCourses(search = ""): Promise<SuperAdminCo
   return all
 }
 
-/** Page through an entire table, selecting only the given columns. */
-async function fetchAllRows<T>(table: string, columns: string): Promise<T[]> {
-  const admin = getSupabaseAdminClientOrThrow()
-  const rows: T[] = []
-  let from = 0
-
-  for (;;) {
-    const { data, error } = await admin
-      .from(table)
-      .select(columns)
-      .range(from, from + PAGE_SIZE - 1)
-    if (error) throw new Error(`${table}: ${error.message}`)
-    const batch = (data ?? []) as T[]
-    rows.push(...batch)
-    if (batch.length < PAGE_SIZE) break
-    from += PAGE_SIZE
-  }
-
-  return rows
-}
-
 /**
  * Courses enriched with per-section review status and issue counts.
- * `search` filters the course set (matching the table filter); the aggregate
- * lookups are by course id, so unrelated aggregate rows are simply ignored.
+ * `search` filters the course set; the aggregate lookups are by course id.
  */
 export async function getCoursesForExport(search = ""): Promise<CourseExportRow[]> {
-  const admin = getSupabaseAdminClientOrThrow()
+  const pool = getPostgresPool()
 
-  const [courses, sections, responses, issues] = await Promise.all([
+  const [courses, sectionsResult, responsesResult, issuesResult] = await Promise.all([
     getAllSuperAdminCourses(search),
-    admin
-      .from("review_sections")
-      .select("id, key")
-      .then((r) => (r.data ?? []) as Array<{ id: string; key: string }>),
-    fetchAllRows<{ course_id: string; section_id: string; status: string }>(
-      "review_responses",
-      "course_id, section_id, status",
+    pool.query<{ id: string; key: string }>("SELECT id, key FROM review_sections"),
+    pool.query<{ course_id: string; section_id: string; status: string }>(
+      "SELECT course_id, section_id, status FROM review_responses",
     ),
-    fetchAllRows<{ course_id: string; status: string }>("course_issues", "course_id, status"),
+    pool.query<{ course_id: string; status: string }>(
+      "SELECT course_id, status FROM course_issues",
+    ),
   ])
 
   const sectionKeyById = new Map<string, string>()
-  for (const s of sections) sectionKeyById.set(s.id, s.key)
+  for (const s of sectionsResult.rows) sectionKeyById.set(s.id, s.key)
 
   const sectionStatus = new Map<
     string,
     { metadata: SectionStatus; matrix: SectionStatus; syllabus: SectionStatus }
   >()
-  for (const r of responses) {
+  for (const r of responsesResult.rows) {
     const key = sectionKeyById.get(r.section_id)
     if (!key) continue
     const cur = sectionStatus.get(r.course_id) ?? { metadata: null, matrix: null, syllabus: null }
@@ -103,7 +69,7 @@ export async function getCoursesForExport(search = ""): Promise<CourseExportRow[
   }
 
   const issueCounts = new Map<string, { open: number; resolved: number }>()
-  for (const i of issues) {
+  for (const i of issuesResult.rows) {
     const cur = issueCounts.get(i.course_id) ?? { open: 0, resolved: 0 }
     if (i.status === "resolved") cur.resolved += 1
     else cur.open += 1

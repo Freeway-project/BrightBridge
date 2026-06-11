@@ -6,7 +6,6 @@ import { requireProfile } from "@/lib/auth/context"
 import { postCourseComment } from "@/lib/services/comments"
 import { addEscalationMessage, resolveEscalation } from "@/lib/services/escalations"
 import { overrideCourseStatus } from "@/lib/services/course-status-override"
-import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
 import type { CourseStatus } from "@coursebridge/workflow"
 
 export async function postCommentAction(courseId: string, body: string) {
@@ -101,7 +100,7 @@ export async function overrideCourseStatusAction(input: {
   }
 
   try {
-    await overrideCourseStatus(getSupabaseAdminClientOrThrow(), {
+    await overrideCourseStatus({
       courseId: input.courseId,
       to: input.to,
       reason: input.reason,
