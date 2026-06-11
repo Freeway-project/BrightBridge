@@ -10,8 +10,21 @@ import { signOut } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
 import { SupportMessageDialog } from "./support-message-dialog"
 import Lottie from "lottie-react"
-import aiAnimationData from "@/assets/3c6d4dc5-50cf-45ba-9775-ab665ca5923d.json"
+import aiAnimationBlush from "@/assets/3c6d4dc5-50cf-45ba-9775-ab665ca5923d.json"
+import aiAnimationOcean from "@/assets/559b1333-2acb-45f2-91d0-f47e905945dd.json"
+import aiAnimationSunset from "@/assets/08f2524d-4f10-4454-9ae8-25007a5b8c57.json"
+import aiAnimationMono from "@/assets/7151ad77-5cd9-4b4a-a8d9-eb7ae1f355f8.json"
+import aiAnimationAurora from "@/assets/9612aa98-116d-11ee-b4c5-2f9cdafc1909.json"
 import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
+import { useTweaks, type ThemeId } from "@/components/shared/tweak-provider"
+
+const THEME_LOTTIE: Record<ThemeId, unknown> = {
+  blush: aiAnimationBlush,
+  ocean: aiAnimationOcean,
+  sunset: aiAnimationSunset,
+  monochrome: aiAnimationMono,
+  aurora: aiAnimationAurora,
+}
 import {
   Sidebar,
   SidebarContent,
@@ -62,6 +75,8 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
   const canPokeSupport = role === "standard_user" || role === "admin_full"
+  const { settings } = useTweaks()
+  const themeAnimation = THEME_LOTTIE[settings.theme] ?? aiAnimationOcean
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/50 backdrop-blur-xl">
@@ -109,7 +124,7 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
 
         {!collapsed && (role === "admin_full" || role === "standard_user") && (
           <div className="mt-auto mb-4 px-4 flex justify-center">
-            <Lottie animationData={aiAnimationData} loop={true} className="w-full max-w-[120px]" />
+            <Lottie key={settings.theme} animationData={themeAnimation} loop={true} className="w-full max-w-[120px]" />
           </div>
         )}
       </SidebarContent>
