@@ -17,7 +17,7 @@ Do not build large features without explicit instruction. Work in small, focused
 - React Hook Form + Zod (for forms)
 - Supabase Postgres / Auth / Realtime
 - Cloudflare R2 for file storage
-- Vercel deployment
+- Self-hosted Ubuntu VM + PM2 (`scripts/deploy.sh`)
 - Sentry for error monitoring
 
 ## Coding Guidelines

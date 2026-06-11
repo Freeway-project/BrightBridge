@@ -9,6 +9,6 @@
 - Tables: TanStack Table later
 - Database/Auth/Realtime: Supabase later
 - Storage: Cloudflare R2 later
-- Hosting: Vercel
+- Hosting: Self-hosted Ubuntu VM + PM2 (`scripts/deploy.sh`)
 
 Supabase, R2, PDF export, notifications, and full workflow persistence are intentionally deferred until the project shell is stable.

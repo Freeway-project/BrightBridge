@@ -138,3 +138,10 @@ export function assertCanTransition(input: TransitionInput) {
 function transitionAllowsRole(transition: CourseTransition, role: EffectiveRole) {
   return (transition.roles as readonly EffectiveRole[]).includes(role);
 }
+
+const ADMIN_OVERRIDE_ROLES = ["admin_full", "super_admin"] as const satisfies readonly EffectiveRole[];
+
+export function isAdminOverride({ role, from, to }: TransitionInput): boolean {
+  if (from === to) return false;
+  return (ADMIN_OVERRIDE_ROLES as readonly EffectiveRole[]).includes(role);
+}

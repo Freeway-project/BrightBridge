@@ -385,7 +385,7 @@ Only start these after the MVP workflow works end to end:
 - Template editor.
 - Advanced reporting.
 - Full audit timeline UI.
-- Vercel preview deployment.
+- Staging/preview deployment environment.
 
 ## Solo Developer Weekly Rhythm
 
