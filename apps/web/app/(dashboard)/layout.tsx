@@ -27,7 +27,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   if (context.kind === "missing_profile") {
-    redirect("/auth/login")
+    // Signed in via Azure but no CourseBridge profile/role — send to a terminal
+    // page instead of /auth/login, which would silently SSO back here and loop.
+    redirect("/auth/no-access")
   }
 
   const role = context.profile.role

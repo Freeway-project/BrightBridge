@@ -2,9 +2,9 @@ import "server-only";
 
 import { getCourseStatusLabel, type CourseStatus, type Role } from "@coursebridge/workflow";
 import { requireProfile } from "@/lib/auth/context";
-import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared";
+import { getPostgresPool } from "@/lib/postgres/pool";
 
-type NotificationKind = "assignment" | "course_action" | "issue" | "comment" | "support" | "status_override";
+type NotificationKind = "assignment" | "course_action" | "issue" | "comment" | "support";
 type NotificationTone = "default" | "warning" | "danger" | "success";
 
 export type NotificationItem = {
@@ -114,7 +114,6 @@ export type NotificationsPageData = {
 
 export async function getNotificationsPageData(): Promise<NotificationsPageData> {
   const context = await requireProfile();
-  const admin = getSupabaseAdminClientOrThrow();
   const role = context.profile.role;
   const isAdmin = ADMIN_ROLES.includes(role);
 
@@ -127,13 +126,12 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       return { notifications: [], pendingCount: 0, role, error: false };
     }
 
-    const [courses, issues, comments, supportMessages, reassignments, overrides] = await Promise.all([
+    const [courses, issues, comments, supportMessages, reassignments] = await Promise.all([
       getRelevantCourses(accessibleCourseIds, role),
       getRelevantIssues(accessibleCourseIds),
       getRecentComments(accessibleCourseIds, context.profile.id),
       role === "super_admin" ? getOpenSupportMessages() : Promise.resolve([]),
       getRecentReassignments(context.profile.id, isAdmin),
-      getRecentOverridesForUser(context.profile.id),
     ]);
 
     const notifications = [
@@ -142,22 +140,11 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       ...comments.map((comment) => commentToNotification(comment, role)),
       ...supportMessages.map(supportMessageToNotification),
       ...reassignments.map((r) => reassignmentToNotification(r, isAdmin)),
-      ...overrides.map(overrideToNotification),
     ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
-    const dismissed = await admin
-      .from("dismissed_notifications")
-      .select("notification_id")
-      .eq("user_id", context.profile.id);
-
-    const dismissedIds = new Set<string>(
-      (dismissed.data ?? []).map((d: { notification_id: string }) => d.notification_id),
-    );
-    const filtered = notifications.filter((n) => !dismissedIds.has(n.id));
-
     return {
-      notifications: filtered,
-      pendingCount: filtered.filter((item) => item.pending).length,
+      notifications,
+      pendingCount: notifications.filter((item) => item.pending).length,
       role,
       error: false,
     };
@@ -168,43 +155,14 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
     return { notifications: [], pendingCount: 0, role, error: true };
   }
 
-  async function getRecentOverridesForUser(profileId: string) {
-    // Override events where the current user is the assigned TA on that
-    // course. Last 14 days only — older overrides shouldn't ring on the bell.
-    const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
-    const { data, error } = await admin
-      .from("course_status_events")
-      .select(`
-        id, course_id, from_status, to_status, note, created_at, actor_role,
-        actor:profiles!course_status_events_actor_id_fkey ( full_name ),
-        courses!inner ( title, assignments:course_assignments!inner ( profile_id, role ) )
-      `)
-      .eq("kind", "admin_override")
-      .gte("created_at", since)
-      .eq("courses.assignments.profile_id", profileId)
-      .eq("courses.assignments.role", "staff")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (error) {
-      console.error("notifications: override fetch failed", error);
-      return [];
-    }
-    return data ?? [];
-  }
-
   async function getAssignedCourseIds(profileId: string, profileRole: Role) {
     const assignmentRole = profileRole === "instructor" ? "instructor" : "staff";
-    const { data, error } = await admin
-      .from("course_assignments")
-      .select("course_id")
-      .eq("profile_id", profileId)
-      .eq("role", assignmentRole);
-
-    if (error) {
-      throw new Error(`Could not load notification assignments: ${error.message}`);
-    }
-
-    return (data ?? []).map((row) => row.course_id as string);
+    const pool = getPostgresPool();
+    const { rows } = await pool.query<{ course_id: string }>(
+      `SELECT course_id FROM course_assignments WHERE profile_id = $1 AND role = $2`,
+      [profileId, assignmentRole],
+    );
+    return rows.map((row) => row.course_id);
   }
 }
 
@@ -212,150 +170,209 @@ async function getRecentReassignments(
   forProfileId: string,
   isAdmin: boolean,
 ): Promise<ReassignmentRow[]> {
-  const admin = getSupabaseAdminClientOrThrow();
-  let query = admin
-    .from("course_reassignments")
-    .select("id, course_id, to_profile_id, created_at, courses ( title ), to_profile:to_profile_id ( full_name )")
-    .order("created_at", { ascending: false })
-    .limit(50);
-
-  // TAs only see reassignments TO them; admins see all recent.
+  const pool = getPostgresPool();
+  const values: unknown[] = [];
+  let whereSql = "";
   if (!isAdmin) {
-    query = query.eq("to_profile_id", forProfileId);
+    values.push(forProfileId);
+    whereSql = `WHERE r.to_profile_id = $1`;
   }
-
-  const { data, error } = await query;
-  if (error) {
-    throw new Error(`Could not load reassignments: ${error.message}`);
-  }
-  return (data ?? []) as unknown as ReassignmentRow[];
+  const { rows } = await pool.query<{
+    id: string;
+    course_id: string;
+    to_profile_id: string;
+    created_at: string;
+    course_title: string | null;
+    to_full_name: string | null;
+  }>(
+    `
+      SELECT r.id, r.course_id, r.to_profile_id, r.created_at,
+             c.title AS course_title, p.full_name AS to_full_name
+      FROM course_reassignments r
+      LEFT JOIN courses c ON c.id = r.course_id
+      LEFT JOIN profiles p ON p.id = r.to_profile_id
+      ${whereSql}
+      ORDER BY r.created_at DESC
+      LIMIT 50
+    `,
+    values,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    course_id: row.course_id,
+    to_profile_id: row.to_profile_id,
+    created_at: row.created_at,
+    courses: { title: row.course_title },
+    to_profile: { full_name: row.to_full_name },
+  }));
 }
 
 async function getOpenSupportMessages(): Promise<SupportMessageRow[]> {
-  const admin = getSupabaseAdminClientOrThrow();
-  const { data, error } = await admin
-    .from("support_messages")
-    .select("id, sender_role, type, subject, body, status, created_at, sender:sender_profile_id ( full_name, role )")
-    .neq("status", "resolved")
-    .order("created_at", { ascending: false })
-    .limit(50);
-
-  if (error) {
-    throw new Error("Could not load support messages: " + error.message);
-  }
-
-  return (data ?? []) as unknown as SupportMessageRow[];
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{
+    id: string;
+    sender_role: string;
+    type: "message" | "poke";
+    subject: string | null;
+    body: string;
+    status: "open" | "read" | "resolved";
+    created_at: string;
+    sender_full_name: string | null;
+    sender_profile_role: string | null;
+  }>(
+    `
+      SELECT s.id, s.sender_role, s.type, s.subject, s.body, s.status, s.created_at,
+             p.full_name AS sender_full_name, p.role AS sender_profile_role
+      FROM support_messages s
+      LEFT JOIN profiles p ON p.id = s.sender_profile_id
+      WHERE s.status <> 'resolved'
+      ORDER BY s.created_at DESC
+      LIMIT 50
+    `,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    sender_role: row.sender_role,
+    type: row.type,
+    subject: row.subject,
+    body: row.body,
+    status: row.status,
+    created_at: row.created_at,
+    sender: { full_name: row.sender_full_name, role: row.sender_profile_role },
+  }));
 }
 
 async function getRelevantCourses(courseIds: string[] | null, role: Role): Promise<CourseRow[]> {
-  const admin = getSupabaseAdminClientOrThrow();
   const pendingStatuses = getPendingStatuses(role);
-
-  let query = admin
-    .from("courses")
-    .select("id,title,term,department,status,updated_at")
-    .in("status", pendingStatuses)
-    .order("updated_at", { ascending: false })
-    .limit(100);
-
+  const pool = getPostgresPool();
+  const values: unknown[] = [pendingStatuses];
+  let courseFilter = "";
   if (courseIds) {
-    query = query.in("id", courseIds);
+    values.push(courseIds);
+    courseFilter = `AND id = ANY($${values.length}::uuid[])`;
   }
+  const { rows } = await pool.query<CourseRow>(
+    `
+      SELECT id, title, term, department, status, updated_at
+      FROM courses
+      WHERE status = ANY($1::text[]) ${courseFilter}
+      ORDER BY updated_at DESC
+      LIMIT 100
+    `,
+    values,
+  );
+  const courses = rows as CourseRow[];
 
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Could not load notification courses: ${error.message}`);
-  }
-
-  const courses = (data ?? []) as CourseRow[];
-
-  // For submitted_to_admin courses, count how many times each was submitted
-  const submittedIds = courses
-    .filter((c) => c.status === "submitted_to_admin")
-    .map((c) => c.id);
-
+  const submittedIds = courses.filter((c) => c.status === "submitted_to_admin").map((c) => c.id);
   if (submittedIds.length > 0) {
-    const { data: events } = await admin
-      .from("course_status_events")
-      .select("course_id")
-      .in("course_id", submittedIds)
-      .eq("to_status", "submitted_to_admin");
-
+    const { rows: events } = await pool.query<{ course_id: string }>(
+      `SELECT course_id FROM course_status_events WHERE course_id = ANY($1::uuid[]) AND to_status = 'submitted_to_admin'`,
+      [submittedIds],
+    );
     const countMap = new Map<string, number>();
-    for (const ev of events ?? []) {
-      countMap.set(ev.course_id, (countMap.get(ev.course_id) ?? 0) + 1);
-    }
+    for (const ev of events) countMap.set(ev.course_id, (countMap.get(ev.course_id) ?? 0) + 1);
     for (const course of courses) {
-      if (countMap.has(course.id)) {
-        course.submission_count = countMap.get(course.id);
-      }
+      if (countMap.has(course.id)) course.submission_count = countMap.get(course.id);
     }
   }
-
   return courses;
 }
 
 async function getRelevantIssues(courseIds: string[] | null): Promise<IssueRow[]> {
-  const admin = getSupabaseAdminClientOrThrow();
-
-  let query = admin
-    .from("course_issues")
-    .select(
-      `
-      id, course_id, title, type, severity, status, created_at, updated_at,
-      courses ( title ),
-      created_by_profile:created_by ( full_name, role )
-    `,
-    )
-    .order("updated_at", { ascending: false })
-    .limit(125);
-
+  const pool = getPostgresPool();
+  const values: unknown[] = [];
+  let courseFilter = "";
   if (courseIds) {
-    query = query.in("course_id", courseIds);
+    values.push(courseIds);
+    courseFilter = `WHERE i.course_id = ANY($${values.length}::uuid[])`;
   }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Could not load notification issues: ${error.message}`);
-  }
-
-  return (data ?? []) as unknown as IssueRow[];
+  const { rows } = await pool.query<{
+    id: string;
+    course_id: string;
+    title: string;
+    type: string;
+    severity: string;
+    status: "open" | "in_review" | "resolved";
+    created_at: string;
+    updated_at: string;
+    course_title: string | null;
+    cb_full_name: string | null;
+    cb_role: string | null;
+  }>(
+    `
+      SELECT i.id, i.course_id, i.title, i.type, i.severity, i.status, i.created_at, i.updated_at,
+             c.title AS course_title,
+             p.full_name AS cb_full_name, p.role AS cb_role
+      FROM course_issues i
+      LEFT JOIN courses c ON c.id = i.course_id
+      LEFT JOIN profiles p ON p.id = i.created_by
+      ${courseFilter}
+      ORDER BY i.updated_at DESC
+      LIMIT 125
+    `,
+    values,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    course_id: row.course_id,
+    title: row.title,
+    type: row.type,
+    severity: row.severity,
+    status: row.status,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    courses: { title: row.course_title },
+    created_by_profile: { full_name: row.cb_full_name, role: row.cb_role },
+  }));
 }
 
 async function getRecentComments(courseIds: string[] | null, currentUserId: string): Promise<CommentRow[]> {
-  const admin = getSupabaseAdminClientOrThrow();
-
-  let query = admin
-    .from("course_issue_comments")
-    .select(
-      `
-      id, issue_id, author_id, body, created_at,
-      author:author_id ( full_name, role ),
-      course_issues!inner (
-        course_id,
-        title,
-        courses ( title )
-      )
-    `,
-    )
-    .eq("is_system_message", false)
-    .neq("author_id", currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(25);
-
+  const pool = getPostgresPool();
+  const values: unknown[] = [currentUserId];
+  let courseFilter = "";
   if (courseIds) {
-    query = query.in("course_issues.course_id", courseIds);
+    values.push(courseIds);
+    courseFilter = `AND i.course_id = ANY($${values.length}::uuid[])`;
   }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Could not load notification comments: ${error.message}`);
-  }
-
-  return (data ?? []) as unknown as CommentRow[];
+  const { rows } = await pool.query<{
+    id: string;
+    issue_id: string;
+    author_id: string;
+    body: string;
+    created_at: string;
+    course_id: string;
+    issue_title: string | null;
+    course_title: string | null;
+    author_full_name: string | null;
+    author_role: string | null;
+  }>(
+    `
+      SELECT c.id, c.issue_id, c.author_id, c.body, c.created_at,
+             i.course_id, i.title AS issue_title, crs.title AS course_title,
+             p.full_name AS author_full_name, p.role AS author_role
+      FROM course_issue_comments c
+      INNER JOIN course_issues i ON i.id = c.issue_id
+      LEFT JOIN courses crs ON crs.id = i.course_id
+      LEFT JOIN profiles p ON p.id = c.author_id
+      WHERE c.is_system_message = false AND c.author_id <> $1 ${courseFilter}
+      ORDER BY c.created_at DESC
+      LIMIT 25
+    `,
+    values,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    issue_id: row.issue_id,
+    author_id: row.author_id,
+    body: row.body,
+    created_at: row.created_at,
+    course_issues: {
+      course_id: row.course_id,
+      title: row.issue_title,
+      courses: { title: row.course_title },
+    },
+    author: { full_name: row.author_full_name, role: row.author_role },
+  }));
 }
 
 function formatAuthorName(fullName: string | null | undefined, role: string | null | undefined): string {
@@ -489,36 +506,6 @@ function reassignmentToNotification(row: ReassignmentRow, viewerIsAdmin: boolean
     href: viewerIsAdmin ? `/admin/courses/${row.course_id}` : `/courses/${row.course_id}/metadata`,
     createdAt: row.created_at,
     pending: !viewerIsAdmin, // actionable for the new TA, informational for admins
-  };
-}
-
-function overrideToNotification(row: {
-  id: string;
-  course_id: string;
-  from_status: string | null;
-  to_status: string;
-  note: string | null;
-  created_at: string;
-  actor: { full_name: string | null } | { full_name: string | null }[] | null;
-  courses: { title: string | null } | { title: string | null }[] | null;
-}): NotificationItem {
-  const actor = Array.isArray(row.actor) ? row.actor[0] : row.actor;
-  const course = Array.isArray(row.courses) ? row.courses[0] : row.courses;
-  const fromLabel = row.from_status
-    ? getCourseStatusLabel(row.from_status as CourseStatus)
-    : "—";
-  const toLabel = getCourseStatusLabel(row.to_status as CourseStatus);
-  return {
-    id: `override:${row.id}`,
-    kind: "status_override",
-    tone: "warning",
-    title: "Status changed by admin",
-    description: `${actor?.full_name ?? "An admin"} moved this course from ${fromLabel} to ${toLabel}. Reason: ${row.note ?? "(none)"}`,
-    courseTitle: course?.title ?? null,
-    meta: "Admin override",
-    href: `/courses/${row.course_id}`,
-    createdAt: row.created_at,
-    pending: true,
   };
 }
 

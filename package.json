@@ -15,20 +15,25 @@
     "typecheck": "turbo typecheck",
     "db:push": "node scripts/apply-migration.mjs",
     "db:migrate:all": "node scripts/db-migrate-all.mjs",
+    "db:provision": "bash scripts/db-provision.sh",
+    "dev:db:up": "docker compose up -d postgres",
+    "dev:db:down": "docker compose down",
+    "dev:db:reset": "docker compose down -v && docker compose up -d postgres",
+    "dev:db:migrate": "DB_PROVIDER=postgres DEV_DATABASE_URL=postgres://coursebridge_user:localdev@localhost:5433/coursebridge node scripts/db-migrate-all.mjs",
+    "dev:db:seed": "DATABASE_URL=postgres://coursebridge_user:localdev@localhost:5433/coursebridge node scripts/seed-local-postgres.mjs",
     "db:inspect": "node scripts/db-inspect.mjs",
     "import:dry-run": "node scripts/import-course-instructors-dry-run.mjs",
-    "import:instructors": "node scripts/import-course-instructors.mjs",
-    "import:courses": "node scripts/import-courses-and-assignments.mjs",
-    "check:rls": "node scripts/check-core-rls.mjs",
     "db:backup": "bash scripts/backup-db.sh",
     "db:backup:prod": "bash scripts/backup-db.sh --prod",
-    "seed:dev": "node scripts/seed-dev.mjs",
-    "dev:users": "node scripts/ensure-dev-users.mjs",
     "prepare": "husky"
   },
-  "devDependencies": {
-    "husky": "^9.1.7",
+  "dependencies": {
     "pg": "^8.20.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.6",
+    "husky": "^9.1.7",
     "turbo": "^2.9.14",
     "typescript": "^5.9.0"
   },

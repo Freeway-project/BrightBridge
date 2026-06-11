@@ -46,10 +46,6 @@ export type CourseSummary = {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
-  /** Assigned reviewer (course_assignments role "staff"). Populated by list queries that join assignments. */
-  ta?: { name: string | null; email: string } | null;
-  /** Assigned instructor (course_assignments role "instructor"). */
-  instructor?: { name: string | null; email: string } | null;
   reviewProgress?: ReviewProgress;
 };
 
@@ -99,6 +95,25 @@ export type AdminCourseListFilters = {
 
 export type AssignedCourseListFilters = {
   statuses?: readonly CourseStatus[];
+};
+
+export type AccessibleCourseScope =
+  | { kind: "all" }
+  | { kind: "assigned"; profileId: string; role: AssignmentRole };
+
+export type AccessibleCourseListFilters = {
+  scope: AccessibleCourseScope;
+  status?: CourseStatus;
+  search?: string;
+  subject?: string;
+  term?: string;
+};
+
+export type AccessibleCourseAggregates = {
+  statusCounts: Partial<Record<CourseStatus, number>>;
+  subjects: string[];
+  terms: string[];
+  total: number;
 };
 
 export type UnitCourseListFilters = {
@@ -156,7 +171,6 @@ export type AuditEvent = {
   course_title: string;
   from_status: string | null;
   to_status: string;
-  kind: "transition" | "admin_override";
   actor_name: string | null;
   actor_email: string;
   actor_role: string;
@@ -341,6 +355,17 @@ export type AssignmentLog = {
 
 export interface CourseRepository {
   listAccessibleCourses(): Promise<CourseSummary[]>;
+  /** Paginated accessible-courses query for the `/courses` list view. */
+  listAccessibleCoursesPage(
+    page: number,
+    pageSize: number,
+    filters: AccessibleCourseListFilters,
+  ): Promise<PaginatedResult<CourseSummary>>;
+  /** Status-count map + distinct subjects/terms for the `/courses` list tabs and filter dropdowns. */
+  getAccessibleCourseAggregates(
+    scope: AccessibleCourseScope,
+    filters?: Pick<AccessibleCourseListFilters, "search" | "subject" | "term">,
+  ): Promise<AccessibleCourseAggregates>;
   listAssignedCourses(
     userId: string,
     assignmentRole: AssignmentRole,
@@ -370,7 +395,8 @@ export interface CourseRepository {
   listSuperAdminCourses(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<SuperAdminCourseRow>>;
   countCourses(): Promise<number>;
   listStatusCounts(): Promise<StatusCount[]>;
-  listStuckCourses(cutoffIso: string): Promise<StuckCourse[]>;
+  listStuckCourses(cutoffIso: string, limit?: number): Promise<StuckCourse[]>;
+  countStuckCourses(cutoffIso: string): Promise<number>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
   listAuditEventsPage(page: number, pageSize: number): Promise<PaginatedResult<AuditEvent>>;
@@ -397,6 +423,7 @@ export interface CourseRepository {
 
 export interface ProfileRepository {
   getProfileById(profileId: string): Promise<AppProfileRecord | null>;
+  getProfileByEmail(email: string): Promise<AppProfileRecord | null>;
   getProfilesByRole(role: Role): Promise<ProfileOption[]>;
   listUsers(page?: number, pageSize?: number, search?: string): Promise<PaginatedResult<UserSummary>>;
   upsertProfile(input: {
@@ -406,6 +433,12 @@ export interface ProfileRepository {
     role: Role;
   }): Promise<void>;
   updateProfileRole(profileId: string, role: Role): Promise<void>;
+  /**
+   * Rewrite a profile's primary key. Used on first OIDC sign-in to re-key a
+   * legacy Supabase-auth UUID to the Entra `oid`. Relies on ON UPDATE CASCADE
+   * on every FK referencing profiles(id).
+   */
+  relinkProfileId(oldId: string, newId: string): Promise<void>;
 }
 
 export interface ReviewRepository {

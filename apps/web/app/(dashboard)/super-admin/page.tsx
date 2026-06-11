@@ -1,6 +1,6 @@
 import { Topbar } from "@/components/layout/topbar"
 import { InstitutionPanel } from "@/components/super-admin/institution-panel"
-import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount } from "@/lib/super-admin/queries"
+import { getSuperAdminData, getPaginatedSuperAdminCourses, getPaginatedUsers, getPaginatedSuperAdminSupportMessages, getOpenSupportMessageCount, getPaginatedAuditEvents } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
 import { redirect } from "next/navigation"
 import { TweakableContent } from "@/components/shared/tweakable-content"
@@ -17,8 +17,8 @@ import { getProfilesByRole } from "@/lib/services/profiles"
 import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
 import { getLatestMigrationReport } from "@/lib/migration/report"
 import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
-import { AnalyticsView } from "@/components/super-admin/analytics-view"
 import { SupportMessagesView } from "@/components/super-admin/support-messages-view"
+import { SystemPanel } from "@/components/super-admin/system-panel"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -47,6 +47,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     migrationReport,
     supportMessagesPage,
     openSupportCount,
+    auditPage,
   ] = await Promise.all([
     getSuperAdminData(),
     getPaginatedSuperAdminCourses(page, 50, search),
@@ -57,6 +58,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     getLatestMigrationReport(),
     getPaginatedSuperAdminSupportMessages(page, 50, search),
     getOpenSupportMessageCount(),
+    getPaginatedAuditEvents(1, 30),
   ])
 
   return (
@@ -81,8 +83,8 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
             migrationPanel={<MigrationPanel report={migrationReport} />}
-            auditPanel={<AuditView />}
-            analyticsPanel={<AnalyticsView />}
+            auditPanel={<AuditView initial={auditPage} />}
+            systemPanel={<SystemPanel />}
           />
         </AdminRefreshWrapper>
       </TweakableContent>

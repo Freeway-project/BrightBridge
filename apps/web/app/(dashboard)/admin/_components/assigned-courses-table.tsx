@@ -33,15 +33,30 @@ import { WORKFLOW_PHASES, getPipelineStage, COURSE_STATUS_LABELS } from "@course
 import type { CourseStatus, PipelineStage } from "@coursebridge/workflow"
 import { batchApproveToStagingAction } from "../actions"
 import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
+import { OpenedDot } from "@/components/instructor/opened-dot"
 import { toast } from "sonner"
 
 type Props = {
   page: AdminCoursesPage
   tas: ProfileOption[]
   statusCounts: { status: CourseStatus; count: number }[]
+  /**
+   * Map of courseId -> first-opened timestamp for rows currently in the
+   * instructor phase. Absent keys = not opened. Plain object so it crosses
+   * the server/client boundary without serialization shenanigans.
+   */
+  instructorOpenedAt?: Record<string, string>
 }
 
-export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
+const INSTRUCTOR_PHASE_STATUSES = new Set<CourseStatus>([
+  "sent_to_instructor",
+  "instructor_viewing",
+  "instructor_questions",
+  "instructor_approved",
+  "final_approved",
+])
+
+export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpenedAt }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -516,7 +531,12 @@ export function AssignedCoursesTable({ page, tas, statusCounts }: Props) {
                     </TableCell>
                     <TableCell className="max-w-sm whitespace-normal break-words align-top">
                       <div className="space-y-2 py-1">
-                        <StatusBadge status={course.status} className="w-fit" />
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={course.status} className="w-fit" />
+                          {INSTRUCTOR_PHASE_STATUSES.has(course.status) && (
+                            <OpenedDot openedAt={instructorOpenedAt?.[course.id] ?? null} size="sm" />
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">{getStatusHint(course.status)}</p>
                       </div>
                     </TableCell>

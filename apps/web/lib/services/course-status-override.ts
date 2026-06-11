@@ -1,6 +1,6 @@
 import "server-only";
 import { isAdminOverride, type CourseStatus, type Role } from "@coursebridge/workflow";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { getPostgresPool } from "@/lib/postgres/pool";
 
 const MIN_REASON_LEN = 10;
 
@@ -12,21 +12,21 @@ export type OverrideInput = {
   actorRole: Role;
 };
 
-export async function overrideCourseStatus(client: SupabaseClient, input: OverrideInput) {
+export async function overrideCourseStatus(input: OverrideInput) {
   const reason = input.reason.trim();
   if (reason.length < MIN_REASON_LEN) {
     throw new Error(`reason must be at least ${MIN_REASON_LEN} characters`);
   }
 
-  const { data: course, error: readErr } = await client
-    .from("courses")
-    .select("status")
-    .eq("id", input.courseId)
-    .single();
-  if (readErr) throw readErr;
-  if (!course) throw new Error(`course ${input.courseId} not found`);
+  const pool = getPostgresPool();
 
-  const from = course.status as CourseStatus;
+  const { rows } = await pool.query<{ status: string }>(
+    "SELECT status FROM courses WHERE id = $1",
+    [input.courseId],
+  );
+  if (rows.length === 0) throw new Error(`course ${input.courseId} not found`);
+
+  const from = rows[0].status as CourseStatus;
 
   // Check same-status BEFORE isAdminOverride (which also returns false for from===to)
   // so the user gets the "already" message, not the generic "Forbidden" message.
@@ -38,20 +38,15 @@ export async function overrideCourseStatus(client: SupabaseClient, input: Overri
     throw new Error("Forbidden: role cannot override status, or target equals current");
   }
 
-  const { error: insertErr } = await client.from("course_status_events").insert({
-    course_id: input.courseId,
-    from_status: from,
-    to_status: input.to,
-    actor_id: input.actorId,
-    actor_role: input.actorRole,
-    note: reason,
-    kind: "admin_override",
-  });
-  if (insertErr) throw insertErr;
+  await pool.query(
+    `INSERT INTO course_status_events
+       (course_id, from_status, to_status, actor_id, actor_role, note, kind)
+     VALUES ($1, $2, $3, $4, $5, $6, 'admin_override')`,
+    [input.courseId, from, input.to, input.actorId, input.actorRole, reason],
+  );
 
-  const { error: updateErr } = await client
-    .from("courses")
-    .update({ status: input.to })
-    .eq("id", input.courseId);
-  if (updateErr) throw updateErr;
+  await pool.query(
+    "UPDATE courses SET status = $1 WHERE id = $2",
+    [input.to, input.courseId],
+  );
 }

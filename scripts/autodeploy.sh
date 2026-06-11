@@ -8,15 +8,28 @@ set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOCKFILE="/tmp/brightbridge-deploy.lock"
+PAUSEFILE="${AUTODEPLOY_PAUSEFILE:-/tmp/brightbridge-autodeploy.paused}"
 LOGFILE="/var/log/pm2/brightbridge-autodeploy.log"
 INTERVAL=60  # seconds between polls
 
+# Which deploy script to run. Defaults to the PM2-based one; flip to
+# scripts/deploy-vps.sh after the docker cutover.
+DEPLOY_SCRIPT="${AUTODEPLOY_SCRIPT:-scripts/deploy.sh}"
+
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOGFILE"; }
 
-log "Autodeploy watcher started. Polling every ${INTERVAL}s."
+log "Autodeploy watcher started. Polling every ${INTERVAL}s. Pause: \`touch $PAUSEFILE\`. Deploy script: $DEPLOY_SCRIPT."
 
 while true; do
   cd "$REPO_ROOT"
+
+  # Operator pause — `touch $PAUSEFILE` halts deploys without killing the
+  # watcher; `rm $PAUSEFILE` resumes. Lets us merge to main during a planned
+  # cutover without firing a half-broken deploy.
+  if [ -f "$PAUSEFILE" ]; then
+    sleep "$INTERVAL"
+    continue
+  fi
 
   # Skip if a deploy is already running
   if [ -f "$LOCKFILE" ]; then
@@ -77,8 +90,8 @@ while true; do
     fi
   fi
 
-  log "Starting deploy..."
-  bash "$REPO_ROOT/scripts/deploy.sh" >> "$LOGFILE" 2>&1
+  log "Starting deploy ($DEPLOY_SCRIPT)..."
+  bash "$REPO_ROOT/$DEPLOY_SCRIPT" >> "$LOGFILE" 2>&1
   EXIT_CODE=$?
   rm -f "$LOCKFILE"
 

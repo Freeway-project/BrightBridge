@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, LifeBuoy, MessageSquare, ShieldAlert, TriangleAlert } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, LifeBuoy, MessageSquare, TriangleAlert } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Topbar } from "@/components/layout/topbar";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TweakableContent } from "@/components/shared/tweakable-content";
 import { getNotificationsPageData, type NotificationItem } from "@/lib/notifications/queries";
 import { cn } from "@/lib/utils";
-import { HideButton } from "./_components/notification-row-client";
-import { ClearAllButton } from "./_components/clear-all-button";
 
 const KIND_ICON = {
   assignment: Bell,
@@ -17,13 +15,11 @@ const KIND_ICON = {
   issue: TriangleAlert,
   comment: MessageSquare,
   support: LifeBuoy,
-  status_override: ShieldAlert,
 };
 
 // Section headers for grouping "All notifications" by where each item came
 // from (its `kind`). Order here is the order the groups render in.
 const KIND_LABEL: { kind: NotificationItem["kind"]; label: string }[] = [
-  { kind: "status_override", label: "Admin overrides" },
   { kind: "course_action", label: "Course actions" },
   { kind: "assignment", label: "Assignments" },
   { kind: "issue", label: "Issues" },
@@ -88,10 +84,7 @@ export default async function NotificationsPage() {
             <CardHeader className="border-b border-border/70 px-4 py-3">
               <CardTitle className="flex items-center justify-between gap-3 text-sm">
                 <span>All notifications</span>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">{notifications.length}</Badge>
-                  <ClearAllButton disabled={notifications.length === 0} />
-                </div>
+                <Badge variant="outline">{notifications.length}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -191,14 +184,13 @@ function NotificationRow({ item }: { item: NotificationItem }) {
           </div>
         </div>
       </div>
-      <div className="flex items-start gap-1 sm:justify-end">
+      <div className="flex items-center sm:justify-end">
         <Button asChild size="sm" variant="outline" className="h-8 gap-1.5">
           <Link href={item.href}>
             <ExternalLink className="size-3.5" />
             Open
           </Link>
         </Button>
-        <HideButton notificationId={item.id} />
       </div>
     </div>
   );

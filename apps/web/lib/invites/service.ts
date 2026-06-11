@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getPostgresPool } from "@/lib/postgres/pool";
 
 /** How long a generated invite link stays valid. */
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -29,14 +29,6 @@ function hashToken(rawToken: string): string {
   return createHash("sha256").update(rawToken).digest("hex");
 }
 
-function requireAdmin() {
-  const admin = createAdminClient();
-  if (!admin) {
-    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY — cannot manage review invites.");
-  }
-  return admin;
-}
-
 function mapInvite(row: {
   id: string;
   course_id: string;
@@ -57,25 +49,25 @@ function mapInvite(row: {
 
 /**
  * Returns the instructors assigned to a course (with email) so we know who to
- * invite. Uses the service-role client because invites are generated in admin
- * contexts and we need the joined profile email regardless of RLS.
+ * invite. Joins course_assignments to profiles and filters to instructor role.
  */
 export async function getCourseInstructorRecipients(courseId: string): Promise<InstructorRecipient[]> {
-  const admin = requireAdmin();
-  const { data, error } = await admin
-    .from("course_assignments")
-    .select("profile_id, profiles!inner(email, full_name)")
-    .eq("course_id", courseId)
-    .eq("role", "instructor");
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{
+    profile_id: string;
+    email: string | null;
+    full_name: string | null;
+  }>(
+    `SELECT ca.profile_id, p.email, p.full_name
+     FROM course_assignments ca
+     INNER JOIN profiles p ON p.id = ca.profile_id
+     WHERE ca.course_id = $1 AND ca.role = 'instructor'`,
+    [courseId],
+  );
 
-  if (error) {
-    throw new Error(`Failed to load instructor assignments: ${error.message}`);
-  }
-
-  return (data ?? []).flatMap((row: any) => {
-    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-    if (!profile?.email) return [];
-    return [{ profileId: row.profile_id, email: profile.email, fullName: profile.full_name ?? null }];
+  return rows.flatMap((row) => {
+    if (!row.email) return [];
+    return [{ profileId: row.profile_id, email: row.email, fullName: row.full_name ?? null }];
   });
 }
 
@@ -90,35 +82,40 @@ export async function createReviewInvite(input: {
   email: string;
   createdBy: string;
 }): Promise<{ token: string; invite: ReviewInvite }> {
-  const admin = requireAdmin();
+  const pool = getPostgresPool();
   const email = input.email.trim().toLowerCase();
 
   // Invalidate older outstanding links for this course+email.
-  await admin
-    .from("review_invites")
-    .update({ revoked_at: new Date().toISOString() })
-    .eq("course_id", input.courseId)
-    .eq("email", email)
-    .is("accepted_at", null)
-    .is("revoked_at", null);
+  await pool.query(
+    `UPDATE review_invites
+     SET revoked_at = $1
+     WHERE course_id = $2
+       AND email = $3
+       AND accepted_at IS NULL
+       AND revoked_at IS NULL`,
+    [new Date().toISOString(), input.courseId, email],
+  );
 
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS).toISOString();
 
-  const { data, error } = await admin
-    .from("review_invites")
-    .insert({
-      course_id: input.courseId,
-      email,
-      token_hash: hashToken(token),
-      created_by: input.createdBy,
-      expires_at: expiresAt,
-    })
-    .select("id, course_id, email, expires_at, accepted_at, revoked_at")
-    .single();
+  const { rows } = await pool.query<{
+    id: string;
+    course_id: string;
+    email: string;
+    expires_at: string;
+    accepted_at: string | null;
+    revoked_at: string | null;
+  }>(
+    `INSERT INTO review_invites (course_id, email, token_hash, created_by, expires_at)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, course_id, email, expires_at, accepted_at, revoked_at`,
+    [input.courseId, email, hashToken(token), input.createdBy, expiresAt],
+  );
 
-  if (error || !data) {
-    throw new Error(`Failed to create review invite: ${error?.message ?? "no row returned"}`);
+  const data = rows[0];
+  if (!data) {
+    throw new Error("Failed to create review invite: no row returned");
   }
 
   return { token, invite: mapInvite(data) };
@@ -129,17 +126,24 @@ export async function createReviewInvite(input: {
  * only after the session has been minted successfully.
  */
 export async function redeemReviewInvite(rawToken: string): Promise<RedeemResult> {
-  const admin = requireAdmin();
+  const pool = getPostgresPool();
 
-  const { data, error } = await admin
-    .from("review_invites")
-    .select("id, course_id, email, expires_at, accepted_at, revoked_at")
-    .eq("token_hash", hashToken(rawToken))
-    .maybeSingle();
+  const { rows } = await pool.query<{
+    id: string;
+    course_id: string;
+    email: string;
+    expires_at: string;
+    accepted_at: string | null;
+    revoked_at: string | null;
+  }>(
+    `SELECT id, course_id, email, expires_at, accepted_at, revoked_at
+     FROM review_invites
+     WHERE token_hash = $1
+     LIMIT 1`,
+    [hashToken(rawToken)],
+  );
 
-  if (error) {
-    throw new Error(`Failed to look up review invite: ${error.message}`);
-  }
+  const data = rows[0];
   if (!data) return { ok: false, reason: "not_found" };
   if (data.revoked_at) return { ok: false, reason: "revoked" };
   if (data.accepted_at) return { ok: false, reason: "accepted" };
@@ -150,13 +154,9 @@ export async function redeemReviewInvite(rawToken: string): Promise<RedeemResult
 
 /** Marks an invite consumed so the link cannot be reused. */
 export async function markInviteAccepted(inviteId: string): Promise<void> {
-  const admin = requireAdmin();
-  const { error } = await admin
-    .from("review_invites")
-    .update({ accepted_at: new Date().toISOString() })
-    .eq("id", inviteId);
-
-  if (error) {
-    throw new Error(`Failed to mark invite accepted: ${error.message}`);
-  }
+  const pool = getPostgresPool();
+  await pool.query(
+    `UPDATE review_invites SET accepted_at = $1 WHERE id = $2`,
+    [new Date().toISOString(), inviteId],
+  );
 }
