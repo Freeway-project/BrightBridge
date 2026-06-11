@@ -1,0 +1,162 @@
+# CourseBridge self-hosted VPS stack.
+# Replaces the PM2 deploy. Bundles app + Postgres + monitoring in one docker compose.
+# No Supabase. No Swarm. Plain `docker compose up -d`.
+#
+# First run:
+#   cp .env.template .env && $EDITOR .env
+#   docker compose up -d postgres
+#   docker compose --profile migrate run --rm migrate
+#   docker compose up -d
+#
+# Routine:
+#   docker compose pull && docker compose up -d
+#   docker compose logs -f web
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: cb-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-coursebridge_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-coursebridge}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-coursebridge_user} -d ${POSTGRES_DB:-coursebridge}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    image: ${COURSEBRIDGE_IMAGE:-okanagan/coursebridge:latest}
+    container_name: cb-web
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+
+      APP_BASE_URL: ${APP_BASE_URL}
+      AUTH_PROVIDER: ${AUTH_PROVIDER:-azure-oidc}
+      SESSION_SECRET: ${SESSION_SECRET:?set in .env}
+
+      DB_PROVIDER: postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER:-coursebridge_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-coursebridge}
+      MIGRATION_BASELINE_ON_EXISTING: ${MIGRATION_BASELINE_ON_EXISTING:-false}
+
+      AZURE_OIDC_TENANT_ID: ${AZURE_OIDC_TENANT_ID}
+      AZURE_OIDC_CLIENT_ID: ${AZURE_OIDC_CLIENT_ID}
+      AZURE_OIDC_CLIENT_SECRET: ${AZURE_OIDC_CLIENT_SECRET}
+      AZURE_OIDC_ISSUER: ${AZURE_OIDC_ISSUER}
+      AZURE_OIDC_AUTHORIZATION_ENDPOINT: ${AZURE_OIDC_AUTHORIZATION_ENDPOINT}
+      AZURE_OIDC_TOKEN_ENDPOINT: ${AZURE_OIDC_TOKEN_ENDPOINT}
+      AZURE_OIDC_JWKS_URI: ${AZURE_OIDC_JWKS_URI}
+      AZURE_OIDC_REDIRECT_URI: ${AZURE_OIDC_REDIRECT_URI}
+      AZURE_OIDC_POST_LOGOUT_REDIRECT_URI: ${AZURE_OIDC_POST_LOGOUT_REDIRECT_URI}
+      AZURE_OIDC_SCOPES: ${AZURE_OIDC_SCOPES}
+      AZURE_OIDC_ALLOWED_TENANT_ID: ${AZURE_OIDC_ALLOWED_TENANT_ID}
+
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
+      NEXT_PUBLIC_POSTHOG_TOKEN: ${NEXT_PUBLIC_POSTHOG_TOKEN}
+      NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
+      NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
+      NEXT_PUBLIC_POSTHOG_PROJECT_ID: ${NEXT_PUBLIC_POSTHOG_PROJECT_ID}
+      NEXT_PUBLIC_POSTHOG_DASHBOARD_URL: ${NEXT_PUBLIC_POSTHOG_DASHBOARD_URL}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
+      SENTRY_ORG: ${SENTRY_ORG}
+      SENTRY_PROJECT: ${SENTRY_PROJECT}
+      SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN}
+      NEXT_PUBLIC_RAPIDAPI_KEY: ${NEXT_PUBLIC_RAPIDAPI_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      NEXT_PUBLIC_FORCE_MAINTENANCE: ${NEXT_PUBLIC_FORCE_MAINTENANCE:-false}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION}
+      GIT_COMMIT_SHA: ${GIT_COMMIT_SHA}
+      METRICS_BEARER_TOKEN: ${METRICS_BEARER_TOKEN}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    networks: [internal]
+
+  # One-shot. Run with: `docker compose --profile migrate run --rm migrate`
+  migrate:
+    image: ${COURSEBRIDGE_IMAGE:-okanagan/coursebridge:latest}
+    profiles: ["migrate"]
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      DB_PROVIDER: postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER:-coursebridge_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-coursebridge}
+      MIGRATION_BASELINE_ON_EXISTING: ${MIGRATION_BASELINE_ON_EXISTING:-false}
+    networks: [internal]
+    command: ["npm", "run", "db:migrate:all"]
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cb-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/metrics_token:/etc/prometheus/metrics_token:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=30d
+    networks: [internal]
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cb-grafana
+    restart: unless-stopped
+    depends_on: [prometheus]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    networks: [internal]
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: cb-node-exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+    networks: [internal]
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: cb-postgres-exporter
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-coursebridge_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-coursebridge}?sslmode=disable
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pgdata:
+  prometheus-data:
+  grafana-data:

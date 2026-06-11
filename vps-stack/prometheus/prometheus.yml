@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    env: vps
+    service: coursebridge
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: node-exporter
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: postgres-exporter
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: coursebridge-web
+    metrics_path: /api/metrics
+    scheme: http
+    bearer_token_file: /etc/prometheus/metrics_token
+    static_configs:
+      - targets: ['web:3000']
+        labels:
+          app: coursebridge
