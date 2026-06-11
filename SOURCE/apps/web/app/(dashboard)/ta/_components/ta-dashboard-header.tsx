@@ -1,34 +1,38 @@
-"use client"
+"use client";
 
-import { useState, useCallback } from "react"
-import { Button } from "@/components/ui/button"
-import { RefreshCw, Sparkles } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface TaDashboardHeaderProps {
-  firstName: string
+  firstName: string;
+  subtitle?: string;
 }
 
-export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
-  const router = useRouter()
-  const [isRefreshing, setIsRefreshing] = useState(false)
+export function TaDashboardHeader({ firstName, subtitle }: TaDashboardHeaderProps) {
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleManualRefresh = useCallback(async () => {
-    setIsRefreshing(true)
+    setIsRefreshing(true);
     try {
-      router.refresh()
+      router.refresh();
     } finally {
-      setIsRefreshing(false)
+      setIsRefreshing(false);
     }
-  }, [router])
+  }, [router]);
 
   return (
-    <div className="relative mb-6 flex flex-row items-center justify-between">
-      <div className="flex items-center gap-3">
+    <div className="relative mb-5 flex flex-row items-start justify-between">
+      <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">
-          Hey, <span className="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text text-transparent">{firstName}</span>.
+          Hey, <span className="bg-gradient-to-r from-accent-indigo to-violet-500 bg-clip-text text-transparent">{firstName}</span>.
         </h1>
+        {subtitle && (
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        )}
       </div>
       <Button
         variant="ghost"
@@ -41,5 +45,5 @@ export function TaDashboardHeader({ firstName }: TaDashboardHeaderProps) {
         <span className="hidden sm:inline text-xs font-medium">Refresh</span>
       </Button>
     </div>
-  )
+  );
 }
