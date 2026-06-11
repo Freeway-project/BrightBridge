@@ -51,6 +51,7 @@ export function createSupabaseCommentRepository(): CommentRepository {
           body: input.body,
           visibility: input.visibility ?? "internal",
           parent_comment_id: input.parentCommentId ?? null,
+          acting_on_behalf_of: input.actingOnBehalfOf ?? null,
         })
         .select(`
           *,

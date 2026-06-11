@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 
 const ROLE_LABELS: Record<string, string> = {
   instructor:    "Instructor",
@@ -78,8 +79,13 @@ export function CourseDiscussion({ courseId, comments, currentUserId, canPost = 
           )}
           {comments.map((comment) => {
             const isMe = comment.author_id === currentUserId
-            const roleLabel = ROLE_LABELS[comment.author_role ?? ""] ?? "Team"
-            const roleColor = ROLE_COLORS[comment.author_role ?? ""] ?? "bg-muted text-muted-foreground"
+            // Prefer the author's org-hierarchy title (e.g. "Dean") over the
+            // generic platform role so the reader sees who is actually speaking.
+            const titleLabel = comment.author_title ? ROLE_TITLE_LABELS[comment.author_title] ?? null : null
+            const roleLabel = titleLabel ?? ROLE_LABELS[comment.author_role ?? ""] ?? "Team"
+            const roleColor = titleLabel
+              ? "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300"
+              : ROLE_COLORS[comment.author_role ?? ""] ?? "bg-muted text-muted-foreground"
             return (
               <div
                 key={comment.id}
@@ -98,10 +104,18 @@ export function CourseDiscussion({ courseId, comments, currentUserId, canPost = 
                     <span className={cn("rounded-full px-1.5 py-0 text-[10px] font-semibold", roleColor)}>
                       {roleLabel}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span
+                      className="text-[10px] text-muted-foreground"
+                      title={new Date(comment.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                    >
                       {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                     </span>
                   </div>
+                  {comment.on_behalf_of_name && (
+                    <span className="text-[10px] italic text-muted-foreground">
+                      on behalf of {comment.on_behalf_of_name}
+                    </span>
+                  )}
                   <div className={cn(
                     "rounded-xl px-3 py-2 text-sm",
                     isMe

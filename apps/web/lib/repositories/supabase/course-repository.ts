@@ -56,10 +56,16 @@ function firstRelation<T>(value: T | T[] | null | undefined): T | null {
 }
 
 const AUDIT_EVENT_SELECT = `
-  id, kind, from_status, to_status, note, created_at, actor_role,
+  id, kind, from_status, to_status, note, created_at, actor_role, acting_on_behalf_of,
   courses ( id, title ),
-  profiles!course_status_events_actor_id_fkey ( full_name, email )
+  profiles!course_status_events_actor_id_fkey ( full_name, email ),
+  on_behalf_profile:profiles!course_status_events_acting_on_behalf_of_fkey ( full_name )
 `;
+
+type OnBehalfRelation =
+  | { full_name: string | null }
+  | Array<{ full_name: string | null }>
+  | null;
 
 function mapAuditEventRow(row: unknown): AuditEvent {
   const event = row as {
@@ -75,9 +81,11 @@ function mapAuditEventRow(row: unknown): AuditEvent {
       | { full_name: string | null; email: string }
       | Array<{ full_name: string | null; email: string }>
       | null;
+    on_behalf_profile?: OnBehalfRelation;
   };
   const relatedCourse = firstRelation(event.courses);
   const actorProfile = firstRelation(event.profiles);
+  const onBehalfProfile = firstRelation(event.on_behalf_profile);
 
   return {
     id: event.id,
@@ -89,6 +97,7 @@ function mapAuditEventRow(row: unknown): AuditEvent {
     actor_name: actorProfile?.full_name ?? null,
     actor_email: actorProfile?.email ?? "",
     actor_role: event.actor_role,
+    on_behalf_of_name: onBehalfProfile?.full_name ?? null,
     note: event.note,
     created_at: event.created_at,
   } satisfies AuditEvent;
@@ -325,6 +334,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         actor_id: input.actorId,
         actor_role: input.actorRole,
         note: cleanOptionalText(input.note),
+        acting_on_behalf_of: input.actingOnBehalfOf ?? null,
       });
 
       if (error) {
@@ -472,6 +482,8 @@ export function createSupabaseCourseRepository(): CourseRepository {
       };
       const staffAssignment = course.course_assignments?.find((assignment) => assignment.role === "staff");
       const staffProfile = firstRelation(staffAssignment?.profiles);
+      const instructorAssignment = course.course_assignments?.find((assignment) => assignment.role === "instructor");
+      const instructorProfile = firstRelation(instructorAssignment?.profiles);
 
       return {
         id: course.id,
@@ -489,6 +501,13 @@ export function createSupabaseCourseRepository(): CourseRepository {
               id: staffProfile.id,
               name: staffProfile.full_name,
               email: staffProfile.email,
+            }
+          : null,
+        instructor: instructorProfile
+          ? {
+              id: instructorProfile.id,
+              name: instructorProfile.full_name,
+              email: instructorProfile.email,
             }
           : null,
       } satisfies AdminCourseRow;
@@ -686,11 +705,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
       const admin = getSupabaseAdminClientOrThrow();
       const { data, error } = await admin
         .from("course_status_events")
-        .select(`
-          id, kind, from_status, to_status, note, created_at, actor_role,
-          courses ( id, title ),
-          profiles!course_status_events_actor_id_fkey ( full_name, email )
-        `)
+        .select(AUDIT_EVENT_SELECT)
         .eq("course_id", courseId)
         .order("created_at", { ascending: true });
 
@@ -698,38 +713,7 @@ export function createSupabaseCourseRepository(): CourseRepository {
         throw new Error(`course status events: ${error.message}`);
       }
 
-      return (data ?? []).map((row) => {
-        const event = row as unknown as {
-          id: string;
-          kind: string | null;
-          from_status: string | null;
-          to_status: string;
-          note: string | null;
-          created_at: string;
-          actor_role: string;
-          courses?: { id: string; title: string } | Array<{ id: string; title: string }> | null;
-          profiles?:
-            | { full_name: string | null; email: string }
-            | Array<{ full_name: string | null; email: string }>
-            | null;
-        };
-        const relatedCourse = firstRelation(event.courses);
-        const actorProfile = firstRelation(event.profiles);
-
-        return {
-          id: event.id,
-          course_id: relatedCourse?.id ?? courseId,
-          course_title: relatedCourse?.title ?? "—",
-          from_status: event.from_status,
-          to_status: event.to_status,
-          kind: event.kind === "admin_override" ? "admin_override" : "transition",
-          actor_name: actorProfile?.full_name ?? null,
-          actor_email: actorProfile?.email ?? "",
-          actor_role: event.actor_role,
-          note: event.note,
-          created_at: event.created_at,
-        } satisfies AuditEvent;
-      });
+      return (data ?? []).map(mapAuditEventRow);
     },
 
     async listCourseAuditEntries(courseId): Promise<CourseAuditEntry[]> {

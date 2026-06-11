@@ -105,10 +105,14 @@ function TimelineDot({ item }: { item: CourseTimelineItem }) {
 }
 
 function TimelineBody({ item }: { item: CourseTimelineItem }) {
+  // Absolute date + time is the source of truth for an audit log; the relative
+  // string is a secondary convenience.
+  const absolute = new Date(item.at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
   const when = (
-    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/70">
+    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/70" title={absolute}>
       <Clock className="size-3" />
-      {formatDistanceToNow(new Date(item.at), { addSuffix: true })}
+      {absolute}
+      <span className="text-muted-foreground/50">· {formatDistanceToNow(new Date(item.at), { addSuffix: true })}</span>
     </span>
   )
 
@@ -124,6 +128,9 @@ function TimelineBody({ item }: { item: CourseTimelineItem }) {
           <span className="text-xs text-muted-foreground">
             {item.actorName ?? "System"}
             <span className="capitalize text-muted-foreground/60"> · {formatRole(item.actorRole)}</span>
+            {item.onBehalfOfName && (
+              <span className="text-muted-foreground/80"> — on behalf of {item.onBehalfOfName}</span>
+            )}
           </span>
           {when}
         </div>
