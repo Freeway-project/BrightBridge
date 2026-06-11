@@ -5,15 +5,29 @@ Bundles the web app, Postgres, and Prometheus+Grafana monitoring in one place.
 
 **No Supabase. No Swarm. No Azure.** Plain `docker compose up -d`.
 
+## Services
+
+| Service              | Image                                 | Purpose                                          |
+|----------------------|---------------------------------------|--------------------------------------------------|
+| `web`                | `okanagan/coursebridge:latest`        | Next.js app (port `${WEB_PORT}`)                 |
+| `postgres`           | `postgres:16`                         | Primary database, internal-only                  |
+| `migrate` (profile)  | same as `web`                         | One-shot migration runner                        |
+| `prometheus`         | `prom/prometheus`                     | Metrics scraper (port `${PROMETHEUS_PORT}`)      |
+| `grafana`            | `grafana/grafana`                     | Dashboards (port `${GRAFANA_PORT}`)              |
+| `node-exporter`      | `prom/node-exporter`                  | Host metrics, internal-only                      |
+| `postgres-exporter`  | `prometheuscommunity/postgres-exporter` | DB metrics, internal-only                      |
+| `backup`             | `prodrigestivill/postgres-backup-local:16` | **Automatic `pg_dump` on cron + rotation**  |
+
 ## Layout
 
 ```
 vps-stack/
-├── compose.yml                              # everything
-├── .env.template                            # copy to .env, fill in
+├── compose.yml                                 # all services
+├── .env.template                               # copy to .env, fill in
+├── backups/                                    # rotated pg_dump output (host-mounted)
 ├── prometheus/
-│   ├── prometheus.yml                       # scrape config (web, node, postgres)
-│   └── metrics_token                        # bearer token for /api/metrics (NOT committed)
+│   ├── prometheus.yml                          # scrape config
+│   └── metrics_token                           # /api/metrics bearer (NOT committed)
 └── grafana/
     └── provisioning/datasources/prometheus.yml
 ```
@@ -51,15 +65,36 @@ docker compose exec postgres psql -U coursebridge_user coursebridge   # psql in
 
 ## Backups
 
+**Automatic** — the `backup` service runs `pg_dump` on `BACKUP_SCHEDULE`
+(default `@daily`) and rotates dumps with daily / weekly / monthly retention
+into `./backups/`. Configure via `.env`:
+
 ```bash
-# manual dump
-docker compose exec postgres pg_dump -U coursebridge_user coursebridge \
-  | gzip > backups/cb-$(date +%F-%H%M).sql.gz
+BACKUP_SCHEDULE=@daily          # cron (`30 2 * * *`) or shortcut (`@daily`, `@hourly`)
+BACKUP_KEEP_DAYS=14
+BACKUP_KEEP_WEEKS=4
+BACKUP_KEEP_MONTHS=6
 ```
 
-Mount `./backups` is already wired into the Postgres container, so you can also
-run `pg_dump` from inside the container writing to `/backups/...`. Schedule via
-host cron.
+```bash
+# inspect what's been written
+ls -lh backups/daily/ backups/weekly/ backups/monthly/
+
+# force one immediately (don't wait for cron)
+docker compose exec backup /backup.sh
+
+# manual ad-hoc dump
+docker compose exec postgres pg_dump -U coursebridge_user coursebridge \
+  | gzip > backups/manual-$(date +%F-%H%M).sql.gz
+
+# restore from a dump
+gunzip -c backups/daily/coursebridge-DATE.sql.gz \
+  | docker compose exec -T postgres psql -U coursebridge_user coursebridge
+```
+
+**Recommended:** mirror `./backups/` off-host nightly (rsync to S3/B2/another
+VPS). The local volume protects against accidental drops but not against host
+loss.
 
 ## Ports exposed on the VPS
 
@@ -72,8 +107,3 @@ host cron.
 Postgres, postgres-exporter, and node-exporter stay on the internal docker
 network — not exposed to the host.
 
-## When Azure is ready
-
-This stack is intentionally independent. The `ORCHESTRATION/` flow (Swarm +
-Traefik + external Postgres) keeps working. Cut over by repointing DNS; no
-changes needed in this stack.

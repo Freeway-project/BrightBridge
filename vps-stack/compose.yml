@@ -152,6 +152,29 @@ services:
       DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-coursebridge_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-coursebridge}?sslmode=disable
     networks: [internal]
 
+  # Automatic Postgres backup. Runs pg_dump on a cron schedule, rotates old dumps.
+  # Defaults: daily at 02:30 UTC, keep 14 days.
+  backup:
+    image: prodrigestivill/postgres-backup-local:16
+    container_name: cb-backup
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-coursebridge}
+      POSTGRES_USER: ${POSTGRES_USER:-coursebridge_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_EXTRA_OPTS: '-Z9 --schema=public --blobs'
+      SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-4}
+      BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-6}
+      HEALTHCHECK_PORT: 8080
+    volumes:
+      - ./backups:/backups
+    networks: [internal]
+
 networks:
   internal:
     driver: bridge
