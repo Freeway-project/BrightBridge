@@ -398,7 +398,7 @@ function CourseGrid({
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:gap-6">
         {courses.map((course, i) => (
-          <CourseCard key={course.id} course={course} index={i} canExport={canExport} />
+          <CourseCard key={course.id} course={course} index={i} />
         ))}
       </div>
       {sentinelRef && courses.length < total && (

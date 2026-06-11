@@ -346,7 +346,7 @@ function CourseGrid({
   return (
     <div className="grid grid-cols-1 gap-4 sm:gap-6">
       {sortedCourses.map((course, i) => (
-        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i} canExport={canExport} />
+        <CourseCard key={course.id} course={course} issueCounts={issueCounts[course.id]} index={i} />
       ))}
     </div>
   )
