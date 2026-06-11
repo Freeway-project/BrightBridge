@@ -43,9 +43,21 @@
   --sidebar-ring: #ffffff;
 
   /* Luminous Iris (Accent Helper) */
-  --ev-500: #818cf8; 
+  --ev-500: #818cf8;
   --ev-600: #6366f1;
   --ev-neon: #a78bfa;
+
+  /* TA dashboard redesign — "your turn / ownership" accent */
+  --accent-indigo: #818cf8;
+  --accent-indigo-hover: #6366f1;
+  --accent-indigo-soft: color-mix(in srgb, #818cf8 12%, transparent);
+  --accent-indigo-glow: color-mix(in srgb, #818cf8 8%, transparent);
+
+  /* TA dashboard redesign — section / pipeline state hues */
+  --status-info: #38bdf8;
+  --status-warning: #f59e0b;
+  --status-success: #10b981;
+  --status-danger: #fb7185;
 
   /* Semantic Colors */
   --destructive: oklch(0.60 0.25 25);
@@ -245,7 +257,15 @@ a {
   --color-background: var(--background);
   --color-violet: var(--ev-500);
   --color-violet-hover: var(--ev-600);
-  
+  --color-accent-indigo: var(--accent-indigo);
+  --color-accent-indigo-hover: var(--accent-indigo-hover);
+  --color-accent-indigo-soft: var(--accent-indigo-soft);
+  --color-accent-indigo-glow: var(--accent-indigo-glow);
+  --color-status-info: var(--status-info);
+  --color-status-warning: var(--status-warning);
+  --color-status-success: var(--status-success);
+  --color-status-danger: var(--status-danger);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
