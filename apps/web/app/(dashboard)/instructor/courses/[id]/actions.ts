@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { requireProfile } from "@/lib/auth/context"
-import { transitionCourseStatus } from "@/lib/courses/service"
+import { resolveDelegationContext, transitionCourseStatus } from "@/lib/courses/service"
 import { createIssueAction } from "@/lib/issues/actions"
 import { getCourseRepository } from "@/lib/repositories"
 import { getSupabaseAdminClientOrThrow } from "@/lib/repositories/supabase/shared"
@@ -75,12 +75,16 @@ export async function instructorSignOffAction(
   assertInstructor(ctx.profile.role)
 
   if (acknowledgedIssueIds.length > 0) {
+    // When a hierarchy leader signs off for the instructor, record the
+    // acknowledgement under the leader's name on the instructor's behalf.
+    const delegation = await resolveDelegationContext({ courseId, profile: ctx.profile })
     const admin = getSupabaseAdminClientOrThrow()
     const rows = acknowledgedIssueIds.map((issueId) => ({
       issue_id: issueId,
       author_id: ctx.profile.id,
       body: "Acknowledged by instructor at sign-off.",
       is_system_message: true,
+      acting_on_behalf_of: delegation.onBehalfOf,
     }))
     const { error } = await admin.from("course_issue_comments").insert(rows)
     if (error) {

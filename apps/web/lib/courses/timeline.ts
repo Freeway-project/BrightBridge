@@ -18,6 +18,7 @@ export type CourseTimelineItem =
       at: string
       actorName: string | null
       actorRole: string
+      onBehalfOfName: string | null
       fromStatus: string | null
       toStatus: string
       note: string | null
@@ -104,6 +105,7 @@ export async function getCourseTimeline(
       at: event.created_at,
       actorName: event.actor_name,
       actorRole: event.actor_role,
+      onBehalfOfName: event.on_behalf_of_name,
       fromStatus: event.from_status,
       toStatus: event.to_status,
       note: event.note,
