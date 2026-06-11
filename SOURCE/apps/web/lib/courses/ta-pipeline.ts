@@ -8,13 +8,14 @@ export type PipelineBuckets = {
   done: number;
 };
 
-const TODO_STATUSES = new Set<CourseStatus>(["course_created", "assigned_to_ta"]);
+const TODO_STATUSES = new Set<CourseStatus>(["assigned_to_ta"]);
 const IN_PROGRESS_STATUSES = new Set<CourseStatus>([
   "ta_review_in_progress",
   "admin_changes_requested",
   "staging_in_progress",
 ]);
 const PENDING_ADMIN_STATUSES = new Set<CourseStatus>([
+  "course_created",
   "submitted_to_admin",
   "waiting_on_admin",
   "ready_for_instructor",
@@ -38,6 +39,10 @@ export function bucketTaPipeline(courses: CourseSummary[]): PipelineBuckets {
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
 const TODAY_LIMIT = 4;
+
+export function countOwnedByTa(courses: CourseSummary[]): number {
+  return courses.filter((c) => getBallInCourt(c.status) === "staff").length;
+}
 
 export function selectTodayCourses(courses: CourseSummary[], now: Date = new Date()): CourseSummary[] {
   const cutoff = now.getTime() - FOURTEEN_DAYS_MS;

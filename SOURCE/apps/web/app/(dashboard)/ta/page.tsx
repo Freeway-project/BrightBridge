@@ -9,7 +9,7 @@ import { TaDashboardHeader } from "./_components/ta-dashboard-header";
 import { ScrollCollapsibleHeader } from "./_components/scroll-collapsible-header";
 import { TodayCard } from "./_components/today-card";
 import { PipelineStrip } from "./_components/pipeline-strip";
-import { bucketTaPipeline, selectTodayCourses } from "@/lib/courses/ta-pipeline";
+import { bucketTaPipeline, countOwnedByTa, selectTodayCourses } from "@/lib/courses/ta-pipeline";
 
 export default async function TADashboardPage() {
   const { courses } = await getAccessibleCourses();
@@ -21,12 +21,13 @@ export default async function TADashboardPage() {
 
   const firstName = ctx.profile.fullName?.split(" ")[0] || "there";
   const today = selectTodayCourses(courses);
+  const totalOwned = countOwnedByTa(courses);
   const buckets = bucketTaPipeline(courses);
 
   const subtitle =
-    today.length === 0
+    totalOwned === 0
       ? "Nothing urgent for you right now."
-      : `You have ${today.length} course${today.length === 1 ? "" : "s"} waiting on you today.`;
+      : `You have ${totalOwned} course${totalOwned === 1 ? "" : "s"} waiting on you today.`;
 
   return (
     <TweakableContent className="min-w-0 flex-1 overflow-hidden">
@@ -36,7 +37,7 @@ export default async function TADashboardPage() {
 
           <div className="mb-5 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-start">
             {today.length > 0 ? (
-              <TodayCard courses={today} totalWaiting={today.length} />
+              <TodayCard courses={today} totalWaiting={totalOwned} />
             ) : (
               <div />
             )}

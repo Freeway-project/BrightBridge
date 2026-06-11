@@ -260,7 +260,6 @@ export function PaginatedCourseListView({
                   courses={isActive ? courses : []}
                   total={isActive ? total : (aggregates.statusCounts[status] ?? 0)}
                   isFetching={isActive && isFetching}
-                  canExport={canExport}
                   onClear={clearFilters}
                   sentinelRef={isActive ? sentinelRef : null}
                 />
@@ -362,14 +361,12 @@ function CourseGrid({
   courses,
   total,
   isFetching,
-  canExport = false,
   onClear,
   sentinelRef,
 }: {
   courses: CourseSummary[]
   total: number
   isFetching: boolean
-  canExport?: boolean
   onClear: () => void
   sentinelRef: React.RefObject<HTMLDivElement | null> | null
 }) {

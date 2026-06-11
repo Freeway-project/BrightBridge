@@ -54,6 +54,15 @@ export function TodayCard({ courses, totalWaiting }: Props) {
         ))}
       </ul>
 
+      {totalWaiting > courses.length && (
+        <Link
+          href="#course-list"
+          className="mb-4 -mt-2 block px-2 text-xs text-muted-foreground/80 hover:text-accent-indigo"
+        >
+          + {totalWaiting - courses.length} more
+        </Link>
+      )}
+
       <div className="flex items-center justify-between border-t border-border/40 pt-3 text-xs text-muted-foreground">
         <span>
           {totalWaiting} {totalWaiting === 1 ? "course" : "courses"} waiting on you
