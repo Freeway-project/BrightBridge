@@ -1,33 +1,25 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { FileCheck, GitMerge, KeyRound, Users } from "lucide-react"
-import { startAzureOidcSignInAction } from "./actions"
+import { useActionState, useEffect, useRef, useState } from "react"
+import { DEV_ACCOUNTS } from "./dev-accounts"
+import { signInAsDevEmail, signInWithPasswordAction, type ActionState } from "./actions"
 import { Button } from "@/components/ui/button"
-import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
+import { Input } from "@/components/ui/input"
 import { AnimatedBubbleParticles } from "@/components/ui/animated-bubble-particles"
+import { FileCheck, GitMerge, KeyRound, Lock, Mail, Users } from "lucide-react"
 
-const DEV_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN === "1"
-
-const DEV_ROLES = [
-  "super_admin",
-  "provost",
-  "admin_full",
-  "admin_viewer",
-  "standard_user",
-  "instructor",
-] as const
-
+// ── Colours that cycle during the sign-in bubble overlay ──────────────────────
 const BUBBLE_COLORS = [
-  "#818cf8",
-  "#ec4899",
-  "#34d399",
-  "#f59e0b",
-  "#38bdf8",
-  "#a78bfa",
-  "#fb7185",
+  "#818cf8", // violet
+  "#ec4899", // pink
+  "#34d399", // emerald
+  "#f59e0b", // amber
+  "#38bdf8", // sky
+  "#a78bfa", // purple
+  "#fb7185", // rose
 ]
 
+// ── Feature list ──────────────────────────────────────────────────────────────
 const FEATURES = [
   {
     icon: GitMerge,
@@ -46,41 +38,9 @@ const FEATURES = [
   },
 ]
 
-function DevLoginPanel() {
-  return (
-    <form
-      action="/auth/dev/login"
-      method="POST"
-      className="mt-6 space-y-3 rounded-md border border-dashed border-amber-400/60 bg-amber-50/40 p-4 dark:bg-amber-950/20"
-    >
-      <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-        Dev sign-in (local only) — bypasses Microsoft Entra.
-      </p>
-      <input
-        name="email"
-        type="email"
-        required
-        placeholder="email of an existing profile"
-        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-      />
-      <select
-        name="role"
-        defaultValue="super_admin"
-        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-      >
-        {DEV_ROLES.map((r) => (
-          <option key={r} value={r}>
-            {r}
-          </option>
-        ))}
-      </select>
-      <Button type="submit" variant="outline" className="w-full h-9 text-sm">
-        Sign in as dev user
-      </Button>
-    </form>
-  )
-}
+const initialState: ActionState = {}
 
+// ── Bubble overlay that auto-dismisses after 5 s ──────────────────────────────
 function SigningInOverlay({ visible }: { visible: boolean }) {
   const [colorIndex, setColorIndex] = useState(0)
   const [dots, setDots] = useState(".")
@@ -89,12 +49,17 @@ function SigningInOverlay({ visible }: { visible: boolean }) {
 
   useEffect(() => {
     if (!visible) return
+
+    // Cycle bubble colour every 800 ms
     timerRef.current = setInterval(() => {
       setColorIndex((i) => (i + 1) % BUBBLE_COLORS.length)
     }, 800)
+
+    // Animate ellipsis
     dotsRef.current = setInterval(() => {
       setDots((d) => (d.length >= 3 ? "." : d + "."))
     }, 400)
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (dotsRef.current) clearInterval(dotsRef.current)
@@ -120,6 +85,7 @@ function SigningInOverlay({ visible }: { visible: boolean }) {
         className="bg-black/70 backdrop-blur-sm"
         zIndex={50}
       >
+        {/* Centre label */}
         <div className="flex flex-col items-center gap-4 select-none">
           <div
             className="flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold text-white shadow-xl"
@@ -137,17 +103,21 @@ function SigningInOverlay({ visible }: { visible: boolean }) {
   )
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function LoginPage() {
-  const [pending, setPending] = useState(false)
+  const [state, formAction, pending] = useActionState(signInWithPasswordAction, initialState)
 
   return (
     <>
       <SigningInOverlay visible={pending} />
 
       <main className="min-h-screen bg-background flex">
+        {/* Left panel */}
         <div className="hidden lg:flex w-1/2 flex-col justify-between bg-sidebar border-r border-sidebar-border px-12 py-14">
-          <div className="flex items-center gap-1">
-            <OCLoadingLogo className="size-12 shrink-0" />
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+              CB
+            </div>
             <span className="text-lg font-semibold text-sidebar-foreground">CourseBridge</span>
           </div>
 
@@ -183,30 +153,57 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {/* Right panel — form */}
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
           <div className="w-full max-w-sm space-y-8">
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight">Sign in</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Use your institutional account through Microsoft Entra ID.
+                Use the account created for you by a CourseBridge super admin.
               </p>
             </div>
 
-            <form
-              action={startAzureOidcSignInAction}
-              onSubmit={() => setPending(true)}
-              className="space-y-4"
-            >
-              <div className="rounded-lg border border-border bg-muted/20 px-4 py-3">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Authenticate with your Microsoft account to continue.
-                </p>
+            <form action={formAction} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" htmlFor="email">Email address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    name="email"
+                    placeholder="you@institution.edu"
+                    required
+                    type="email"
+                    className="h-10 pl-10"
+                  />
+                </div>
               </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" htmlFor="password">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    name="password"
+                    required
+                    type="password"
+                    className="h-10 pl-10"
+                  />
+                </div>
+              </div>
+
               <Button className="w-full h-10 gap-2" type="submit" disabled={pending}>
                 <KeyRound className="size-4" />
-                Sign in with Microsoft
+                Sign in
               </Button>
             </form>
+
+            {state.error ? (
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5">
+                <p className="text-sm text-destructive leading-tight">{state.error}</p>
+              </div>
+            ) : null}
 
             <div className="rounded-lg border border-dashed border-border px-4 py-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -214,7 +211,27 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {DEV_LOGIN_ENABLED && <DevLoginPanel />}
+            {process.env.NODE_ENV === "development" && (
+              <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
+                <div>
+                  <p className="text-xs font-medium text-foreground">Dev quick login</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Password: <code className="font-mono">CourseBridgeDev123!</code>
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {DEV_ACCOUNTS.map((acc) => (
+                    <form action={signInAsDevEmail} key={acc.email}>
+                      <input name="email" type="hidden" value={acc.email} />
+                      <Button className="w-full h-auto py-1.5 flex flex-col gap-0" size="sm" type="submit" variant="outline">
+                        <span className="text-[11px] font-medium">{acc.label}</span>
+                        <span className="text-[9px] text-muted-foreground font-normal">{acc.hint}</span>
+                      </Button>
+                    </form>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

@@ -159,30 +159,6 @@ export const WORKFLOW_PHASES: WorkflowPhase[] = [
   },
 ]
 
-/**
- * Plain-English one-liner per pipeline phase, written for an admin or provost
- * audience who may not know what e.g. "ready_for_instructor" means. Used in
- * tooltips on the admin stats timeline and any other surface that exposes the
- * phase keys to a non-engineering reader.
- */
-export const PHASE_DESCRIPTIONS: Record<PipelineStage, string> = {
-  migration: "Course imported from Moodle; a TA has not yet finished initial review.",
-  staging: "TA or admin is reviewing and staging the migrated content before the instructor sees it.",
-  instructor: "Instructor has the course and is reviewing, asking questions, or signing off.",
-  provision: "Course is final-approved and ready to publish in Brightspace.",
-}
-
-/**
- * Short, plain-English label per phase for KPI cards and timeline pills.
- * Distinct from `WorkflowPhase.label` (which uses the internal phase name).
- */
-export const PHASE_KPI_LABELS: Record<PipelineStage, string> = {
-  migration: "Imported",
-  staging: "Awaiting review",
-  instructor: "With instructor",
-  provision: "Live in Brightspace",
-}
-
 export function getPipelineStage(status: CourseStatus): PipelineStage {
   if (status === "final_approved") return "provision"
   if (

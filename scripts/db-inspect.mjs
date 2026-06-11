@@ -10,7 +10,7 @@ if (!databaseUrl) {
   console.error(
     [
       "Missing DATABASE_URL.",
-      "Add your Postgres connection string to .env.local or apps/web/.env.local."
+      "Add your Supabase Postgres connection string to .env.local or apps/web/.env.local."
     ].join("\n")
   );
   process.exit(1);
@@ -115,11 +115,11 @@ function parseDatabaseUrl(value) {
       connectionString: value
     };
   } catch {
-    return parseManualDatabaseUrl(value);
+    return parseSupabaseDatabaseUrl(value);
   }
 }
 
-function parseManualDatabaseUrl(value) {
+function parseSupabaseDatabaseUrl(value) {
   const protocolMatch = value.match(/^postgres(?:ql)?:\/\//);
 
   if (!protocolMatch) {

@@ -13,7 +13,7 @@ export function WorkloadChart({ taWorkload }: Props) {
     .sort((a, b) => b.active_courses - a.active_courses)
     .slice(0, 12)
     .map((ta) => ({
-      name: ta.full_name ?? (typeof ta.email === "string" ? ta.email.split("@")[0] : "Unknown"),
+      name: ta.full_name ?? ta.email.split("@")[0],
       active: ta.active_courses,
       fixes: ta.needs_fixes,
     }))

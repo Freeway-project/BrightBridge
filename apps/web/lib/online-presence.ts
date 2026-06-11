@@ -1,11 +1,6 @@
 'use client'
 
-// Polling-based online presence. Replaces Supabase Realtime Presence so it works
-// against self-hosted Postgres (where there is no Supabase Realtime). The client
-// sends periodic heartbeats to /api/presence/heartbeat (the server derives the
-// user from the session) and polls /api/presence/online for the live roster.
-// The public API (trackOnlinePresence / subscribeToOnlineUsers) is unchanged so
-// callers don't need to change.
+import { createClient } from '@/lib/supabase/client'
 
 export type OnlineUser = {
   userId: string
@@ -16,13 +11,16 @@ export type OnlineUser = {
 }
 
 type Listener = (users: OnlineUser[]) => void
+type SupabaseClient = ReturnType<typeof createClient>
+type PresenceChannel = ReturnType<SupabaseClient['channel']>
 
-const HEARTBEAT_INTERVAL_MS = 30_000
-const POLL_INTERVAL_MS = 15_000
-
+let supabase: SupabaseClient | null = null
+let channel: PresenceChannel | null = null
+let channelUserId: string | null = null
+let trackedUser: Omit<OnlineUser, 'online_at'> | null = null
+let isSubscribed = false
 let latestUsers: OnlineUser[] = []
 const listeners = new Set<Listener>()
-let pollTimer: ReturnType<typeof setInterval> | null = null
 
 function emitUsers() {
   for (const listener of listeners) {
@@ -30,56 +28,69 @@ function emitUsers() {
   }
 }
 
-async function fetchOnlineUsers() {
-  try {
-    const res = await fetch('/api/presence/online', { cache: 'no-store' })
-    if (!res.ok) return
-    const data = (await res.json()) as { users?: OnlineUser[] }
-    latestUsers = data.users ?? []
+function ensureChannel(userId?: string) {
+  if (channel && (!userId || channelUserId === userId)) {
+    return channel
+  }
+
+  if (!supabase) {
+    supabase = createClient()
+  }
+
+  if (channel) {
+    supabase.removeChannel(channel)
+    channel = null
+    isSubscribed = false
+    latestUsers = []
     emitUsers()
-  } catch {
-    // Transient network error — keep the last known roster.
-  }
-}
-
-function startPolling() {
-  if (pollTimer) return
-  void fetchOnlineUsers()
-  pollTimer = setInterval(() => {
-    void fetchOnlineUsers()
-  }, POLL_INTERVAL_MS)
-}
-
-function stopPolling() {
-  if (pollTimer) {
-    clearInterval(pollTimer)
-    pollTimer = null
-  }
-}
-
-export function trackOnlinePresence(_user: Omit<OnlineUser, 'online_at'>) {
-  const sendHeartbeat = () => {
-    void fetch('/api/presence/heartbeat', { method: 'POST', cache: 'no-store' }).catch(() => {})
   }
 
-  sendHeartbeat()
-  const heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS)
+  channelUserId = userId ?? null
+  channel = supabase.channel('online_users', {
+    config: userId ? { presence: { key: userId } } : {},
+  })
+
+  channel
+    .on('presence', { event: 'sync' }, () => {
+      if (!channel) return
+
+      const state = channel.presenceState<OnlineUser>()
+      latestUsers = Object.values(state).flatMap((presences) => presences)
+      emitUsers()
+    })
+    .subscribe(async (status) => {
+      isSubscribed = status === 'SUBSCRIBED'
+
+      if (isSubscribed && trackedUser) {
+        await channel?.track({ ...trackedUser, online_at: new Date().toISOString() })
+      }
+    })
+
+  return channel
+}
+
+export function trackOnlinePresence(user: Omit<OnlineUser, 'online_at'>) {
+  trackedUser = user
+  const activeChannel = ensureChannel(user.userId)
+
+  if (isSubscribed) {
+    void activeChannel.track({ ...user, online_at: new Date().toISOString() })
+  }
 
   return () => {
-    clearInterval(heartbeatTimer)
-    void fetch('/api/presence/heartbeat', { method: 'DELETE', cache: 'no-store' }).catch(() => {})
+    if (trackedUser?.userId === user.userId) {
+      trackedUser = null
+    }
+    void activeChannel.untrack()
   }
 }
 
 export function subscribeToOnlineUsers(listener: Listener) {
   listeners.add(listener)
   listener(latestUsers)
-  startPolling()
+  ensureChannel()
 
   return () => {
     listeners.delete(listener)
-    if (listeners.size === 0) {
-      stopPolling()
-    }
   }
 }

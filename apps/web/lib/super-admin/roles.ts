@@ -9,8 +9,8 @@ export const ROLE_TITLE_LABELS: Record<string, string> = {
   dean: "Dean",
   associate_dean: "Associate Dean",
   assistant_dean: "Assistant Dean",
-  dept_head: "Department Chair",
-  educator: "Instructor",
+  dept_head: "Department Head",
+  educator: "Educator",
   admin: "Admin",
   staff: "Staff",
 }

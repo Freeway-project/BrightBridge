@@ -43,21 +43,9 @@
   --sidebar-ring: #ffffff;
 
   /* Luminous Iris (Accent Helper) */
-  --ev-500: #818cf8;
+  --ev-500: #818cf8; 
   --ev-600: #6366f1;
   --ev-neon: #a78bfa;
-
-  /* TA dashboard redesign — "your turn / ownership" accent */
-  --accent-indigo: #818cf8;
-  --accent-indigo-hover: #6366f1;
-  --accent-indigo-soft: color-mix(in srgb, #818cf8 12%, transparent);
-  --accent-indigo-glow: color-mix(in srgb, #818cf8 8%, transparent);
-
-  /* TA dashboard redesign — section / pipeline state hues */
-  --status-info: #38bdf8;
-  --status-warning: #f59e0b;
-  --status-success: #10b981;
-  --status-danger: #fb7185;
 
   /* Semantic Colors */
   --destructive: oklch(0.60 0.25 25);
@@ -71,10 +59,6 @@
   --critical: oklch(0.55 0.20 15);
 
   --radius: 0.875rem;
-
-  /* Theme identity hooks (override per theme below) */
-  --primary-glow: 0 0 0 0 transparent;
-  --bg-pattern: none;
 }
 
 /* ── Sunset Theme — Refined candy & sunset ambience ── */
@@ -107,12 +91,6 @@
   --sidebar-accent-foreground: #df5b7e;
   --sidebar-border: color-mix(in srgb, #df5b7e 12%, transparent);
   --sidebar-ring: #df5b7e;
-
-  --radius: 0.75rem;
-  --primary-glow: 0 0 28px color-mix(in srgb, #df5b7e 50%, transparent);
-  --bg-pattern:
-    radial-gradient(at 15% 0%, color-mix(in srgb, #df5b7e 18%, transparent) 0px, transparent 55%),
-    radial-gradient(at 85% 100%, color-mix(in srgb, #7e5bdf 16%, transparent) 0px, transparent 55%);
 }
 
 /* ── Monochrome Theme — Graphite studio, sharp contrast ─ */
@@ -145,10 +123,6 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: color-mix(in srgb, #ffffff 10%, transparent);
   --sidebar-ring: #ffffff;
-
-  --radius: 0.375rem;
-  --primary-glow: 0 0 0 1px color-mix(in srgb, #ffffff 25%, transparent);
-  --bg-pattern: none;
 }
 
 /* ── Aurora Theme — Neon deep space, fuchsia & violet ─── */
@@ -181,12 +155,6 @@
   --sidebar-accent-foreground: #d946ef;
   --sidebar-border: color-mix(in srgb, #7c3aed 25%, transparent);
   --sidebar-ring: #c026d3;
-
-  --radius: 0.25rem;
-  --primary-glow: 0 0 40px color-mix(in srgb, #c026d3 70%, transparent), 0 0 12px color-mix(in srgb, #d946ef 55%, transparent);
-  --bg-pattern:
-    radial-gradient(at 80% 10%, color-mix(in srgb, #c026d3 24%, transparent) 0px, transparent 50%),
-    radial-gradient(at 10% 90%, color-mix(in srgb, #7c3aed 22%, transparent) 0px, transparent 55%);
 }
 
 /* ── Blush Theme — Soft pastels, pink, purple & lavender ─ */
@@ -219,50 +187,6 @@
   --sidebar-accent-foreground: #8b6f9e;
   --sidebar-border: color-mix(in srgb, #d88ec9 18%, transparent);
   --sidebar-ring: #d88ec9;
-
-  --radius: 1.5rem;
-  --primary-glow: 0 6px 24px color-mix(in srgb, #d88ec9 45%, transparent);
-  --bg-pattern:
-    radial-gradient(at 20% 20%, color-mix(in srgb, #d88ec9 16%, transparent) 0px, transparent 60%),
-    radial-gradient(at 80% 80%, color-mix(in srgb, #b39ddb 16%, transparent) 0px, transparent 60%);
-}
-
-/* ── Ocean Theme — Cool cyan/teal depths ──────────────── */
-[data-theme="ocean"] {
-  --background: #04141a;
-  --foreground: #e6fbff;
-  --card: #082832;
-  --card-foreground: #d6f6ff;
-  --popover: #0a3744;
-  --popover-foreground: #f0fbff;
-  --primary: #00b4d8;
-  --primary-foreground: #04141a;
-  --primary-hover: #48cae4;
-  --primary-depth: #0077b6;
-  --secondary: #0096c7;
-  --secondary-foreground: #ffffff;
-  --muted: #082832;
-  --muted-foreground: #90e0ef;
-  --accent: #0d3a47;
-  --accent-foreground: #caf0f8;
-  --border: color-mix(in srgb, #00b4d8 28%, transparent);
-  --border-icy: color-mix(in srgb, #caf0f8 8%, transparent);
-  --input: #082832;
-  --ring: #00b4d8;
-  --sidebar: #020c10;
-  --sidebar-foreground: #caf0f8;
-  --sidebar-primary: #00b4d8;
-  --sidebar-primary-foreground: #04141a;
-  --sidebar-accent: #082832;
-  --sidebar-accent-foreground: #48cae4;
-  --sidebar-border: color-mix(in srgb, #00b4d8 20%, transparent);
-  --sidebar-ring: #00b4d8;
-
-  --radius: 0.625rem;
-  --primary-glow: 0 0 32px color-mix(in srgb, #00b4d8 55%, transparent);
-  --bg-pattern:
-    radial-gradient(at 50% 0%, color-mix(in srgb, #00b4d8 18%, transparent) 0px, transparent 55%),
-    radial-gradient(at 0% 100%, color-mix(in srgb, #0077b6 22%, transparent) 0px, transparent 60%);
 }
 
 * {
@@ -272,19 +196,6 @@
 body {
   margin: 0;
   color-scheme: dark;
-  position: relative;
-  isolation: isolate;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--bg-pattern, none);
-  background-attachment: fixed;
-  transition: background 350ms ease;
 }
 
 a {
@@ -334,15 +245,7 @@ a {
   --color-background: var(--background);
   --color-violet: var(--ev-500);
   --color-violet-hover: var(--ev-600);
-  --color-accent-indigo: var(--accent-indigo);
-  --color-accent-indigo-hover: var(--accent-indigo-hover);
-  --color-accent-indigo-soft: var(--accent-indigo-soft);
-  --color-accent-indigo-glow: var(--accent-indigo-glow);
-  --color-status-info: var(--status-info);
-  --color-status-warning: var(--status-warning);
-  --color-status-success: var(--status-success);
-  --color-status-danger: var(--status-danger);
-
+  
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -475,17 +378,6 @@ a {
   [data-slot="textarea"],
   [data-slot="select-trigger"] {
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--border) 68%, white 32%);
-  }
-
-  /* Theme-driven primary action signature — each theme defines its own glow. */
-  [data-slot="button"][data-variant="default"],
-  button[data-variant="default"] {
-    box-shadow: var(--primary-glow);
-    transition: box-shadow 240ms ease, transform 160ms ease;
-  }
-  [data-slot="button"][data-variant="default"]:hover,
-  button[data-variant="default"]:hover {
-    box-shadow: var(--primary-glow), 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent);
   }
 }
 

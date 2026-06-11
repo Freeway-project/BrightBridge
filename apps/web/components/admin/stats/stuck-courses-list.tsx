@@ -7,12 +7,10 @@ import { cn } from "@/lib/utils"
 
 interface Props {
   stuckCourses: StuckCourse[]
-  totalStuck?: number
 }
 
-export function StuckCoursesList({ stuckCourses, totalStuck }: Props) {
+export function StuckCoursesList({ stuckCourses }: Props) {
   const sorted = [...stuckCourses].sort((a, b) => b.days_stuck - a.days_stuck)
-  const truncated = typeof totalStuck === "number" && totalStuck > sorted.length
 
   return (
     <Card className="border-border/60 bg-card/50 backdrop-blur-sm">
@@ -20,11 +18,6 @@ export function StuckCoursesList({ stuckCourses, totalStuck }: Props) {
         <CardTitle className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
           <AlertTriangle className="size-3.5 text-orange-500" />
           Stuck Courses (&gt;5 days)
-          {truncated ? (
-            <span className="ml-auto text-[10px] font-semibold normal-case tracking-normal text-muted-foreground">
-              top {sorted.length} of {totalStuck}
-            </span>
-          ) : null}
         </CardTitle>
       </CardHeader>
       <CardContent>

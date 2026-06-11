@@ -278,14 +278,13 @@ function CoursesSection({
               <TableHead scope="col" className="w-[190px] text-xs">Status</TableHead>
               <TableHead scope="col" className="hidden text-xs sm:table-cell">Term</TableHead>
               <TableHead scope="col" className="hidden text-xs md:table-cell">Department</TableHead>
-              <TableHead scope="col" className="text-xs">Instructor</TableHead>
               <TableHead scope="col" className="text-xs">Staff (TA)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {courses.data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
                   No courses match these filters.
                 </TableCell>
               </TableRow>
@@ -303,7 +302,6 @@ function CoursesSection({
                   </TableCell>
                   <TableCell className="hidden text-xs text-muted-foreground sm:table-cell">{c.term ?? "—"}</TableCell>
                   <TableCell className="hidden text-xs text-muted-foreground md:table-cell">{c.department ?? "—"}</TableCell>
-                  <TableCell className="text-xs">{c.instructor?.name ?? c.instructor?.email ?? "—"}</TableCell>
                   <TableCell className="text-xs">{c.ta?.name ?? c.ta?.email ?? "—"}</TableCell>
                 </TableRow>
               ))

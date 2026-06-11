@@ -10,16 +10,7 @@ import {
 } from "@coursebridge/workflow";
 import { getAuthContext, requireAnyRole, requireProfile, type AppProfile } from "@/lib/auth/context";
 import { getCourseRepository, getProfileRepository, getReviewRepository, getHierarchyRepository } from "@/lib/repositories";
-import type {
-  AccessibleCourseAggregates,
-  AccessibleCourseScope,
-  CourseSummary,
-  PaginatedResult,
-  ReviewProgress,
-  SectionProgress,
-  CourseAssignmentRecord,
-  InstructorCourse,
-} from "@/lib/repositories/contracts";
+import type { CourseSummary, ReviewProgress, SectionProgress, CourseAssignmentRecord, InstructorCourse } from "@/lib/repositories/contracts";
 import { LEADERSHIP_TITLES, highestLeadershipTitle } from "@/lib/hierarchy/leadership";
 
 const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
@@ -144,70 +135,6 @@ export async function getAccessibleCourses() {
     context,
     courses: summaries.map((course) => ({ ...course, reviewProgress: progressMap.get(course.id) })),
   };
-}
-
-// Default page size for the staff/admin /courses list view. Tuned for the card
-// grid — small enough to render quickly, large enough that one viewport rarely
-// triggers the next page fetch immediately.
-export const ACCESSIBLE_COURSES_PAGE_SIZE = 24;
-
-export type AccessibleCourseListInput = {
-  page?: number;
-  pageSize?: number;
-  status?: CourseStatus;
-  search?: string;
-  subject?: string;
-  term?: string;
-};
-
-async function resolveAccessibleScope(): Promise<{
-  scope: AccessibleCourseScope | null;
-  canExport: boolean;
-}> {
-  const context = await getAuthContext();
-  if (context.kind !== "profile") {
-    return { scope: null, canExport: false };
-  }
-  const role = context.profile.role;
-  const isScoped = role === "standard_user" || role === "instructor";
-  const scope: AccessibleCourseScope = isScoped
-    ? { kind: "assigned", profileId: context.profile.id, role: toAssignmentRole(role) }
-    : { kind: "all" };
-  return { scope, canExport: role === "admin_full" || role === "super_admin" };
-}
-
-export async function getAccessibleCoursesPage(
-  input: AccessibleCourseListInput = {},
-): Promise<PaginatedResult<CourseSummary>> {
-  const { scope } = await resolveAccessibleScope();
-  if (!scope) {
-    return { data: [], total: 0, page: 1, pageSize: input.pageSize ?? ACCESSIBLE_COURSES_PAGE_SIZE, totalPages: 0 };
-  }
-  const page = input.page ?? 1;
-  const pageSize = input.pageSize ?? ACCESSIBLE_COURSES_PAGE_SIZE;
-  const result = await getCourseRepository().listAccessibleCoursesPage(page, pageSize, {
-    scope,
-    status: input.status,
-    search: input.search,
-    subject: input.subject,
-    term: input.term,
-  });
-
-  // Only enrich the rows actually returned to the page — the previous
-  // load-everything path enriched the full set, which was the main per-row cost.
-  const progressMap = await fetchReviewProgressForCourses(result.data.map((c) => c.id));
-  return {
-    ...result,
-    data: result.data.map((c) => ({ ...c, reviewProgress: progressMap.get(c.id) })),
-  };
-}
-
-export async function getAccessibleCourseAggregates(
-  input: Pick<AccessibleCourseListInput, "search" | "subject" | "term"> = {},
-): Promise<AccessibleCourseAggregates> {
-  const { scope } = await resolveAccessibleScope();
-  if (!scope) return { statusCounts: {}, subjects: [], terms: [], total: 0 };
-  return getCourseRepository().getAccessibleCourseAggregates(scope, input);
 }
 
 export async function fetchReviewProgressForCourses(

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getAuthService } from "@/lib/auth/service";
 import {
   redeemReviewInvite,
   markInviteAccepted,
@@ -6,20 +7,10 @@ import {
 import { ensureInstructorIdentity } from "@/lib/invites/instructor-identity";
 
 /**
- * Instructor entry from an admin-emailed link. We no longer mint sessions
- * here — instructors authenticate via Azure OIDC (typically as Entra B2B
- * guests). This route only:
- *
- *   1. Validates the one-time invite token and marks it consumed.
- *   2. Ensures the instructor profile row exists so PBAC has something to
- *      match the OIDC subject against on first sign-in.
- *   3. Records the dashboard-open signal (drives the indicator dot).
- *   4. Auto-advances the course to "instructor_viewing" if applicable.
- *   5. Redirects to /auth/oidc/login with `next=` set to the course page,
- *      so Entra hand-back lands the instructor on the right URL.
- *
- * If the clicker already has an OIDC session, the OIDC route short-circuits
- * to `next` immediately.
+ * Passwordless instructor access. An admin-generated email link points here;
+ * we validate the one-time invite token, ensure the instructor identity exists,
+ * mint a session, and drop them onto their dashboard. The clicker is not yet
+ * authenticated, so invite lookup runs via the service-role client.
  */
 export async function GET(
   request: NextRequest,
@@ -40,18 +31,20 @@ export async function GET(
     return NextResponse.redirect(expiredUrl);
   }
 
-  const nextPath = `/instructor/courses/${invite.courseId}`;
-  const oidcUrl = new URL("/auth/oidc/login", request.url);
-  oidcUrl.searchParams.set("next", nextPath);
-
   try {
+    const auth = getAuthService();
     const instructorProfileId = await ensureInstructorIdentity(invite.email);
+
+    const hashedToken = await auth.generateMagicLinkHashedToken(invite.email);
+    const { error } = await auth.verifyMagicLink(hashedToken);
+    if (error) {
+      console.error("[auth/invite] Failed to verify magic link:", error);
+      return NextResponse.redirect(expiredUrl);
+    }
 
     await markInviteAccepted(invite.id);
 
-    const { recordInstructorView } = await import("@/lib/instructor-views/service");
-    await recordInstructorView(invite.courseId, instructorProfileId);
-
+    // Auto-advance the course to "instructor_viewing" on first open.
     try {
       const { markInstructorViewingByLink } = await import("@/lib/courses/service");
       await markInstructorViewingByLink({ courseId: invite.courseId, instructorProfileId });
@@ -59,10 +52,9 @@ export async function GET(
       console.error("[auth/invite] Failed to mark instructor viewing:", statusError);
     }
   } catch (error) {
-    // Bookkeeping failure is non-fatal — the instructor still needs to sign
-    // in via OIDC. Log and continue to the redirect so they can complete auth.
-    console.error("[auth/invite] Bookkeeping failed; continuing to OIDC redirect:", error);
+    console.error("[auth/invite] Failed to establish instructor session:", error);
+    return NextResponse.redirect(expiredUrl);
   }
 
-  return NextResponse.redirect(oidcUrl);
+  return NextResponse.redirect(new URL("/instructor", request.url));
 }
