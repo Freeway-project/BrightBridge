@@ -3,9 +3,7 @@
 Self-hosted docker-compose stack that replaces the existing PM2 deploy.
 Bundles the web app, Postgres, and Prometheus+Grafana monitoring in one place.
 
-**No Supabase. No Swarm.** Plain `docker compose up -d`.
-
-Independent of `SOURCE/` and `ORCHESTRATION/` — those stay as-is for the Azure path.
+**No Supabase. No Swarm. No Azure.** Plain `docker compose up -d`.
 
 ## Layout
 

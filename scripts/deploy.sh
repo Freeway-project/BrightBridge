@@ -114,11 +114,11 @@ log "Writing deploy marker..."
 git rev-parse HEAD > "$REPO_ROOT/apps/web/.deployment-version"
 
 # ---------------------------------------------------------------------------
-# 5. Reload PM2 (re-reads ecosystem.config.cjs so new SOURCE/ paths take effect)
+# 5. Reload PM2 (re-reads ecosystem.config.cjs so updated paths take effect)
 # ---------------------------------------------------------------------------
 # startOrReload applies the config file (cwd, script paths) on every deploy.
 # Plain `pm2 reload <name>` reuses the old config and would keep pointing at
-# pre-restructure paths after the SOURCE/ migration.
+# pre-restructure paths.
 log "Reloading PM2 with updated config..."
 pm2 startOrReload "$REPO_ROOT/ecosystem.config.cjs" --env production
 pm2 save

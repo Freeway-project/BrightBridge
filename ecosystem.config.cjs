@@ -1,6 +1,6 @@
 const path = require("path");
-// __dirname resolves to SOURCE/ — all paths are relative to it so this config
-// works regardless of where the repo is cloned on the VPS.
+// __dirname resolves to the repo root — all paths are relative to it so this
+// config works regardless of where the repo is cloned on the VPS.
 const root = __dirname;
 
 module.exports = {
