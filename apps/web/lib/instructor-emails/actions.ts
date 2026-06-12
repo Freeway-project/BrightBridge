@@ -20,9 +20,7 @@ import { notifyInstructor } from "./service";
  * Best-effort per-recipient: a failed send to one instructor is logged but
  * doesn't abort the others. Returns the number of attempted/sent recipients.
  *
- * NOTE: today the "dashboard URL" is the magic-link invite URL (token-based
- * sign-in). After the OIDC cutover this will become a stable per-instructor
- * dashboard route — see TODO in templates/course-ready-for-instructor.ts.
+ * NOTE: the "dashboard URL" is the invite token URL from lib/invites/service.ts.
  */
 async function dispatchToAllInstructors(input: {
   courseId: string;

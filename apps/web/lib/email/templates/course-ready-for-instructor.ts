@@ -7,13 +7,8 @@ export type CourseReadyForInstructorTemplateInput = {
   /**
    * URL the instructor opens from the email.
    *
-   * Caller-supplied — the template is auth-agnostic. Today this is the
-   * single-use magic-link invite URL (lib/invites/service.ts::buildInviteLink)
-   * because token sign-in is the only working auth path. Once OIDC ships
-   * (see CLAUDE.md + the AUTH_PROVIDER cutover), swap callers to a stable
-   * per-instructor dashboard URL and stop minting per-email tokens.
-   *
-   * TODO(oidc-cutover): replace caller-side dashboardUrl with the OIDC dashboard URL.
+   * Caller-supplied — the template is auth-agnostic. Callers pass the
+   * single-use invite token URL (lib/invites/service.ts::buildInviteLink).
    */
   dashboardUrl: string;
 };

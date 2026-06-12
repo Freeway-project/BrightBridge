@@ -78,7 +78,7 @@ export async function GET() {
   const pool = labeledMap(findMetric(metrics, "pg_pool_connections"), "state");
   const courses = labeledMap(findMetric(metrics, "courses_total"), "status");
 
-  const oidcOutcomes = labeledMap(findMetric(metrics, "oidc_callback_total"), "result");
+  const loginOutcomes = labeledMap(findMetric(metrics, "login_total"), "result");
 
   return NextResponse.json({
     snapshotTs: Date.now(),
@@ -97,7 +97,7 @@ export async function GET() {
       poolWaiting: pool.waiting ?? 0,
     },
     courses,
-    auth: { oidcOutcomes },
+    auth: { loginOutcomes },
     recentLogs: recentLogs(100),
   });
 }

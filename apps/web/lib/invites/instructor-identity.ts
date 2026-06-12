@@ -5,12 +5,8 @@ import { getProfileRepository } from "@/lib/repositories";
 
 /**
  * Idempotently ensures an instructor profile row exists for an email. Called
- * by the invite-redemption route before kicking off OIDC sign-in so PBAC has
- * a profile to match the Entra subject against on first sign-in.
- *
- * No auth user is provisioned here — Entra (B2B guest or otherwise) is the
- * authoritative auth backend. The profile id we assign is replaced on first
- * sign-in by auth/context, which resolves the OIDC sub → profile by email.
+ * by the invite-redemption route so PBAC has a profile to match when the
+ * instructor signs in for the first time.
  */
 export async function ensureInstructorIdentity(
   email: string,

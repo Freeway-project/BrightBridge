@@ -353,8 +353,6 @@ export async function createInstructorAndAssignAction(
     const profiles = getProfileRepository();
 
     // Look up an existing instructor profile by email; create one if missing.
-    // The OIDC sub assigned to this profile id is a placeholder — auth/context
-    // re-resolves it by email on the first Entra sign-in.
     const existing = await profiles.getProfileByEmail(email);
     const userId = existing?.id ?? randomUUID();
 

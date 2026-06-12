@@ -18,12 +18,11 @@ export default async function NoAccessPage() {
         <div className="space-y-2">
           <h1 className="text-xl font-semibold tracking-tight">No CourseBridge access</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            You signed in with Microsoft{email ? ` as ${email}` : ""}, but your account
-            does not have a CourseBridge profile or app role assigned yet.
+            {email ? `The account ${email}` : "Your account"} does not have a CourseBridge
+            profile or role assigned yet.
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Ask a super admin to assign you a CourseBridge role in Microsoft Entra,
-            then sign in again.
+            Ask a super admin to create your account and assign you a role, then sign in again.
           </p>
         </div>
 

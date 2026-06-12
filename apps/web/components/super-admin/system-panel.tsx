@@ -11,7 +11,7 @@ type Snapshot = {
   http: { requestsTotal: number; errorsTotal: number }
   db: { poolTotal: number; poolIdle: number; poolWaiting: number }
   courses: Record<string, number>
-  auth: { oidcOutcomes: Record<string, number> }
+  auth: { loginOutcomes: Record<string, number> }
   recentLogs: LogEntry[]
 }
 
