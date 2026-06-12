@@ -122,7 +122,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Overview — clean course info only */}
+          {/* Overview — course info + instructor notes */}
           <TabsContent value="overview" className="flex-1 overflow-y-auto p-6">
             <div className="max-w-2xl space-y-4">
               <div className="rounded-lg border border-border bg-card p-5 space-y-3">
@@ -154,6 +154,15 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
                   )}
                 </div>
               </div>
+
+              {course.instructorSummaryNotes?.trim() && (
+                <div className="rounded-lg border border-border bg-card p-5 space-y-2">
+                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Instructor Notes</h2>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                    {course.instructorSummaryNotes}
+                  </p>
+                </div>
+              )}
             </div>
           </TabsContent>
 

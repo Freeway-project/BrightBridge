@@ -42,6 +42,7 @@ export type CourseSummary = {
   term: string | null;
   department: string | null;
   orgUnitId: string | null;
+  orgUnitName: string | null;
   status: CourseStatus;
   createdBy: string;
   createdAt: string;

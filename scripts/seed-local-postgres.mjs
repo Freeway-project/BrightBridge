@@ -1,11 +1,15 @@
-// Seeds a LOCAL Postgres with dev profiles + sample courses so `npm run dev`
-// has something to log into. Idempotent.
+// Seeds LOCAL Postgres after a prod restore.
 //
-// All dev profiles get the password "Dev1234!" (hashed with scrypt, same as
-// the auth service). You can also bypass password auth via the dev panel on
-// /auth/login when ENABLE_DEV_LOGIN=1.
+// Does NOT create fake data. Instead it unlocks the best real prod accounts
+// with Dev1234! so you can explore real courses, real hierarchy, real workflow.
+//
+// Idempotent — safe to re-run after every restore.
+//
+// Usage:
+//   node scripts/seed-local-postgres.mjs
+//   DATABASE_URL=postgresql://... node scripts/seed-local-postgres.mjs
 
-import { createHash, randomBytes, scrypt } from "node:crypto";
+import { randomBytes, scrypt } from "node:crypto";
 import { promisify } from "node:util";
 import process from "node:process";
 import pg from "pg";
@@ -24,32 +28,56 @@ const databaseUrl =
   process.env.DATABASE_URL?.trim() ||
   "postgres://coursebridge_user:localdev@localhost:5433/coursebridge";
 
-// email -> internal profiles.role
-const DEV_PROFILES = [
-  { email: "ta@coursebridge.dev", name: "Dev Staff (TA)", role: "standard_user" },
-  { email: "admin@coursebridge.dev", name: "Dev Admin", role: "admin_full" },
-  { email: "communications@coursebridge.dev", name: "Dev Comms", role: "admin_viewer" },
-  { email: "instructor@coursebridge.dev", name: "Dev Instructor", role: "instructor" },
-  { email: "admin-instructor@coursebridge.dev", name: "Dev Admin+Instructor", role: "admin_full" },
-  { email: "superadmin@coursebridge.dev", name: "Dev Super Admin", role: "super_admin" },
-  { email: "provost@coursebridge.dev", name: "Dev Provost", role: "provost" },
-  { email: "dean@coursebridge.dev", name: "Dev Dean", role: "admin_viewer" },
-  { email: "associate-dean@coursebridge.dev", name: "Dev Associate Dean", role: "admin_viewer" },
-  { email: "depthead@coursebridge.dev", name: "Dev Dept Head", role: "admin_viewer" },
+// Real prod accounts to unlock — one per domain, chosen for richest data.
+// Password will be set to Dev1234! on the local copy only.
+const SHOWCASE_ACCOUNTS = [
+  // ── Admin ──────────────────────────────────────────────────────────────────
+  {
+    email: "ahartwell@okanagan.bc.ca",
+    note: "Admin (Amber Hartwell) — admin_full, full course pipeline access",
+  },
+  {
+    email: "mweiss@okanagan.bc.ca",
+    note: "Admin (Mike Weiss) — admin_full",
+  },
+  // ── TA / Staff ─────────────────────────────────────────────────────────────
+  {
+    email: "gtindogan@okanagan.bc.ca",
+    note: "TA (Gian) — 366 course assignments, heaviest reviewer load",
+  },
+  {
+    email: "amccallum@okanagan.bc.ca",
+    note: "TA (Alannah McCallum) — 354 assignments",
+  },
+  // ── Instructor ─────────────────────────────────────────────────────────────
+  {
+    email: "jheadland@okanagan.bc.ca",
+    note: "Instructor (Jill Headland) — 33 courses, all final_approved",
+  },
+  {
+    email: "kclarkson@okanagan.bc.ca",
+    note: "Instructor (Kristine Clarkson) — 30 courses",
+  },
+  // ── Dept Head ──────────────────────────────────────────────────────────────
+  {
+    email: "afontenla@okanagan.bc.ca",
+    note: "Dept Head (Adrian Fontenla) — Business Administration, 54 dept courses visible",
+  },
+  // ── Associate Dean ─────────────────────────────────────────────────────────
+  {
+    email: "dmarques@okanagan.bc.ca",
+    note: "Associate Dean (Danny Marques) — Trades & Apprenticeship, 75 courses",
+  },
+  {
+    email: "cnewitt@okanagan.bc.ca",
+    note: "Associate Dean (Chris Newitt) — Arts & Foundational Programs, 58 courses",
+  },
+  // ── VP ─────────────────────────────────────────────────────────────────────
+  {
+    email: "chartigan@okanagan.bc.ca",
+    note: "VP (Caitlin Hartigan) — Trades & Apprenticeship, broadest dept view (75 courses)",
+  },
 ];
-
-const SAMPLE_COURSES = [
-  { code: "DEV-001", title: "BIOL 112 — Intro Biology", status: "assigned_to_ta" },
-  { code: "DEV-002", title: "MATH 100 — Calculus I", status: "ta_review_in_progress" },
-  { code: "DEV-003", title: "ENGL 110 — Composition", status: "submitted_to_admin" },
-  { code: "DEV-004", title: "CHEM 121 — Intro Chemistry", status: "sent_to_instructor" },
-];
-
-// Stable UUID per email so re-seeding upserts instead of duplicating.
-function emailToUuid(email) {
-  const h = createHash("sha256").update(email).digest("hex");
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
-}
 
 const client = new pg.Client({ connectionString: databaseUrl });
 
@@ -58,70 +86,39 @@ try {
 
   const pwHash = await hashPassword(DEV_PASSWORD);
 
-  for (const p of DEV_PROFILES) {
-    await client.query(
-      `
-        INSERT INTO profiles (id, email, full_name, role, password_hash)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (id) DO UPDATE
-          SET email = EXCLUDED.email,
-              full_name = EXCLUDED.full_name,
-              role = EXCLUDED.role,
-              password_hash = EXCLUDED.password_hash
-      `,
-      [emailToUuid(p.email), p.email, p.name, p.role, pwHash],
+  let unlocked = 0;
+  let missing = [];
+
+  for (const acc of SHOWCASE_ACCOUNTS) {
+    const result = await client.query(
+      `UPDATE profiles SET password_hash = $1 WHERE email = $2`,
+      [pwHash, acc.email],
     );
-  }
-  console.log(`Seeded ${DEV_PROFILES.length} dev profiles (password: ${DEV_PASSWORD}).`);
-
-  const superId = emailToUuid("superadmin@coursebridge.dev");
-  const taId = emailToUuid("ta@coursebridge.dev");
-  const instructorId = emailToUuid("instructor@coursebridge.dev");
-
-  for (const c of SAMPLE_COURSES) {
-    const existing = await client.query(`SELECT id FROM courses WHERE source_course_id = $1 LIMIT 1`, [c.code]);
-    let courseId = existing.rows[0]?.id;
-
-    if (!courseId) {
-      const inserted = await client.query(
-        `
-          INSERT INTO courses (source_course_id, title, status, created_by)
-          VALUES ($1, $2, $3, $4)
-          RETURNING id
-        `,
-        [c.code, c.title, c.status, superId],
-      );
-      courseId = inserted.rows[0].id;
+    if (result.rowCount > 0) {
+      unlocked++;
+    } else {
+      missing.push(acc.email);
     }
+  }
 
-    await client.query(
-      `
-        INSERT INTO course_assignments (course_id, profile_id, role, assigned_by)
-        VALUES ($1, $2, 'staff', $3)
-        ON CONFLICT (course_id, profile_id, role) DO NOTHING
-      `,
-      [courseId, taId, superId],
-    );
-    await client.query(
-      `
-        INSERT INTO course_assignments (course_id, profile_id, role, assigned_by)
-        VALUES ($1, $2, 'instructor', $3)
-        ON CONFLICT (course_id, profile_id, role) DO NOTHING
-      `,
-      [courseId, instructorId, superId],
-    );
+  console.log(`\nUnlocked ${unlocked}/${SHOWCASE_ACCOUNTS.length} prod accounts with password: ${DEV_PASSWORD}`);
+  if (missing.length > 0) {
+    console.log(`  Not found in DB (skip): ${missing.join(", ")}`);
   }
-  console.log(`Seeded ${SAMPLE_COURSES.length} sample courses (assigned to ta@ + instructor@).`);
-  console.log("");
-  console.log("Dev credentials (all accounts use the same password):");
-  console.log(`  password: ${DEV_PASSWORD}`);
-  for (const p of DEV_PROFILES) {
-    console.log(`  ${p.email.padEnd(42)} ${p.role}`);
+
+  console.log("\nAccounts ready to log into:");
+  console.log(`${"Email".padEnd(40)} Note`);
+  console.log("-".repeat(90));
+  for (const acc of SHOWCASE_ACCOUNTS) {
+    if (!missing.includes(acc.email)) {
+      console.log(`${acc.email.padEnd(40)} ${acc.note}`);
+    }
   }
-  console.log("");
-  console.log("Start the app: npm run dev");
-  console.log("  → Email/password form: use any dev email above + Dev1234!");
-  console.log("  → Dev bypass panel:    set ENABLE_DEV_LOGIN=1 + NEXT_PUBLIC_ENABLE_DEV_LOGIN=1");
+
+  console.log("\nAll use password: Dev1234!");
+  console.log("\nStart the app: npm run dev");
+  console.log("  → Use the dev panel on /auth/login to one-click fill credentials");
+  console.log("  → Or type the email + Dev1234! directly into the form");
 } catch (error) {
   console.error("Seed failed:", error.message ?? error);
   process.exitCode = 1;

@@ -110,7 +110,7 @@ export function InstructorSimpleWizard({
     })
   }
 
-  // ----- Read-only / non-actionable: summary only -----
+  // ----- Read-only / non-actionable: full summary -----
   if (!isWizard) {
     return (
       <div className="mx-auto max-w-3xl space-y-6 p-2">
@@ -125,6 +125,18 @@ export function InstructorSimpleWizard({
             {statusMessage}
           </div>
         ) : null}
+
+        {/* Instructor's final notes — always shown when present */}
+        {finalSummary?.trim() && (
+          <section className="space-y-2 rounded-xl border border-border bg-muted/30 p-5">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="size-4 text-muted-foreground" aria-hidden />
+              <h3 className="text-sm font-semibold">Instructor&apos;s notes</h3>
+            </div>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">{finalSummary}</p>
+          </section>
+        )}
+
         <div data-tour="review-summary">{reviewNode}</div>
       </div>
     )

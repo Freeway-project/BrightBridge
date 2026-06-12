@@ -2,7 +2,7 @@ import "server-only"
 
 import type { CourseStatus } from "@coursebridge/workflow"
 import { requireProfile } from "@/lib/auth/context"
-import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
+import { getCourseRepository, getHierarchyRepository, getProfileRepository } from "@/lib/repositories"
 import { getPostgresPool } from "@/lib/postgres/pool"
 import type {
   AdminCourseRow,
@@ -36,6 +36,28 @@ export type OrgChild = {
   memberCount: number
 }
 export type OrgLeader = { id: string; name: string; title: string; rawTitle: string }
+export type OrgTreeNode = {
+  id: string
+  parentId: string | null
+  name: string
+  type: string
+  courseCount: number
+  memberCount: number
+}
+export type OrgUnitMemberDetail = {
+  id: string
+  profileId: string
+  orgUnitId: string
+  title: string
+  isPrimary: boolean
+  name: string
+  email: string
+}
+export type OrgUserOption = {
+  id: string
+  name: string
+  email: string
+}
 
 export type OrgExplorerView = {
   /** The unit currently being viewed, or null at the institution (top) level. */
@@ -51,6 +73,14 @@ export type OrgExplorerView = {
   courseTotal: number
   /** Distinct terms in the current subtree, for the course term filter. */
   terms: string[]
+  /** Flat tree data for the persistent hierarchy navigator. */
+  tree: OrgTreeNode[]
+  /** Members assigned directly to the selected unit. */
+  selectedMembers: OrgUnitMemberDetail[]
+  /** Whether the current role can manage units and memberships here. */
+  canManage: boolean
+  /** User options for the add-member action; omitted for read-only roles. */
+  userOptions: OrgUserOption[]
 }
 
 // Walk parent_id up to the root using the already-loaded unit map (no extra query).
@@ -67,9 +97,14 @@ function buildBreadcrumb(unitId: string, unitById: Map<string, OrgUnit>): OrgCru
 }
 
 export async function getOrgExplorerView(unitId: string | null): Promise<OrgExplorerView> {
-  await requireOrgViewer()
+  const context = await requireOrgViewer()
+  const canManage =
+    context.profile.role === "super_admin" ||
+    context.profile.role === "provost" ||
+    context.profile.role === "admin_full"
   const hierarchy = getHierarchyRepository()
   const courseRepo = getCourseRepository()
+  const profileRepo = getProfileRepository()
 
   const [allUnits, allMembers] = await Promise.all([
     hierarchy.listUnits(),
@@ -83,62 +118,92 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   const childUnits = allUnits
     .filter((u) => (u.parentId ?? null) === effectiveUnitId)
     .sort((a, b) => a.name.localeCompare(b.name))
-  const childIds = childUnits.map((u) => u.id)
+  const unitIds = allUnits.map((u) => u.id)
 
   const memberCountByUnit = new Map<string, number>()
   for (const m of allMembers) {
     memberCountByUnit.set(m.orgUnitId, (memberCountByUnit.get(m.orgUnitId) ?? 0) + 1)
   }
 
-  const [childCourseCounts, facets, globalCounts] = await Promise.all([
-    childIds.length
-      ? courseRepo.getChildUnitCourseCounts(childIds)
+  const [unitCourseCounts, facets, globalCounts, usersPage] = await Promise.all([
+    unitIds.length
+      ? courseRepo.getChildUnitCourseCounts(unitIds)
       : Promise.resolve({} as Record<string, number>),
     effectiveUnitId ? courseRepo.getUnitCourseFacets(effectiveUnitId) : Promise.resolve(null),
     effectiveUnitId ? Promise.resolve(null) : courseRepo.listStatusCounts(),
+    canManage ? profileRepo.listUsers(1, 5000) : Promise.resolve(null),
   ])
 
   const children: OrgChild[] = childUnits.map((u) => ({
     id: u.id,
     name: u.name,
     type: u.type,
-    courseCount: childCourseCounts[u.id] ?? 0,
+    courseCount: unitCourseCounts[u.id] ?? 0,
     memberCount: memberCountByUnit.get(u.id) ?? 0,
   }))
 
+  const selectedUnitMembers = effectiveUnitId
+    ? allMembers.filter((m) => m.orgUnitId === effectiveUnitId)
+    : []
+  const memberIds = [...new Set(selectedUnitMembers.map((m) => m.profileId))]
+  let selectedMembers: OrgUnitMemberDetail[] = []
   let leadership: OrgLeader[] = []
-  if (effectiveUnitId) {
-    const unitMembers = allMembers.filter((m) => m.orgUnitId === effectiveUnitId)
-    if (unitMembers.length) {
-      const memberIds = unitMembers.map((m) => m.profileId)
-      const pool = getPostgresPool()
-      const { rows: profiles } = await pool.query<{ id: string; full_name: string | null; email: string }>(
-        `SELECT id, full_name, email FROM profiles WHERE id = ANY($1::uuid[])`,
-        [memberIds],
+  if (memberIds.length) {
+    const pool = getPostgresPool()
+    const { rows: profiles } = await pool.query<{ id: string; full_name: string | null; email: string }>(
+      `SELECT id, full_name, email FROM profiles WHERE id = ANY($1::uuid[])`,
+      [memberIds],
+    )
+
+    const profileById = new Map(profiles.map((p) => [p.id, p]))
+    selectedMembers = selectedUnitMembers
+      .map((member) => {
+        const profile = profileById.get(member.profileId)
+        const email = profile?.email ?? ""
+        return {
+          id: member.id,
+          profileId: member.profileId,
+          orgUnitId: member.orgUnitId,
+          title: member.title,
+          isPrimary: member.isPrimary,
+          name: profile?.full_name?.trim() || email || "Unknown",
+          email,
+        }
+      })
+      .sort(
+        (a, b) =>
+          (ROLE_TITLE_RANK[a.title] ?? 99) - (ROLE_TITLE_RANK[b.title] ?? 99) ||
+          a.name.localeCompare(b.name),
       )
 
-      const nameById = new Map<string, string>()
-      for (const p of profiles) {
-        nameById.set(p.id, p.full_name?.trim() || p.email)
-      }
-      leadership = unitMembers
-        .map((m) => ({
-          id: m.id,
-          name: nameById.get(m.profileId) ?? "Unknown",
-          title: ROLE_TITLE_LABELS[m.title] ?? m.title,
-          rawTitle: m.title,
-        }))
-        .sort(
-          (a, b) =>
-            (ROLE_TITLE_RANK[a.rawTitle] ?? 99) - (ROLE_TITLE_RANK[b.rawTitle] ?? 99) ||
-            a.name.localeCompare(b.name),
-        )
-    }
+    leadership = selectedMembers.map((member) => ({
+      id: member.id,
+      name: member.name,
+      title: ROLE_TITLE_LABELS[member.title] ?? member.title,
+      rawTitle: member.title,
+    }))
   }
 
   const statusCounts = facets ? facets.statusCounts : globalCounts ?? []
   const courseTotal = facets ? facets.total : statusCounts.reduce((sum, c) => sum + c.count, 0)
   const terms = facets ? facets.terms : []
+  const tree = allUnits
+    .map((unit) => ({
+      id: unit.id,
+      parentId: unit.parentId,
+      name: unit.name,
+      type: unit.type,
+      courseCount: unitCourseCounts[unit.id] ?? 0,
+      memberCount: memberCountByUnit.get(unit.id) ?? 0,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+  const userOptions = (usersPage?.data ?? [])
+    .map((user) => ({
+      id: user.id,
+      name: user.fullName?.trim() || user.email,
+      email: user.email,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   return {
     current: current ? { id: current.id, name: current.name, type: current.type } : null,
@@ -148,6 +213,10 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
     statusCounts,
     courseTotal,
     terms,
+    tree,
+    selectedMembers,
+    canManage,
+    userOptions,
   }
 }
 

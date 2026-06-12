@@ -125,7 +125,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
         status: r.status,
         updatedAt: r.updatedAt,
       }))
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .sort((a, b) => toSortableTimestamp(b.updatedAt) - toSortableTimestamp(a.updatedAt))
       .slice(0, 18),
   }))
 
@@ -168,6 +168,15 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
       </TweakableContent>
     </>
   )
+}
+
+function toSortableTimestamp(value: string | Date): number {
+  if (value instanceof Date) {
+    return value.getTime()
+  }
+
+  const parsed = Date.parse(value)
+  return Number.isNaN(parsed) ? 0 : parsed
 }
 
 function getSingleParam(value: string | string[] | undefined): string | undefined {

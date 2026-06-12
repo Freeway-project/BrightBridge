@@ -28,10 +28,22 @@ export function bucketForStatus(status: CourseStatus): InstructorBucket {
 }
 
 export function actionLabelForStatus(status: CourseStatus): string {
-  if (isInstructorActionableStatus(status)) return "Ready for your review"
-  if (status === "instructor_questions") return "You asked a question — waiting on the team"
-  if (status === "instructor_approved" || status === "final_approved") return "Approved"
-  return "In progress with the team"
+  switch (status) {
+    case "sent_to_instructor":
+    case "instructor_viewing":   return "Ready for your review"
+    case "instructor_questions": return "Awaiting team response"
+    case "instructor_approved":  return "Approved — awaiting final sign-off"
+    case "final_approved":       return "Approved"
+    case "course_created":       return "Awaiting TA assignment"
+    case "assigned_to_ta":       return "TA assigned — not yet started"
+    case "ta_review_in_progress":return "TA review in progress"
+    case "submitted_to_admin":   return "Submitted — awaiting admin review"
+    case "admin_changes_requested": return "Admin requested changes"
+    case "waiting_on_admin":     return "Waiting on admin"
+    case "staging_in_progress":  return "Staging in progress"
+    case "ready_for_instructor": return "Ready to send to instructor"
+    default:                     return "In progress"
+  }
 }
 
 export type ClassifiedCourses<T> = {
@@ -58,7 +70,11 @@ export function classifyInstructorCourses<T extends InstructorCourseLike>(
   }
 
   // Surface the longest-waiting review first so nothing rots at the bottom.
-  result.needsReview.sort((a, b) => (a.course.updatedAt ?? "").localeCompare(b.course.updatedAt ?? ""))
+  result.needsReview.sort((a, b) => {
+    const aTime = a.course.updatedAt ? new Date(a.course.updatedAt).getTime() : 0
+    const bTime = b.course.updatedAt ? new Date(b.course.updatedAt).getTime() : 0
+    return aTime - bTime
+  })
 
   return result
 }

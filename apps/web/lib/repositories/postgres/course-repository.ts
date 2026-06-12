@@ -36,6 +36,7 @@ type CourseRow = {
   term: string | null;
   department: string | null;
   org_unit_id: string | null;
+  org_unit_name?: string | null;
   status: string;
   created_by: string;
   created_at: string;
@@ -108,6 +109,7 @@ function toCourseSummary(row: CourseRow): CourseSummary {
     term: row.term,
     department: row.department,
     orgUnitId: row.org_unit_id,
+    orgUnitName: row.org_unit_name ?? null,
     status: toCourseStatus(row.status),
     createdBy: row.created_by,
     createdAt: row.created_at,
@@ -1147,9 +1149,11 @@ export function createPostgresCourseRepository(): CourseRepository {
       const pool = getPostgresPool();
       const { rows } = await pool.query<CourseRow>(
         `
-          SELECT DISTINCT c.id, c.source_course_id, c.target_course_id, c.title, c.term, c.department, c.org_unit_id, c.status, c.created_by, c.created_at, c.updated_at
+          SELECT DISTINCT c.id, c.source_course_id, c.target_course_id, c.title, c.term, c.department,
+                 c.org_unit_id, ou.name AS org_unit_name, c.status, c.created_by, c.created_at, c.updated_at
           FROM courses c
           INNER JOIN org_unit_hierarchy_paths hp ON hp.descendant_id = c.org_unit_id
+          LEFT JOIN organizational_units ou ON ou.id = c.org_unit_id
           WHERE hp.ancestor_id = ANY($1::uuid[])
           ORDER BY c.updated_at DESC
         `,
@@ -1330,7 +1334,7 @@ export function createPostgresCourseRepository(): CourseRepository {
             AND c.status = ANY($2::text[])
           ORDER BY c.updated_at DESC
         `,
-        [profileId, ["sent_to_instructor", "instructor_questions", "instructor_approved", "final_approved"]],
+        [profileId, ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved", "final_approved"]],
       );
 
       return rows.map((row) => ({

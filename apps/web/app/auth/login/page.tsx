@@ -21,11 +21,20 @@ const DEV_ROLES = [
 const DEV_PASSWORD = "Dev1234!"
 
 const DEV_ACCOUNTS = [
-  { email: "superadmin@coursebridge.dev", role: "super_admin" },
-  { email: "admin@coursebridge.dev",      role: "admin_full" },
-  { email: "ta@coursebridge.dev",         role: "standard_user" },
-  { email: "instructor@coursebridge.dev", role: "instructor" },
-  { email: "provost@coursebridge.dev",    role: "provost" },
+  // Admin
+  { email: "ahartwell@okanagan.bc.ca",  role: "admin" },
+  { email: "mweiss@okanagan.bc.ca",     role: "admin" },
+  // TA / Staff
+  { email: "gtindogan@okanagan.bc.ca",  role: "TA · 366 courses" },
+  { email: "amccallum@okanagan.bc.ca",  role: "TA · 354 courses" },
+  // Instructor
+  { email: "jheadland@okanagan.bc.ca",  role: "instructor · 33 courses" },
+  { email: "kclarkson@okanagan.bc.ca",  role: "instructor · 30 courses" },
+  // Dept Head → VP
+  { email: "afontenla@okanagan.bc.ca",  role: "dept head · Business Admin" },
+  { email: "dmarques@okanagan.bc.ca",   role: "assoc. dean · Trades (75)" },
+  { email: "cnewitt@okanagan.bc.ca",    role: "assoc. dean · Arts (58)" },
+  { email: "chartigan@okanagan.bc.ca",  role: "VP · Trades (75)" },
 ] as const
 
 const FEATURES = [

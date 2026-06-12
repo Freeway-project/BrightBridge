@@ -116,7 +116,8 @@ export async function createUnitAction(
 
   const name = String(formData.get("name") ?? "").trim()
   const type = String(formData.get("type") ?? "").trim()
-  const parentId = String(formData.get("parentId") ?? "") || null
+  const rawParentId = String(formData.get("parentId") ?? "")
+  const parentId = rawParentId && rawParentId !== "__none__" ? rawParentId : null
 
   if (!name || !type) {
     return { kind: "error", message: "Name and type are required." }
@@ -132,7 +133,10 @@ export async function createUnitAction(
   }
 
   revalidatePath("/super-admin")
+  revalidatePath("/admin")
+  revalidatePath("/hierarchy")
   revalidatePath("/provost")
+  revalidatePath("/provost/org")
   return { kind: "success", message: `Created unit ${name}.` }
 }
 
@@ -160,7 +164,10 @@ export async function addUnitMemberAction(
   }
 
   revalidatePath("/super-admin")
+  revalidatePath("/admin")
+  revalidatePath("/hierarchy")
   revalidatePath("/provost")
+  revalidatePath("/provost/org")
   return { kind: "success", message: "Added member to unit." }
 }
 
@@ -168,7 +175,10 @@ export async function removeUnitMemberAction(memberId: string): Promise<void> {
   await requireOrgManager()
   await getHierarchyRepository().removeMember(memberId)
   revalidatePath("/super-admin")
+  revalidatePath("/admin")
+  revalidatePath("/hierarchy")
   revalidatePath("/provost")
+  revalidatePath("/provost/org")
 }
 
 // Fetches one page of audit events for the Audit Trail's infinite scroll.
