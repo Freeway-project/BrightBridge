@@ -40,7 +40,7 @@ git clone <repo> && cd vps-stack
 
 # 2. Configure
 cp .env.template .env
-$EDITOR .env                                 # fill POSTGRES_PASSWORD, SESSION_SECRET, AZURE_OIDC_*, METRICS_BEARER_TOKEN, GRAFANA_ADMIN_PASSWORD
+$EDITOR .env                                 # fill POSTGRES_PASSWORD, SESSION_SECRET, EMAIL_*, METRICS_BEARER_TOKEN, GRAFANA_ADMIN_PASSWORD
 
 # 3. Wire the metrics bearer token so Prometheus can scrape the app
 echo -n "$METRICS_BEARER_TOKEN_VALUE" > prometheus/metrics_token
