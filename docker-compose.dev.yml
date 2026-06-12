@@ -1,0 +1,60 @@
+# docker-compose.dev.yml — overlay for local development with HMR.
+#
+# Adds the Next.js app on top of the base Postgres stack.
+# Source code is bind-mounted so every file save triggers hot reload.
+# node_modules lives in a named Docker volume (not the host dir) to avoid
+# OS binary conflicts between a macOS/Windows host and the Alpine container.
+#
+# First run:
+#   cp apps/web/.env.example apps/web/.env.local
+#   # fill DATABASE_URL, SESSION_SECRET, ENABLE_DEV_LOGIN=1, NEXT_PUBLIC_ENABLE_DEV_LOGIN=1
+#
+# Start everything:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Postgres only (no app — for running `npm run dev` natively):
+#   docker compose up -d
+#
+# Rebuild node_modules from scratch (e.g. after adding a package):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm web-setup
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  web:
+    image: node:22-alpine
+    container_name: coursebridge-web-dev
+    working_dir: /app
+    # Install deps if node_modules is empty/stale, then start Next.js dev server.
+    # node_modules is a named volume so it persists across restarts and npm
+    # install only re-runs when the lock file changes.
+    command: >
+      sh -c "
+        if [ ! -f node_modules/.modules-installed ]; then
+          npm install --prefer-offline &&
+          touch node_modules/.modules-installed;
+        fi &&
+        npm run dev --workspace=@coursebridge/web -- -p 3000 -H 0.0.0.0
+      "
+    volumes:
+      - .:/app
+      # Named volume masks host node_modules — avoids Linux/macOS binary conflicts.
+      - dev_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Load local env — these files are gitignored and never committed.
+    env_file:
+      - path: apps/web/.env.local
+        required: false
+      - path: apps/web/.env
+        required: false
+    environment:
+      NODE_ENV: development
+      # Override DATABASE_URL to use the in-compose Postgres service name
+      # (container-to-container; port is 5432, not the host-exposed 5433).
+      DATABASE_URL: postgresql://coursebridge_user:localdev@postgres:5432/coursebridge
+
+volumes:
+  dev_node_modules:
