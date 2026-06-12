@@ -9,6 +9,7 @@ import { getProfileRepository, getHierarchyRepository } from "@/lib/repositories
 import { getPaginatedAuditEvents } from "@/lib/super-admin/queries"
 import type { PaginatedResult, AuditEvent } from "@/lib/repositories/contracts"
 import { syncRoleChannel } from "@/lib/chat/membership"
+import { hashPassword } from "@/lib/auth/service"
 
 export type ManageUserState = {
   kind: "idle" | "success" | "error"
@@ -24,6 +25,7 @@ export async function createUserAction(
   const email = String(formData.get("email") ?? "").trim().toLowerCase()
   const fullName = String(formData.get("fullName") ?? "").trim()
   const role = String(formData.get("role") ?? "") as Role
+  const password = String(formData.get("password") ?? "").trim()
 
   if (!email || !fullName) {
     return { kind: "error", message: "Name and email are required." }
@@ -33,21 +35,19 @@ export async function createUserAction(
     return { kind: "error", message: "Select a valid role." }
   }
 
+  if (!password || password.length < 8) {
+    return { kind: "error", message: "Password must be at least 8 characters." }
+  }
+
   try {
-    // We don't mint credentials — users authenticate via Azure OIDC. This action
-    // just provisions the profile row so PBAC can match them on first sign-in
-    // (auth/context resolves the OIDC sub → profile by email when the id doesn't
-    // match yet).
     const profiles = getProfileRepository()
     const existing = await profiles.getProfileByEmail(email)
     const userId = existing?.id ?? randomUUID()
 
-    await profiles.upsertProfile({
-      id: userId,
-      email,
-      fullName,
-      role,
-    })
+    await profiles.upsertProfile({ id: userId, email, fullName, role })
+
+    const hash = await hashPassword(password)
+    await profiles.setPasswordHash(userId, hash)
   } catch (error) {
     return {
       kind: "error",
@@ -57,7 +57,7 @@ export async function createUserAction(
 
   revalidatePath("/super-admin")
 
-  return { kind: "success", message: `Provisioned ${email} as ${role}. They sign in via Microsoft.` }
+  return { kind: "success", message: `Created ${email} as ${role}.` }
 }
 
 export async function updateUserRoleAction(

@@ -433,12 +433,8 @@ export interface ProfileRepository {
     role: Role;
   }): Promise<void>;
   updateProfileRole(profileId: string, role: Role): Promise<void>;
-  /**
-   * Rewrite a profile's primary key. Used on first OIDC sign-in to re-key a
-   * legacy Supabase-auth UUID to the Entra `oid`. Relies on ON UPDATE CASCADE
-   * on every FK referencing profiles(id).
-   */
-  relinkProfileId(oldId: string, newId: string): Promise<void>;
+  setPasswordHash(profileId: string, hash: string): Promise<void>;
+  getPasswordHashByEmail(email: string): Promise<{ id: string; hash: string } | null>;
 }
 
 export interface ReviewRepository {

@@ -12,8 +12,7 @@ type MetricsBag = {
   registry: Registry;
   httpRequestsTotal: Counter<string>;
   httpRequestDurationSeconds: Histogram<string>;
-  oidcLoginStartedTotal: Counter<string>;
-  oidcCallbackTotal: Counter<string>;
+  loginTotal: Counter<string>;
   devLoginTotal: Counter<string>;
   pgPoolConnections: Gauge<string>;
   pgQueryDurationSeconds: Histogram<string>;
@@ -46,15 +45,9 @@ function buildMetrics(): MetricsBag {
     registers: [registry],
   });
 
-  const oidcLoginStartedTotal = new Counter({
-    name: "oidc_login_started_total",
-    help: "OIDC login flows initiated (redirect to IdP).",
-    registers: [registry],
-  });
-
-  const oidcCallbackTotal = new Counter({
-    name: "oidc_callback_total",
-    help: "OIDC callbacks processed, labelled by outcome.",
+  const loginTotal = new Counter({
+    name: "login_total",
+    help: "Email/password login attempts, labelled by outcome.",
     labelNames: ["result"],
     registers: [registry],
   });
@@ -98,8 +91,7 @@ function buildMetrics(): MetricsBag {
     registry,
     httpRequestsTotal,
     httpRequestDurationSeconds,
-    oidcLoginStartedTotal,
-    oidcCallbackTotal,
+    loginTotal,
     devLoginTotal,
     pgPoolConnections,
     pgQueryDurationSeconds,
@@ -115,8 +107,7 @@ globalForMetrics.__coursebridgeMetrics = metrics;
 export const metricsRegistry = metrics.registry;
 export const httpRequestsTotal = metrics.httpRequestsTotal;
 export const httpRequestDurationSeconds = metrics.httpRequestDurationSeconds;
-export const oidcLoginStartedTotal = metrics.oidcLoginStartedTotal;
-export const oidcCallbackTotal = metrics.oidcCallbackTotal;
+export const loginTotal = metrics.loginTotal;
 export const devLoginTotal = metrics.devLoginTotal;
 export const pgPoolConnections = metrics.pgPoolConnections;
 export const pgQueryDurationSeconds = metrics.pgQueryDurationSeconds;

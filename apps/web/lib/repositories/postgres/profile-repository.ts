@@ -170,18 +170,34 @@ export function createPostgresProfileRepository(): ProfileRepository {
       );
     },
 
-    async relinkProfileId(oldId, newId) {
-      if (oldId === newId) return;
+    async setPasswordHash(profileId, hash) {
       const pool = getPostgresPool();
       await pool.query(
         `
           UPDATE profiles
-          SET id = $2,
+          SET password_hash = $2,
               updated_at = NOW()
           WHERE id = $1
         `,
-        [oldId, newId],
+        [profileId, hash],
       );
+    },
+
+    async getPasswordHashByEmail(email) {
+      const pool = getPostgresPool();
+      const normalizedEmail = email.trim().toLowerCase();
+      const { rows } = await pool.query<{ id: string; password_hash: string | null }>(
+        `
+          SELECT id, password_hash
+          FROM profiles
+          WHERE LOWER(email) = $1
+          LIMIT 1
+        `,
+        [normalizedEmail],
+      );
+      const row = rows[0];
+      if (!row || !row.password_hash) return null;
+      return { id: row.id, hash: row.password_hash };
     },
   };
 }

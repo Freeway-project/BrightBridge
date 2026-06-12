@@ -6,20 +6,13 @@ import {
 import { ensureInstructorIdentity } from "@/lib/invites/instructor-identity";
 
 /**
- * Instructor entry from an admin-emailed link. We no longer mint sessions
- * here — instructors authenticate via Azure OIDC (typically as Entra B2B
- * guests). This route only:
+ * Instructor entry from an admin-emailed link. This route:
  *
  *   1. Validates the one-time invite token and marks it consumed.
- *   2. Ensures the instructor profile row exists so PBAC has something to
- *      match the OIDC subject against on first sign-in.
+ *   2. Ensures the instructor profile row exists so PBAC can match them.
  *   3. Records the dashboard-open signal (drives the indicator dot).
  *   4. Auto-advances the course to "instructor_viewing" if applicable.
- *   5. Redirects to /auth/oidc/login with `next=` set to the course page,
- *      so Entra hand-back lands the instructor on the right URL.
- *
- * If the clicker already has an OIDC session, the OIDC route short-circuits
- * to `next` immediately.
+ *   5. Redirects to /auth/login with `next=` set to the course page.
  */
 export async function GET(
   request: NextRequest,
@@ -41,8 +34,8 @@ export async function GET(
   }
 
   const nextPath = `/instructor/courses/${invite.courseId}`;
-  const oidcUrl = new URL("/auth/oidc/login", request.url);
-  oidcUrl.searchParams.set("next", nextPath);
+  const loginUrl = new URL("/auth/login", request.url);
+  loginUrl.searchParams.set("next", nextPath);
 
   try {
     const instructorProfileId = await ensureInstructorIdentity(invite.email);
@@ -59,10 +52,8 @@ export async function GET(
       console.error("[auth/invite] Failed to mark instructor viewing:", statusError);
     }
   } catch (error) {
-    // Bookkeeping failure is non-fatal — the instructor still needs to sign
-    // in via OIDC. Log and continue to the redirect so they can complete auth.
-    console.error("[auth/invite] Bookkeeping failed; continuing to OIDC redirect:", error);
+    console.error("[auth/invite] Bookkeeping failed; continuing to login redirect:", error);
   }
 
-  return NextResponse.redirect(oidcUrl);
+  return NextResponse.redirect(loginUrl);
 }
