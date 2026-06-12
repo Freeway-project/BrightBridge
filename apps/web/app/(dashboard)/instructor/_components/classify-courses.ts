@@ -23,7 +23,7 @@ export type ClassifiedCourse<T> = {
 
 export function bucketForStatus(status: CourseStatus): InstructorBucket {
   if (isInstructorActionableStatus(status)) return "needs_review"
-  if (status === "instructor_approved" || status === "final_approved") return "approved"
+  if (status === "instructor_approved") return "approved"
   return "waiting"
 }
 

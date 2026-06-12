@@ -35,7 +35,7 @@ export function TodayCard({ courses, totalWaiting }: Props) {
         {courses.map((c) => (
           <li key={c.id}>
             <Link
-              href={`/courses/${c.id}/metadata`}
+              href={`/courses/${c.id}`}
               className="group flex items-baseline justify-between gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-accent-indigo-soft"
             >
               <span className="flex min-w-0 items-baseline gap-2">

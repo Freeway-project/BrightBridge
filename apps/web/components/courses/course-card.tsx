@@ -39,7 +39,7 @@ export function CourseCard({ course, issueCounts, index = 0 }: CourseCardProps) 
       transition={{ duration: 0.35, delay: index * 0.04, ease: [0.23, 1, 0.32, 1] }}
     >
       <Link
-        href={`/courses/${course.id}/metadata`}
+        href={`/courses/${course.id}`}
         className="block focus:outline-none"
         aria-label={`${course.sourceCourseId ?? "NO-CODE"} ${course.title} — ${action}`}
       >

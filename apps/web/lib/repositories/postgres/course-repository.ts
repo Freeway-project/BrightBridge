@@ -1334,7 +1334,7 @@ export function createPostgresCourseRepository(): CourseRepository {
             AND c.status = ANY($2::text[])
           ORDER BY c.updated_at DESC
         `,
-        [profileId, ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved", "final_approved"]],
+        [profileId, ["sent_to_instructor", "instructor_viewing", "instructor_questions", "instructor_approved"]],
       );
 
       return rows.map((row) => ({
