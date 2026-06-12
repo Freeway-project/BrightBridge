@@ -1,13 +1,24 @@
-// Seeds a LOCAL Postgres (DB_PROVIDER=postgres path) with the dev accounts from
-// apps/web/app/auth/login/dev-accounts.ts plus a few sample courses, so `npm run
-// dev` with AUTH_PROVIDER=dev has something to log into. Idempotent.
+// Seeds a LOCAL Postgres with dev profiles + sample courses so `npm run dev`
+// has something to log into. Idempotent.
 //
-// Writes profile/course rows directly via pg — no auth schema needed
-// (the postgres_compat migration drops the auth.users FK).
+// All dev profiles get the password "Dev1234!" (hashed with scrypt, same as
+// the auth service). You can also bypass password auth via the dev panel on
+// /auth/login when ENABLE_DEV_LOGIN=1.
 
-import { createHash } from "node:crypto";
+import { createHash, randomBytes, scrypt } from "node:crypto";
+import { promisify } from "node:util";
 import process from "node:process";
 import pg from "pg";
+
+const scryptAsync = promisify(scrypt);
+
+const DEV_PASSWORD = "Dev1234!";
+
+async function hashPassword(password) {
+  const salt = randomBytes(16).toString("hex");
+  const hash = await scryptAsync(password, salt, 64);
+  return `${salt}:${hash.toString("hex")}`;
+}
 
 const databaseUrl =
   process.env.DATABASE_URL?.trim() ||
@@ -45,17 +56,23 @@ const client = new pg.Client({ connectionString: databaseUrl });
 try {
   await client.connect();
 
+  const pwHash = await hashPassword(DEV_PASSWORD);
+
   for (const p of DEV_PROFILES) {
     await client.query(
       `
-        INSERT INTO profiles (id, email, full_name, role)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, full_name = EXCLUDED.full_name, role = EXCLUDED.role
+        INSERT INTO profiles (id, email, full_name, role, password_hash)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (id) DO UPDATE
+          SET email = EXCLUDED.email,
+              full_name = EXCLUDED.full_name,
+              role = EXCLUDED.role,
+              password_hash = EXCLUDED.password_hash
       `,
-      [emailToUuid(p.email), p.email, p.name, p.role],
+      [emailToUuid(p.email), p.email, p.name, p.role, pwHash],
     );
   }
-  console.log(`Seeded ${DEV_PROFILES.length} dev profiles.`);
+  console.log(`Seeded ${DEV_PROFILES.length} dev profiles (password: ${DEV_PASSWORD}).`);
 
   const superId = emailToUuid("superadmin@coursebridge.dev");
   const taId = emailToUuid("ta@coursebridge.dev");
@@ -95,7 +112,16 @@ try {
     );
   }
   console.log(`Seeded ${SAMPLE_COURSES.length} sample courses (assigned to ta@ + instructor@).`);
-  console.log("Done. Log in via the dev quick-login buttons on /auth/login.");
+  console.log("");
+  console.log("Dev credentials (all accounts use the same password):");
+  console.log(`  password: ${DEV_PASSWORD}`);
+  for (const p of DEV_PROFILES) {
+    console.log(`  ${p.email.padEnd(42)} ${p.role}`);
+  }
+  console.log("");
+  console.log("Start the app: npm run dev");
+  console.log("  → Email/password form: use any dev email above + Dev1234!");
+  console.log("  → Dev bypass panel:    set ENABLE_DEV_LOGIN=1 + NEXT_PUBLIC_ENABLE_DEV_LOGIN=1");
 } catch (error) {
   console.error("Seed failed:", error.message ?? error);
   process.exitCode = 1;
