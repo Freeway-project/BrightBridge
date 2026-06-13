@@ -1,0 +1,139 @@
+<h2>Q1 — How should the instructor Simple view show the TA review?</h2>
+<p class="subtitle">Instructors are non-tech. They receive a course, need to see everything at a glance, and either approve or ask a question. Which layout feels right?</p>
+
+<div class="cards" style="grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px;">
+
+  <!-- Option A: Traffic light summary cards -->
+  <div class="card" data-choice="A" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#0f172a;border-radius:8px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:10px;">YOUR COURSE REVIEW</div>
+
+      <div style="background:#1e293b;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #10b981;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;font-weight:600;color:#e2e8f0;">📋 Course Details</span>
+          <span style="font-size:10px;font-weight:700;color:#10b981;">✓ READY</span>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">Term · Sections · Notes from reviewer</div>
+      </div>
+
+      <div style="background:#1e293b;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #f59e0b;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;font-weight:600;color:#e2e8f0;">✅ Review Checklist</span>
+          <span style="font-size:10px;font-weight:700;color:#f59e0b;">2 FLAGS</span>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">12 items · 2 need attention</div>
+        <div style="font-size:10px;color:#f59e0b;margin-top:6px;background:#2d1f00;padding:4px 6px;border-radius:4px;">⚠ Broken module link in Unit 3</div>
+      </div>
+
+      <div style="background:#1e293b;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #10b981;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;font-weight:600;color:#e2e8f0;">📄 Syllabus & Gradebook</span>
+          <span style="font-size:10px;font-weight:700;color:#10b981;">✓ READY</span>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">6 items checked</div>
+      </div>
+
+      <div style="background:#1e293b;border-radius:8px;padding:10px;border-left:3px solid #ef4444;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;font-weight:600;color:#e2e8f0;">💬 Messages</span>
+          <span style="font-size:10px;font-weight:700;color:#ef4444;">1 UNREAD</span>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;">Alannah: "Please check gradebook weights"</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Summary cards</h3>
+      <p>Each section is a status card (green/amber/red). Flags and messages are surfaced inline. Tap any card to expand the full detail. No navigation needed — everything is one scroll.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Expanded accordion all open -->
+  <div class="card" data-choice="B" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#0f172a;border-radius:8px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:10px;">YOUR COURSE REVIEW</div>
+
+      <div style="background:#1e293b;border-radius:8px;margin-bottom:6px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#172554;border-left:3px solid #6366f1;">
+          <span style="font-size:11px;font-weight:700;color:#a5b4fc;">1 · Course Details</span>
+          <span style="font-size:10px;color:#10b981;font-weight:600;">✓ All good</span>
+        </div>
+        <div style="padding:8px 10px;font-size:11px;color:#64748b;">Term: 2026 Spring · Sections: 01, 02<br/>Reviewer note: "All content migrated cleanly."</div>
+      </div>
+
+      <div style="background:#1e293b;border-radius:8px;margin-bottom:6px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#1c1108;border-left:3px solid #f59e0b;">
+          <span style="font-size:11px;font-weight:700;color:#fbbf24;">2 · Review Checklist</span>
+          <span style="font-size:10px;color:#f59e0b;font-weight:600;">⚠ 2 flags</span>
+        </div>
+        <div style="padding:8px 10px;">
+          <div style="font-size:10px;color:#10b981;margin-bottom:3px;">✓ Content migrated · ✓ Links verified · ✓ Media present</div>
+          <div style="font-size:10px;color:#f59e0b;background:#2d1800;padding:4px;border-radius:4px;margin-bottom:3px;">⚠ Module 3 link broken</div>
+          <div style="font-size:10px;color:#f59e0b;background:#2d1800;padding:4px;border-radius:4px;">⚠ Video needs re-upload</div>
+        </div>
+      </div>
+
+      <div style="background:#1e293b;border-radius:8px;margin-bottom:6px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#172554;border-left:3px solid #6366f1;">
+          <span style="font-size:11px;font-weight:700;color:#a5b4fc;">3 · Syllabus & Gradebook</span>
+          <span style="font-size:10px;color:#10b981;font-weight:600;">✓ All good</span>
+        </div>
+        <div style="padding:8px 10px;font-size:11px;color:#64748b;">Syllabus: 4/4 · Gradebook: 3/3</div>
+      </div>
+
+      <div style="background:#1e293b;border-radius:8px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#1a0a2e;border-left:3px solid #a855f7;">
+          <span style="font-size:11px;font-weight:700;color:#c084fc;">💬 Conversation</span>
+          <span style="font-size:10px;color:#ef4444;font-weight:600;">1 unread</span>
+        </div>
+        <div style="padding:8px 10px;font-size:11px;color:#64748b;">Alannah: "Please check gradebook…"</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Full accordion expanded</h3>
+      <p>All sections expanded and visible by default. Every checklist item shown inline. Instructor scrolls top to bottom and sees everything. Conversation thread pinned at the bottom. Most information-dense.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Wizard stays but synced -->
+  <div class="card" data-choice="C" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#0f172a;border-radius:8px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:10px;">YOUR COURSE REVIEW</div>
+
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <div style="flex:1;height:4px;border-radius:2px;background:#6366f1;"></div>
+        <div style="flex:1;height:4px;border-radius:2px;background:#6366f1;opacity:0.4;"></div>
+        <div style="flex:1;height:4px;border-radius:2px;background:#6366f1;opacity:0.4;"></div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px;">Step 1 of 3 — Here's what we checked</div>
+      <div style="font-size:11px;color:#64748b;margin-bottom:10px;">Everything the reviewer found on your course.</div>
+
+      <!-- Floating urgent flag -->
+      <div style="background:#1a0800;border:1px solid #f59e0b;border-radius:8px;padding:8px;margin-bottom:8px;">
+        <div style="font-size:10px;font-weight:700;color:#f59e0b;margin-bottom:4px;">⚠ Reviewer flagged 2 items</div>
+        <div style="font-size:11px;color:#9ca3af;">Module 3 link broken · Video needs re-upload</div>
+      </div>
+
+      <!-- Inline message alert -->
+      <div style="background:#1a0a2e;border:1px solid #a855f7;border-radius:8px;padding:8px;margin-bottom:8px;">
+        <div style="font-size:10px;font-weight:700;color:#c084fc;margin-bottom:4px;">💬 Message from Alannah</div>
+        <div style="font-size:11px;color:#9ca3af;">"Please check the gradebook weights — the old syllabus said 30%."</div>
+      </div>
+
+      <div style="background:#1e293b;border-radius:8px;padding:10px;margin-bottom:10px;">
+        <div style="font-size:11px;color:#64748b;">+ Course details · Review checklist · Syllabus · Gradebook (all shown below)</div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;">
+        <div style="background:#6366f1;color:white;font-size:11px;font-weight:700;padding:6px 14px;border-radius:8px;">Next →</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Wizard + urgent alerts pinned top</h3>
+      <p>Keep the 3-step wizard but pin flags and unread messages at the top of Step 1 so they're impossible to miss. Full review data scrolls below. Chat and questions are always visible regardless of which step you're on.</p>
+    </div>
+  </div>
+
+</div>
+
+<p style="margin-top:16px;font-size:12px;color:#6b7280;">Click to select. Or tell me in the terminal if you want a mix — e.g. "A style cards but with the full item list like B".</p>

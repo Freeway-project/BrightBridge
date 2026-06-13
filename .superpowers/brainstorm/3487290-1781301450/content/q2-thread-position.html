@@ -1,0 +1,116 @@
+<h2>Q2 — Where does the conversation thread live in the instructor view?</h2>
+<p class="subtitle">The unified thread (messages + questions + flags) needs a home in the B layout.</p>
+
+<div class="split" style="gap:16px;align-items:flex-start;">
+
+  <!-- Option A: Thread at top, review below -->
+  <div class="card" data-choice="A" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:#0f172a;border-radius:8px;font-size:10px;">
+      <div style="font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">INSTRUCTOR VIEW — SCROLL</div>
+
+      <!-- Thread at top -->
+      <div style="border:1px solid #a855f7;border-radius:6px;padding:8px;margin-bottom:6px;background:#1a0a2e;">
+        <div style="font-weight:700;color:#c084fc;margin-bottom:4px;">💬 Conversation <span style="background:#ef4444;color:white;padding:1px 5px;border-radius:99px;font-size:9px;margin-left:4px;">1 new</span></div>
+        <div style="color:#64748b;">Alannah: "Please check gradebook…"</div>
+        <div style="color:#64748b;margin-top:2px;">You: "Which weight is off?"</div>
+        <div style="background:#6366f1;color:white;border-radius:4px;padding:3px 8px;text-align:center;margin-top:6px;font-weight:600;">Reply</div>
+      </div>
+
+      <!-- Review sections below -->
+      <div style="border-left:3px solid #10b981;background:#1e293b;border-radius:4px;padding:6px;margin-bottom:4px;">
+        <span style="color:#10b981;font-weight:700;">✓</span> <span style="color:#e2e8f0;">Course Details</span>
+        <div style="color:#64748b;font-size:9px;">Term · Sections · Notes</div>
+      </div>
+      <div style="border-left:3px solid #f59e0b;background:#1e293b;border-radius:4px;padding:6px;margin-bottom:4px;">
+        <span style="color:#f59e0b;font-weight:700;">⚠</span> <span style="color:#e2e8f0;">Review Checklist</span>
+        <div style="color:#f59e0b;font-size:9px;">2 flags</div>
+      </div>
+      <div style="border-left:3px solid #10b981;background:#1e293b;border-radius:4px;padding:6px;">
+        <span style="color:#10b981;font-weight:700;">✓</span> <span style="color:#e2e8f0;">Syllabus & Gradebook</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Thread at top</h3>
+      <p>Conversation is the first thing they see. If there's an unread message they can't miss it. Review data scrolls below. Works well when communication is the priority action.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Flags inline, thread at bottom -->
+  <div class="card" data-choice="B" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:#0f172a;border-radius:8px;font-size:10px;">
+      <div style="font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">INSTRUCTOR VIEW — SCROLL</div>
+
+      <!-- Urgent banner -->
+      <div style="background:#1a0800;border:1px solid #f59e0b;border-radius:6px;padding:6px;margin-bottom:6px;">
+        <span style="color:#f59e0b;font-weight:700;">⚠ 1 unread message + 2 review flags</span>
+      </div>
+
+      <div style="border-left:3px solid #10b981;background:#1e293b;border-radius:4px;padding:6px;margin-bottom:4px;">
+        <span style="color:#10b981;font-weight:700;">✓</span> <span style="color:#e2e8f0;">Course Details</span>
+      </div>
+      <div style="border-left:3px solid #f59e0b;background:#1e293b;border-radius:4px;padding:6px;margin-bottom:4px;">
+        <span style="color:#f59e0b;font-weight:700;">⚠</span> <span style="color:#e2e8f0;">Review Checklist</span>
+        <div style="background:#2d1800;border-radius:3px;padding:3px 5px;color:#f59e0b;margin-top:4px;">⚠ Module 3 link broken</div>
+        <div style="background:#2d1800;border-radius:3px;padding:3px 5px;color:#f59e0b;margin-top:2px;">⚠ Video needs re-upload</div>
+      </div>
+      <div style="border-left:3px solid #10b981;background:#1e293b;border-radius:4px;padding:6px;margin-bottom:4px;">
+        <span style="color:#10b981;font-weight:700;">✓</span> <span style="color:#e2e8f0;">Syllabus & Gradebook</span>
+      </div>
+
+      <!-- Thread at bottom -->
+      <div style="border:1px solid #a855f7;border-radius:6px;padding:8px;margin-top:4px;background:#1a0a2e;">
+        <div style="font-weight:700;color:#c084fc;margin-bottom:4px;">💬 Conversation <span style="background:#ef4444;color:white;padding:1px 5px;border-radius:99px;font-size:9px;margin-left:4px;">1 new</span></div>
+        <div style="color:#64748b;">Alannah: "Please check gradebook…"</div>
+        <div style="background:#6366f1;color:white;border-radius:4px;padding:3px 8px;text-align:center;margin-top:6px;font-weight:600;">Reply</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Review first, thread below</h3>
+      <p>A sticky alert banner at top shows any unread messages + flags. Instructor reads through the review in order. Conversation thread anchors the bottom — scroll down to reply. Clean reading flow top to bottom.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Floating side panel -->
+  <div class="card" data-choice="C" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:#0f172a;border-radius:8px;font-size:10px;">
+      <div style="font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">INSTRUCTOR VIEW — SPLIT PANE</div>
+
+      <div style="display:flex;gap:8px;">
+        <!-- Left: review -->
+        <div style="flex:1.4;">
+          <div style="border-left:3px solid #10b981;background:#1e293b;border-radius:4px;padding:5px;margin-bottom:3px;">
+            <span style="color:#10b981;font-weight:700;">✓</span> <span style="color:#e2e8f0;font-size:9px;">Course Details</span>
+          </div>
+          <div style="border-left:3px solid #f59e0b;background:#1e293b;border-radius:4px;padding:5px;margin-bottom:3px;">
+            <span style="color:#f59e0b;font-weight:700;">⚠</span> <span style="color:#e2e8f0;font-size:9px;">Review Checklist</span>
+            <div style="color:#f59e0b;font-size:8px;">2 flags</div>
+          </div>
+          <div style="border-left:3px solid #10b981;background:#1e293b;border-radius:4px;padding:5px;">
+            <span style="color:#10b981;font-weight:700;">✓</span> <span style="color:#e2e8f0;font-size:9px;">Syllabus & Gradebook</span>
+          </div>
+        </div>
+
+        <!-- Right: thread panel -->
+        <div style="flex:1;background:#1a0a2e;border-radius:6px;border:1px solid #4c1d95;padding:6px;">
+          <div style="font-weight:700;color:#c084fc;font-size:9px;margin-bottom:6px;">💬 THREAD <span style="background:#ef4444;color:white;padding:1px 4px;border-radius:99px;">1</span></div>
+          <div style="background:#2d1058;border-radius:4px;padding:4px;margin-bottom:3px;">
+            <div style="color:#a78bfa;font-size:8px;font-weight:600;">Alannah</div>
+            <div style="color:#9ca3af;font-size:8px;">Please check gradebook…</div>
+          </div>
+          <div style="background:#1e3a5f;border-radius:4px;padding:4px;margin-bottom:6px;margin-left:8px;">
+            <div style="color:#60a5fa;font-size:8px;font-weight:600;">You</div>
+            <div style="color:#9ca3af;font-size:8px;">Which weight is off?</div>
+          </div>
+          <input style="width:100%;background:#0f172a;border:1px solid #4c1d95;border-radius:3px;color:#9ca3af;font-size:8px;padding:3px;" placeholder="Reply…" />
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Split pane (review left, thread right)</h3>
+      <p>Review sections on the left, conversation always visible on the right. Thread never scrolls away. Best for desktop. Can collapse the thread panel. More complex layout — may feel cramped on smaller screens.</p>
+    </div>
+  </div>
+
+</div>
+
+<p style="margin-top:16px;font-size:12px;color:#6b7280;">Where should the conversation live relative to the review sections?</p>

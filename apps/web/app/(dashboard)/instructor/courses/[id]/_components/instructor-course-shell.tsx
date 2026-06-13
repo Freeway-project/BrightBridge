@@ -1,13 +1,15 @@
 "use client"
 
 import { useEffect, useState, type ReactNode } from "react"
-import { HelpCircle, PanelsTopLeft, ShieldCheck, Sparkles } from "lucide-react"
+import { HelpCircle, MessageSquare, PanelsTopLeft, ShieldCheck, Sparkles } from "lucide-react"
 import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import type { CourseStatus } from "@coursebridge/workflow"
+import type { CourseComment } from "@/lib/services/comments"
 import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 import { getInstructorSimpleState } from "@/lib/courses/instructor-view"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { InstructorSimpleWizard } from "./instructor-simple-wizard"
 import { useInstructorTour } from "./instructor-guided-tour"
 
@@ -22,6 +24,10 @@ interface Props {
   reviewNode: ReactNode
   /** The existing 5-tab workspace, rendered when "Full details" is chosen. */
   full: ReactNode
+  /** Shared comments (instructor_visible) for the Simple view discussion panel. */
+  sharedComments: CourseComment[]
+  /** The current user's ID for the discussion panel. */
+  currentUserId: string
   /** Assigned instructor's name when a hierarchy leader is acting on their behalf. */
   actingOnBehalfOfName?: string | null
   /** The acting leader's org title (e.g. "dean") when delegating. */
@@ -42,6 +48,8 @@ export function InstructorCourseShell({
   readOnly,
   reviewNode,
   full,
+  sharedComments,
+  currentUserId,
   actingOnBehalfOfName,
   actingAsTitle,
 }: Props) {
@@ -159,6 +167,27 @@ export function InstructorCourseShell({
             step={step}
             onStepChange={setStep}
           />
+
+          {/* Shared discussion — always visible below the wizard steps */}
+          <div className="mt-10 max-w-3xl mx-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <MessageSquare className="size-4 text-muted-foreground" aria-hidden />
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Messages
+              </h2>
+              {sharedComments.length > 0 && (
+                <span className="rounded-full bg-primary/15 text-primary text-[10px] font-bold px-2 py-0.5">
+                  {sharedComments.length}
+                </span>
+              )}
+            </div>
+            <CourseDiscussion
+              courseId={courseId}
+              comments={sharedComments}
+              currentUserId={currentUserId}
+              canPost={!readOnly}
+            />
+          </div>
         </div>
       ) : (
         full

@@ -1,0 +1,140 @@
+<h2>How should the Review section present the TA's findings?</h2>
+<p class="subtitle">This is what the instructor reads first — it needs to be clear without requiring technical knowledge</p>
+
+<div class="cards" style="grid-template-columns:1fr 1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+
+  <!-- Option A: Plain language status cards -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:1rem; background:#f8fafc; border-radius:8px; min-height:300px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:8px;">PLAIN LANGUAGE STATUS CARDS</div>
+
+      <!-- Each checklist section = one status card -->
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:6px; padding:7px 10px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; font-weight:700; color:#166534;">📄 Syllabus</span>
+        <span style="font-size:9px; background:#dcfce7; color:#15803d; border-radius:99px; padding:1px 7px; font-weight:600;">All good ✓</span>
+      </div>
+
+      <div style="background:#fffbeb; border:1px solid #fbbf24; border-radius:6px; padding:7px 10px; margin-bottom:5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:10px; font-weight:700; color:#92400e;">📊 Grade Setup</span>
+          <span style="font-size:9px; background:#fef3c7; color:#d97706; border-radius:99px; padding:1px 7px; font-weight:600;">1 note ⚠</span>
+        </div>
+        <div style="margin-top:5px; font-size:9px; color:#78350f; line-height:1.4;">
+          The grade categories were renamed from Moodle. Your weighting is the same — this is just a display change.
+        </div>
+      </div>
+
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:6px; padding:7px 10px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; font-weight:700; color:#166534;">🔗 Links &amp; Files</span>
+        <span style="font-size:9px; background:#dcfce7; color:#15803d; border-radius:99px; padding:1px 7px; font-weight:600;">All good ✓</span>
+      </div>
+
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:6px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:10px; font-weight:700; color:#166534;">🗓 Course Structure</span>
+        <span style="font-size:9px; background:#dcfce7; color:#15803d; border-radius:99px; padding:1px 7px; font-weight:600;">All good ✓</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Status Cards</h3>
+      <p>Each checklist section = one row. Green "All good" or amber "N notes" badge. Amber rows expand to show a <strong>plain-English explanation</strong> written by the TA.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Glanceable at a second</li>
+        <li>Non-tech friendly language</li>
+        <li>Hides TA form jargon completely</li>
+        <li>Requires TA to write good notes</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option B: Issues-first — only show flagged items -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:1rem; background:#f8fafc; border-radius:8px; min-height:300px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:8px;">ISSUES-FIRST (flagged items only)</div>
+
+      <div style="font-size:10px; color:#15803d; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:4px;">
+        <span style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%;"></span>
+        3 sections checked — all clear
+      </div>
+
+      <div style="border-top:1px solid #e2e8f0; padding-top:8px; margin-bottom:6px;">
+        <div style="font-size:10px; font-weight:700; color:#92400e; margin-bottom:6px;">⚠ 1 thing to be aware of:</div>
+
+        <div style="background:#fffbeb; border-left:3px solid #f59e0b; border-radius:4px; padding:8px; margin-bottom:5px;">
+          <div style="font-size:10px; font-weight:700; color:#78350f; margin-bottom:3px;">Grade Setup — Category Names Changed</div>
+          <div style="font-size:9px; color:#92400e; line-height:1.4;">
+            The grade categories were renamed from Moodle. Your weighting is the same — this is just a display change. No action needed.
+          </div>
+          <div style="margin-top:5px; display:flex; gap:4px;">
+            <div style="font-size:8px; background:#fef3c7; color:#d97706; border-radius:3px; padding:2px 5px; font-weight:600;">TA note</div>
+            <div style="font-size:8px; color:#a16207;">Checked by: Sarah K. · Jun 10</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:4px; padding:6px; text-align:center;">
+        <span style="font-size:9px; color:#94a3b8;">▼ Show full checklist detail</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Issues First</h3>
+      <p>"Everything good" shown as a single green line. Only <strong>flagged items are shown in full</strong> with the TA's plain-English note. Full detail available via expand.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Instructor attention goes to what matters</li>
+        <li>Zero clutter if course is clean</li>
+        <li>Full detail still accessible</li>
+        <li>Could feel like info is being hidden</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option C: Expandable full detail rows -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:1rem; background:#f8fafc; border-radius:8px; min-height:300px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:8px;">EXPANDABLE FULL DETAIL</div>
+
+      <!-- Section header + rows -->
+      <div style="font-size:9px; font-weight:700; color:#4f46e5; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em;">📄 Syllabus</div>
+
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:5px; overflow:hidden; margin-bottom:5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px; border-bottom:1px solid #f1f5f9;">
+          <span style="font-size:9px;">Syllabus present?</span>
+          <span style="font-size:9px; color:#15803d; font-weight:600;">✓ Yes</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px; border-bottom:1px solid #f1f5f9;">
+          <span style="font-size:9px;">Outcome statements</span>
+          <span style="font-size:9px; color:#15803d; font-weight:600;">✓ Yes</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px;">
+          <span style="font-size:9px;">Contact info</span>
+          <span style="font-size:9px; color:#15803d; font-weight:600;">✓ Yes</span>
+        </div>
+      </div>
+
+      <div style="font-size:9px; font-weight:700; color:#4f46e5; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em;">📊 Grade Setup</div>
+      <div style="background:#fff; border:1px solid #fbbf24; border-radius:5px; overflow:hidden; margin-bottom:5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px; border-bottom:1px solid #fef3c7; background:#fffbeb;">
+          <span style="font-size:9px;">Grade categories match</span>
+          <span style="font-size:9px; color:#d97706; font-weight:600;">⚠ Note</span>
+        </div>
+        <div style="padding:5px 8px; font-size:8px; color:#78350f; background:#fffbeb;">Categories renamed — weighting unchanged</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 8px;">
+          <span style="font-size:9px;">Total weighting = 100%</span>
+          <span style="font-size:9px; color:#15803d; font-weight:600;">✓ Yes</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Full Expandable Detail</h3>
+      <p>Show the <strong>full TA checklist</strong> with every row, grouped by section. Flagged rows highlighted amber. TA notes inline. Matches the current "Review" tab content.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Most complete picture</li>
+        <li>Transparent — nothing hidden</li>
+        <li>Can overwhelm non-tech instructors</li>
+        <li>Closest to current design (less rework)</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:1.5rem; text-align:center;">Click a card to select, or reply in the terminal.</p>

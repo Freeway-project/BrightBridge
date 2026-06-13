@@ -1,0 +1,127 @@
+<h2>Design — Full mode sync + TA side</h2>
+<p class="subtitle">How the toggle and TA workspace change. Both share the same thread underneath.</p>
+
+<div style="display:flex;flex-direction:column;gap:24px;margin-top:8px;">
+
+  <!-- SECTION 1: Full mode tabs -->
+  <div>
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#6366f1;margin-bottom:10px;">① Full mode (instructor clicks "Full details")</h3>
+    <div class="mockup">
+      <div class="mockup-header">instructor/courses/[id] — Full mode</div>
+      <div class="mockup-body" style="padding:0;">
+        <!-- Tab bar -->
+        <div style="display:flex;align-items:center;gap:0;border-bottom:1px solid #1e293b;padding:0 16px;background:#0f172a;">
+          <div style="padding:10px 16px;font-size:12px;font-weight:600;color:#94a3b8;border-bottom:2px solid transparent;cursor:pointer;">Overview</div>
+          <div style="padding:10px 16px;font-size:12px;font-weight:600;color:#94a3b8;border-bottom:2px solid transparent;cursor:pointer;">Review</div>
+          <div style="padding:10px 16px;font-size:12px;font-weight:700;color:#6366f1;border-bottom:2px solid #6366f1;position:relative;">
+            Thread
+            <span style="position:absolute;top:8px;right:4px;background:#ef4444;color:white;font-size:8px;font-weight:800;padding:1px 4px;border-radius:99px;">1</span>
+          </div>
+          <div style="padding:10px 16px;font-size:12px;font-weight:600;color:#94a3b8;border-bottom:2px solid transparent;cursor:pointer;">Timeline</div>
+          <div style="margin-left:auto;padding:8px 0;">
+            <div style="display:flex;align-items:center;background:#1e293b;border-radius:8px;padding:2px;border:1px solid #334155;">
+              <span style="color:#64748b;font-size:10px;font-weight:600;padding:4px 10px;">✦ Simple</span>
+              <span style="background:#334155;color:#e2e8f0;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">Full details</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thread tab content — same data as Simple's right panel -->
+        <div style="display:flex;min-height:220px;">
+          <div style="flex:1;padding:16px;background:#0a0a0f;">
+            <div style="font-size:11px;color:#6b7280;margin-bottom:12px;">Same conversation as shown in Simple mode. Posting here is instantly visible when switching back to Simple.</div>
+            <div style="display:flex;flex-direction:column;gap:8px;max-width:560px;">
+              <div style="background:#1e1b4b;border-radius:2px 8px 8px 8px;padding:10px 12px;">
+                <div style="font-size:10px;font-weight:700;color:#a78bfa;margin-bottom:3px;">Alannah (Reviewer)</div>
+                <div style="font-size:12px;color:#c4b5fd;">Hi! I've completed the review. A couple of things to flag — see the checklist.</div>
+              </div>
+              <div style="background:#0c2340;border-radius:8px 2px 8px 8px;padding:10px 12px;align-self:flex-end;">
+                <div style="font-size:10px;font-weight:700;color:#60a5fa;margin-bottom:3px;">You (Instructor)</div>
+                <div style="font-size:12px;color:#93c5fd;">The broken link — is that something you can fix?</div>
+              </div>
+              <div style="background:#1e1b4b;border-radius:2px 8px 8px 8px;padding:10px 12px;">
+                <div style="font-size:10px;font-weight:700;color:#a78bfa;margin-bottom:3px;">Alannah (Reviewer) · <span style="color:#ef4444;">UNREAD</span></div>
+                <div style="font-size:12px;color:#c4b5fd;font-weight:600;">You'll need to re-link it in Brightspace — I've noted the exact location.</div>
+              </div>
+            </div>
+            <div style="margin-top:12px;background:#1e293b;border-radius:8px;padding:10px;border:1px solid #334155;max-width:560px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Reply…</div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:10px;color:#475569;">Visible to: TA · Admin · You</span>
+                <span style="background:#6366f1;color:white;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">Send</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:#64748b;margin-top:6px;">Notes: Discussion + Questions tabs are <strong>merged into one "Thread" tab</strong>. Badge shows unread count. The Overview tab shows course metadata. The Review tab shows the same accordion but without the split pane.</p>
+  </div>
+
+  <!-- SECTION 2: TA side -->
+  <div>
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#10b981;margin-bottom:10px;">② TA workspace — instructor messages surface inline</h3>
+    <div class="mockup">
+      <div class="mockup-header">courses/[id] — TA workspace (Discussion tab, now "Thread")</div>
+      <div class="mockup-body" style="padding:0;">
+        <div style="display:flex;min-height:260px;">
+          <!-- Left: TA nav -->
+          <div style="width:200px;background:#0a0a0f;border-right:1px solid #1e293b;padding:12px;">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#475569;margin-bottom:8px;">Navigation</div>
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <div style="padding:6px 8px;border-radius:6px;font-size:11px;color:#64748b;">1 · Metadata</div>
+              <div style="padding:6px 8px;border-radius:6px;font-size:11px;color:#64748b;">2 · Review Matrix</div>
+              <div style="padding:6px 8px;border-radius:6px;font-size:11px;color:#64748b;">3 · Syllabus & Gradebook</div>
+              <div style="padding:6px 8px;border-radius:6px;font-size:11px;color:#64748b;">4 · Issues</div>
+              <div style="padding:6px 8px;border-radius:6px;font-size:11px;color:#64748b;">5 · Submit</div>
+              <div style="padding:6px 8px;border-radius:6px;font-size:11px;background:#1e1b4b;color:#a78bfa;font-weight:700;display:flex;align-items:center;justify-content:space-between;">
+                Thread
+                <span style="background:#ef4444;color:white;font-size:8px;padding:1px 5px;border-radius:99px;">1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Thread tab content on TA side -->
+          <div style="flex:1;padding:16px;background:#0f172a;">
+            <!-- Instructor engagement indicator -->
+            <div style="background:#0d2218;border:1px solid #10b981;border-radius:8px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:14px;">👁</span>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#6ee7b7;">Instructor last opened: today, 2:14pm</div>
+                <div style="font-size:10px;color:#065f46;">Manvir Judge · opened 3×  · has not yet replied</div>
+              </div>
+            </div>
+
+            <!-- Same thread, but from TA's perspective -->
+            <div style="display:flex;flex-direction:column;gap:8px;max-width:560px;">
+              <div style="background:#1e293b;border-radius:2px 8px 8px 8px;padding:10px 12px;">
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:3px;">You (Alannah, Reviewer)</div>
+                <div style="font-size:12px;color:#e2e8f0;">Hi! I've completed the review. A couple of things to flag — see the checklist.</div>
+              </div>
+              <div style="background:#172554;border-radius:8px 2px 8px 8px;padding:10px 12px;align-self:flex-end;">
+                <div style="font-size:10px;font-weight:700;color:#93c5fd;margin-bottom:3px;">Manvir Judge (Instructor)</div>
+                <div style="font-size:12px;color:#bfdbfe;">The broken link — is that something you can fix?</div>
+              </div>
+              <div style="background:#1e293b;border-radius:2px 8px 8px 8px;padding:10px 12px;">
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;margin-bottom:3px;">You (Alannah, Reviewer) · <span style="color:#10b981;">✓ Read by instructor</span></div>
+                <div style="font-size:12px;color:#e2e8f0;font-weight:600;">You'll need to re-link it in Brightspace — exact location noted in the flag.</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;background:#1e293b;border-radius:8px;padding:10px;border:1px solid #334155;max-width:560px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Reply or add context…</div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:10px;color:#475569;">Visible to: Instructor · Admin · You</span>
+                <span style="background:#6366f1;color:white;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">Send</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:#64748b;margin-top:6px;">Notes: TA sees <strong>instructor engagement</strong> (opened 3×, last seen time, hasn't replied yet). "✓ Read by instructor" receipt on messages they've seen. Thread is the same data — one source of truth.</p>
+  </div>
+
+</div>
+
+<p style="margin-top:16px;text-align:center;font-size:12px;color:#6b7280;">Does this look right for Full mode and the TA side? Any changes before we move to the admin view and engagement tracking?</p>

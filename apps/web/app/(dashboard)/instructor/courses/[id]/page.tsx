@@ -93,6 +93,8 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           status={course.status}
           finalSummary={course.instructorSummaryNotes}
           readOnly={readOnly}
+          sharedComments={sharedComments}
+          currentUserId={context.userId}
           actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
           actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
           reviewNode={

@@ -1,0 +1,148 @@
+<h2>How should the instructor experience be structured?</h2>
+<p class="subtitle">Pick the layout pattern that fits how instructors should navigate their course review</p>
+
+<div class="cards" style="grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1rem; background: #f8fafc; border-radius: 8px; min-height: 260px;">
+      <!-- Wizard mockup -->
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:6px;">ENHANCED WIZARD (keep toggle)</div>
+      <div style="display:flex; gap:4px; margin-bottom:10px;">
+        <div style="flex:1; height:4px; background:#6366f1; border-radius:99px;"></div>
+        <div style="flex:1; height:4px; background:#6366f1; border-radius:99px;"></div>
+        <div style="flex:1; height:4px; background:#e2e8f0; border-radius:99px;"></div>
+      </div>
+      <div style="font-size:11px; font-weight:700; margin-bottom:8px;">Step 2 of 3 — Have any questions?</div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:8px; margin-bottom:6px; font-size:10px;">
+        <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px;">
+          <div style="width:14px; height:14px; background:#dcfce7; border-radius:3px; border:1px solid #86efac;"></div>
+          <span style="color:#16a34a; font-weight:600;">✓ No — everything looks good</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <div style="width:14px; height:14px; background:#f0f9ff; border-radius:3px; border:1px solid #7dd3fc;"></div>
+          <span style="color:#0369a1; font-weight:600;">? Yes — I have a question</span>
+        </div>
+      </div>
+      <div style="font-size:9px; color:#94a3b8; padding: 4px 0;">↕ Discussion always visible below steps</div>
+      <div style="background:#f1f5f9; border-radius:5px; padding:6px; margin-top:4px;">
+        <div style="font-size:9px; color:#64748b; font-weight:600; margin-bottom:3px;">💬 Messages (2)</div>
+        <div style="background:#fff; border-radius:4px; padding:4px; font-size:9px; color:#64748b;">Admin: "Your course is ready…"</div>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:4px;">
+        <div style="flex:1; background:#e2e8f0; border-radius:4px; padding:4px; font-size:9px; color:#64748b; text-align:center;">✨ Simple</div>
+        <div style="flex:1; background:#e2e8f0; border-radius:4px; padding:4px; font-size:9px; color:#64748b; text-align:center;">⊞ Full details</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Enhanced Wizard</h3>
+      <p>Keep the Simple/Full toggle but <strong>fix the sync</strong> between modes. Add expandable sub-sections inside each step. Discussion always pinned at bottom.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Familiar for existing users</li>
+        <li>Linear flow good for approval</li>
+        <li>Still two modes to switch between</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1rem; background: #f8fafc; border-radius: 8px; min-height: 260px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:6px;">SINGLE SCROLLABLE PAGE (no modes)</div>
+
+      <!-- Section 1: course summary -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:5px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background:#f0fdf4; border-bottom:1px solid #bbf7d0;">
+          <span style="font-size:10px; font-weight:700; color:#166534;">📋 Your Course Summary</span>
+          <span style="font-size:9px; color:#16a34a;">✓ Reviewed</span>
+        </div>
+        <div style="padding:6px 8px; font-size:9px; color:#64748b;">Review details expanded here…</div>
+      </div>
+
+      <!-- Section 2: questions collapsed -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:5px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background:#fffbeb; border-bottom:1px solid #fde68a;">
+          <span style="font-size:10px; font-weight:700; color:#92400e;">❓ My Questions (1)</span>
+          <span style="font-size:9px; color:#d97706;">▼ expand</span>
+        </div>
+      </div>
+
+      <!-- Section 3: messages collapsed -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:5px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background:#f0f9ff; border-bottom:1px solid #bae6fd;">
+          <span style="font-size:10px; font-weight:700; color:#075985;">💬 Messages (3)</span>
+          <span style="font-size:9px; color:#0369a1;">▼ expand</span>
+        </div>
+      </div>
+
+      <!-- Section 4: approve -->
+      <div style="background:#fff; border:1px solid #bbf7d0; border-radius:6px; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background:#f0fdf4; border-bottom:1px solid #bbf7d0;">
+          <span style="font-size:10px; font-weight:700; color:#166534;">✅ Approve This Course</span>
+          <span style="font-size:9px; color:#64748b;">▼ expand</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Accordion Page</h3>
+      <p><strong>No modes. No tabs. No wizard.</strong> Everything lives on one scrollable page as color-coded expandable sections. Scroll down = move forward.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Zero navigation — can't get lost</li>
+        <li>Each section color-coded by purpose</li>
+        <li>No sync issue — there's only one view</li>
+        <li>Requires redesign of current shell</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 1rem; background: #f8fafc; border-radius: 8px; min-height: 260px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:6px;">SIMPLIFIED TABS (no toggle)</div>
+
+      <!-- Tab bar - colored pills -->
+      <div style="display:flex; gap:4px; margin-bottom:10px; flex-wrap:wrap;">
+        <div style="background:#6366f1; color:#fff; border-radius:99px; padding:3px 8px; font-size:9px; font-weight:700;">📋 Review</div>
+        <div style="background:#f1f5f9; color:#f59e0b; border:1px solid #fde68a; border-radius:99px; padding:3px 8px; font-size:9px; font-weight:700;">❓ Questions <span style="background:#fde68a; border-radius:99px; padding:0 4px;">1</span></div>
+        <div style="background:#f1f5f9; color:#0369a1; border:1px solid #bae6fd; border-radius:99px; padding:3px 8px; font-size:9px; font-weight:700;">💬 Chat</div>
+        <div style="background:#f1f5f9; color:#16a34a; border:1px solid #bbf7d0; border-radius:99px; padding:3px 8px; font-size:9px; font-weight:700;">✅ Approve</div>
+      </div>
+
+      <!-- Active tab: Review -->
+      <div style="font-size:10px; font-weight:600; color:#4f46e5; margin-bottom:6px;">What we checked on your course</div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px; margin-bottom:4px; font-size:9px;">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-weight:600;">Syllabus</span>
+          <span style="color:#16a34a; font-size:9px;">✓ Looks good</span>
+        </div>
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px; margin-bottom:4px; font-size:9px;">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-weight:600;">Grade Setup</span>
+          <span style="color:#f59e0b; font-size:9px;">⚠ 1 note</span>
+        </div>
+        <!-- expandable detail -->
+        <div style="margin-top:3px; font-size:8px; color:#64748b;">▼ The grade categories were renamed. Click to see details.</div>
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px; font-size:9px;">
+        <div style="display:flex; justify-content:space-between;">
+          <span style="font-weight:600;">Links &amp; Files</span>
+          <span style="color:#16a34a; font-size:9px;">✓ Looks good</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Simplified Tabs</h3>
+      <p>Remove the Simple/Full toggle. Replace with <strong>4 clear color-coded tabs</strong> — Review, Questions, Chat, Approve. Within Review, each checklist section is expandable.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Tabs are obvious, color-coded with icons</li>
+        <li>No mode confusion</li>
+        <li>Familiar tab metaphor</li>
+        <li>Still requires tab navigation</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:1.5rem; text-align:center;">Click a card to select. You can also just tell me in the terminal.</p>

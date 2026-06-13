@@ -1,0 +1,176 @@
+<h2>Design — Instructor workspace (Simple mode)</h2>
+<p class="subtitle">B+C layout: full accordion review left, unified thread always visible right. Does this structure feel right?</p>
+
+<div class="mockup" style="max-width:900px;margin:0 auto;">
+  <div class="mockup-header">instructor/courses/[id] — Simple mode (default)</div>
+  <div class="mockup-body" style="padding:0;overflow:hidden;">
+
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#0f172a;border-bottom:1px solid #1e293b;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:11px;color:#64748b;">← My courses</span>
+        <span style="font-size:13px;font-weight:700;color:#e2e8f0;">AVIA-122 — Aviation Ground School</span>
+        <span style="font-size:10px;background:#1d4ed8;color:#93c5fd;padding:2px 8px;border-radius:99px;font-weight:600;">SENT TO INSTRUCTOR</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <!-- Simple/Full toggle -->
+        <div style="display:flex;align-items:center;background:#1e293b;border-radius:8px;padding:2px;border:1px solid #334155;">
+          <span style="background:#334155;color:#e2e8f0;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">✦ Simple</span>
+          <span style="color:#64748b;font-size:10px;font-weight:600;padding:4px 10px;">Full details</span>
+        </div>
+        <!-- Approve button -->
+        <div style="background:#10b981;color:white;font-size:11px;font-weight:700;padding:6px 14px;border-radius:8px;">✓ Approve course</div>
+      </div>
+    </div>
+
+    <!-- Main content: split pane -->
+    <div style="display:flex;min-height:480px;">
+
+      <!-- LEFT: Review accordion -->
+      <div style="flex:1.4;padding:16px;overflow-y:auto;border-right:1px solid #1e293b;background:#0f172a;">
+
+        <!-- Urgent banner (only when flags/unread) -->
+        <div style="background:linear-gradient(135deg,#2d1800,#1a0a2e);border:1px solid #f59e0b;border-radius:10px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">⚠</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#fbbf24;">2 items flagged · 1 unread message</div>
+            <div style="font-size:11px;color:#92400e;margin-top:2px;">Scroll down to review or reply in the thread →</div>
+          </div>
+        </div>
+
+        <!-- Section 1: Course Details — GREEN -->
+        <div style="border:1px solid #064e3b;border-left:4px solid #10b981;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#0d2218;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">📋</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#e2e8f0;">Course Details</div>
+                <div style="font-size:10px;color:#6ee7b7;">Everything looks good</div>
+              </div>
+            </div>
+            <span style="background:#065f46;color:#6ee7b7;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;">✓ READY</span>
+          </div>
+          <div style="padding:0 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="background:#0f172a;border-radius:6px;padding:8px;">
+              <div style="font-size:9px;color:#64748b;text-transform:uppercase;font-weight:700;">Term</div>
+              <div style="font-size:12px;color:#e2e8f0;font-weight:600;">2026 Spring</div>
+            </div>
+            <div style="background:#0f172a;border-radius:6px;padding:8px;">
+              <div style="font-size:9px;color:#64748b;text-transform:uppercase;font-weight:700;">Sections</div>
+              <div style="font-size:12px;color:#e2e8f0;font-weight:600;">01, 02</div>
+            </div>
+            <div style="background:#0f172a;border-radius:6px;padding:8px;grid-column:span 2;">
+              <div style="font-size:9px;color:#64748b;text-transform:uppercase;font-weight:700;">Reviewer note</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:2px;">"All content migrated cleanly from Moodle. No missing modules."</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Review Checklist — AMBER (flags) -->
+        <div style="border:1px solid #78350f;border-left:4px solid #f59e0b;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#1c1108;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">✅</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#e2e8f0;">Review Checklist</div>
+                <div style="font-size:10px;color:#fbbf24;">2 items need attention</div>
+              </div>
+            </div>
+            <span style="background:#78350f;color:#fbbf24;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;">⚠ 2 FLAGS</span>
+          </div>
+          <div style="padding:0 14px 12px;">
+            <!-- Green items summary -->
+            <div style="font-size:10px;color:#6ee7b7;margin-bottom:8px;">✓ Content migrated &nbsp;·&nbsp; ✓ Links verified &nbsp;·&nbsp; ✓ Media present &nbsp;·&nbsp; +9 more</div>
+            <!-- Flag cards -->
+            <div style="background:#2d1800;border:1px solid #f59e0b;border-radius:6px;padding:8px;margin-bottom:6px;">
+              <div style="font-size:11px;font-weight:700;color:#fbbf24;">⚠ Module 3 — "Sorting Algorithms" link is broken</div>
+              <div style="font-size:10px;color:#92400e;margin-top:2px;">Direct link goes to a 404 in Brightspace. Needs to be re-linked.</div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span style="font-size:9px;background:#0f172a;color:#64748b;padding:3px 8px;border-radius:4px;cursor:pointer;">👁 Open in Brightspace</span>
+                <span style="font-size:9px;background:#1d4ed8;color:#93c5fd;padding:3px 8px;border-radius:4px;cursor:pointer;">Ask about this →</span>
+              </div>
+            </div>
+            <div style="background:#2d1800;border:1px solid #f59e0b;border-radius:6px;padding:8px;">
+              <div style="font-size:11px;font-weight:700;color:#fbbf24;">⚠ Week 4 video needs re-upload</div>
+              <div style="font-size:10px;color:#92400e;margin-top:2px;">The embedded video player returns an error. Original file may need re-uploading.</div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span style="font-size:9px;background:#0f172a;color:#64748b;padding:3px 8px;border-radius:4px;cursor:pointer;">👁 Open in Brightspace</span>
+                <span style="font-size:9px;background:#1d4ed8;color:#93c5fd;padding:3px 8px;border-radius:4px;cursor:pointer;">Ask about this →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Syllabus & Gradebook — GREEN -->
+        <div style="border:1px solid #064e3b;border-left:4px solid #10b981;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#0d2218;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">📄</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#e2e8f0;">Syllabus & Gradebook</div>
+                <div style="font-size:10px;color:#6ee7b7;">All items checked</div>
+              </div>
+            </div>
+            <span style="background:#065f46;color:#6ee7b7;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;">✓ READY</span>
+          </div>
+          <div style="padding:0 14px 12px;">
+            <div style="font-size:10px;color:#6ee7b7;">Syllabus: 4/4 items confirmed &nbsp;·&nbsp; Gradebook: 3/3 categories verified</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:4px;">Instructor confirmed: weights total 100%. Term dates updated.</div>
+          </div>
+        </div>
+
+        <!-- Approve CTA -->
+        <div style="background:linear-gradient(135deg,#064e3b,#0d2218);border:1px solid #10b981;border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:4px;">Ready to approve?</div>
+          <div style="font-size:11px;color:#6ee7b7;margin-bottom:10px;">2 flagged items are still open. You can approve anyway or ask the team first.</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <div style="background:#10b981;color:white;font-size:12px;font-weight:700;padding:8px 20px;border-radius:8px;">✓ Approve this course</div>
+            <div style="background:#1e293b;color:#94a3b8;font-size:12px;font-weight:600;padding:8px 16px;border-radius:8px;border:1px solid #334155;">Ask a question first</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Unified thread -->
+      <div style="width:280px;display:flex;flex-direction:column;background:#0a0a0f;border-left:1px solid #1e293b;">
+        <div style="padding:10px 14px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;font-weight:700;color:#c084fc;">💬 Conversation</span>
+          <span style="background:#ef4444;color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px;">1 unread</span>
+        </div>
+
+        <!-- Messages -->
+        <div style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+          <div style="background:#1e1b4b;border-radius:8px;border-radius:2px 8px 8px 8px;padding:8px 10px;">
+            <div style="font-size:10px;font-weight:700;color:#a78bfa;margin-bottom:3px;">Alannah (Reviewer)</div>
+            <div style="font-size:11px;color:#c4b5fd;">Hi! I've completed the review. A couple of things to flag — see the checklist. Let me know if you have questions about any of it.</div>
+            <div style="font-size:9px;color:#4c1d95;margin-top:4px;">2 days ago</div>
+          </div>
+          <div style="background:#0c2340;border-radius:8px 2px 8px 8px;padding:8px 10px;align-self:flex-end;max-width:90%;">
+            <div style="font-size:10px;font-weight:700;color:#60a5fa;margin-bottom:3px;">You (Instructor)</div>
+            <div style="font-size:11px;color:#93c5fd;">Thanks. The broken link — is that something you can fix or do I need to do it?</div>
+            <div style="font-size:9px;color:#1e3a5f;margin-top:4px;">1 day ago</div>
+          </div>
+          <div style="background:#1e1b4b;border-radius:2px 8px 8px 8px;padding:8px 10px;">
+            <div style="font-size:10px;font-weight:700;color:#a78bfa;margin-bottom:3px;">Alannah (Reviewer)</div>
+            <div style="font-size:11px;color:#c4b5fd;font-weight:600;">You'll need to re-link it in Brightspace — I've noted the exact location in the flag. Should take 2 minutes.</div>
+            <div style="font-size:9px;color:#4c1d95;margin-top:4px;">Today · UNREAD</div>
+          </div>
+        </div>
+
+        <!-- Reply box -->
+        <div style="padding:10px 12px;border-top:1px solid #1e293b;background:#0f172a;">
+          <div style="background:#1e293b;border-radius:8px;padding:8px;border:1px solid #334155;">
+            <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Reply to the team…</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:10px;color:#475569;">Visible to: TA · Admin · You</span>
+              <span style="background:#6366f1;color:white;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;">Send</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<p style="margin-top:16px;text-align:center;font-size:12px;color:#6b7280;">Does this structure look right? Anything to adjust before we move to the Full mode and TA side designs?</p>
