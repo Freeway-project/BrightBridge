@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instructor Accordion — Full Page Wireframe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #f1f5f9; min-height: 100vh; padding: 0; }
+
+  .browser-frame { max-width: 860px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,.5); margin-top: 24px; margin-bottom: 24px; color: #0f172a; }
+
+  .topbar { background: #1e293b; padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
+  .topbar-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .topbar-title { color: #f1f5f9; font-size: 13px; font-weight: 600; }
+  .topbar-back { color: #94a3b8; font-size: 11px; }
+  .topbar-badge { margin-left: auto; background: #f59e0b; color: #fff; border-radius: 99px; padding: 2px 10px; font-size: 10px; font-weight: 700; }
+
+  .course-header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 24px; }
+  .course-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+  .course-meta { font-size: 11px; color: #64748b; display: flex; gap: 12px; }
+  .course-meta span { display: flex; align-items: center; gap: 3px; }
+
+  .view-strip { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 8px 24px; display: flex; align-items: center; gap: 8px; }
+  .view-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+  .view-text { font-size: 10px; color: #64748b; }
+  .opened-pill { margin-left: auto; background: #dcfce7; color: #16a34a; border-radius: 99px; padding: 2px 10px; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+  .page-body { padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; }
+
+  /* Accordion section */
+  .acc { border-radius: 8px; overflow: hidden; border: 1px solid; }
+  .acc-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .acc-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+  .acc-badge { font-size: 9px; border-radius: 99px; padding: 1px 7px; font-weight: 700; }
+  .acc-right { display: flex; align-items: center; gap: 8px; }
+  .acc-seen { font-size: 9px; border-radius: 99px; padding: 2px 7px; }
+  .acc-chevron { font-size: 10px; color: #94a3b8; }
+  .acc-body { border-top: 1px solid; padding: 12px 16px; font-size: 11px; }
+
+  /* Section 1: Course Summary — slate */
+  .s1 { border-color: #cbd5e1; }
+  .s1 .acc-header { background: #f8fafc; }
+  .s1 .acc-body { border-color: #e2e8f0; background: #fff; }
+  .s1 .acc-title { color: #0f172a; }
+
+  /* Section 2: Review — indigo */
+  .s2 { border-color: #a5b4fc; }
+  .s2 .acc-header { background: #eef2ff; }
+  .s2 .acc-body { border-color: #c7d2fe; background: #fff; }
+  .s2 .acc-title { color: #3730a3; }
+
+  /* Section 3: Questions — amber */
+  .s3 { border-color: #fbbf24; }
+  .s3 .acc-header { background: #fffbeb; }
+  .s3 .acc-body { border-color: #fde68a; background: #fff; }
+  .s3 .acc-title { color: #92400e; }
+
+  /* Section 4: Messages — sky */
+  .s4 { border-color: #7dd3fc; }
+  .s4 .acc-header { background: #f0f9ff; }
+  .s4 .acc-body { border-color: #bae6fd; background: #fff; }
+  .s4 .acc-title { color: #075985; }
+
+  /* Section 5: Approve — green */
+  .s5 { border-color: #86efac; }
+  .s5 .acc-header { background: #f0fdf4; }
+  .s5 .acc-body { border-color: #bbf7d0; background: #fff; }
+  .s5 .acc-title { color: #166534; }
+
+  .issue-row { background: #fffbeb; border: 1px solid #fbbf24; border-left: 3px solid #f59e0b; border-radius: 5px; padding: 8px 10px; margin-bottom: 6px; }
+  .issue-row-title { font-size: 11px; font-weight: 700; color: #78350f; margin-bottom: 3px; }
+  .issue-row-body { font-size: 10px; color: #92400e; line-height: 1.5; }
+  .issue-row-footer { margin-top:5px; display:flex; align-items:center; gap:6px; }
+  .tag { font-size: 8px; border-radius: 3px; padding: 1px 5px; font-weight: 600; }
+
+  .clear-row { background: #f0fdf4; border: 1px solid #86efac; border-radius: 5px; padding: 6px 10px; font-size: 10px; color: #15803d; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+
+  .ack-strip { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 5px; padding: 6px 10px; font-size: 10px; color: #92400e; display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .ack-checkbox { width: 12px; height: 12px; border: 1.5px solid #fbbf24; border-radius: 3px; flex-shrink: 0; }
+
+  .q-item { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 5px; padding: 7px 10px; margin-bottom: 6px; }
+  .q-item-title { font-size: 11px; font-weight: 700; color: #78350f; margin-bottom: 3px; }
+  .q-reply { background: #f0f9ff; border-left: 2px solid #38bdf8; padding: 5px 7px; border-radius: 3px; font-size: 10px; color: #0369a1; margin-top: 4px; }
+
+  .msg-bubble { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 5px; padding: 6px 10px; margin-bottom: 5px; }
+  .msg-from { font-size: 9px; font-weight: 700; color: #0369a1; margin-bottom: 2px; }
+  .msg-body { font-size: 10px; color: #0c4a6e; }
+
+  .approve-check { display: flex; align-items: flex-start; gap: 8px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
+  .approve-check input { margin-top: 2px; }
+  .approve-check-label { font-size: 12px; font-weight: 600; color: #166534; }
+  .approve-btn { width: 100%; background: #16a34a; color: #fff; border: none; border-radius: 6px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+  .annotation { display: flex; align-items: flex-start; gap: 6px; background: #1e293b; border-radius: 6px; padding: 8px 12px; margin: 8px 0; font-size: 10px; color: #94a3b8; }
+  .annotation-dot { width: 8px; height: 8px; border-radius: 50%; background: #6366f1; flex-shrink: 0; margin-top: 2px; }
+
+  .tracking-bar { background: #1e293b; padding: 10px 24px; display: flex; gap: 16px; align-items: center; border-top: 1px solid #334155; }
+  .tracking-item { display: flex; align-items: center; gap: 5px; font-size: 9px; }
+  .tracking-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tracking-label { color: #94a3b8; }
+  .tracking-val { color: #f1f5f9; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div style="padding: 20px 16px 0; text-align:center;">
+  <h2 style="font-size:18px; font-weight:700; margin-bottom:4px;">Full Accordion Wireframe — Instructor View</h2>
+  <p style="font-size:12px; color:#94a3b8; margin-bottom:0;">One scrollable page · No modes · Color-coded sections · Engagement tracked</p>
+</div>
+
+<div class="browser-frame">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-dot" style="background:#ef4444;"></div>
+    <div class="topbar-dot" style="background:#f59e0b;"></div>
+    <div class="topbar-dot" style="background:#22c55e;"></div>
+    <span class="topbar-back">← My Courses</span>
+    <span class="topbar-title">Course Review — BIOL 201</span>
+    <span class="topbar-badge">Action needed</span>
+  </div>
+
+  <!-- Course header -->
+  <div class="course-header">
+    <div class="course-title">Biology 201: Introduction to Cell Biology</div>
+    <div class="course-meta">
+      <span>📅 Winter 2026</span>
+      <span>🏛 Science · Biology</span>
+      <span>Reviewer: Sarah K.</span>
+    </div>
+  </div>
+
+  <!-- Engagement strip (admin-visible signal, shown subtly to instructor too) -->
+  <div class="view-strip">
+    <div class="view-dot"></div>
+    <span class="view-text">Your progress: 2 of 4 sections reviewed</span>
+    <div class="opened-pill">
+      👁 Opened today
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- SECTION 1: Course Summary — always expanded, no tracking needed -->
+    <div class="acc s1">
+      <div class="acc-header">
+        <div class="acc-title">📋 &nbsp;Course Summary</div>
+        <div class="acc-right">
+          <span class="acc-seen" style="background:#dcfce7; color:#16a34a;">✓ Seen</span>
+          <span class="acc-chevron">▲</span>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; font-size:11px;">
+          <span style="color:#64748b;">Term</span><span style="font-weight:600;">Winter 2026</span>
+          <span style="color:#64748b;">Department</span><span style="font-weight:600;">Biology</span>
+          <span style="color:#64748b;">Old system (Moodle)</span><span style="font-family:monospace; font-size:10px;">BIO-201-2025W</span>
+          <span style="color:#64748b;">New system (Brightspace)</span><span style="font-family:monospace; font-size:10px;">BIOL201-W26</span>
+          <span style="color:#64748b;">Reviewed by</span><span style="font-weight:600;">Sarah K. (TA)</span>
+          <span style="color:#64748b;">Review completed</span><span style="font-weight:600;">Jun 10, 2026</span>
+        </div>
+        <div style="margin-top:8px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px; padding:7px 10px; font-size:10px; color:#475569; line-height:1.5;">
+          <span style="font-weight:600; display:block; margin-bottom:2px;">Note from reviewer:</span>
+          Course migrated successfully. One grade category rename noted. All content and links verified intact.
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-dot"></div>
+      <span><strong style="color:#c7d2fe;">Review section</strong> — instructor sees only flagged items. Green sections collapsed to a single summary line. Expanding a flagged item logs a "viewed issue" event.</span>
+    </div>
+
+    <!-- SECTION 2: Review (Issues First) -->
+    <div class="acc s2">
+      <div class="acc-header">
+        <div class="acc-title">
+          🔍 &nbsp;What We Checked
+          <span class="acc-badge" style="background:#fef3c7; color:#d97706;">1 note</span>
+        </div>
+        <div class="acc-right">
+          <span class="acc-seen" style="background:#fef3c7; color:#d97706;">⚠ Not acknowledged</span>
+          <span class="acc-chevron">▲</span>
+        </div>
+      </div>
+      <div class="acc-body">
+        <!-- Clear rows summary -->
+        <div class="clear-row">✓ Syllabus — all good</div>
+        <div class="clear-row">✓ Links &amp; Files — all good</div>
+        <div class="clear-row">✓ Course Structure — all good</div>
+
+        <!-- Flagged item -->
+        <div class="issue-row">
+          <div class="issue-row-title">📊 Grade Setup — Category Names Changed</div>
+          <div class="issue-row-body">
+            The grade categories were renamed during the migration. Your course weighting is exactly the same — this is a display-only change. Students will see the new names in Brightspace.
+          </div>
+          <div class="issue-row-footer">
+            <span class="tag" style="background:#fef3c7; color:#d97706;">TA note</span>
+            <span style="font-size:9px; color:#a16207;">Checked Jun 10 · Sarah K.</span>
+            <span style="margin-left:auto; font-size:9px; color:#6366f1; cursor:pointer;">▼ See full checklist</span>
+          </div>
+        </div>
+
+        <!-- Acknowledgment strip -->
+        <div class="ack-strip">
+          <div class="ack-checkbox"></div>
+          <span>I've read the reviewer's notes and I understand what changed.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-dot"></div>
+      <span><strong style="color:#c7d2fe;">Questions section</strong> — shows history of all Q&amp;A. "Ask a question" button triggers status → <em>instructor_questions</em>. Replies from TA/Admin appear inline.</span>
+    </div>
+
+    <!-- SECTION 3: Questions -->
+    <div class="acc s3">
+      <div class="acc-header">
+        <div class="acc-title">
+          ❓ &nbsp;My Questions
+          <span class="acc-badge" style="background:#fef3c7; color:#d97706;">1 open</span>
+        </div>
+        <div class="acc-right">
+          <span class="acc-seen" style="background:#dcfce7; color:#16a34a;">✓ Seen</span>
+          <span class="acc-chevron">▲</span>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="q-item">
+          <div class="q-item-title">Will students see different grade category names?</div>
+          <div style="font-size:9px; color:#a16207; margin-bottom:4px;">Asked by you · Jun 13</div>
+          <div class="q-reply">
+            <strong>Admin replied:</strong> No — Brightspace will show the same category names to students. The rename was internal only. ✓ Resolved
+          </div>
+        </div>
+        <button style="width:100%; background:#fffbeb; border:1px dashed #fbbf24; color:#d97706; border-radius:5px; padding:7px; font-size:11px; font-weight:600; cursor:pointer;">
+          + Ask another question
+        </button>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-dot"></div>
+      <span><strong style="color:#c7d2fe;">Messages section</strong> — shared discussion thread (instructor_visible comments). Separate from questions. TA/Admin post here for general communication.</span>
+    </div>
+
+    <!-- SECTION 4: Messages -->
+    <div class="acc s4">
+      <div class="acc-header">
+        <div class="acc-title">
+          💬 &nbsp;Messages
+          <span class="acc-badge" style="background:#e0f2fe; color:#0369a1;">2 new</span>
+        </div>
+        <div class="acc-right">
+          <span class="acc-seen" style="background:#fef3c7; color:#d97706;">⚠ Not opened</span>
+          <span class="acc-chevron">▼</span>
+        </div>
+      </div>
+      <!-- collapsed — user needs to expand -->
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-dot"></div>
+      <span><strong style="color:#c7d2fe;">Approve section</strong> — only enabled when status is <em>sent_to_instructor</em>. Disabled with explanation if already approved or read-only (hierarchy view).</span>
+    </div>
+
+    <!-- SECTION 5: Approve -->
+    <div class="acc s5">
+      <div class="acc-header">
+        <div class="acc-title">✅ &nbsp;Approve This Course</div>
+        <div class="acc-right">
+          <span class="acc-seen" style="background:#f1f5f9; color:#94a3b8;">Pending</span>
+          <span class="acc-chevron">▼</span>
+        </div>
+      </div>
+      <!-- body shown for illustration -->
+      <div class="acc-body" style="display:block;">
+        <p style="font-size:11px; color:#374151; margin-bottom:10px; line-height:1.5;">
+          Once you approve, we'll begin the final steps to make your course live in Brightspace.
+          You can still message us afterward if you notice anything.
+        </p>
+        <div class="approve-check">
+          <input type="checkbox" />
+          <span class="approve-check-label">I've reviewed everything and I'm happy for this course to go live.</span>
+        </div>
+        <button class="approve-btn">✓ Approve my course</button>
+      </div>
+    </div>
+
+  </div><!-- /page-body -->
+
+  <!-- Engagement tracking bar (admin sees this, not instructor) -->
+  <div class="tracking-bar">
+    <span style="font-size:9px; font-weight:700; color:#6366f1; text-transform:uppercase; letter-spacing:.05em;">Admin sees:</span>
+    <div class="tracking-item"><div class="tracking-dot" style="background:#22c55e;"></div><span class="tracking-label">Opened</span>&nbsp;<span class="tracking-val">Today 2:14pm</span></div>
+    <div class="tracking-item"><div class="tracking-dot" style="background:#22c55e;"></div><span class="tracking-label">Review viewed</span>&nbsp;<span class="tracking-val">Yes</span></div>
+    <div class="tracking-item"><div class="tracking-dot" style="background:#f59e0b;"></div><span class="tracking-label">Issues acked</span>&nbsp;<span class="tracking-val">Not yet</span></div>
+    <div class="tracking-item"><div class="tracking-dot" style="background:#ef4444;"></div><span class="tracking-label">Messages</span>&nbsp;<span class="tracking-val">Not opened</span></div>
+    <div class="tracking-item"><div class="tracking-dot" style="background:#94a3b8;"></div><span class="tracking-label">Approved</span>&nbsp;<span class="tracking-val">Pending</span></div>
+  </div>
+
+</div>
+
+<div style="padding: 12px 24px 24px; text-align:center; font-size:11px; color:#64748b;">
+  Does this structure and order feel right? Reply in the terminal — any section you'd change, add, or remove?
+</div>
+
+</body>
+</html>

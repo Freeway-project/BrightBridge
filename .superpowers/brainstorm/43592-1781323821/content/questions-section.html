@@ -1,0 +1,159 @@
+<h2>How should the instructor raise and track questions?</h2>
+<p class="subtitle">Questions go to the TA/Admin team — this shapes how they're recorded and followed up on both sides</p>
+
+<div class="cards" style="grid-template-columns:1fr 1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+
+  <!-- Option A: Inline questions tied to flagged items -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:1rem; background:#f8fafc; border-radius:8px; min-height:320px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:8px;">INLINE — tied to a flagged item</div>
+
+      <!-- Flagged item with inline ask button -->
+      <div style="background:#fffbeb; border-left:3px solid #f59e0b; border-radius:4px; padding:8px; margin-bottom:8px;">
+        <div style="font-size:10px; font-weight:700; color:#78350f; margin-bottom:3px;">Grade Setup — Category Names Changed</div>
+        <div style="font-size:9px; color:#92400e; line-height:1.4; margin-bottom:6px;">
+          The grade categories were renamed. Weighting is the same.
+        </div>
+        <button style="font-size:9px; background:#fff7ed; border:1px solid #fbbf24; color:#b45309; border-radius:4px; padding:3px 8px; cursor:pointer;">
+          ❓ Ask about this
+        </button>
+      </div>
+
+      <!-- After clicking — inline form appears below the item -->
+      <div style="background:#fff; border:1px solid #fbbf24; border-radius:6px; padding:8px; margin-bottom:8px;">
+        <div style="font-size:9px; font-weight:600; color:#78350f; margin-bottom:4px;">Your question about Grade Setup:</div>
+        <div style="background:#f9fafb; border:1px solid #e2e8f0; border-radius:4px; padding:5px; font-size:9px; color:#94a3b8; margin-bottom:5px; min-height:36px;">
+          Will students see different category names…
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:4px;">
+          <div style="font-size:9px; background:#e2e8f0; color:#64748b; border-radius:4px; padding:3px 8px;">Cancel</div>
+          <div style="font-size:9px; background:#6366f1; color:#fff; border-radius:4px; padding:3px 8px;">Send ✓</div>
+        </div>
+      </div>
+
+      <!-- Submitted question -->
+      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:4px; padding:6px; font-size:9px;">
+        <div style="font-weight:600; color:#0369a1; margin-bottom:2px;">Your question · sent Jun 13</div>
+        <div style="color:#075985;">Will students see different category names?</div>
+        <div style="color:#94a3b8; margin-top:3px; font-style:italic;">Waiting for reply…</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Inline per issue</h3>
+      <p>Each flagged item has an "Ask about this" button. The question is <strong>linked to that specific checklist item</strong>. The TA sees which item triggered the question.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Questions have context — no ambiguity</li>
+        <li>TA sees exactly what triggered it</li>
+        <li>Harder to ask a general question</li>
+        <li>More complex to build</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option B: Dedicated section -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:1rem; background:#f8fafc; border-radius:8px; min-height:320px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:8px;">DEDICATED QUESTIONS SECTION</div>
+
+      <!-- Section header with badge -->
+      <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:6px; overflow:hidden; margin-bottom:8px;">
+        <div style="padding:7px 10px; border-bottom:1px solid #fde68a; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:10px; font-weight:700; color:#92400e;">❓ My Questions</span>
+          <span style="font-size:9px; background:#fef3c7; color:#d97706; border-radius:99px; padding:1px 7px; font-weight:600;">1 open</span>
+        </div>
+        <div style="padding:8px 10px;">
+          <!-- Existing question -->
+          <div style="background:#fff; border:1px solid #fbbf24; border-radius:5px; padding:6px; margin-bottom:6px; font-size:9px;">
+            <div style="font-weight:600; color:#78350f; margin-bottom:2px;">Will students see different grade names?</div>
+            <div style="color:#94a3b8; margin-bottom:4px;">Asked Jun 13</div>
+            <div style="background:#f0f9ff; border-left:2px solid #38bdf8; padding:4px; border-radius:2px; color:#0369a1;">
+              Admin: "No — Brightspace shows the same…"
+            </div>
+            <div style="margin-top:4px; color:#94a3b8; font-style:italic;">Resolved ✓</div>
+          </div>
+
+          <!-- New question button -->
+          <button style="width:100%; font-size:9px; background:#fffbeb; border:1px dashed #fbbf24; color:#d97706; border-radius:4px; padding:5px; cursor:pointer; text-align:center;">
+            + Ask another question
+          </button>
+        </div>
+      </div>
+
+      <!-- Ask form expanded -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:5px; padding:7px;">
+        <div style="font-size:9px; font-weight:600; color:#374151; margin-bottom:4px;">What's your question?</div>
+        <div style="background:#f9fafb; border:1px solid #e2e8f0; border-radius:4px; padding:4px; font-size:9px; color:#94a3b8; min-height:30px; margin-bottom:4px;">Type your question here…</div>
+        <div style="font-size:9px; font-weight:600; color:#374151; margin-bottom:4px;">Any more detail? <span style="font-weight:400; color:#94a3b8;">(optional)</span></div>
+        <div style="background:#f9fafb; border:1px solid #e2e8f0; border-radius:4px; padding:4px; font-size:9px; color:#94a3b8; min-height:24px; margin-bottom:5px;"></div>
+        <div style="display:flex; justify-content:flex-end;">
+          <div style="font-size:9px; background:#6366f1; color:#fff; border-radius:4px; padding:4px 10px;">Send to reviewer</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Dedicated section</h3>
+      <p>A separate <strong>"My Questions" accordion section</strong> shows all questions + replies, with a button to ask another. General or specific — instructor's choice.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>One place for all Q&amp;A history</li>
+        <li>Works for general and specific questions</li>
+        <li>Simpler to build (existing issue model)</li>
+        <li>No direct link to the flagged item</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option C: Questions + Messages merged -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:1rem; background:#f8fafc; border-radius:8px; min-height:320px;">
+      <div style="font-size:10px; color:#94a3b8; font-weight:600; letter-spacing:.05em; margin-bottom:8px;">COMBINED — questions inside chat thread</div>
+
+      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; overflow:hidden;">
+        <div style="padding:7px 10px; border-bottom:1px solid #bae6fd; display:flex; justify-content:space-between;">
+          <span style="font-size:10px; font-weight:700; color:#075985;">💬 Messages &amp; Questions</span>
+          <span style="font-size:9px; color:#0369a1;">4 messages</span>
+        </div>
+        <div style="padding:8px 10px; space-y:6px;">
+
+          <!-- Regular message -->
+          <div style="background:#fff; border-radius:5px; padding:6px; margin-bottom:5px; font-size:9px; border:1px solid #e2e8f0;">
+            <div style="font-weight:600; color:#0369a1; margin-bottom:2px;">Admin · Jun 12</div>
+            <div style="color:#1e3a5f;">Your course is ready for review. Let us know if you have any questions!</div>
+          </div>
+
+          <!-- Question — styled differently -->
+          <div style="background:#fffbeb; border:1px solid #fbbf24; border-radius:5px; padding:6px; margin-bottom:5px; font-size:9px;">
+            <div style="display:flex; align-items:center; gap:4px; margin-bottom:2px;">
+              <span style="background:#fef3c7; color:#d97706; border-radius:3px; padding:1px 4px; font-size:8px; font-weight:700;">QUESTION</span>
+              <span style="font-weight:600; color:#78350f;">You · Jun 13</span>
+            </div>
+            <div style="color:#78350f;">Will students see different grade category names?</div>
+          </div>
+
+          <!-- Reply to question -->
+          <div style="background:#f0f9ff; border-left:2px solid #38bdf8; border-radius:5px; padding:6px; margin-bottom:5px; font-size:9px;">
+            <div style="font-weight:600; color:#0369a1; margin-bottom:2px;">Admin (reply) · Jun 13</div>
+            <div style="color:#075985;">No — they'll see the same names. The change was internal only.</div>
+          </div>
+
+          <!-- Ask button -->
+          <button style="width:100%; font-size:9px; background:#fff; border:1px dashed #bae6fd; color:#0369a1; border-radius:4px; padding:4px; cursor:pointer; text-align:center;">
+            ❓ Ask a question &nbsp;&nbsp; 💬 Send a message
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Combined thread</h3>
+      <p>Questions and chat messages live in <strong>one unified thread</strong>. Questions are visually distinguished (amber badge) but otherwise flow with the conversation.</p>
+      <ul style="font-size:0.78rem; color:#64748b; margin-top:6px; padding-left:1rem;">
+        <li>Simplest — one section not two</li>
+        <li>Conversation feels natural</li>
+        <li>Harder for admin to track open questions</li>
+        <li>Breaks the existing issue-tracking model</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:1.5rem; text-align:center;">Click a card or reply in the terminal.</p>
