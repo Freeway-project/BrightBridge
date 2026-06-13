@@ -460,8 +460,8 @@ export function InstructorAccordionView({
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Once you approve, we'll begin the final steps to make your course live in Brightspace.
-                You can still message us afterward if you notice anything.
+                Once you have reviewed this information, please approve below so we know you are ready to prepare for your upcoming course offering.
+                (Live shells are created later through Banner when the academic calendar is finalized).
               </p>
 
               {openIssues === null ? (
