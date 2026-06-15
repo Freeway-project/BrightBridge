@@ -130,7 +130,7 @@ interface Props {
   meta: InstructorAccordionCourseMeta
 }
 
-type SectionId = "summary" | "review" | "questions" | "messages" | "approve"
+type SectionId = "summary" | "review" | "questions" | "discussion" | "approve"
 
 const STORAGE_KEY = (courseId: string) => `coursebridge:accordion:${courseId}`
 
@@ -337,10 +337,10 @@ export function InstructorAccordionView({
           </label>
         </AccSection>
 
-        {/* 3 — My Questions */}
+        {/* 3 — Questions & Issues */}
         <AccSection
           id="questions"
-          title="My Questions"
+          title="Questions & Issues"
           icon={<MessageCircleQuestion className="size-4" aria-hidden />}
           badge={
             openQuestions > 0 ? (
@@ -414,10 +414,10 @@ export function InstructorAccordionView({
           )}
         </AccSection>
 
-        {/* 4 — Messages */}
+        {/* 4 — Discussion */}
         <AccSection
-          id="messages"
-          title="Messages"
+          id="discussion"
+          title="Discussion"
           icon={<MessageSquare className="size-4" aria-hidden />}
           badge={
             sharedComments.length > 0 ? (
@@ -426,7 +426,7 @@ export function InstructorAccordionView({
               </span>
             ) : undefined
           }
-          open={openSections.has("messages")}
+          open={openSections.has("discussion")}
           onToggle={toggleSection}
           colorBorder="border-sky-200 dark:border-sky-800"
           colorHeader="bg-sky-50 dark:bg-sky-950"

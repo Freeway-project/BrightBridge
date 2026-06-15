@@ -248,7 +248,7 @@ export async function addCommentAction(issueId: string, input: AddCommentInput):
 export async function getIssuesForCourseAction(
   courseId: string,
   filters?: {
-    phase?: 'migration' | 'staging' | 'provision'
+    phase?: 'migration' | 'staging' | 'provision' | Array<'migration' | 'staging' | 'provision'>
     status?: IssueStatus
     type?: string
     severity?: string
@@ -258,9 +258,17 @@ export async function getIssuesForCourseAction(
     if (!courseId) throw new Error('Course ID is required')
     const pool = getPostgresPool()
     const clauses = ['i.course_id = $1']
-    const values: Array<string> = [courseId]
+    const values: Array<string | string[]> = [courseId]
 
-    if (filters?.phase) { values.push(filters.phase); clauses.push(`i.phase = $${values.length}`) }
+    if (filters?.phase) {
+      if (Array.isArray(filters.phase)) {
+        values.push(filters.phase)
+        clauses.push(`i.phase = ANY($${values.length}::text[])`)
+      } else {
+        values.push(filters.phase)
+        clauses.push(`i.phase = $${values.length}`)
+      }
+    }
     if (filters?.status) { values.push(filters.status); clauses.push(`i.status = $${values.length}`) }
     if (filters?.type) { values.push(filters.type); clauses.push(`i.type = $${values.length}`) }
     if (filters?.severity) { values.push(filters.severity); clauses.push(`i.severity = $${values.length}`) }

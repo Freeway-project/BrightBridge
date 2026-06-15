@@ -100,6 +100,11 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve 
     fix_needed: 'Fix Needed',
     general: 'General',
   }
+  const phaseLabel = {
+    migration: 'Migration',
+    staging: 'Staging',
+    provision: 'Provision',
+  }
 
   return (
     <div className="w-96 border-l bg-card border-border flex flex-col">
@@ -114,6 +119,7 @@ export function IssueDrawer({ issue, phase, onClose, onIssueUpdated, canResolve 
 
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline">{typeLabel[fullIssue.type]}</Badge>
+          <Badge variant="outline">{phaseLabel[fullIssue.phase]}</Badge>
           <Badge className={`text-xs ${statusColors[fullIssue.status]}`}>
             {statusLabel[fullIssue.status]}
           </Badge>

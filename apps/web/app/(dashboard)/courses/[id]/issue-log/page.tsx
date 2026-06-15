@@ -27,7 +27,7 @@ export default async function IssueLogPage({ params }: Props) {
 
   return (
     <>
-      <Topbar title="Course Workspace" subtitle="Step 4 of 5 — Issue Log" courseStatus={course.status} role={ctx.profile.role} />
+      <Topbar title="Course Workspace" subtitle="Step 4 of 5 — Issues" courseStatus={course.status} role={ctx.profile.role} />
       <main className="flex-1 overflow-y-auto p-6">
         <CourseWorkspaceRefreshWrapper
           courseId={id}

@@ -306,7 +306,6 @@ export function PaginatedCourseListView({
                         courses={isActive ? courses : []}
                         total={isActive ? total : (aggregates.statusCounts[status] ?? 0)}
                         isFetching={isActive && isFetching}
-                        canExport={canExport}
                         onClear={clearFilters}
                         sentinelRef={isActive ? sentinelRef : null}
                       />

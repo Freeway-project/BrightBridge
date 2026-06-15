@@ -98,7 +98,9 @@ export default async function CommsCourseDetailPage({ params }: Props) {
               <div className="bg-card border border-border rounded-lg p-6 flex-1 overflow-y-auto">
                 <IssueTracker
                   courseId={id}
-                  phase="migration"
+                  phases={["migration", "staging", "provision"]}
+                  createPhase="migration"
+                  title="Issues & Questions"
                   userRole={context.profile.role}
                 />
               </div>

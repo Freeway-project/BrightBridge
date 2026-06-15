@@ -12,24 +12,40 @@ import type { CourseStatus } from '@coursebridge/workflow'
 
 interface IssueTrackerProps {
   courseId: string
-  phase: IssuePhase
+  phase?: IssuePhase
+  phases?: IssuePhase[]
+  createPhase?: IssuePhase
+  title?: string
   userRole?: string
   courseStatus?: CourseStatus
 }
 
-export function IssueTracker({ courseId, phase, userRole, courseStatus }: IssueTrackerProps) {
+export function IssueTracker({
+  courseId,
+  phase,
+  phases,
+  createPhase,
+  title,
+  userRole,
+  courseStatus,
+}: IssueTrackerProps) {
   const [issues, setIssues] = useState<CourseIssue[]>([])
   const [loading, setLoading] = useState(true)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
+  const activePhases = phases?.length ? phases : (phase ? [phase] : undefined)
+  const primaryPhase: IssuePhase = createPhase ?? phase ?? activePhases?.[0] ?? 'migration'
+
   useEffect(() => {
     loadIssues()
-  }, [courseId, phase])
+  }, [courseId, phase, phases])
 
   async function loadIssues() {
     try {
       setLoading(true)
-      const data = await getIssuesForCourseAction(courseId, { phase })
+      const data = await getIssuesForCourseAction(courseId, {
+        phase: activePhases && activePhases.length === 1 ? activePhases[0] : activePhases,
+      })
       setIssues(data)
     } catch (error) {
       console.error('Failed to load issues:', error)
@@ -44,9 +60,9 @@ export function IssueTracker({ courseId, phase, userRole, courseStatus }: IssueT
   }
 
   const canCreateIssue =
-    (phase === 'migration' && ['standard_user', 'admin_full', 'super_admin'].includes(userRole || '')) ||
-    (phase === 'staging' && ['admin_full', 'super_admin'].includes(userRole || '')) ||
-    (phase === 'provision' && ['admin_full', 'super_admin'].includes(userRole || ''))
+    (primaryPhase === 'migration' && ['standard_user', 'admin_full', 'super_admin'].includes(userRole || '')) ||
+    (primaryPhase === 'staging' && ['admin_full', 'super_admin'].includes(userRole || '')) ||
+    (primaryPhase === 'provision' && ['admin_full', 'super_admin'].includes(userRole || ''))
 
   const escalations = issues.filter(i => i.type === 'escalation')
   const openEscalations = escalations.filter(i => i.status !== 'resolved')
@@ -59,11 +75,11 @@ export function IssueTracker({ courseId, phase, userRole, courseStatus }: IssueT
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-lg font-semibold">Issues</h3>
+        <h3 className="text-lg font-semibold">{title ?? (activePhases?.includes('provision') ? 'Issues & Questions' : 'Issues')}</h3>
         {canCreateIssue && (
           <IssueCreateDialog
             courseId={courseId}
-            phase={phase}
+            phase={primaryPhase}
             open={createDialogOpen}
             onOpenChange={setCreateDialogOpen}
             onCreated={handleIssueCreated}
@@ -101,7 +117,7 @@ export function IssueTracker({ courseId, phase, userRole, courseStatus }: IssueT
       <IssueList
         issues={issues}
         loading={loading}
-        phase={phase}
+        phase={primaryPhase}
         onIssuesChange={loadIssues}
         canResolve={['super_admin', 'admin_full', 'admin_viewer'].includes(userRole ?? '')}
       />

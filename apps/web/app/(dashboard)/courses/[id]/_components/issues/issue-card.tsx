@@ -37,6 +37,11 @@ export function IssueCard({ issue, isSelected, onClick }: IssueCardProps) {
     fix_needed: 'Fix Needed',
     general: 'General',
   }
+  const phaseLabel = {
+    migration: 'Migration',
+    staging: 'Staging',
+    provision: 'Provision',
+  }
 
   const commentCount = issue.comment_count || 0
 
@@ -54,9 +59,14 @@ export function IssueCard({ issue, isSelected, onClick }: IssueCardProps) {
         {/* Title and Type */}
         <div className="flex items-start justify-between gap-2">
           <h4 className="font-semibold text-sm flex-1 line-clamp-2 text-foreground">{issue.title}</h4>
-          <Badge variant="secondary" className="shrink-0 text-xs whitespace-nowrap">
-            {typeLabel[issue.type]}
-          </Badge>
+          <div className="flex shrink-0 flex-wrap gap-1 justify-end">
+            <Badge variant="secondary" className="text-xs whitespace-nowrap">
+              {typeLabel[issue.type]}
+            </Badge>
+            <Badge variant="outline" className="text-xs whitespace-nowrap">
+              {phaseLabel[issue.phase]}
+            </Badge>
+          </div>
         </div>
 
         {/* Status and Severity */}
