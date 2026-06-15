@@ -15,7 +15,7 @@ export const runtime = "nodejs"
 // non-streaming request; give the route headroom before it self-aborts.
 export const maxDuration = 300
 
-const CLAUDE_MODEL = "claude-sonnet-4-20250514"
+const CLAUDE_MODEL = "claude-sonnet-4-6"
 
 // The Anthropic API always requires a max_tokens ceiling — there is no
 // "unlimited" value. We set it high enough that the token cap is never what
@@ -66,7 +66,17 @@ async function callClaude(
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
     },
-    body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, messages }),
+    // This is a PDF/Word -> structured-output extraction task, not a reasoning
+    // task. Disable thinking and use low effort so latency and cost stay close
+    // to the prior (non-thinking) Sonnet 4 behavior — Sonnet 4.6 otherwise
+    // defaults to adaptive thinking at high effort.
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: maxTokens,
+      thinking: { type: "disabled" },
+      output_config: { effort: "low" },
+      messages,
+    }),
   })
 
   if (!res.ok) {
