@@ -140,13 +140,14 @@ function IssueRow({ issue }: { issue: IssueLogResponseData["issues"][number] }) 
   )
 }
 
-export function InstructorReviewDetail({ responses, sectionKeyById }: Props) {
+export function InstructorReviewDetail({ course, responses, sectionKeyById }: Props) {
   const byKey = new Map<string, ReviewResponse>()
   for (const r of responses) {
     const key = sectionKeyById[r.section_id]
     if (key) byKey.set(key, r)
   }
 
+  const taName = course.ta?.name ?? course.ta?.email ?? null
   const metadata = byKey.get("course_metadata")?.response_data as MetadataResponseData | undefined
   const matrix = byKey.get("review_matrix")?.response_data as ReviewMatrixResponseData | undefined
   const syllabus = (byKey.get("syllabus_review")?.response_data ??
@@ -197,9 +198,20 @@ export function InstructorReviewDetail({ responses, sectionKeyById }: Props) {
                 <dd className="sm:col-span-2 leading-relaxed whitespace-pre-wrap">{metadata.migration_notes}</dd>
               </div>
             ) : null}
+            {taName && (
+              <div className="sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-6">
+                <dt className="text-muted-foreground">Reviewed by</dt>
+                <dd className="sm:col-span-2 font-medium">{taName}</dd>
+              </div>
+            )}
           </dl>
         </Section>
       ) : null}
+      {!metadata && taName && (
+        <p className="text-sm text-muted-foreground">
+          Reviewed by <span className="font-medium text-foreground">{taName}</span>
+        </p>
+      )}
 
       {matrix?.items?.length ? (
         <Section title="Course review">

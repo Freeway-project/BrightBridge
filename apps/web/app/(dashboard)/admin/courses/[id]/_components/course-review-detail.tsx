@@ -7,6 +7,7 @@ import type {
   MetadataResponseData,
   ReviewMatrixResponseData,
   SyllabusGradebookResponseData,
+  IssueLogResponseData,
 } from "@/lib/workspace/types"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,7 +22,7 @@ type Props = {
   sectionKeyById: Record<string, string>
 }
 
-export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
+export function CourseReviewDetail({ course, responses, sectionKeyById }: Props) {
   const byKey: Record<string, ReviewResponse> = {}
   for (const r of responses) {
     const key = sectionKeyById[r.section_id]
@@ -31,17 +32,22 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
   const meta = byKey["course_metadata"]?.response_data as MetadataResponseData | undefined
   const matrix = byKey["review_matrix"]?.response_data as ReviewMatrixResponseData | undefined
   const syllabus = byKey["syllabus_review"]?.response_data as SyllabusGradebookResponseData | undefined
+  const issueLog = byKey["general_notes"]?.response_data as IssueLogResponseData | undefined
 
   const metaStatus = byKey["course_metadata"]?.status ?? null
   const matrixStatus = byKey["review_matrix"]?.status ?? null
   const syllabusStatus = byKey["syllabus_review"]?.status ?? null
+  const issueLogStatus = byKey["general_notes"]?.status ?? null
+
+  const taName = course.ta?.name ?? course.ta?.email ?? null
 
   return (
     <div className="space-y-[var(--card-spacing,1rem)]">
-      <ReviewProgressSummary metaStatus={metaStatus} matrixStatus={matrixStatus} syllabusStatus={syllabusStatus} />
-      <MetadataCard data={meta} responseStatus={metaStatus} />
+      <ReviewProgressSummary metaStatus={metaStatus} matrixStatus={matrixStatus} syllabusStatus={syllabusStatus} issueLogStatus={issueLogStatus} />
+      <MetadataCard data={meta} responseStatus={metaStatus} taName={taName} />
       <ReviewMatrixCard data={matrix} responseStatus={matrixStatus} />
       <SyllabusCard data={syllabus} responseStatus={syllabusStatus} />
+      <IssueLogCard data={issueLog} responseStatus={issueLogStatus} />
     </div>
   )
 }
@@ -49,19 +55,21 @@ export function CourseReviewDetail({ responses, sectionKeyById }: Props) {
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
 function ReviewProgressSummary({
-  metaStatus, matrixStatus, syllabusStatus,
+  metaStatus, matrixStatus, syllabusStatus, issueLogStatus,
 }: {
   metaStatus: "draft" | "submitted" | null
   matrixStatus: "draft" | "submitted" | null
   syllabusStatus: "draft" | "submitted" | null
+  issueLogStatus: "draft" | "submitted" | null
 }) {
   const tiles = [
-    { label: "Metadata", status: metaStatus, icon: FileText },
-    { label: "Review Matrix", status: matrixStatus, icon: ListChecks },
+    { label: "Metadata",     status: metaStatus,     icon: FileText },
+    { label: "Review Matrix", status: matrixStatus,  icon: ListChecks },
     { label: "Syllabus & GB", status: syllabusStatus, icon: BookOpen },
+    { label: "Issue Log",    status: issueLogStatus,  icon: AlertTriangle },
   ]
 
-  const submittedCount = [metaStatus, matrixStatus, syllabusStatus].filter((s) => s === "submitted").length
+  const submittedCount = [metaStatus, matrixStatus, syllabusStatus, issueLogStatus].filter((s) => s === "submitted").length
 
   return (
     <Card className="border-border">
@@ -70,13 +78,13 @@ function ReviewProgressSummary({
           <CardTitle className="text-sm font-semibold">TA Review Progress</CardTitle>
           <span className={cn(
             "text-xs font-semibold px-2 py-0.5 rounded-full",
-            submittedCount === 3
+            submittedCount === 4
               ? "bg-green-500/15 text-green-700 dark:text-green-400"
               : submittedCount > 0
                 ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
                 : "bg-muted text-muted-foreground"
           )}>
-            {submittedCount}/3 sections submitted
+            {submittedCount}/4 sections submitted
           </span>
         </div>
       </CardHeader>
@@ -194,9 +202,11 @@ function Field({ label, value }: { label: string; value?: string | null }) {
 function MetadataCard({
   data,
   responseStatus,
+  taName,
 }: {
   data: MetadataResponseData | undefined
   responseStatus: "draft" | "submitted" | null
+  taName: string | null
 }) {
   return (
     <CollapsibleCard title="Metadata" chip={<SectionStatusChip responseStatus={responseStatus} />}>
@@ -212,6 +222,11 @@ function MetadataCard({
           <div className="sm:col-span-2">
             <Field label="Migration Notes" value={data.migration_notes} />
           </div>
+          {taName && (
+            <div className="sm:col-span-2">
+              <Field label="Reviewer (TA)" value={taName} />
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">No data saved yet.</p>
@@ -356,6 +371,85 @@ function ReviewMatrixCard({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">No data saved yet.</p>
+      )}
+    </CollapsibleCard>
+  )
+}
+
+const WORKSPACE_ISSUE_STATUS: Record<string, { label: string; className: string }> = {
+  open:      { label: "Open",      className: "text-orange-600 dark:text-orange-400" },
+  fixed:     { label: "Fixed",     className: "text-emerald-600 dark:text-emerald-400" },
+  escalated: { label: "Escalated", className: "text-purple-600 dark:text-purple-400" },
+  resolved:  { label: "Resolved",  className: "text-emerald-600 dark:text-emerald-400" },
+}
+
+const WORKSPACE_SEVERITY: Record<string, { label: string; className: string }> = {
+  minor:    { label: "Minor",    className: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/30" },
+  major:    { label: "Major",    className: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/30" },
+  critical: { label: "Critical", className: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30" },
+}
+
+function IssueLogCard({
+  data,
+  responseStatus,
+}: {
+  data: IssueLogResponseData | undefined
+  responseStatus: "draft" | "submitted" | null
+}) {
+  const issues = data?.issues?.filter((i) => i.description?.trim() || i.type?.trim()) ?? []
+
+  return (
+    <CollapsibleCard title="Issue Log" chip={<SectionStatusChip responseStatus={responseStatus} />}>
+      {issues.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No issues logged in the TA review.</p>
+      ) : (
+        <div className="grid gap-2">
+          {issues.map((issue) => {
+            const sev = WORKSPACE_SEVERITY[issue.severity] ?? WORKSPACE_SEVERITY.minor
+            const stat = WORKSPACE_ISSUE_STATUS[issue.status] ?? WORKSPACE_ISSUE_STATUS.open
+            return (
+              <div
+                key={issue.id}
+                className="flex flex-col gap-1 rounded-md border border-border p-3"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-mono text-muted-foreground">{issue.type}</span>
+                      <span className={cn("rounded-full border px-2 py-0.5 text-xs font-semibold", sev.className)}>
+                        {sev.label}
+                      </span>
+                      <span className={cn("text-xs font-semibold", stat.className)}>
+                        {stat.label}
+                      </span>
+                    </div>
+                    {issue.location && (
+                      <p className="text-xs text-muted-foreground">
+                        Location: <span className="font-mono">{issue.location}</span>
+                      </p>
+                    )}
+                    {issue.description?.trim() && (
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {issue.description}
+                      </p>
+                    )}
+                  </div>
+                  {issue.direct_link?.trim() && (
+                    <a
+                      href={issue.direct_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-primary transition-colors border border-transparent hover:border-border"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink className="size-4" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       )}
     </CollapsibleCard>
   )

@@ -3,47 +3,13 @@
 import { getPostgresPool } from '@/lib/postgres/pool'
 
 export async function notifyMentionedUsersAction(
-  issueId: string,
-  commentId: string,
-  mentionedProfileIds: string[],
-  mentionerName: string
+  _issueId: string,
+  _commentId: string,
+  _mentionedProfileIds: string[],
+  _mentionerName: string
 ): Promise<void> {
-  try {
-    if (!issueId || !commentId) throw new Error('Issue ID and comment ID are required')
-    if (!mentionedProfileIds || mentionedProfileIds.length === 0) return
-
-    const pool = getPostgresPool()
-    const issueResult = await pool.query<{ id: string; title: string; course_id: string; phase: string }>(
-      'SELECT id, title, course_id, phase FROM course_issues WHERE id = $1 LIMIT 1',
-      [issueId],
-    )
-    const issue = issueResult.rows[0] ?? null
-
-    if (!issue) {
-      console.error('[notifyMentionedUsersAction] Failed to fetch issue for mention notification')
-      return
-    }
-
-    // In a production system, this would send notifications via:
-    // - In-app notifications (create notification records in DB)
-    // - Email notifications
-    // - Push notifications
-    // For now, we just log the mention for audit purposes
-
-    console.log('[notifyMentionedUsersAction] Mentions:', {
-      issue_id: issueId,
-      comment_id: commentId,
-      issue_title: issue?.title,
-      mentioned_count: mentionedProfileIds.length,
-      mentioner: mentionerName,
-      phase: issue?.phase,
-    })
-
-    // TODO: Implement notification system
-  } catch (err) {
-    console.error('[notifyMentionedUsersAction] Error:', err)
-    // Don't throw - notifications are non-critical
-  }
+  // Mention notifications are surfaced at query time in
+  // lib/notifications/queries.ts (getMentionNotifications).
 }
 
 export async function getUnreadMentionsAction(userId: string): Promise<number> {

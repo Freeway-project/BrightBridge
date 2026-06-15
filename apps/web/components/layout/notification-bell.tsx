@@ -5,7 +5,7 @@ import { Bell } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
-const POLL_INTERVAL = 60_000 // 1 min
+const POLL_INTERVAL = 15_000 // 15s — matches NotificationProvider
 
 export function NotificationBell() {
   const [count, setCount] = useState(0)

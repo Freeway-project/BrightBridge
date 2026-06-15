@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TweakableContent } from "@/components/shared/tweakable-content";
 import { getNotificationsPageData, type NotificationItem } from "@/lib/notifications/queries";
 import { cn } from "@/lib/utils";
+import { HideButton } from "./_components/notification-row-client";
+import { ClearAllButton } from "./_components/clear-all-button";
 
 const KIND_ICON = {
   assignment: Bell,
@@ -68,7 +70,10 @@ export default async function NotificationsPage() {
                   <BellRing className="size-4 text-yellow-400" />
                   Pending attention
                 </span>
-                <Badge className="border-yellow-400/30 bg-yellow-500/15 text-yellow-200">{pending.length}</Badge>
+                <div className="flex items-center gap-2">
+                  <ClearAllButton disabled={pending.length === 0} />
+                  <Badge className="border-yellow-400/30 bg-yellow-500/15 text-yellow-200">{pending.length}</Badge>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -184,7 +189,8 @@ function NotificationRow({ item }: { item: NotificationItem }) {
           </div>
         </div>
       </div>
-      <div className="flex items-center sm:justify-end">
+      <div className="flex items-center gap-2 sm:justify-end">
+        <HideButton notificationId={item.id} />
         <Button asChild size="sm" variant="outline" className="h-8 gap-1.5">
           <Link href={item.href}>
             <ExternalLink className="size-3.5" />

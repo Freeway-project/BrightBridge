@@ -104,6 +104,9 @@ const ADMIN_PENDING_STATUSES = new Set<CourseStatus>([
   "instructor_approved",
 ]);
 
+/** Comments older than this window are informational, not "pending attention". */
+const COMMENT_PENDING_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
 export type NotificationsPageData = {
   notifications: NotificationItem[];
   pendingCount: number;
@@ -126,12 +129,14 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       return { notifications: [], pendingCount: 0, role, error: false };
     }
 
-    const [courses, issues, comments, supportMessages, reassignments] = await Promise.all([
+    const [courses, issues, comments, supportMessages, reassignments, dismissedIds, mentions] = await Promise.all([
       getRelevantCourses(accessibleCourseIds, role),
       getRelevantIssues(accessibleCourseIds),
       getRecentComments(accessibleCourseIds, context.profile.id),
       role === "super_admin" ? getOpenSupportMessages() : Promise.resolve([]),
       getRecentReassignments(context.profile.id, isAdmin),
+      getDismissedIds(context.profile.id),
+      getMentionNotifications(context.profile.id, role),
     ]);
 
     const notifications = [
@@ -140,7 +145,9 @@ export async function getNotificationsPageData(): Promise<NotificationsPageData>
       ...comments.map((comment) => commentToNotification(comment, role)),
       ...supportMessages.map(supportMessageToNotification),
       ...reassignments.map((r) => reassignmentToNotification(r, isAdmin)),
-    ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+      ...mentions,
+    ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+      .filter((n) => !dismissedIds.has(n.id));
 
     return {
       notifications,
@@ -464,7 +471,7 @@ function commentToNotification(comment: CommentRow, role: Role): NotificationIte
     meta: `By ${authorName}`,
     href: getIssueHref(issue?.course_id ?? "", role),
     createdAt: comment.created_at,
-    pending: true,
+    pending: Date.now() - Date.parse(comment.created_at) < COMMENT_PENDING_WINDOW_MS,
   };
 }
 
@@ -553,6 +560,68 @@ function formatSeverity(severity: string) {
 
 function formatIssueStatus(status: string) {
   return status.replace(/_/g, " ");
+}
+
+async function getDismissedIds(userId: string): Promise<Set<string>> {
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{ notification_id: string }>(
+    `SELECT notification_id FROM dismissed_notifications WHERE user_id = $1`,
+    [userId],
+  );
+  return new Set(rows.map((r) => r.notification_id));
+}
+
+async function getMentionNotifications(
+  profileId: string,
+  role: Role,
+): Promise<NotificationItem[]> {
+  const pool = getPostgresPool();
+  const { rows } = await pool.query<{
+    comment_id: string;
+    issue_id: string;
+    body: string;
+    course_id: string;
+    issue_title: string | null;
+    author_name: string | null;
+    created_at: string;
+  }>(
+    `
+      SELECT
+        m.comment_id,
+        c.issue_id,
+        c.body,
+        i.course_id,
+        i.title AS issue_title,
+        p.full_name AS author_name,
+        c.created_at
+      FROM issue_comment_mentions m
+      JOIN course_issue_comments c ON c.id = m.comment_id
+      JOIN course_issues i        ON i.id = c.issue_id
+      LEFT JOIN profiles p        ON p.id = c.author_id
+      WHERE m.mentioned_profile_id = $1
+        AND c.is_system_message = false
+      ORDER BY c.created_at DESC
+      LIMIT 25
+    `,
+    [profileId],
+  );
+
+  return rows.map((row) => {
+    const preview = row.body.length > 120 ? `${row.body.slice(0, 120)}...` : row.body;
+    const authorName = row.author_name ?? "Team Member";
+    return {
+      id: `mention-${row.comment_id}`,
+      kind: "comment" as const,
+      tone: "default" as const,
+      title: `You were mentioned in a comment on "${row.issue_title ?? "an issue"}"`,
+      description: preview,
+      courseTitle: null,
+      meta: `By ${authorName}`,
+      href: getIssueHref(row.course_id, role),
+      createdAt: row.created_at,
+      pending: Date.now() - Date.parse(row.created_at) < COMMENT_PENDING_WINDOW_MS,
+    };
+  });
 }
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
