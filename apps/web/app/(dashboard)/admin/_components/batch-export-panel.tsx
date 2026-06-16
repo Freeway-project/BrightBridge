@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ function buildCsv(rows: BatchMailMergeRow[]): string {
   ];
   const escape = (v: string) => {
     const s = v.replace(/\r?\n/g, " ");
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    return /[",]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return [
     header,
@@ -65,7 +65,6 @@ export function BatchExportPanel({ courses }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
   const [accessMap, setAccessMap] = useState<Record<string, AccessState>>({});
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
 
   const allSelected = courses.length > 0 && selectedIds.size === courses.length;
 
@@ -84,21 +83,25 @@ export function BatchExportPanel({ courses }: Props) {
   function handleExport() {
     const ids = Array.from(selectedIds);
     startTransition(async () => {
-      const result = await batchExportAndSendAction(ids);
-      if (result.rows.length > 0) {
-        downloadCsv(result.rows);
-        toast.success(
-          result.skipped > 0
-            ? `Exported ${result.rows.length} course${result.rows.length !== 1 ? "s" : ""}, skipped ${result.skipped} (no instructor assigned).`
-            : `Exported ${result.rows.length} course${result.rows.length !== 1 ? "s" : ""}.`,
-        );
-        setSelectedIds(new Set());
-      } else {
-        toast.error(
-          result.skipped > 0
-            ? `All ${result.skipped} selected courses were skipped — check instructor assignments.`
-            : "No courses exported.",
-        );
+      try {
+        const result = await batchExportAndSendAction(ids);
+        if (result.rows.length > 0) {
+          downloadCsv(result.rows);
+          toast.success(
+            result.skipped > 0
+              ? `Exported ${result.rows.length} course${result.rows.length !== 1 ? "s" : ""}, skipped ${result.skipped} (no instructor assigned).`
+              : `Exported ${result.rows.length} course${result.rows.length !== 1 ? "s" : ""}.`,
+          );
+          setSelectedIds(new Set());
+        } else {
+          toast.error(
+            result.skipped > 0
+              ? `All ${result.skipped} selected courses were skipped — check instructor assignments.`
+              : "No courses exported.",
+          );
+        }
+      } catch {
+        toast.error("Export failed. Please try again.");
       }
     });
   }
@@ -129,8 +132,6 @@ export function BatchExportPanel({ courses }: Props) {
         },
       )
       .subscribe();
-
-    channelRef.current = channel;
 
     return () => {
       supabase.removeChannel(channel);
