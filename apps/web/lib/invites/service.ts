@@ -194,11 +194,15 @@ export async function recordInviteAccess(inviteId: string): Promise<void> {
 
   // Read current state, then update — slightly non-atomic but acceptable for
   // analytics tracking where race conditions produce slightly wrong counts.
-  const { data: current } = await admin
+  const { data: current, error: readError } = await admin
     .from("review_invites")
     .select("access_count, first_accessed_at")
     .eq("id", inviteId)
-    .single();
+    .maybeSingle();
+
+  if (readError) {
+    throw new Error(`Failed to read invite before access record: ${readError.message}`);
+  }
 
   const { error } = await admin
     .from("review_invites")
