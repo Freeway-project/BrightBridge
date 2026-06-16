@@ -111,6 +111,8 @@ export function BatchExportPanel({ courses }: Props) {
     if (courses.length === 0) return;
 
     const supabase = createClient();
+    if (!supabase) return;
+
     const channel = supabase
       .channel("batch-invite-access")
       .on(
