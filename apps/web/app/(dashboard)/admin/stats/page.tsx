@@ -5,7 +5,7 @@ import { getAdminStatsData } from "@/lib/admin/queries"
 import { Topbar } from "@/components/layout/topbar"
 import { TweakableContent } from "@/components/shared/tweakable-content"
 import { ActivityTrend } from "@/components/admin/stats/activity-trend"
-import { PhaseDetailDonut } from "@/components/admin/stats/phase-detail-donut"
+import { OperationalStatusChart } from "@/components/admin/stats/operational-status-chart"
 import { PipelineTimeline } from "@/components/admin/stats/pipeline-timeline"
 import { StatsOverview } from "@/components/admin/stats/stats-overview"
 import { StuckCoursesList } from "@/components/admin/stats/stuck-courses-list"
@@ -21,13 +21,11 @@ export default async function AdminStatsPage() {
     data.statusCounts.map((s) => [s.status, s.count]),
   )
   const phases = getPhaseBreakdown(countByStatus)
-  const stagingPhase = phases.find((p) => p.key === "staging")
-
   return (
     <>
       <Topbar
         title="Stats"
-        subtitle="Where every migrated course sits in the pipeline"
+        subtitle="Current operational queue, handoff readiness, and bottlenecks"
         role={context.profile.role}
       />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background">
@@ -36,14 +34,8 @@ export default async function AdminStatsPage() {
 
           <StatsOverview totalCourses={data.totalCourses} phases={phases} />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {stagingPhase && (
-              <PhaseDetailDonut
-                phase={stagingPhase}
-                title="Staging breakdown"
-                caption="Where the bulk of in-flight work sits today"
-              />
-            )}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)]">
+            <OperationalStatusChart phases={phases} totalCourses={data.totalCourses} />
             <WorkloadChart taWorkload={data.taWorkload} />
           </div>
 

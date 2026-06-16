@@ -207,8 +207,22 @@ function normalizeSearchTerm(value: string | undefined) {
     .trim();
 }
 
+function getPgErrorCode(error: unknown): string | null {
+  return !!error && typeof error === "object" && "code" in error
+    ? ((error as { code?: string }).code ?? null)
+    : null;
+}
+
 function isMissingRelationError(error: unknown) {
-  return !!error && typeof error === "object" && "code" in error && (error as { code?: string }).code === "42P01";
+  return getPgErrorCode(error) === "42P01";
+}
+
+function isMissingColumnError(error: unknown) {
+  return getPgErrorCode(error) === "42703";
+}
+
+function isMissingSchemaDependencyError(error: unknown) {
+  return isMissingRelationError(error) || isMissingColumnError(error);
 }
 
 function nonEmptyString(value: unknown): string | null {
@@ -247,6 +261,24 @@ const AUDIT_EVENT_FROM_SQL = `
   LEFT JOIN courses c ON c.id = e.course_id
   LEFT JOIN profiles p ON p.id = e.actor_id
   LEFT JOIN profiles ob ON ob.id = e.acting_on_behalf_of
+`;
+
+const AUDIT_EVENT_FROM_LEGACY_SQL = `
+  SELECT
+    e.id,
+    e.from_status,
+    e.to_status,
+    e.note,
+    e.created_at,
+    e.actor_role,
+    c.id AS course_id,
+    c.title AS course_title,
+    p.full_name AS actor_name,
+    p.email AS actor_email,
+    NULL::text AS on_behalf_of_name
+  FROM course_status_events e
+  LEFT JOIN courses c ON c.id = e.course_id
+  LEFT JOIN profiles p ON p.id = e.actor_id
 `;
 
 function mapAuditEventRow(row: AuditEventQueryRow): AuditEvent {
@@ -917,12 +949,22 @@ export function createPostgresCourseRepository(): CourseRepository {
 
     async listAuditEvents(limit) {
       const pool = getPostgresPool();
-      const { rows } = await pool.query<AuditEventQueryRow>(
-        `${AUDIT_EVENT_FROM_SQL} ORDER BY e.created_at DESC LIMIT $1`,
-        [limit],
-      );
+      try {
+        const { rows } = await pool.query<AuditEventQueryRow>(
+          `${AUDIT_EVENT_FROM_SQL} ORDER BY e.created_at DESC LIMIT $1`,
+          [limit],
+        );
 
-      return rows.map(mapAuditEventRow);
+        return rows.map(mapAuditEventRow);
+      } catch (error) {
+        if (!isMissingSchemaDependencyError(error)) throw error;
+
+        const { rows } = await pool.query<AuditEventQueryRow>(
+          `${AUDIT_EVENT_FROM_LEGACY_SQL} ORDER BY e.created_at DESC LIMIT $1`,
+          [limit],
+        );
+        return rows.map(mapAuditEventRow);
+      }
     },
 
     async listAuditEventsPage(page, pageSize) {
@@ -930,24 +972,47 @@ export function createPostgresCourseRepository(): CourseRepository {
       const safePage = Math.max(1, Math.floor(page));
       const offset = (safePage - 1) * pageSize;
 
-      const [countResult, pageResult] = await Promise.all([
-        pool.query<{ total: string }>(
-          `SELECT COUNT(*)::text AS total FROM course_status_events`,
-        ),
-        pool.query<AuditEventQueryRow>(
-          `${AUDIT_EVENT_FROM_SQL} ORDER BY e.created_at DESC LIMIT $1 OFFSET $2`,
-          [pageSize, offset],
-        ),
-      ]);
+      try {
+        const [countResult, pageResult] = await Promise.all([
+          pool.query<{ total: string }>(
+            `SELECT COUNT(*)::text AS total FROM course_status_events`,
+          ),
+          pool.query<AuditEventQueryRow>(
+            `${AUDIT_EVENT_FROM_SQL} ORDER BY e.created_at DESC LIMIT $1 OFFSET $2`,
+            [pageSize, offset],
+          ),
+        ]);
 
-      const total = Number(countResult.rows[0]?.total ?? "0");
-      return {
-        data: pageResult.rows.map(mapAuditEventRow),
-        total,
-        page: safePage,
-        pageSize,
-        totalPages: Math.max(1, Math.ceil(total / pageSize)),
-      };
+        const total = Number(countResult.rows[0]?.total ?? "0");
+        return {
+          data: pageResult.rows.map(mapAuditEventRow),
+          total,
+          page: safePage,
+          pageSize,
+          totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        };
+      } catch (error) {
+        if (!isMissingSchemaDependencyError(error)) throw error;
+
+        const [countResult, pageResult] = await Promise.all([
+          pool.query<{ total: string }>(
+            `SELECT COUNT(*)::text AS total FROM course_status_events`,
+          ),
+          pool.query<AuditEventQueryRow>(
+            `${AUDIT_EVENT_FROM_LEGACY_SQL} ORDER BY e.created_at DESC LIMIT $1 OFFSET $2`,
+            [pageSize, offset],
+          ),
+        ]);
+
+        const total = Number(countResult.rows[0]?.total ?? "0");
+        return {
+          data: pageResult.rows.map(mapAuditEventRow),
+          total,
+          page: safePage,
+          pageSize,
+          totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        };
+      }
     },
 
     async listCourseStatusEvents(courseId) {

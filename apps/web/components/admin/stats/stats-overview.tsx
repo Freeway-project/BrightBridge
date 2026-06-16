@@ -8,55 +8,61 @@ interface Props {
   phases: PhaseBreakdown[]
 }
 
-/**
- * Four plain-English KPIs for admin/provost readers — derived from the
- * canonical phase breakdown so they always sum back to totalCourses.
- *
- *   Imported            = totalCourses
- *   Awaiting review     = migration + staging phase totals
- *   With instructor     = instructor phase total
- *   Live in Brightspace = provision phase total
- */
 export function StatsOverview({ totalCourses, phases }: Props) {
   const phaseTotal = (key: PhaseBreakdown["key"]) =>
     phases.find((p) => p.key === key)?.total ?? 0
 
-  const awaitingReview = phaseTotal("migration") + phaseTotal("staging")
+  const statusTotal = (status: string) =>
+    phases.flatMap((phase) => phase.statuses).find((entry) => entry.status === status)?.count ?? 0
+
+  const migrationBacklog = phaseTotal("migration")
   const withInstructor = phaseTotal("instructor")
-  const live = phaseTotal("provision")
+  const readyForInstructor = statusTotal("ready_for_instructor")
+  const waitingOnAdmin = statusTotal("waiting_on_admin")
 
   const pct = (n: number) =>
-    totalCourses > 0 ? `${Math.max(1, Math.round((n / totalCourses) * 100))}% of total` : "—"
+    totalCourses > 0 ? `${Math.round((n / totalCourses) * 100)}% of total` : "0% of total"
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
       <StatCard
-        label="Imported"
+        label="Total Inventory"
         value={totalCourses}
         icon="book-open"
         index={0}
-        sub="courses migrated from Moodle"
+        sub="all migrated courses in CourseBridge"
       />
       <StatCard
-        label="Awaiting review"
-        value={awaitingReview}
-        icon="clock"
-        index={1}
-        sub={awaitingReview > 0 ? pct(awaitingReview) : "nothing in queue"}
-      />
-      <StatCard
-        label="With instructor"
-        value={withInstructor}
+        label="Ready For Instructor"
+        value={readyForInstructor}
         icon="user-check"
-        index={2}
-        sub={withInstructor > 0 ? "instructor action needed" : "none in instructor stage"}
+        index={1}
+        accent="#2563eb"
+        sub={readyForInstructor > 0 ? `${pct(readyForInstructor)} awaiting handoff` : "nothing queued for handoff"}
       />
       <StatCard
-        label="Live in Brightspace"
-        value={live}
+        label="Waiting On Admin"
+        value={waitingOnAdmin}
+        icon="clock"
+        index={2}
+        accent="#f59e0b"
+        sub={waitingOnAdmin > 0 ? `${pct(waitingOnAdmin)} needs admin action` : "no admin queue right now"}
+      />
+      <StatCard
+        label="With Instructor"
+        value={withInstructor}
         icon="check-square"
         index={3}
-        sub={live > 0 ? `${pct(live)} provisioned` : "no courses provisioned yet"}
+        accent="#d97706"
+        sub={withInstructor > 0 ? `${pct(withInstructor)} in instructor review` : "none currently with instructors"}
+      />
+      <StatCard
+        label="Migration Leftovers"
+        value={migrationBacklog}
+        icon="alert-triangle"
+        index={4}
+        accent="#64748b"
+        sub={migrationBacklog > 0 ? "small upstream tail; lower priority" : "migration phase effectively cleared"}
       />
     </div>
   )
