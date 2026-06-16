@@ -1,1 +1,6 @@
-npm run db:backup:prod
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+if [ "$BACKUP_ON_COMMIT" = "1" ]; then
+  npm run db:backup:prod
+fi
