@@ -133,7 +133,7 @@ export async function getAdminCourseDetail(courseId: string): Promise<AdminCours
 export async function getReadyForInstructorCourses(): Promise<ReadyForInstructorCourse[]> {
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const admin = createAdminClient();
-  if (!admin) throw new Error("Admin client unavailable — check SUPABASE_SERVICE_ROLE_KEY.");
+  if (!admin) return []; // Supabase env vars not configured — tab shows empty state
 
   // Step 1: fetch courses with status ready_for_instructor that have an instructor assignment
   const { data: courseData, error: courseError } = await admin
