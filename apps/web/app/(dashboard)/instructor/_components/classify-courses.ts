@@ -30,19 +30,19 @@ export function bucketForStatus(status: CourseStatus): InstructorBucket {
 export function actionLabelForStatus(status: CourseStatus): string {
   switch (status) {
     case "sent_to_instructor":
-    case "instructor_viewing":   return "Ready for your review"
-    case "instructor_questions": return "Awaiting team response"
-    case "instructor_approved":  return "Approved — awaiting final sign-off"
-    case "final_approved":       return "Approved"
-    case "course_created":       return "Awaiting TA assignment"
-    case "assigned_to_ta":       return "TA assigned — not yet started"
-    case "ta_review_in_progress":return "TA review in progress"
-    case "submitted_to_admin":   return "Submitted — awaiting admin review"
-    case "admin_changes_requested": return "Admin requested changes"
-    case "waiting_on_admin":     return "Waiting on admin"
-    case "staging_in_progress":  return "Staging in progress"
-    case "ready_for_instructor": return "Ready to send to instructor"
-    default:                     return "In progress"
+    case "instructor_viewing":      return "Ready for your review"
+    case "instructor_questions":    return "Your question is with the team — we'll be in touch"
+    case "instructor_approved":     return "Approved — awaiting final sign-off"
+    case "final_approved":          return "Fully approved"
+    case "course_created":          return "Team is assigning a reviewer"
+    case "assigned_to_ta":          return "Queued for review"
+    case "ta_review_in_progress":   return "Team is reviewing your course"
+    case "submitted_to_admin":      return "Review complete — awaiting final approval"
+    case "admin_changes_requested": return "Team is making updates"
+    case "waiting_on_admin":        return "Awaiting final approval"
+    case "staging_in_progress":     return "Team is building your course shell"
+    case "ready_for_instructor":    return "Almost ready — being prepared for you"
+    default:                        return "In progress"
   }
 }
 

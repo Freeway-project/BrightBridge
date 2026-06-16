@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
-import { ArrowRight, CheckCircle2, ChevronDown, Clock, GraduationCap } from "lucide-react"
+import { ArrowRight, CheckCircle2, ChevronDown, Clock, GraduationCap, Info } from "lucide-react"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
@@ -78,11 +78,14 @@ function CourseGroup({
   items,
   icon,
   defaultOpen = false,
+  passive = false,
 }: {
   title: string
   items: ClassifiedCourse<InboxCourse>[]
   icon: React.ReactNode
   defaultOpen?: boolean
+  /** When true, items are informational only — no navigation link or hover state. */
+  passive?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
   if (items.length === 0) return null
@@ -97,8 +100,35 @@ function CourseGroup({
         <ChevronDown className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-180")} aria-hidden />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-2 pt-2">
+        {passive && (
+          <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-xs text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+            <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            <span>
+              These courses are currently being handled by the team — no action needed from you. You&apos;ll be notified when something requires your attention.
+            </span>
+          </div>
+        )}
         {items.map(({ course, actionLabel }) => {
           const { relative, absolute } = sentAgo(course.updatedAt)
+          if (passive) {
+            return (
+              <div
+                key={course.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-muted-foreground" title={course.title}>{course.title}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground/70">
+                    {actionLabel}
+                    {subtitle(course) ? ` · ${subtitle(course)}` : ""}
+                  </p>
+                </div>
+                <span className="shrink-0 text-[11px] text-muted-foreground/60" title={absolute}>
+                  {relative}
+                </span>
+              </div>
+            )
+          }
           return (
             <Link
               key={course.id}
@@ -169,6 +199,7 @@ function InboxPanel({
             items={waiting}
             icon={<Clock className="size-4 text-muted-foreground" aria-hidden />}
             defaultOpen={waiting.length > 0 && needsReview.length === 0}
+            passive
           />
           <CourseGroup
             title="Approved"

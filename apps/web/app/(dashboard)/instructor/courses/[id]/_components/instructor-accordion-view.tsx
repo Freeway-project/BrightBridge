@@ -24,6 +24,7 @@ import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -305,7 +306,10 @@ export function InstructorAccordionView({
           </div>
           {finalSummary?.trim() && (
             <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3">
-              <p className="text-xs font-semibold text-muted-foreground mb-1">Note from reviewer</p>
+              <div className="mb-1 flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold text-muted-foreground">Note from reviewer</p>
+                <CopyButton value={finalSummary} label="reviewer note" />
+              </div>
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{finalSummary}</p>
             </div>
           )}

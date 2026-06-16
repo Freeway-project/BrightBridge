@@ -20,6 +20,7 @@ import type {
   IssueStatus,
 } from "@/lib/workspace/types"
 import { ITEM_LABELS, SYLLABUS_ITEM_LABELS, GRADEBOOK_ITEM_LABELS } from "@/lib/workspace/constants"
+import { CopyButton } from "@/components/ui/copy-button"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -27,6 +28,8 @@ interface Props {
   responses: ReviewResponse[]
   sectionKeyById: Record<string, string>
 }
+
+type ResponseStatus = "draft" | "submitted" | null
 
 type StatusStyle = { label: string; icon: LucideIcon; className: string }
 
@@ -58,6 +61,52 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <h2 className="text-xl font-bold tracking-tight">{title}</h2>
       {children}
     </section>
+  )
+}
+
+function ResponseStatusChip({ status }: { status: ResponseStatus }) {
+  if (status === "submitted") {
+    return <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">Submitted</span>
+  }
+  if (status === "draft") {
+    return <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">Draft saved</span>
+  }
+  return <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">Not started</span>
+}
+
+function ProgressTile({
+  label,
+  status,
+}: {
+  label: string
+  status: ResponseStatus
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-muted/20 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <ResponseStatusChip status={status} />
+      </div>
+    </div>
+  )
+}
+
+function EmptySectionState({
+  title,
+  status,
+  message,
+}: {
+  title: string
+  status: ResponseStatus
+  message: string
+}) {
+  return (
+    <Section title={title}>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/10 p-4">
+        <p className="text-sm text-muted-foreground">{message}</p>
+        <ResponseStatusChip status={status} />
+      </div>
+    </Section>
   )
 }
 
@@ -147,26 +196,46 @@ export function InstructorReviewDetail({ course, responses, sectionKeyById }: Pr
     if (key) byKey.set(key, r)
   }
 
+  const metadataResponse = byKey.get("course_metadata")
+  const matrixResponse = byKey.get("review_matrix")
+  const syllabusResponse = byKey.get("syllabus_review") ?? byKey.get("gradebook_review")
+  const issueLogResponse = byKey.get("general_notes")
+
   const taName = course.ta?.name ?? course.ta?.email ?? null
-  const metadata = byKey.get("course_metadata")?.response_data as MetadataResponseData | undefined
-  const matrix = byKey.get("review_matrix")?.response_data as ReviewMatrixResponseData | undefined
-  const syllabus = (byKey.get("syllabus_review")?.response_data ??
-    byKey.get("gradebook_review")?.response_data) as SyllabusGradebookResponseData | undefined
-  const issueLog = byKey.get("general_notes")?.response_data as IssueLogResponseData | undefined
+  const metadata = metadataResponse?.response_data as MetadataResponseData | undefined
+  const matrix = matrixResponse?.response_data as ReviewMatrixResponseData | undefined
+  const syllabus = syllabusResponse?.response_data as SyllabusGradebookResponseData | undefined
+  const issueLog = issueLogResponse?.response_data as IssueLogResponseData | undefined
   const issues = issueLog?.issues?.filter((i) => i.description?.trim() || i.type?.trim()) ?? []
 
-  const hasAny = metadata || matrix || syllabus || issues.length > 0
+  const metadataStatus = metadataResponse?.status ?? null
+  const matrixStatus = matrixResponse?.status ?? null
+  const syllabusStatus = syllabusResponse?.status ?? null
+  const issueLogStatus = issueLogResponse?.status ?? null
 
-  if (!hasAny) {
-    return (
-      <div className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground">
-        The TA review for this course isn&apos;t available yet.
-      </div>
-    )
-  }
+  const hasAnyStructuredData = Boolean(
+    metadata ||
+    matrix?.items?.length ||
+    syllabus?.syllabus_items?.length ||
+    syllabus?.gradebook_items?.length ||
+    issues.length > 0
+  )
 
   return (
     <div className="max-w-3xl space-y-[var(--card-spacing,1.5rem)]">
+      <Section title="TA review progress">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <ProgressTile label="Course details" status={metadataStatus} />
+          <ProgressTile label="Course review" status={matrixStatus} />
+          <ProgressTile label="Syllabus & gradebook" status={syllabusStatus} />
+          <ProgressTile label="Issue log" status={issueLogStatus} />
+        </div>
+        {!hasAnyStructuredData && (
+          <p className="text-sm text-muted-foreground">
+            The structured TA forms have not been filled out yet for this course. As the review progresses, updates from each form will appear here.
+          </p>
+        )}
+      </Section>
       {issues.length > 0 && (
         <Section title={`Issues flagged by reviewer (${issues.length})`}>
           <ul className="space-y-3">
@@ -179,6 +248,10 @@ export function InstructorReviewDetail({ course, responses, sectionKeyById }: Pr
 
       {metadata ? (
         <Section title="Course details">
+          <div className="flex items-center justify-between gap-3">
+            <ResponseStatusChip status={metadataStatus} />
+            {metadata.migration_notes?.trim() ? <CopyButton value={metadata.migration_notes} label="TA notes" /> : null}
+          </div>
           <dl className="grid grid-cols-1 gap-y-3 sm:grid-cols-3 sm:gap-x-6 text-base">
             {metadata.term ? (
               <div className="sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-6">
@@ -206,15 +279,20 @@ export function InstructorReviewDetail({ course, responses, sectionKeyById }: Pr
             )}
           </dl>
         </Section>
-      ) : null}
-      {!metadata && taName && (
-        <p className="text-sm text-muted-foreground">
-          Reviewed by <span className="font-medium text-foreground">{taName}</span>
-        </p>
+      ) : (
+        <EmptySectionState
+          title="Course details"
+          status={metadataStatus}
+          message={taName ? `Structured course details are not available yet. Reviewer: ${taName}.` : "Structured course details are not available yet."}
+        />
       )}
 
       {matrix?.items?.length ? (
         <Section title="Course review">
+          <div className="flex items-center justify-between gap-3">
+            <ResponseStatusChip status={matrixStatus} />
+            <span className="text-xs text-muted-foreground">{matrix.items.length} checklist items</span>
+          </div>
           <ul className="space-y-3">
             {matrix.items.map((item) => (
               <ItemRow
@@ -227,10 +305,20 @@ export function InstructorReviewDetail({ course, responses, sectionKeyById }: Pr
             ))}
           </ul>
         </Section>
-      ) : null}
+      ) : (
+        <EmptySectionState
+          title="Course review"
+          status={matrixStatus}
+          message="Checklist results are not available yet."
+        />
+      )}
 
-      {syllabus?.syllabus_items?.length ? (
+      {(syllabus?.syllabus_items?.length || syllabus?.gradebook_items?.length) ? (
         <Section title="Syllabus">
+          <div className="flex items-center justify-between gap-3">
+            <ResponseStatusChip status={syllabusStatus} />
+            <span className="text-xs text-muted-foreground">{(syllabus?.syllabus_items?.length ?? 0) + (syllabus?.gradebook_items?.length ?? 0)} review items</span>
+          </div>
           <ul className="space-y-3">
             {syllabus.syllabus_items.map((item) => (
               <ItemRow
@@ -260,6 +348,22 @@ export function InstructorReviewDetail({ course, responses, sectionKeyById }: Pr
           </ul>
         </Section>
       ) : null}
+
+      {!(syllabus?.syllabus_items?.length || syllabus?.gradebook_items?.length) ? (
+        <EmptySectionState
+          title="Syllabus & gradebook"
+          status={syllabusStatus}
+          message="Syllabus and gradebook notes are not available yet."
+        />
+      ) : null}
+
+      {issues.length > 0 ? null : (
+        <EmptySectionState
+          title="Issue log"
+          status={issueLogStatus}
+          message="No issue log entries have been shared yet."
+        />
+      )}
     </div>
   )
 }

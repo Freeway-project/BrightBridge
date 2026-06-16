@@ -88,18 +88,9 @@ echo -e "  Output file:          ${CYAN}$OUT${NC}"
 echo ""
 
 run_dump() {
-  if command -v pg_dump >/dev/null 2>&1; then
-    PGSSLMODE="${PGSSLMODE:-require}" pg_dump \
-      "$URL" \
-      --format=custom \
-      --no-owner \
-      --no-acl \
-      --file="$OUT"
-    return
-  fi
-
+  # Use Docker if available — guarantees pg_dump v17 matches the server version.
+  # Falls back to the local pg_dump only when Docker is not present.
   if command -v docker >/dev/null 2>&1; then
-    # Fallback: run pg_dump inside Docker — custom format on stdout
     docker run --rm -i \
       -e PGSSLMODE="${PGSSLMODE:-require}" \
       postgres:17-alpine \
@@ -109,6 +100,16 @@ run_dump() {
       --no-owner \
       --no-acl \
       >"$OUT"
+    return
+  fi
+
+  if command -v pg_dump >/dev/null 2>&1; then
+    PGSSLMODE="${PGSSLMODE:-require}" pg_dump \
+      "$URL" \
+      --format=custom \
+      --no-owner \
+      --no-acl \
+      --file="$OUT"
     return
   fi
 

@@ -84,6 +84,31 @@ Placed after the Syllabus card.
 
 ---
 
+## Bug 2b: TA Name Not Shown in Review Detail Views
+
+**Root cause:** `AdminCourseRow.ta` (`{ id, name, email } | null`) is already fetched and present on the `course` prop in both `InstructorReviewDetail` and `CourseReviewDetail`. Neither component renders it.
+
+**Fix — `InstructorReviewDetail`:**
+
+Extract `taName = course.ta?.name ?? course.ta?.email ?? null`. In the "Course details" `<Section>`, add a row to the `<dl>`:
+
+```tsx
+{taName && (
+  <div className="sm:col-span-3 grid ...">
+    <dt className="text-muted-foreground">Reviewed by</dt>
+    <dd className="sm:col-span-2 font-medium">{taName}</dd>
+  </div>
+)}
+```
+
+**Fix — `CourseReviewDetail`:**
+
+In `MetadataCard`, add a `<Field label="Reviewer (TA)" value={taName} />` alongside the other metadata fields. `taName` is derived from `course.ta` passed down from the parent.
+
+Both components already accept `course: AdminCourseRow` so no prop changes needed.
+
+---
+
 ## Bug 3: @Mention Notifications Are Dead Code
 
 **Root cause:** `notifyMentionedUsersAction` in `lib/issues/notifications.ts` only logs to console. `getNotificationsPageData()` never queries `issue_comment_mentions`.
@@ -166,7 +191,8 @@ const POLL_INTERVAL = 15_000 // 15s — matches NotificationProvider
 |---|---|
 | `lib/notifications/queries.ts` | Filter dismissed IDs; add `getMentionNotifications()`; 7-day comment pending window |
 | `app/(dashboard)/notifications/page.tsx` | Add `HideButton` per row; add `ClearAllButton` in header |
-| `app/(dashboard)/admin/courses/[id]/_components/course-review-detail.tsx` | Read `general_notes`; add `IssueLogCard`; update progress to 4/4 |
+| `app/(dashboard)/admin/courses/[id]/_components/course-review-detail.tsx` | Read `general_notes`; add `IssueLogCard`; update progress to 4/4; show TA name in MetadataCard |
+| `app/(dashboard)/instructor/courses/[id]/_components/instructor-review-detail.tsx` | Show TA name ("Reviewed by") in Course details section |
 | `lib/issues/notifications.ts` | Remove dead TODO + console.log from `notifyMentionedUsersAction` |
 | `components/layout/notification-bell.tsx` | `POLL_INTERVAL = 15_000` |
 
