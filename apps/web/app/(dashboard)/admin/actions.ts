@@ -25,6 +25,20 @@ export type AssignableCourseOption = {
   sourceCourseId: string | null;
 };
 
+export type BatchMailMergeRow = {
+  instructorName: string;
+  instructorEmail: string;
+  courseTitle: string;
+  moodleUrl: string;
+  brightspaceUrl: string;
+  magicLink: string;
+};
+
+export type BatchExportResult = {
+  rows: BatchMailMergeRow[];
+  skipped: number;
+};
+
 export async function searchAssignableCoursesAction(searchTerm: string): Promise<AssignableCourseOption[]> {
   const context = await requireProfile();
   requireAnyRole(context, ["admin_full", "super_admin"]);
@@ -555,4 +569,66 @@ export async function transitionCourseAction(
       error: error instanceof Error ? error.message : "Could not move the course.",
     };
   }
+}
+
+/**
+ * For each selected course: mints a never-expiring magic link for the assigned
+ * instructor, transitions the course to sent_to_instructor, and returns a row
+ * for the mail-merge CSV. Courses that fail (no instructor, transition error)
+ * are skipped and counted in the returned skipped total.
+ */
+export async function batchExportAndSendAction(courseIds: string[]): Promise<BatchExportResult> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
+
+  const { getReadyForInstructorCourses } = await import("@/lib/admin/queries");
+  const { createReviewInvite } = await import("@/lib/invites/service");
+  const { buildInviteLink } = await import("@/lib/email/templates/instructor-invite");
+
+  const allReady = await getReadyForInstructorCourses();
+  const readyById = new Map(allReady.map((c) => [c.courseId, c]));
+
+  const rows: BatchMailMergeRow[] = [];
+  let skipped = 0;
+
+  for (const courseId of courseIds) {
+    const course = readyById.get(courseId);
+    if (!course) {
+      skipped++;
+      continue;
+    }
+
+    try {
+      const { token } = await createReviewInvite({
+        courseId,
+        email: course.instructorEmail,
+        createdBy: ctx.userId,
+        neverExpires: true,
+      });
+
+      await transitionCourseStatus({
+        courseId,
+        toStatus: "sent_to_instructor",
+        note: "Sent to instructor via batch export.",
+      });
+
+      rows.push({
+        instructorName: course.instructorName ?? "",
+        instructorEmail: course.instructorEmail,
+        courseTitle: course.courseTitle,
+        moodleUrl: course.moodleUrl,
+        brightspaceUrl: course.brightspaceUrl,
+        magicLink: buildInviteLink(token),
+      });
+    } catch (error) {
+      console.error(`[batchExportAndSendAction] Skipped course ${courseId}:`, error);
+      skipped++;
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/communications");
+  revalidatePath("/instructor");
+
+  return { rows, skipped };
 }
