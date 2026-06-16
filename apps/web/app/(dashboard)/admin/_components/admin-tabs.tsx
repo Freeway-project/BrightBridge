@@ -13,8 +13,10 @@ type Props = {
   migrationPanel: React.ReactNode
   institutionPanel: React.ReactNode
   assignmentLogsPanel: React.ReactNode
+  sendPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
+  readyForInstructorCount: number
 }
 
 export function AdminTabs({
@@ -27,8 +29,10 @@ export function AdminTabs({
   migrationPanel,
   institutionPanel,
   assignmentLogsPanel,
+  sendPanel,
   unassignedCount,
   openEscalationsCount,
+  readyForInstructorCount,
 }: Props) {
   const [tab, setTab] = useStickyTabState("admin-dashboard", "overview")
 
@@ -47,6 +51,14 @@ export function AdminTabs({
             )}
           </TabsTrigger>
           <TabsTrigger value="instructor">Instructors</TabsTrigger>
+          <TabsTrigger value="send">
+            Send to Instructors
+            {readyForInstructorCount > 0 && (
+              <span className="ml-1.5 rounded-full bg-amber-500/20 px-1.5 py-0 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                {readyForInstructorCount.toLocaleString()}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="escalations">
             Escalations
             {openEscalationsCount > 0 && (
@@ -71,6 +83,7 @@ export function AdminTabs({
         {instructorPanel}
         {assignmentLogsPanel}
       </TabsContent>
+      <TabsContent value="send">{sendPanel}</TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
       <TabsContent value="migration">{migrationPanel}</TabsContent>
       <TabsContent value="institution">{institutionPanel}</TabsContent>

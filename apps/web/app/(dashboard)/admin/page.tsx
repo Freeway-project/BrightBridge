@@ -1,7 +1,8 @@
 import { Topbar } from "@/components/layout/topbar"
 import { COURSE_STATUSES, WORKFLOW_PHASES, type CourseStatus, type PipelineStage } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
-import { getAdminCoursesPage, getAdminOverviewData, type AdminCourseRow } from "@/lib/admin/queries"
+import { getAdminCoursesPage, getAdminOverviewData, getReadyForInstructorCourses, type AdminCourseRow } from "@/lib/admin/queries"
+import { BatchExportPanel } from "./_components/batch-export-panel"
 import { CoursesBoard, type BoardColumn } from "./_components/courses-board"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { getOpenEscalations } from "@/lib/services/escalations"
@@ -48,7 +49,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     : undefined
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport, institutionData] = await Promise.all([
+  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport, institutionData, readyForInstructor] = await Promise.all([
     getAdminCoursesPage({
       page,
       pageSize,
@@ -69,6 +70,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getAdminOverviewData(),
     getLatestMigrationReport(),
     getSuperAdminData(),
+    getReadyForInstructorCourses(),
   ])
 
   // ---- Workflow board data (All Courses tab) -----------------------------
@@ -144,6 +146,8 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
+            sendPanel={<BatchExportPanel courses={readyForInstructor} />}
+            readyForInstructorCount={readyForInstructor.length}
           />
         </AdminRefreshWrapper>
       </TweakableContent>
