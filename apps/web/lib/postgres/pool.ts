@@ -12,6 +12,20 @@ function getDatabaseUrlOrThrow(): string {
   return value;
 }
 
+// Parse the URL into explicit params so pg-connection-string never processes
+// sslmode — newer pg versions treat sslmode=require as verify-full which
+// rejects Supabase's cert chain, breaking the connection entirely.
+function parseConnectionUrl(url: string) {
+  const u = new URL(url);
+  return {
+    host: u.hostname,
+    port: u.port ? Number(u.port) : 5432,
+    user: decodeURIComponent(u.username),
+    password: decodeURIComponent(u.password),
+    database: u.pathname.replace(/^\//, "").split("?")[0] || "postgres",
+  };
+}
+
 function instrumentPool(pool: Pool): void {
   // Lazy-required so this module can be imported from instrumentation.ts
   // without pulling prom-client into the edge runtime graph.
@@ -80,7 +94,7 @@ export function getPostgresPool(): Pool {
   }
 
   sharedPool = new Pool({
-    connectionString: getDatabaseUrlOrThrow(),
+    ...parseConnectionUrl(getDatabaseUrlOrThrow()),
     max: Number(process.env.PG_POOL_MAX ?? 10),
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
   });
