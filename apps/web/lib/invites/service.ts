@@ -3,8 +3,9 @@ import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { getPostgresPool } from "@/lib/postgres/pool";
 
-/** How long a generated invite link stays valid. */
-const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+// Instructor links are permanent access tokens — instructors have no password
+// and use the link as their only way in. 1-year TTL; admin can revoke manually.
+const INVITE_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 
 export type ReviewInvite = {
   id: string;
@@ -23,7 +24,7 @@ export type InstructorRecipient = {
 
 export type RedeemResult =
   | { ok: true; invite: ReviewInvite }
-  | { ok: false; reason: "not_found" | "revoked" | "accepted" | "expired" };
+  | { ok: false; reason: "not_found" | "revoked" | "expired" };
 
 function hashToken(rawToken: string): string {
   return createHash("sha256").update(rawToken).digest("hex");
@@ -146,7 +147,8 @@ export async function redeemReviewInvite(rawToken: string): Promise<RedeemResult
   const data = rows[0];
   if (!data) return { ok: false, reason: "not_found" };
   if (data.revoked_at) return { ok: false, reason: "revoked" };
-  if (data.accepted_at) return { ok: false, reason: "accepted" };
+  // accepted_at is NOT a blocker — links are reusable; instructors have no password
+  // and this link is their permanent entry point to the course.
   if (new Date(data.expires_at).getTime() < Date.now()) return { ok: false, reason: "expired" };
 
   return { ok: true, invite: mapInvite(data) };

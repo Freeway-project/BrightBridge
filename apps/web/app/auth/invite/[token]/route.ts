@@ -4,15 +4,21 @@ import {
   markInviteAccepted,
 } from "@/lib/invites/service";
 import { ensureInstructorIdentity } from "@/lib/invites/instructor-identity";
+import { mintSession } from "@/lib/auth/service";
 
 /**
- * Instructor entry from an admin-emailed link. This route:
+ * Instructor entry from an emailed link. Instructors have no password — the
+ * link IS their authentication. This route:
  *
- *   1. Validates the one-time invite token and marks it consumed.
- *   2. Ensures the instructor profile row exists so PBAC can match them.
- *   3. Records the dashboard-open signal (drives the indicator dot).
- *   4. Auto-advances the course to "instructor_viewing" if applicable.
- *   5. Redirects to /auth/login with `next=` set to the course page.
+ *   1. Validates the invite token (revoked / expired checks; NOT one-time-use).
+ *   2. Ensures the instructor profile row exists (idempotent upsert).
+ *   3. Mints a session cookie — instructor is logged in immediately.
+ *   4. Records the dashboard-open signal (drives the indicator dot).
+ *   5. Auto-advances the course to "instructor_viewing" if applicable.
+ *   6. Redirects directly to the course review page (no login page shown).
+ *
+ * The link can be clicked multiple times — useful if the instructor bookmarks
+ * it or opens it on a new device. Only admin revocation stops it.
  */
 export async function GET(
   request: NextRequest,
@@ -33,14 +39,22 @@ export async function GET(
     return NextResponse.redirect(expiredUrl);
   }
 
-  const nextPath = `/instructor/courses/${invite.courseId}`;
-  const loginUrl = new URL("/auth/login", request.url);
-  loginUrl.searchParams.set("next", nextPath);
+  const courseUrl = new URL(`/instructor/courses/${invite.courseId}`, request.url);
 
   try {
     const instructorProfileId = await ensureInstructorIdentity(invite.email);
 
-    await markInviteAccepted(invite.id);
+    // Mint a session — instructor is now logged in, no password needed.
+    await mintSession({
+      sub: instructorProfileId,
+      email: invite.email,
+      fullName: null,
+    });
+
+    // Record first-open on the invite row (informational only, does not block reuse).
+    if (!invite.acceptedAt) {
+      await markInviteAccepted(invite.id);
+    }
 
     const { recordInstructorView } = await import("@/lib/instructor-views/service");
     await recordInstructorView(invite.courseId, instructorProfileId);
@@ -52,8 +66,9 @@ export async function GET(
       console.error("[auth/invite] Failed to mark instructor viewing:", statusError);
     }
   } catch (error) {
-    console.error("[auth/invite] Bookkeeping failed; continuing to login redirect:", error);
+    console.error("[auth/invite] Session/bookkeeping failed:", error);
+    // Still redirect — worst case they land on the course page and see a login prompt.
   }
 
-  return NextResponse.redirect(loginUrl);
+  return NextResponse.redirect(courseUrl);
 }
