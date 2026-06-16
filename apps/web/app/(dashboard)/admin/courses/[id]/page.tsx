@@ -18,10 +18,8 @@ import { FinalApprovalBanner } from "./_components/final-approval-banner"
 import { getSubmissionHistory, getQuestionRoundHistory } from "@/lib/courses/service"
 import { getCourseTimeline } from "@/lib/courses/timeline"
 import { CourseTimeline } from "@/components/courses/course-timeline"
-import { lastForCourse, listByCourse } from "@/lib/instructor-emails/queries"
 import { viewForCourse } from "@/lib/instructor-views/queries"
 import { OpenedDot } from "@/components/instructor/opened-dot"
-import { EmailsList } from "./_components/emails-list"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -32,22 +30,18 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, comments, submissionHistory, questionRounds, timeline, lastEmail, emails, instructorView] = await Promise.all([
+  const [detail, comments, submissionHistory, questionRounds, timeline, instructorView] = await Promise.all([
     getAdminCourseDetail(id),
     getCourseComments(id),
     getSubmissionHistory(id),
     getQuestionRoundHistory(id),
     getCourseTimeline(id, { includeInternalComments: true }),
-    lastForCourse(id),
-    listByCourse(id),
     viewForCourse(id),
   ])
 
   if (!detail) notFound()
 
   const { course, responses, sectionKeyById } = detail
-  const lastSendFailed = lastEmail?.status === "failed"
-  const lastSendError = lastEmail?.sendError ?? null
 
   return (
     <>
@@ -63,7 +57,6 @@ export default async function AdminCourseDetailPage({ params }: Props) {
             <TabsTrigger value="issues" className="text-base">Issues</TabsTrigger>
             <TabsTrigger value="chat" className="text-base">Discussion</TabsTrigger>
             <TabsTrigger value="timeline" className="text-base">Timeline</TabsTrigger>
-            <TabsTrigger value="emails" className="text-base">Emails</TabsTrigger>
           </TabsList>
 
           {/* Review Tab */}
@@ -92,11 +85,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
                   <SendToInstructorBanner courseId={id} />
                 )}
                 {(course.status === "sent_to_instructor" || course.status === "instructor_viewing") && (
-                  <ResendInviteBanner
-                    courseId={id}
-                    lastSendFailed={lastSendFailed}
-                    lastSendError={lastSendError}
-                  />
+                  <ResendInviteBanner courseId={id} />
                 )}
                 {course.status === "submitted_to_admin" && (
                   <ResubmitBanner submissions={submissionHistory} />
@@ -151,19 +140,6 @@ export default async function AdminCourseDetailPage({ params }: Props) {
             <CourseTimeline items={timeline} />
           </TabsContent>
 
-          {/* Emails Tab */}
-          <TabsContent value="emails" className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-3xl mx-auto space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Send history</h2>
-                <p className="text-sm text-muted-foreground">
-                  Every &quot;course ready&quot; email sent to the instructor for this course.
-                  Resend is only available after a failed delivery.
-                </p>
-              </div>
-              <EmailsList emails={emails} instructorFirstOpenedAt={instructorView?.firstOpenedAt ?? null} />
-            </div>
-          </TabsContent>
         </StickyTabs>
       </main>
     </>

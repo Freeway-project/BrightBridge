@@ -3,6 +3,7 @@ import "server-only";
 import { createHmac, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { cookies } from "next/headers";
+import bcrypt from "bcryptjs";
 
 const scryptAsync = promisify(scrypt);
 
@@ -67,6 +68,11 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  // Bcrypt hashes from old Supabase auth (starts with $2a$ or $2b$)
+  if (stored.startsWith("$2")) {
+    return bcrypt.compare(password, stored);
+  }
+  // Scrypt format: salt_hex:hash_hex
   const [salt, storedHash] = stored.split(":");
   if (!salt || !storedHash) return false;
   try {

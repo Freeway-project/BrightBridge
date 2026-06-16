@@ -123,17 +123,19 @@ Add these in **Vercel → Project → Settings → Environment Variables**:
 DATABASE_URL=postgresql://postgres.[ref]:[PASSWORD]@aws-1-us-west-2.pooler.supabase.com:6543/postgres
 PG_POOL_MAX=2
 
+# Optional deployment version metadata
+# Set one of these from the current commit SHA if you want deploy/version visibility in-app
+GIT_COMMIT_SHA=<your commit sha>
+# or NEXT_PUBLIC_GIT_COMMIT_SHA=<your commit sha>
+# or NEXT_PUBLIC_APP_VERSION=<release tag or build id>
+
 # Auth
 SESSION_SECRET=<run: openssl rand -base64 32>
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=<run: openssl rand -base64 32>
 
 # App URL (your Vercel domain or custom domain)
+# Required for exported instructor invite links used in manual mail merge
 NEXT_PUBLIC_SITE_URL=https://your-app.vercel.app
-
-# Email — pick one provider
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=re_...
-EMAIL_FROM=CourseBridge <reviews@yourdomain.com>
 
 # Optional: Sentry error tracking
 NEXT_PUBLIC_SENTRY_DSN=
@@ -144,8 +146,20 @@ SENTRY_AUTH_TOKEN=   # CI/CD only — add to Vercel env, not repo
 # Optional: AI content converter
 ANTHROPIC_API_KEY=
 
+# Optional: MindFresh refresh API
+GROQ_API_KEY=
+
 # Optional: Meme icebreaker
 NEXT_PUBLIC_RAPIDAPI_KEY=
+
+# Optional: Chat feature flag
+NEXT_PUBLIC_CHAT_ENABLED=false
+
+# Optional: Maintenance override / migration banner forcing
+NEXT_PUBLIC_FORCE_MAINTENANCE=false
+
+# Optional: Protect /api/metrics with a bearer token
+METRICS_BEARER_TOKEN=
 
 # Leave blank in production (dev-only bypass)
 ENABLE_DEV_LOGIN=
@@ -166,7 +180,7 @@ Click **Deploy**. First build takes ~2–3 minutes.
 1. Visit `https://your-app.vercel.app/auth/login`
 2. Sign in with the super admin credentials from Step 4
 3. Go to **Admin → Users** and confirm profiles load
-4. Create a test TA user and verify login works
+4. Open a course in **Ready for Instructor**, use **Send to Instructor + CSV**, and confirm the downloaded CSV contains instructor emails and invite links for manual mail merge
 
 ---
 

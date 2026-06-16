@@ -455,55 +455,53 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
   return { succeeded, failed };
 }
 
+type InstructorMailMergeRow = {
+  instructorName: string;
+  instructorEmail: string;
+  courseTitle: string;
+  inviteLink: string;
+  expiresAt: string;
+};
+
 /**
- * Generates a fresh magic-link invite for every assigned instructor AND sends
- * the "course is ready" email through the logged instructor-emails service —
- * so every attempt shows up in the admin Emails tab regardless of outcome.
- *
- * Best-effort at the per-recipient level: a failure to one instructor is
- * logged + persisted (status='failed') but never throws, so it can't roll
- * back the surrounding status transition.
+ * Generates fresh invite links for every assigned instructor and returns the
+ * rows needed for a manual mail-merge CSV export. Creating a new export always
+ * revokes any prior unaccepted links for the same course+recipient.
  */
-async function emailInstructorInvites(courseId: string, createdBy: string): Promise<void> {
-  try {
-    const [{ createReviewInvite, getCourseInstructorRecipients }, { buildInviteLink }, { notifyInstructor }] = await Promise.all([
-      import("@/lib/invites/service"),
-      import("@/lib/email/templates/instructor-invite"),
-      import("@/lib/instructor-emails/service"),
-    ]);
+async function createInstructorMailMergeRows(
+  courseId: string,
+  createdBy: string,
+): Promise<InstructorMailMergeRow[]> {
+  const [{ createReviewInvite, getCourseInstructorRecipients }, { buildInviteLink }] = await Promise.all([
+    import("@/lib/invites/service"),
+    import("@/lib/email/templates/instructor-invite"),
+  ]);
 
-    const detail = await getAdminCourseDetail(courseId);
-    const courseTitle = detail?.course.title ?? "your migrated course";
-    const recipients = await getCourseInstructorRecipients(courseId);
+  const detail = await getAdminCourseDetail(courseId);
+  const courseTitle = detail?.course.title ?? "your migrated course";
+  const recipients = await getCourseInstructorRecipients(courseId);
 
-    for (const recipient of recipients) {
-      try {
-        const { token } = await createReviewInvite({
-          courseId,
-          email: recipient.email,
-          createdBy,
-        });
-        await notifyInstructor({
-          courseId,
-          sentBy: createdBy,
-          recipient: recipient.email,
-          instructorName: recipient.fullName,
-          courseTitle,
-          dashboardUrl: buildInviteLink(token),
-        });
-      } catch (innerErr) {
-        console.error(
-          `[sendToInstructor] Failed to notify ${recipient.email} for course ${courseId}:`,
-          innerErr,
-        );
-      }
-    }
-  } catch (error) {
-    console.error(`[sendToInstructor] Failed to issue instructor invites for course ${courseId}:`, error);
+  const rows: InstructorMailMergeRow[] = [];
+  for (const recipient of recipients) {
+    const { token, invite } = await createReviewInvite({
+      courseId,
+      email: recipient.email,
+      createdBy,
+    });
+
+    rows.push({
+      instructorName: recipient.fullName ?? "",
+      instructorEmail: recipient.email,
+      courseTitle,
+      inviteLink: buildInviteLink(token),
+      expiresAt: invite.expiresAt,
+    });
   }
+
+  return rows;
 }
 
-export async function sendToInstructorAction(courseId: string): Promise<void> {
+export async function sendToInstructorAction(courseId: string): Promise<InstructorMailMergeRow[]> {
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
   await transitionCourseStatus({
@@ -511,43 +509,28 @@ export async function sendToInstructorAction(courseId: string): Promise<void> {
     toStatus: "sent_to_instructor",
     note: "Sent to instructor by communications.",
   });
-  await emailInstructorInvites(courseId, ctx.userId);
+  const rows = await createInstructorMailMergeRows(courseId, ctx.userId);
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/communications");
   revalidatePath(`/communications/courses/${courseId}`);
   revalidatePath("/ta");
   revalidatePath("/instructor");
+  return rows;
 }
 
 /**
- * Re-issues the instructor magic-link invite without changing course status.
- * Used by the "Resend invite" affordance once a course is already with the
- * instructor.
+ * Generates a fresh CSV payload for manual mail merge without changing course
+ * status. Issuing a new export revokes any prior unaccepted links for the same
+ * recipients, so only the latest CSV should be used.
  */
-export async function resendInstructorInviteAction(courseId: string): Promise<void> {
+export async function resendInstructorInviteAction(courseId: string): Promise<InstructorMailMergeRow[]> {
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
 
-  // Resend is only allowed after a failed send. A successful prior send means
-  // the instructor already has a working magic link; a still-pending send
-  // shouldn't be duplicated. The Emails tab UI also hides the resend button
-  // unless the last send failed, but the guard lives here too because the
-  // action is exported.
-  const { lastForCourse } = await import("@/lib/instructor-emails/queries");
-  const last = await lastForCourse(courseId);
-  if (!last) {
-    throw new Error("No previous send to resend — use the initial send action.");
-  }
-  if (last.status !== "failed") {
-    throw new Error(
-      `Resend is only available after a failed send (last send: ${last.status}).`,
-    );
-  }
-
-  await emailInstructorInvites(courseId, ctx.userId);
+  const rows = await createInstructorMailMergeRows(courseId, ctx.userId);
   revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath(`/admin/courses/${courseId}/emails`);
+  return rows;
 }
 
 export async function grantFinalApprovalAction(courseId: string): Promise<void> {

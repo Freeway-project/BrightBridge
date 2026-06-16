@@ -179,6 +179,23 @@ try {
       continue;
     }
 
+    // On hosted Supabase the auth schema is owned by GoTrue — postgres cannot
+    // CREATE inside it even with IF NOT EXISTS. Skip the compat stub entirely;
+    // the real auth.users and auth.uid() are already present.
+    if (file === AUTH_COMPAT_FILE) {
+      const authExists = await client.query(
+        "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='auth' AND table_name='users') AS exists"
+      );
+      if (authExists.rows[0].exists) {
+        console.log(`Skipping auth_compat migration (Supabase auth schema already present): ${file}`);
+        await client.query(
+          "INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING",
+          [file]
+        );
+        continue;
+      }
+    }
+
     const migrationPath = path.join(MIGRATIONS_DIR, file);
     let sql = readFileSync(migrationPath, "utf8");
 
@@ -257,10 +274,16 @@ function loadEnvFiles(files) {
 
 function parseDatabaseUrl(value) {
   try {
-    new URL(value);
-    return {
-      connectionString: value
-    };
+    const url = new URL(value);
+    // Return explicit params so pg-connection-string never touches the URL and
+    // the caller's ssl:{rejectUnauthorized:false} is the only SSL config applied.
+    const portIndex = url.host.lastIndexOf(":");
+    const host = portIndex === -1 ? url.hostname : url.hostname;
+    const port = url.port ? Number(url.port) : 5432;
+    const user = decodeURIComponent(url.username);
+    const password = decodeURIComponent(url.password);
+    const database = url.pathname.replace(/^\//, "").split("?")[0] || "postgres";
+    return { host, port, user, password, database };
   } catch {
     return parseManualDatabaseUrl(value);
   }
