@@ -508,7 +508,7 @@ async function createInstructorMailMergeRows(
       instructorEmail: recipient.email,
       courseTitle,
       inviteLink: buildInviteLink(token),
-      expiresAt: invite.expiresAt,
+      expiresAt: invite.expiresAt ?? "",
     });
   }
 
