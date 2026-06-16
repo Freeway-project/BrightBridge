@@ -9,6 +9,9 @@ export default defineConfig({
       // In unit tests we treat it as a no-op so pure service modules can be
       // imported without a Next.js runtime.
       "server-only": path.resolve(__dirname, "./vitest-server-only-stub.js"),
+      // Next.js path alias — resolves @/ to apps/web/ so service modules can be
+      // imported in tests without a Next.js runtime.
+      "@": path.resolve(__dirname, "./apps/web"),
     },
   },
 });
