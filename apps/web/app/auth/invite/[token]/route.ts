@@ -3,6 +3,7 @@ import { getAuthService } from "@/lib/auth/service";
 import {
   redeemReviewInvite,
   markInviteAccepted,
+  recordInviteAccess,
 } from "@/lib/invites/service";
 import { ensureInstructorIdentity } from "@/lib/invites/instructor-identity";
 
@@ -42,7 +43,12 @@ export async function GET(
       return NextResponse.redirect(expiredUrl);
     }
 
-    await markInviteAccepted(invite.id);
+    // Branch: never-expiring batch-export links are multi-use; one-time links get consumed.
+    if (invite.expiresAt === null) {
+      await recordInviteAccess(invite.id);
+    } else {
+      await markInviteAccepted(invite.id);
+    }
 
     // Auto-advance the course to "instructor_viewing" on first open.
     try {
