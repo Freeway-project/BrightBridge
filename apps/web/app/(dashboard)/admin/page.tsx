@@ -16,7 +16,6 @@ import { TweakableContent } from "@/components/shared/tweakable-content"
 import { AdminRefreshWrapper } from "./_components/admin-refresh-wrapper"
 import { RecentAssignmentsTable } from "./_components/recent-assignments-table"
 import { getCourseRepository } from "@/lib/repositories"
-import { FeatureAnnouncementToast } from "@/components/shared/feature-announcement-toast"
 import { AdminOverview } from "./_components/admin-overview"
 import { MigrationPanel } from "./_components/migration-panel"
 import { getLatestMigrationReport } from "@/lib/migration/report"
@@ -133,7 +132,6 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
 
   return (
     <>
-      <FeatureAnnouncementToast role={context.profile.role} />
       <Topbar title="Admin" subtitle="Manage courses, assignments, and review progress" role={context.profile.role} />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background">
         <AdminRefreshWrapper title="Admin Dashboard">
