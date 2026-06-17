@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { requireProfile } from "@/lib/auth/context";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Sidebar } from "./_components/Sidebar";
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
@@ -8,15 +7,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const ctx = await requireProfile();
   return (
     <div className="flex h-screen overflow-hidden">
-      <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel defaultSize={26} minSize={18} maxSize={40}>
-          <Sidebar currentUserId={ctx.userId} />
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={74}>
-          <div className="flex h-full flex-col">{children}</div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <aside className="w-72 shrink-0">
+        <Sidebar currentUserId={ctx.userId} />
+      </aside>
+      <div className="flex h-full min-w-0 flex-1 flex-col">{children}</div>
     </div>
   );
 }
