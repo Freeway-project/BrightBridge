@@ -22,7 +22,7 @@ const sendSchema = z.object({
 export async function sendMessageAction(input: unknown): Promise<{ messageId: string }> {
   const parsed = sendSchema.parse(input);
   const ctx = await requireProfile();
-  const authorName = ctx.profile.fullName ?? ctx.profile.email ?? ctx.userId;
+  const authorName = ctx.profile.fullName?.trim() || ctx.profile.email || ctx.userId;
   const messageId = await service.sendMessage(
     {
       ...parsed,
