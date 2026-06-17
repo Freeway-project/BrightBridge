@@ -32,7 +32,7 @@ export async function listConversationsForUser(userId: string): Promise<Conversa
      ),
      partner as (
        select cm.conversation_id,
-              coalesce(p.full_name, p.email) as partner_name
+              coalesce(nullif(trim(p.full_name), ''), p.email) as partner_name
        from public.conversation_members cm
        join public.profiles p on p.id = cm.user_id
        join public.conversations cv on cv.id = cm.conversation_id and cv.type = 'dm'
@@ -85,7 +85,7 @@ export async function getConversationDetail(
   const { rows } = await getPostgresPool().query(
     `select c.id, c.type, c.title,
             count(cm2.user_id)::int as member_count,
-            (select coalesce(p.full_name, p.email)
+            (select coalesce(nullif(trim(p.full_name), ''), p.email)
              from public.conversation_members cm3
              join public.profiles p on p.id = cm3.user_id
              where cm3.conversation_id = c.id
@@ -108,7 +108,7 @@ export async function getConversationDetail(
 
 const MSG_SELECT = `
   select m.*,
-    coalesce(p.full_name, p.email, m.author_id::text) as author_name,
+    coalesce(nullif(trim(p.full_name), ''), p.email, m.author_id::text) as author_name,
     coalesce((select array_agg(mentioned_user_id) from public.message_mentions where message_id = m.id), '{}') as mentions,
     coalesce((select json_agg(json_build_object('emoji', emoji, 'user_id', user_id))
               from public.message_reactions where message_id = m.id), '[]') as reactions_raw,
