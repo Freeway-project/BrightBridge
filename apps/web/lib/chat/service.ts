@@ -5,15 +5,21 @@ import { broadcastNotificationEvent } from "@/lib/notifications/realtime"
 import * as repo from "./repository"
 import { listMessages } from "./queries"
 
-export async function sendMessage(input: repo.InsertMessageInput): Promise<string> {
+export async function sendMessage(
+  input: repo.InsertMessageInput,
+  authorName: string,
+): Promise<string> {
   await assertMember(input.conversationId, input.authorId)
   const id = await repo.insertMessage(input)
   void broadcastChatEvent(input.conversationId, "message", {
     id,
     conversationId: input.conversationId,
     authorId: input.authorId,
+    authorName,
     body: input.body,
     parentId: input.parentId ?? null,
+    editedAt: null,
+    deletedAt: null,
     mentions: input.mentionIds ?? [],
     attachments: input.attachments ?? [],
     createdAt: new Date().toISOString(),

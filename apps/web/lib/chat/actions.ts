@@ -22,11 +22,15 @@ const sendSchema = z.object({
 export async function sendMessageAction(input: unknown): Promise<{ messageId: string }> {
   const parsed = sendSchema.parse(input);
   const ctx = await requireProfile();
-  const messageId = await service.sendMessage({
-    ...parsed,
-    authorId: ctx.userId,
-    parentId: parsed.parentId ?? null,
-  });
+  const authorName = ctx.profile.fullName ?? ctx.profile.email ?? ctx.userId;
+  const messageId = await service.sendMessage(
+    {
+      ...parsed,
+      authorId: ctx.userId,
+      parentId: parsed.parentId ?? null,
+    },
+    authorName,
+  );
   revalidatePath(`/chat/${parsed.conversationId}`);
   return { messageId };
 }

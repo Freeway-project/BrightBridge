@@ -39,7 +39,10 @@ export function SidebarSearch() {
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(`/api/chat/search?q=${encodeURIComponent(q)}`);
-        if (res.ok) setHits(await res.json());
+        if (res.ok) {
+          const data = (await res.json()) as { hits?: SearchHit[] };
+          setHits(data.hits ?? []);
+        }
       } catch {
         // search errors are non-fatal
       }

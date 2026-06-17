@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useReducer } from "react";
 import type { ConversationDetail, MessageRow } from "@/lib/chat/types";
 import { createClient } from "@/lib/supabase/client";
+import { markReadAction } from "@/lib/chat/actions";
 import { ConversationHeader } from "./ConversationHeader";
 import { MessageList } from "./MessageList";
 import { Composer } from "./Composer";
@@ -84,6 +85,12 @@ export function ChatSseClient(props: {
     }
     return () => es.close();
   }, [props.conversationId]);
+
+  // Mark the conversation read on open and whenever new messages arrive while viewing,
+  // so the sidebar unread badge clears instead of growing forever.
+  useEffect(() => {
+    void markReadAction({ conversationId: props.conversationId }).catch(() => {});
+  }, [props.conversationId, state.messages.size]);
 
   const messages = useMemo(
     () => [...state.messages.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
