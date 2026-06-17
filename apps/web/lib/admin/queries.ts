@@ -18,6 +18,15 @@ export type ReadyForInstructorCourse = {
   brightspaceUrl: string;
 };
 
+export type SentToInstructorCourse = {
+  courseId: string;
+  courseTitle: string;
+  status: CourseStatus;
+  instructorName: string | null;
+  instructorEmail: string | null;
+  updatedAt: string;
+};
+
 export type AdminCourseDetail = {
   course: AdminCourseRow
   responses: ReviewResponse[]
@@ -184,4 +193,51 @@ export async function getReadyForInstructorCourses(): Promise<ReadyForInstructor
       brightspaceUrl: (metadata.brightspace_url as string | undefined) ?? "",
     };
   });
+}
+
+const INSTRUCTOR_PHASE_STATUSES = [
+  "sent_to_instructor",
+  "instructor_viewing",
+  "instructor_questions",
+  "instructor_approved",
+] as const;
+
+/** Courses currently in any instructor-review phase, newest first. */
+export async function getSentToInstructorCourses(): Promise<SentToInstructorCourse[]> {
+  const { getPostgresPool } = await import("@/lib/postgres/pool");
+  const pool = getPostgresPool();
+
+  const { rows } = await pool.query<{
+    course_id: string;
+    title: string;
+    status: string;
+    updated_at: string;
+    instructor_email: string | null;
+    instructor_name: string | null;
+  }>(
+    `SELECT
+       c.id          AS course_id,
+       c.title,
+       c.status,
+       c.updated_at,
+       p.email       AS instructor_email,
+       p.full_name   AS instructor_name
+     FROM courses c
+     LEFT JOIN course_assignments ca
+       ON ca.course_id = c.id AND ca.role = 'instructor'
+     LEFT JOIN profiles p
+       ON p.id = ca.profile_id
+     WHERE c.status = ANY($1::text[])
+     ORDER BY c.updated_at DESC`,
+    [INSTRUCTOR_PHASE_STATUSES],
+  );
+
+  return rows.map((r) => ({
+    courseId: r.course_id,
+    courseTitle: r.title,
+    status: r.status as CourseStatus,
+    instructorName: r.instructor_name,
+    instructorEmail: r.instructor_email,
+    updatedAt: r.updated_at,
+  }));
 }

@@ -1,8 +1,8 @@
 import { Topbar } from "@/components/layout/topbar"
 import { COURSE_STATUSES, WORKFLOW_PHASES, type CourseStatus, type PipelineStage } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
-import { getAdminCoursesPage, getAdminOverviewData, getReadyForInstructorCourses, type AdminCourseRow } from "@/lib/admin/queries"
-import { BatchExportPanel } from "./_components/batch-export-panel"
+import { getAdminCoursesPage, getAdminOverviewData, getReadyForInstructorCourses, getSentToInstructorCourses, type AdminCourseRow } from "@/lib/admin/queries"
+import { SendPanel } from "./_components/send-panel"
 import { CoursesBoard, type BoardColumn } from "./_components/courses-board"
 import { getProfilesByRole } from "@/lib/services/profiles"
 import { getOpenEscalations } from "@/lib/services/escalations"
@@ -66,6 +66,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     r_overview,
     r_institution,
     r_ready,
+    r_sent,
   ] = await Promise.allSettled([
     getAdminCoursesPage({ page, pageSize, search, status, statuses: phaseStatuses, taProfileId }),
     getAdminCoursesPage({ page: 1, pageSize: 200, status: "course_created" }),
@@ -76,6 +77,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getAdminOverviewData(),
     getSuperAdminData(),
     getReadyForInstructorCourses(),
+    getSentToInstructorCourses(),
   ])
 
   const coursesPage = r_courses.status === "fulfilled" ? r_courses.value : emptyPage
@@ -91,6 +93,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     ? r_institution.value
     : { users: [], totalCourses: 0, statusCounts: [], stuckCourses: [], taWorkload: [], auditEvents: [], units: [], members: [] }
   const readyForInstructor = r_ready.status === "fulfilled" ? r_ready.value : []
+  const sentToInstructor = r_sent.status === "fulfilled" ? r_sent.value : []
 
   // ---- Workflow board data (All Courses tab) -----------------------------
   // One column per status, derived from the shared WORKFLOW_PHASES so the admin
@@ -176,7 +179,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
-            sendPanel={<BatchExportPanel courses={readyForInstructor} />}
+            sendPanel={<SendPanel readyCourses={readyForInstructor} sentCourses={sentToInstructor} />}
             readyForInstructorCount={readyForInstructor.length}
           />
         </AdminRefreshWrapper>

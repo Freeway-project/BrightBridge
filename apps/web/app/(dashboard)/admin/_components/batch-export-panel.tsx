@@ -25,8 +25,8 @@ function buildCsv(rows: BatchMailMergeRow[]): string {
     "Brightspace URL",
     "Magic Link",
   ];
-  const escape = (v: string) => {
-    const s = v.replace(/\r?\n/g, " ");
+  const escape = (v: unknown) => {
+    const s = String(v ?? "").replace(/\r?\n/g, " ");
     return /[",]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return [
