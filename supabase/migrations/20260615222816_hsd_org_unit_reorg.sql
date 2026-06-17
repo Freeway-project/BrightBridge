@@ -52,4 +52,15 @@ where id in (
   'b2e56633-4ff6-4818-b8c1-22157b530faa'
 );
 
+update public.courses
+set department = case
+  when org_unit_id = '1e796cbe-61cb-43e4-a0da-4686f854fe35' then 'Pharmacy Technician'
+  when org_unit_id = 'f3b70699-b3d4-4da3-9dfe-df6a1ad9945f' then 'Practical Nursing'
+  else department
+end
+where org_unit_id in (
+  '1e796cbe-61cb-43e4-a0da-4686f854fe35',
+  'f3b70699-b3d4-4da3-9dfe-df6a1ad9945f'
+);
+
 commit;
