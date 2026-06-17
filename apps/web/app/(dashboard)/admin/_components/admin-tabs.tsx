@@ -10,7 +10,6 @@ type Props = {
   instructorPanel: React.ReactNode
   escalationsPanel: React.ReactNode
   completedPanel: React.ReactNode
-  migrationPanel: React.ReactNode
   institutionPanel: React.ReactNode
   assignmentLogsPanel: React.ReactNode
   sendPanel: React.ReactNode
@@ -26,7 +25,6 @@ export function AdminTabs({
   instructorPanel,
   escalationsPanel,
   completedPanel,
-  migrationPanel,
   institutionPanel,
   assignmentLogsPanel,
   sendPanel,
@@ -67,7 +65,6 @@ export function AdminTabs({
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="migration">Migration</TabsTrigger>
           <TabsTrigger value="institution">Institution</TabsTrigger>
           <TabsTrigger value="completed">Provision</TabsTrigger>
         </TabsList>
@@ -85,7 +82,6 @@ export function AdminTabs({
       </TabsContent>
       <TabsContent value="send">{sendPanel}</TabsContent>
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
-      <TabsContent value="migration">{migrationPanel}</TabsContent>
       <TabsContent value="institution">{institutionPanel}</TabsContent>
       <TabsContent value="completed">{completedPanel}</TabsContent>
     </Tabs>

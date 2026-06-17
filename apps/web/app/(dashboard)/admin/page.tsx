@@ -17,8 +17,6 @@ import { AdminRefreshWrapper } from "./_components/admin-refresh-wrapper"
 import { RecentAssignmentsTable } from "./_components/recent-assignments-table"
 import { getCourseRepository } from "@/lib/repositories"
 import { AdminOverview } from "./_components/admin-overview"
-import { MigrationPanel } from "./_components/migration-panel"
-import { getLatestMigrationReport } from "@/lib/migration/report"
 import { InstitutionPanel } from "@/components/super-admin/institution-panel"
 import { getSuperAdminData } from "@/lib/super-admin/queries"
 import { firstOpenedAtByCourseIds } from "@/lib/instructor-views/queries"
@@ -57,29 +55,42 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     : undefined
   const taProfileId = getSingleParam(resolvedSearchParams?.ta)
 
-  const [coursesPage, unassignedPage, tas, openEscalations, completedPage, recentAssignments, overviewData, migrationReport, institutionData, readyForInstructor] = await Promise.all([
-    getAdminCoursesPage({
-      page,
-      pageSize,
-      search,
-      status,
-      statuses: phaseStatuses,
-      taProfileId,
-    }),
-    getAdminCoursesPage({
-      page: 1,
-      pageSize: 200,
-      status: "course_created",
-    }),
+  const emptyPage = { data: [], total: 0, page: 1, pageSize: 50, totalPages: 0 }
+  const [
+    r_courses,
+    r_unassigned,
+    r_tas,
+    r_escalations,
+    r_completed,
+    r_assignments,
+    r_overview,
+    r_institution,
+    r_ready,
+  ] = await Promise.allSettled([
+    getAdminCoursesPage({ page, pageSize, search, status, statuses: phaseStatuses, taProfileId }),
+    getAdminCoursesPage({ page: 1, pageSize: 200, status: "course_created" }),
     getProfilesByRole("standard_user"),
     getOpenEscalations(),
     getAdminCoursesPage({ page: 1, pageSize: 200, status: "final_approved" }),
     getCourseRepository().listRecentAssignments(20),
     getAdminOverviewData(),
-    getLatestMigrationReport(),
     getSuperAdminData(),
     getReadyForInstructorCourses(),
   ])
+
+  const coursesPage = r_courses.status === "fulfilled" ? r_courses.value : emptyPage
+  const unassignedPage = r_unassigned.status === "fulfilled" ? r_unassigned.value : emptyPage
+  const tas = r_tas.status === "fulfilled" ? r_tas.value : []
+  const openEscalations = r_escalations.status === "fulfilled" ? r_escalations.value : []
+  const completedPage = r_completed.status === "fulfilled" ? r_completed.value : emptyPage
+  const recentAssignments = r_assignments.status === "fulfilled" ? r_assignments.value : []
+  const overviewData = r_overview.status === "fulfilled"
+    ? r_overview.value
+    : { totalCourses: 0, statusCounts: [], taWorkload: [] }
+  const institutionData = r_institution.status === "fulfilled"
+    ? r_institution.value
+    : { users: [], totalCourses: 0, statusCounts: [], stuckCourses: [], taWorkload: [], auditEvents: [], units: [], members: [] }
+  const readyForInstructor = r_ready.status === "fulfilled" ? r_ready.value : []
 
   // ---- Workflow board data (All Courses tab) -----------------------------
   // One column per status, derived from the shared WORKFLOW_PHASES so the admin
@@ -98,9 +109,12 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
   const countByStatus = new Map<CourseStatus, number>(overviewData.statusCounts.map((s) => [s.status, s.count]))
   const repo = getCourseRepository()
   const cardStatuses = COURSE_STATUSES.filter((s) => (countByStatus.get(s) ?? 0) > 0)
-  const cardPages = await Promise.all(cardStatuses.map((s) => repo.listAdminCoursesPage(1, 15, { status: s })))
+  const cardResults = await Promise.allSettled(cardStatuses.map((s) => repo.listAdminCoursesPage(1, 15, { status: s })))
   const rowsByStatus = new Map<CourseStatus, AdminCourseRow[]>()
-  cardStatuses.forEach((s, i) => rowsByStatus.set(s, cardPages[i].data))
+  cardStatuses.forEach((s, i) => {
+    const r = cardResults[i]
+    rowsByStatus.set(s, r?.status === "fulfilled" ? r.value.data : [])
+  })
   // Batched opened-at lookup for the current page rows so the indicator dot in
   // the All Courses list doesn't N+1. We only ask about rows that are in the
   // instructor phase — earlier statuses can never have an open.
@@ -159,7 +173,6 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               />
             }
             escalationsPanel={<EscalationsTable escalations={openEscalations} />}
-            migrationPanel={<MigrationPanel report={migrationReport} />}
             institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
