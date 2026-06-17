@@ -1,12 +1,16 @@
 import { requireProfile } from "@/lib/auth/context";
 import { assertMember } from "@/lib/chat/membership";
-import { events } from "@/lib/chat/events";
 
-export const runtime = "nodejs";          // Edge can't use EventEmitter
-export const dynamic = "force-dynamic";   // no caching
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const encoder = new TextEncoder();
 
+// Fallback SSE endpoint for single-instance deployments without Supabase.
+// When NEXT_PUBLIC_SUPABASE_URL is set, ChatSseClient uses Supabase Broadcast
+// instead and this route is never called. Without Supabase the client falls
+// back here; we keep the connection alive with pings so the tab doesn't error,
+// but real-time message delivery requires Supabase Broadcast to be configured.
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ conversationId: string }> },
@@ -20,36 +24,23 @@ export async function GET(
     return new Response("forbidden", { status: 403 });
   }
 
-  let unsubscribe: (() => void) | null = null;
   let heartbeat: ReturnType<typeof setInterval> | null = null;
 
   const stream = new ReadableStream({
     start(controller) {
-      const send = (type: string, payload: unknown) => {
-        try {
-          controller.enqueue(encoder.encode(`event: ${type}\ndata: ${JSON.stringify(payload)}\n\n`));
-        } catch {
-          unsubscribe?.();
-          heartbeat && clearInterval(heartbeat);
-          try { controller.close(); } catch {}
-        }
-      };
-
-      send("ready", { conversationId, ts: Date.now() });
-
-      unsubscribe = events.subscribe(conversationId, (e) => send(e.type, e.payload));
+      try {
+        controller.enqueue(encoder.encode(`event: ready\ndata: ${JSON.stringify({ conversationId, ts: Date.now() })}\n\n`));
+      } catch { return; }
 
       heartbeat = setInterval(() => {
         try { controller.enqueue(encoder.encode(`: ping\n\n`)); }
         catch {
-          unsubscribe?.();
           heartbeat && clearInterval(heartbeat);
           try { controller.close(); } catch {}
         }
       }, 25_000);
     },
     cancel() {
-      unsubscribe?.();
       heartbeat && clearInterval(heartbeat);
     },
   });

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useReducer } from "react";
 import type { MessageRow } from "@/lib/chat/types";
+import { createClient } from "@/lib/supabase/client";
 import { ConversationHeader } from "./ConversationHeader";
 import { MessageList } from "./MessageList";
 import { Composer } from "./Composer";
@@ -49,6 +50,9 @@ function reducer(state: State, a: Action): State {
   return { messages: next };
 }
 
+const BROADCAST_EVENTS = ["message", "message.edited", "message.deleted", "reaction.added", "reaction.removed"] as const;
+type BroadcastEventType = (typeof BROADCAST_EVENTS)[number];
+
 export function ChatSseClient(props: {
   conversationId: string;
   currentUserId: string;
@@ -59,9 +63,22 @@ export function ChatSseClient(props: {
   });
 
   useEffect(() => {
+    const supabase = createClient();
+
+    if (supabase) {
+      const channel = supabase.channel(`chat:${props.conversationId}`);
+      for (const event of BROADCAST_EVENTS) {
+        channel.on("broadcast", { event }, ({ payload }: { payload: unknown }) => {
+          dispatch({ type: event as BroadcastEventType, payload } as Action);
+        });
+      }
+      channel.subscribe();
+      return () => { void supabase.removeChannel(channel); };
+    }
+
+    // Fallback: SSE for single-instance deployments without Supabase configured
     const es = new EventSource(`/api/chat/stream/${props.conversationId}`);
-    const types = ["message", "message.edited", "message.deleted", "reaction.added", "reaction.removed"] as const;
-    for (const t of types) {
+    for (const t of BROADCAST_EVENTS) {
       es.addEventListener(t, (ev) => dispatch({ type: t, payload: JSON.parse((ev as MessageEvent).data) } as Action));
     }
     return () => es.close();
