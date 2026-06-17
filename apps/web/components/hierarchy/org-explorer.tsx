@@ -13,7 +13,6 @@ import {
   GraduationCap,
   Plus,
   Search,
-  Settings2,
   Users,
 } from "lucide-react"
 import type { AdminCourseRow, PaginatedResult, StatusCount } from "@/lib/repositories/contracts"
@@ -246,21 +245,6 @@ export function OrgExplorer({ view, courses, filters }: Props) {
           ) : (
             <div className="space-y-6">
               <OverviewSection currentType={null} children={view.children} leadership={[]} filters={filters} />
-              {view.canManage ? (
-                <Card className="border-dashed">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Settings2 className="size-4 text-primary" /> Organization setup
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                    <p>Create a top-level unit here, then select it in the tree to manage people and child departments.</p>
-                    <Button onClick={() => setCreateOpen(true)}>
-                      <Plus className="mr-2 size-4" /> Create top-level unit
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : null}
             </div>
           )}
         </div>
