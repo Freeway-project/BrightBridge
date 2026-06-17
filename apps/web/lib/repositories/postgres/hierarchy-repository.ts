@@ -20,7 +20,15 @@ export function createPostgresHierarchyRepository(): HierarchyRepository {
         `
           SELECT id, parent_id, name, type
           FROM organizational_units
-          ORDER BY name ASC
+          ORDER BY
+            CASE type
+              WHEN 'college'    THEN 0
+              WHEN 'school'     THEN 1
+              WHEN 'faculty'    THEN 1
+              WHEN 'department' THEN 2
+              ELSE 3
+            END,
+            name ASC
         `,
       );
 

@@ -1324,34 +1324,53 @@ export function createPostgresCourseRepository(): CourseRepository {
 
     async getUnitCourseFacets(unitId) {
       const pool = getPostgresPool();
-      const { rows } = await pool.query<{ status: string; term: string | null }>(
-        `
-          SELECT c.status, c.term
-          FROM courses c
-          WHERE c.org_unit_id IN (
-            SELECT descendant_id FROM org_unit_hierarchy_paths WHERE ancestor_id = $1
-          )
-        `,
-        [unitId],
-      );
 
-      const counts = new Map<string, number>();
-      const terms = new Set<string>();
-      for (const row of rows) {
-        counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
-        const t = row.term?.trim();
-        if (t) terms.add(t);
-      }
+      const [statusRows, termRows, totalRow] = await Promise.all([
+        pool.query<{ status: string; count: string }>(
+          `
+            SELECT c.status, COUNT(*)::text AS count
+            FROM courses c
+            WHERE c.org_unit_id IN (
+              SELECT descendant_id FROM org_unit_hierarchy_paths WHERE ancestor_id = $1
+            )
+            GROUP BY c.status
+          `,
+          [unitId],
+        ),
+        pool.query<{ term: string }>(
+          `
+            SELECT DISTINCT TRIM(c.term) AS term
+            FROM courses c
+            WHERE c.org_unit_id IN (
+              SELECT descendant_id FROM org_unit_hierarchy_paths WHERE ancestor_id = $1
+            )
+              AND c.term IS NOT NULL AND TRIM(c.term) <> ''
+            ORDER BY term DESC
+          `,
+          [unitId],
+        ),
+        pool.query<{ total: string }>(
+          `
+            SELECT COUNT(*)::text AS total
+            FROM courses c
+            WHERE c.org_unit_id IN (
+              SELECT descendant_id FROM org_unit_hierarchy_paths WHERE ancestor_id = $1
+            )
+          `,
+          [unitId],
+        ),
+      ]);
 
-      const statusCounts: StatusCount[] = COURSE_STATUSES.filter((s) => counts.has(s)).map((s) => ({
+      const countMap = new Map(statusRows.rows.map((r) => [r.status, Number(r.count)]));
+      const statusCounts: StatusCount[] = COURSE_STATUSES.filter((s) => countMap.has(s)).map((s) => ({
         status: s,
-        count: counts.get(s) ?? 0,
+        count: countMap.get(s) ?? 0,
       }));
 
       return {
         statusCounts,
-        terms: [...terms].sort((a, b) => b.localeCompare(a)),
-        total: rows.length,
+        terms: termRows.rows.map((r) => r.term),
+        total: Number(totalRow.rows[0]?.total ?? 0),
       } satisfies UnitCourseFacets;
     },
 

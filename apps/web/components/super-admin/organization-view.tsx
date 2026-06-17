@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useState, useEffect } from "react"
+import { useActionState, useState, useEffect, useMemo } from "react"
 import { Building2, Users, Trash2, Plus, Search, Check } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -44,6 +44,12 @@ export function OrganizationView({ data }: { data: SuperAdminData }) {
 
   const selectedUnit = units.find(u => u.id === selectedUnitId)
   const selectedUnitMembers = members.filter(m => m.orgUnitId === selectedUnitId)
+
+  const memberCountByUnit = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const m of members) map.set(m.orgUnitId, (map.get(m.orgUnitId) ?? 0) + 1)
+    return map
+  }, [members])
 
   const filteredUnits = units.filter(u => {
     const q = unitSearch.trim().toLowerCase()
@@ -93,7 +99,7 @@ export function OrganizationView({ data }: { data: SuperAdminData }) {
                   </p>
                 ) : (
                   filteredUnits.map(unit => {
-                    const memberCount = members.filter(m => m.orgUnitId === unit.id).length
+                    const memberCount = memberCountByUnit.get(unit.id) ?? 0
                     const parentName = unit.parentId ? units.find(u => u.id === unit.parentId)?.name : null
                     return (
                       <button
@@ -242,11 +248,11 @@ export function OrganizationView({ data }: { data: SuperAdminData }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium">Type</label>
-              <Select name="type" defaultValue="department">
+              <Select name="type" defaultValue="school">
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="college">College</SelectItem>
-                  <SelectItem value="faculty">Faculty</SelectItem>
+                  <SelectItem value="school">School</SelectItem>
                   <SelectItem value="department">Department</SelectItem>
                 </SelectContent>
               </Select>
