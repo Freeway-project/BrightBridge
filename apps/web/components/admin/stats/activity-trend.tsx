@@ -50,6 +50,7 @@ export function ActivityTrend({ auditEvents }: Props) {
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
+              tickFormatter={(v: number) => String(v)}
             />
             <Tooltip
               content={({ payload, label }) => {

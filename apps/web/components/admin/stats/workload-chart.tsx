@@ -53,6 +53,7 @@ export function WorkloadChart({ taWorkload }: Props) {
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
+              tickFormatter={(v: number) => String(v)}
             />
             <Tooltip
               content={({ payload, label }) => {

@@ -151,7 +151,8 @@ export async function getReadyForInstructorCourses(): Promise<ReadyForInstructor
     .order("updated_at", { ascending: false });
 
   if (courseError) {
-    throw new Error(`Failed to load ready-for-instructor courses: ${courseError.message}`);
+    console.error("[getReadyForInstructorCourses] courses query failed:", courseError.message);
+    return [];
   }
 
   if (!courseData || courseData.length === 0) return [];
@@ -166,7 +167,8 @@ export async function getReadyForInstructorCourses(): Promise<ReadyForInstructor
     .eq("review_sections.key", "course_metadata");
 
   if (responseError) {
-    throw new Error(`Failed to load course metadata responses: ${responseError.message}`);
+    console.error("[getReadyForInstructorCourses] metadata query failed:", responseError.message);
+    return [];
   }
 
   const metadataByCourseid = new Map<string, Record<string, unknown>>();
