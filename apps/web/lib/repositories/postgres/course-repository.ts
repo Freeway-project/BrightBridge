@@ -234,7 +234,9 @@ type AuditEventQueryRow = {
   from_status: string | null;
   to_status: string;
   note: string | null;
-  created_at: string;
+  // node-postgres returns `timestamp`/`timestamptz` columns as JS `Date`
+  // objects, so the raw row reflects that rather than the contract's `string`.
+  created_at: Date | string;
   actor_role: string;
   course_id: string;
   course_title: string | null;
@@ -281,7 +283,20 @@ const AUDIT_EVENT_FROM_LEGACY_SQL = `
   LEFT JOIN profiles p ON p.id = e.actor_id
 `;
 
-function mapAuditEventRow(row: AuditEventQueryRow): AuditEvent {
+/**
+ * Coerce a Postgres timestamp value to an ISO-8601 string.
+ *
+ * node-postgres parses `timestamp`/`timestamptz` columns into JS `Date`
+ * objects, but our contracts (and downstream consumers such as date-fns
+ * `parseISO`) expect ISO strings. Normalizing here keeps the data layer
+ * honest about its declared `string` types and prevents
+ * `e.split is not a function` crashes in string-only date parsers.
+ */
+export function toIsoTimestamp(value: Date | string): string {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
+export function mapAuditEventRow(row: AuditEventQueryRow): AuditEvent {
   return {
     id: row.id,
     course_id: row.course_id,
@@ -293,7 +308,7 @@ function mapAuditEventRow(row: AuditEventQueryRow): AuditEvent {
     actor_role: row.actor_role,
     on_behalf_of_name: row.on_behalf_of_name,
     note: row.note,
-    created_at: row.created_at,
+    created_at: toIsoTimestamp(row.created_at),
   };
 }
 

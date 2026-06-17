@@ -3,7 +3,7 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import type { AuditEvent } from "@/lib/repositories/contracts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { format, subDays, parseISO, startOfDay } from "date-fns"
+import { format, subDays, startOfDay } from "date-fns"
 
 interface Props {
   auditEvents: AuditEvent[]
@@ -17,7 +17,9 @@ export function ActivityTrend({ auditEvents }: Props) {
   })
 
   for (const ev of auditEvents) {
-    const key = format(parseISO(ev.created_at), "yyyy-MM-dd")
+    // `new Date(...)` tolerates both ISO strings and Date objects, matching how
+    // every other created_at consumer in the app parses these values.
+    const key = format(new Date(ev.created_at), "yyyy-MM-dd")
     const slot = days.find((d) => d.key === key)
     if (slot) slot.count++
   }
