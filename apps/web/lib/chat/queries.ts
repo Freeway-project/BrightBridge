@@ -1,6 +1,6 @@
 import "server-only";
 import { getPostgresPool } from "@/lib/postgres/pool";
-import type { ConversationSummary, MessageHit, MessageRow } from "./types";
+import type { ConversationDetail, ConversationSummary, MessageHit, MessageRow } from "./types";
 
 export async function listConversationsForUser(userId: string): Promise<ConversationSummary[]> {
   const { rows } = await getPostgresPool().query(
@@ -29,50 +29,103 @@ export async function listConversationsForUser(userId: string): Promise<Conversa
        from public.conversation_members cm
        where cm.removed_at is null
        group by cm.conversation_id
+     ),
+     partner as (
+       select cm.conversation_id,
+              coalesce(p.full_name, p.email) as partner_name
+       from public.conversation_members cm
+       join public.profiles p on p.id = cm.user_id
+       join public.conversations cv on cv.id = cm.conversation_id and cv.type = 'dm'
+       where cm.removed_at is null
+         and cm.user_id != $1
      )
      select c.*,
             coalesce(unread.n, 0) as unread_count,
             last_msg.body as last_body,
-            mems.user_ids
+            mems.user_ids,
+            partner.partner_name
      from public.conversations c
      join my on my.conversation_id = c.id
      left join last_msg on last_msg.conversation_id = c.id
      left join unread   on unread.conversation_id = c.id
      left join mems     on mems.conversation_id = c.id
+     left join partner  on partner.conversation_id = c.id
      order by coalesce(c.last_message_at, c.created_at) desc`,
     [userId],
   );
 
-  return rows.map((r): ConversationSummary => ({
-    id: r.id,
-    type: r.type,
-    title: r.title,
-    courseId: r.course_id,
-    roleKey: r.role_key,
-    createdBy: r.created_by,
-    createdAt: r.created_at,
-    lastMessageAt: r.last_message_at,
-    unreadCount: r.unread_count ?? 0,
-    lastMessagePreview: r.last_body ?? null,
-    memberIds: r.user_ids ?? [],
-    displayTitle: r.title ?? "(direct message)",
-  }));
+  return rows.map((r): ConversationSummary => {
+    const partnerName: string | null = r.partner_name ?? null;
+    const displayTitle =
+      r.type === "dm"
+        ? (partnerName ?? "Direct Message")
+        : (r.title ?? "Group");
+    return {
+      id: r.id,
+      type: r.type,
+      title: r.title,
+      courseId: r.course_id,
+      roleKey: r.role_key,
+      createdBy: r.created_by,
+      createdAt: r.created_at,
+      lastMessageAt: r.last_message_at,
+      unreadCount: r.unread_count ?? 0,
+      lastMessagePreview: r.last_body ?? null,
+      memberIds: r.user_ids ?? [],
+      displayTitle,
+      partnerName,
+    };
+  });
 }
+
+export async function getConversationDetail(
+  conversationId: string,
+  currentUserId: string,
+): Promise<ConversationDetail | null> {
+  const { rows } = await getPostgresPool().query(
+    `select c.id, c.type, c.title,
+            count(cm2.user_id)::int as member_count,
+            (select coalesce(p.full_name, p.email)
+             from public.conversation_members cm3
+             join public.profiles p on p.id = cm3.user_id
+             where cm3.conversation_id = c.id
+               and cm3.removed_at is null
+               and cm3.user_id != $2
+             limit 1) as partner_name
+     from public.conversations c
+     join public.conversation_members cm on cm.conversation_id = c.id and cm.user_id = $2 and cm.removed_at is null
+     join public.conversation_members cm2 on cm2.conversation_id = c.id and cm2.removed_at is null
+     where c.id = $1
+     group by c.id`,
+    [conversationId, currentUserId],
+  );
+  const r = rows[0];
+  if (!r) return null;
+  const displayTitle =
+    r.type === "dm" ? (r.partner_name ?? "Direct Message") : (r.title ?? "Group");
+  return { id: r.id, type: r.type, displayTitle, memberCount: r.member_count };
+}
+
+const MSG_SELECT = `
+  select m.*,
+    coalesce(p.full_name, p.email, m.author_id::text) as author_name,
+    coalesce((select array_agg(mentioned_user_id) from public.message_mentions where message_id = m.id), '{}') as mentions,
+    coalesce((select json_agg(json_build_object('emoji', emoji, 'user_id', user_id))
+              from public.message_reactions where message_id = m.id), '[]') as reactions_raw,
+    coalesce((select json_agg(json_build_object('id', id, 'storage_key', storage_key,
+                                                'filename', filename, 'mime_type', mime_type,
+                                                'size_bytes', size_bytes))
+              from public.message_attachments where message_id = m.id), '[]') as attachments
+  from public.messages m
+  left join public.profiles p on p.id = m.author_id
+`;
 
 export async function listMessages(
   conversationId: string,
   { before, limit = 50 }: { before?: string; limit?: number } = {},
 ): Promise<MessageRow[]> {
   const { rows } = await getPostgresPool().query(
-    `select m.*,
-       coalesce((select array_agg(mentioned_user_id) from public.message_mentions where message_id = m.id), '{}') as mentions,
-       coalesce((select json_agg(json_build_object('emoji', emoji, 'user_id', user_id))
-                 from public.message_reactions where message_id = m.id), '[]') as reactions_raw,
-       coalesce((select json_agg(json_build_object('id', id, 'storage_key', storage_key,
-                                                   'filename', filename, 'mime_type', mime_type,
-                                                   'size_bytes', size_bytes))
-                 from public.message_attachments where message_id = m.id), '[]') as attachments
-     from public.messages m
+    `${MSG_SELECT}
      where m.conversation_id = $1
        and m.parent_id is null
        and ($2::timestamptz is null or m.created_at < $2)
@@ -85,15 +138,7 @@ export async function listMessages(
 
 export async function listThread(parentId: string): Promise<MessageRow[]> {
   const { rows } = await getPostgresPool().query(
-    `select m.*,
-       coalesce((select array_agg(mentioned_user_id) from public.message_mentions where message_id = m.id), '{}') as mentions,
-       coalesce((select json_agg(json_build_object('emoji', emoji, 'user_id', user_id))
-                 from public.message_reactions where message_id = m.id), '[]') as reactions_raw,
-       coalesce((select json_agg(json_build_object('id', id, 'storage_key', storage_key,
-                                                   'filename', filename, 'mime_type', mime_type,
-                                                   'size_bytes', size_bytes))
-                 from public.message_attachments where message_id = m.id), '[]') as attachments
-     from public.messages m
+    `${MSG_SELECT}
      where m.id = $1 or m.parent_id = $1
      order by m.created_at asc`,
     [parentId],
@@ -142,6 +187,7 @@ function mapMessage(r: any): MessageRow {
     id: r.id,
     conversationId: r.conversation_id,
     authorId: r.author_id,
+    authorName: r.author_name ?? r.author_id,
     parentId: r.parent_id,
     body: r.body,
     editedAt: r.edited_at,

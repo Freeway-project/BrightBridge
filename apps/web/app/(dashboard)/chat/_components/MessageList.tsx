@@ -8,9 +8,11 @@ const GROUP_GAP_MS = 5 * 60 * 1000; // 5 minutes
 export function MessageList({
   messages,
   currentUserId,
+  conversationId,
 }: {
   messages: MessageRow[];
   currentUserId: string;
+  conversationId: string;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +52,7 @@ export function MessageList({
               key={msg.id}
               message={msg}
               currentUserId={currentUserId}
+              conversationId={conversationId}
               showHeader={showHeader}
             />
           );

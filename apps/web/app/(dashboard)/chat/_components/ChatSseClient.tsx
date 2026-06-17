@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useReducer } from "react";
-import type { MessageRow } from "@/lib/chat/types";
+import type { ConversationDetail, MessageRow } from "@/lib/chat/types";
 import { createClient } from "@/lib/supabase/client";
 import { ConversationHeader } from "./ConversationHeader";
 import { MessageList } from "./MessageList";
@@ -57,6 +57,7 @@ export function ChatSseClient(props: {
   conversationId: string;
   currentUserId: string;
   initialMessages: MessageRow[];
+  conversation: ConversationDetail;
 }) {
   const [state, dispatch] = useReducer(reducer, {
     messages: new Map(props.initialMessages.map((m) => [m.id, m])),
@@ -91,8 +92,8 @@ export function ChatSseClient(props: {
 
   return (
     <>
-      <ConversationHeader conversationId={props.conversationId} />
-      <MessageList messages={messages} currentUserId={props.currentUserId} />
+      <ConversationHeader conversation={props.conversation} />
+      <MessageList messages={messages} currentUserId={props.currentUserId} conversationId={props.conversationId} />
       <Composer conversationId={props.conversationId} />
     </>
   );

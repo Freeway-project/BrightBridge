@@ -18,7 +18,8 @@ export interface ConversationSummary extends ConversationRow {
   unreadCount: number;
   lastMessagePreview: string | null;
   memberIds: string[];
-  displayTitle: string;   // resolved for DMs
+  displayTitle: string;
+  partnerName: string | null;
 }
 
 export interface ConversationMember {
@@ -42,14 +43,22 @@ export interface MessageRow {
   id: string;
   conversationId: string;
   authorId: string;
+  authorName: string;
   parentId: string | null;
   body: string;
   editedAt: string | null;
   deletedAt: string | null;
   createdAt: string;
-  mentions: string[];                 // user ids
+  mentions: string[];
   reactions: { emoji: string; userIds: string[] }[];
   attachments: AttachmentRow[];
+}
+
+export interface ConversationDetail {
+  id: string;
+  type: ConversationType;
+  displayTitle: string;
+  memberCount: number;
 }
 
 export interface MessageHit {
