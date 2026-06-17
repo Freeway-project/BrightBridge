@@ -36,16 +36,23 @@ export async function firstOpenedAtByCourseIds(
   if (courseIds.length === 0) return result;
 
   const pool = getPostgresPool();
-  const { rows } = await pool.query<{ course_id: string; first_opened_at: string }>(
-    `
-      SELECT course_id, min(first_opened_at) AS first_opened_at
-      FROM instructor_dashboard_views
-      WHERE course_id = ANY($1::uuid[])
-      GROUP BY course_id
-    `,
-    [courseIds as string[]],
-  );
-  for (const row of rows) result.set(row.course_id, row.first_opened_at);
+  try {
+    const { rows } = await pool.query<{ course_id: string; first_opened_at: string }>(
+      `
+        SELECT course_id, min(first_opened_at) AS first_opened_at
+        FROM instructor_dashboard_views
+        WHERE course_id = ANY($1::uuid[])
+        GROUP BY course_id
+      `,
+      [courseIds as string[]],
+    );
+    for (const row of rows) result.set(row.course_id, row.first_opened_at);
+  } catch (error) {
+    const code = error && typeof error === "object" && "code" in error ? (error as { code?: string }).code : null;
+    if (code !== "42P01") {
+      console.warn("[firstOpenedAtByCourseIds] query failed:", (error as Error).message);
+    }
+  }
   return result;
 }
 

@@ -601,18 +601,50 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "super_admin"]);
 
-  const { getReadyForInstructorCourses } = await import("@/lib/admin/queries");
+  if (courseIds.length === 0) return { rows: [], skipped: 0 };
+
+  const { getPostgresPool } = await import("@/lib/postgres/pool");
   const { createReviewInvite } = await import("@/lib/invites/service");
   const { buildInviteLink } = await import("@/lib/email/templates/instructor-invite");
 
-  const allReady = await getReadyForInstructorCourses();
-  const readyById = new Map(allReady.map((c) => [c.courseId, c]));
+  const pool = getPostgresPool();
+
+  // Fetch all course data in one postgres query — avoids the Supabase FK ambiguity
+  // that caused the Supabase-based helper to silently return empty on every call.
+  const { rows: courseRows } = await pool.query<{
+    course_id: string;
+    title: string;
+    instructor_email: string;
+    instructor_name: string | null;
+    metadata: Record<string, unknown> | null;
+  }>(
+    `SELECT
+       c.id              AS course_id,
+       c.title,
+       p.email           AS instructor_email,
+       p.full_name       AS instructor_name,
+       rr.response_data  AS metadata
+     FROM courses c
+     INNER JOIN course_assignments ca
+       ON ca.course_id = c.id AND ca.role = 'instructor'
+     INNER JOIN profiles p
+       ON p.id = ca.profile_id
+     LEFT JOIN review_responses rr
+       ON rr.course_id = c.id
+       AND rr.section_id = (
+         SELECT id FROM review_sections WHERE key = 'course_metadata' LIMIT 1
+       )
+     WHERE c.id = ANY($1) AND c.status = 'ready_for_instructor'`,
+    [courseIds],
+  );
+
+  const courseMap = new Map(courseRows.map((r) => [r.course_id, r]));
 
   const rows: BatchMailMergeRow[] = [];
   let skipped = 0;
 
   for (const courseId of courseIds) {
-    const course = readyById.get(courseId);
+    const course = courseMap.get(courseId);
     if (!course) {
       skipped++;
       continue;
@@ -621,7 +653,7 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
     try {
       const { token } = await createReviewInvite({
         courseId,
-        email: course.instructorEmail,
+        email: course.instructor_email,
         createdBy: ctx.userId,
         neverExpires: true,
       });
@@ -632,12 +664,14 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
         note: "Sent to instructor via batch export.",
       });
 
+      const metadata = (course.metadata as Record<string, unknown>) ?? {};
+
       rows.push({
-        instructorName: course.instructorName ?? "",
-        instructorEmail: course.instructorEmail,
-        courseTitle: course.courseTitle,
-        moodleUrl: course.moodleUrl,
-        brightspaceUrl: course.brightspaceUrl,
+        instructorName: course.instructor_name ?? "",
+        instructorEmail: course.instructor_email,
+        courseTitle: course.title,
+        moodleUrl: (metadata.moodle_url as string | undefined) ?? "",
+        brightspaceUrl: (metadata.brightspace_url as string | undefined) ?? "",
         magicLink: buildInviteLink(token),
       });
     } catch (error) {
