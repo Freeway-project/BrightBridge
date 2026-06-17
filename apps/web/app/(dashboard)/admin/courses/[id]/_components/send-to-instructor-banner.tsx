@@ -20,9 +20,9 @@ interface Props {
 
 function buildCsv(rows: MailMergeRow[]): string {
   const header = ["Instructor Name", "Instructor Email", "Course Title", "Invite Link", "Invite Expires At"]
-  const escapeCell = (value: string) => {
-    const normalized = value.replace(/\r?\n/g, " ")
-    return /[",\n]/.test(normalized) ? `"${normalized.replace(/"/g, '""')}"` : normalized
+  const escapeCell = (value: unknown) => {
+    const normalized = String(value ?? "").replace(/\r?\n/g, " ")
+    return /[",]/.test(normalized) ? `"${normalized.replace(/"/g, '""')}"` : normalized
   }
 
   return [
