@@ -5,6 +5,7 @@ import { useActionState, useEffect, useMemo, useState, useTransition } from "rea
 import {
   ArrowRight,
   BookOpen,
+  Building,
   Building2,
   ChevronDown,
   ChevronRight,
@@ -96,6 +97,7 @@ function unitTypeStyle(type: string) {
 function UnitTypeIcon({ type, className }: { type: string; className?: string }) {
   if (type === "college") return <Building2 className={className} />
   if (type === "faculty" || type === "school") return <GraduationCap className={className} />
+  if (type === "department") return <Building className={className} />
   return <Folder className={className} />
 }
 
