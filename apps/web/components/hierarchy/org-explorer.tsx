@@ -11,7 +11,6 @@ import {
   Folder,
   FolderTree,
   GraduationCap,
-  Plus,
   Search,
   Users,
 } from "lucide-react"
@@ -62,7 +61,6 @@ import { cn } from "@/lib/utils"
 import { roleTitleStyle, ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import {
   addUnitMemberAction,
-  createUnitAction,
   removeUnitMemberAction,
   type ManageUserState,
 } from "@/app/(dashboard)/super-admin/actions"
@@ -122,11 +120,9 @@ function countBy(statusCounts: StatusCount[], status: string) {
 export function OrgExplorer({ view, courses, filters }: Props) {
   const [tab, setTab] = useState<WorkspaceTab>("overview")
   const [treeOpen, setTreeOpen] = useState(false)
-  const [createOpen, setCreateOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
-  const [unitState, unitFormAction, unitPending] = useActionState(createUnitAction, initialState)
   const [memberState, memberFormAction, memberPending] = useActionState(addUnitMemberAction, initialState)
 
   useEffect(() => {
@@ -138,9 +134,6 @@ export function OrgExplorer({ view, courses, filters }: Props) {
     }
   }, [tab, view.canManage, view.current])
 
-  useEffect(() => {
-    if (unitState.kind === "success") setCreateOpen(false)
-  }, [unitState.kind])
 
   useEffect(() => {
     if (memberState.kind === "success") setAddMemberOpen(false)
@@ -174,12 +167,6 @@ export function OrgExplorer({ view, courses, filters }: Props) {
           <Button variant="outline" className="lg:hidden" onClick={() => setTreeOpen(true)}>
             <FolderTree className="mr-2 size-4" /> Browse units
           </Button>
-          {view.canManage && (
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-2 size-4" />
-              {view.current ? "Create child unit" : "Create unit"}
-            </Button>
-          )}
           {view.canManage && view.current && (
             <Button variant="outline" onClick={() => setAddMemberOpen(true)}>
               <Users className="mr-2 size-4" /> Add member
@@ -227,7 +214,6 @@ export function OrgExplorer({ view, courses, filters }: Props) {
                     currentName={view.current.name}
                     members={view.selectedMembers}
                     onAddMember={() => setAddMemberOpen(true)}
-                    onCreateUnit={() => setCreateOpen(true)}
                     onRemoveMember={(memberId) => {
                       setRemovingMemberId(memberId)
                       startTransition(async () => {
@@ -263,17 +249,6 @@ export function OrgExplorer({ view, courses, filters }: Props) {
         </SheetContent>
       </Sheet>
 
-      {view.canManage ? (
-        <CreateUnitSheet
-          open={createOpen}
-          onOpenChange={setCreateOpen}
-          units={view.tree}
-          defaultParentId={view.current?.id ?? null}
-          formAction={unitFormAction}
-          pending={unitPending}
-          state={unitState}
-        />
-      ) : null}
       {view.canManage && view.current ? (
         <AddMemberSheet
           open={addMemberOpen}
@@ -660,14 +635,12 @@ function ManageSection({
   currentName,
   members,
   onAddMember,
-  onCreateUnit,
   onRemoveMember,
   removingMemberId,
 }: {
   currentName: string
   members: OrgUnitMemberDetail[]
   onAddMember: () => void
-  onCreateUnit: () => void
   onRemoveMember: (memberId: string) => void
   removingMemberId: string | null
 }) {
@@ -677,12 +650,9 @@ function ManageSection({
         <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-base">Manage {currentName}</CardTitle>
-            <p className="text-sm text-muted-foreground">Add staff, adjust leadership assignments, or create child units from this workspace.</p>
+            <p className="text-sm text-muted-foreground">Add staff and adjust leadership assignments for this unit.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={onCreateUnit}>
-              <Plus className="mr-2 size-4" /> Create child unit
-            </Button>
             <Button onClick={onAddMember}>
               <Users className="mr-2 size-4" /> Add member
             </Button>
@@ -747,66 +717,6 @@ function ManageSection({
   )
 }
 
-function CreateUnitSheet({
-  open,
-  onOpenChange,
-  units,
-  defaultParentId,
-  formAction,
-  pending,
-  state,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  units: OrgTreeNode[]
-  defaultParentId: string | null
-  formAction: (payload: FormData) => void
-  pending: boolean
-  state: ManageUserState
-}) {
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right">
-        <SheetHeader className="border-b border-border pb-4">
-          <SheetTitle>Create organizational unit</SheetTitle>
-          <SheetDescription className="sr-only">Form to create a new child organizational unit</SheetDescription>
-        </SheetHeader>
-        <form action={formAction} className="flex flex-col gap-5 p-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium">Name</label>
-            <Input name="name" placeholder="e.g. Mathematics Department" required className="h-9" />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium">Type</label>
-            <Select name="type" defaultValue="department">
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="college">College</SelectItem>
-                <SelectItem value="faculty">Faculty</SelectItem>
-                <SelectItem value="school">School</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium">Parent unit</label>
-            <Select name="parentId" defaultValue={defaultParentId ?? "__none__"}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent className="max-h-64">
-                <SelectItem value="__none__">None - top level</SelectItem>
-                {units.map((unit) => (
-                  <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {state.kind === "error" ? <p className="text-xs text-destructive">{state.message}</p> : null}
-          <Button type="submit" disabled={pending}>{pending ? "Creating..." : "Create unit"}</Button>
-        </form>
-      </SheetContent>
-    </Sheet>
-  )
-}
 
 function AddMemberSheet({
   open,

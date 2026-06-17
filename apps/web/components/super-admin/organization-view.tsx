@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/sheet"
 import type { SuperAdminData } from "@/lib/super-admin/queries"
 import {
-  createUnitAction,
   addUnitMemberAction,
   removeUnitMemberAction,
 } from "@/app/(dashboard)/super-admin/actions"
@@ -28,15 +27,10 @@ export function OrganizationView({ data }: { data: SuperAdminData }) {
   const { units, members, users } = data
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null)
   const [unitSearch, setUnitSearch] = useState("")
-  const [createOpen, setCreateOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
 
-  const [unitState, unitFormAction, unitPending] = useActionState(createUnitAction, initialState)
   const [memberState, memberFormAction, memberPending] = useActionState(addUnitMemberAction, initialState)
 
-  useEffect(() => {
-    if (unitState.kind === "success") setCreateOpen(false)
-  }, [unitState.kind])
 
   useEffect(() => {
     if (memberState.kind === "success") setAddMemberOpen(false)
@@ -71,9 +65,6 @@ export function OrganizationView({ data }: { data: SuperAdminData }) {
                   Organizational Units
                   <span className="text-xs font-normal text-muted-foreground">({units.length})</span>
                 </CardTitle>
-                <Button size="icon" variant="outline" className="size-7" onClick={() => setCreateOpen(true)}>
-                  <Plus className="size-4" />
-                </Button>
               </div>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
@@ -235,51 +226,6 @@ export function OrganizationView({ data }: { data: SuperAdminData }) {
         </div>
       </div>
 
-      {/* Create Unit Sheet */}
-      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-        <SheetContent side="right">
-          <SheetHeader className="border-b border-border">
-            <SheetTitle>New Organizational Unit</SheetTitle>
-          </SheetHeader>
-          <form action={unitFormAction} className="flex flex-col gap-5 p-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium">Name</label>
-              <Input name="name" placeholder="e.g. Mathematics Department" required className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium">Type</label>
-              <Select name="type" defaultValue="school">
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="college">College</SelectItem>
-                  <SelectItem value="school">School</SelectItem>
-                  <SelectItem value="department">Department</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium">
-                Parent Unit <span className="text-muted-foreground font-normal">(optional)</span>
-              </label>
-              <Select name="parentId">
-                <SelectTrigger className="h-9"><SelectValue placeholder="None — top level" /></SelectTrigger>
-                <SelectContent className="max-h-64">
-                  <SelectItem value="">None — top level</SelectItem>
-                  {units.map(u => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {unitState.kind === "error" && (
-              <p className="text-xs text-destructive">{unitState.message}</p>
-            )}
-            <Button type="submit" disabled={unitPending} className="mt-2">
-              {unitPending ? "Creating..." : "Create Unit"}
-            </Button>
-          </form>
-        </SheetContent>
-      </Sheet>
 
       {/* Add Member Sheet */}
       {selectedUnit && (

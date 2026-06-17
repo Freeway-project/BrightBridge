@@ -108,37 +108,6 @@ export async function updateUserRoleAction(
   return { kind: "success", message: `Updated ${profile.email} to ${role}.` }
 }
 
-export async function createUnitAction(
-  _state: ManageUserState,
-  formData: FormData,
-): Promise<ManageUserState> {
-  await requireOrgManager()
-
-  const name = String(formData.get("name") ?? "").trim()
-  const type = String(formData.get("type") ?? "").trim()
-  const rawParentId = String(formData.get("parentId") ?? "")
-  const parentId = rawParentId && rawParentId !== "__none__" ? rawParentId : null
-
-  if (!name || !type) {
-    return { kind: "error", message: "Name and type are required." }
-  }
-
-  try {
-    await getHierarchyRepository().createUnit({ name, type, parentId })
-  } catch (error) {
-    return {
-      kind: "error",
-      message: error instanceof Error ? error.message : "Could not create unit.",
-    }
-  }
-
-  revalidatePath("/super-admin")
-  revalidatePath("/admin")
-  revalidatePath("/hierarchy")
-  revalidatePath("/provost")
-  revalidatePath("/provost/org")
-  return { kind: "success", message: `Created unit ${name}.` }
-}
 
 export async function addUnitMemberAction(
   _state: ManageUserState,

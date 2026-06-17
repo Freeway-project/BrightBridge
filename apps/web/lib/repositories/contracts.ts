@@ -517,7 +517,6 @@ export interface HierarchyRepository {
   getUserUnits(profileId: string): Promise<OrgUnitMember[]>;
   listAllMembers(): Promise<OrgUnitMember[]>;
   hasHierarchyAccess(profileId: string, courseId: string): Promise<boolean>;
-  createUnit(input: { name: string; type: string; parentId?: string | null }): Promise<OrgUnit>;
   addMember(input: { profileId: string; orgUnitId: string; title: string; isPrimary?: boolean }): Promise<void>;
   removeMember(memberId: string): Promise<void>;
 }

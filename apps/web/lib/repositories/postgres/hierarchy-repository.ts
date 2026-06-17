@@ -168,30 +168,6 @@ export function createPostgresHierarchyRepository(): HierarchyRepository {
       return ancestorRows.some((row) => userUnitSet.has(row.ancestor_id));
     },
 
-    async createUnit(input) {
-      const pool = getPostgresPool();
-      const { rows } = await pool.query<{
-        id: string;
-        parent_id: string | null;
-        name: string;
-        type: string;
-      }>(
-        `
-          INSERT INTO organizational_units (name, type, parent_id)
-          VALUES ($1, $2, $3)
-          RETURNING id, parent_id, name, type
-        `,
-        [input.name, input.type, input.parentId ?? null],
-      );
-
-      const row = rows[0];
-      return {
-        id: row.id,
-        parentId: row.parent_id,
-        name: row.name,
-        type: row.type,
-      };
-    },
 
     async addMember(input) {
       const pool = getPostgresPool();
