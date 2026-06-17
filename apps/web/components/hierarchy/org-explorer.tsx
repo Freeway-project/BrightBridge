@@ -39,6 +39,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -254,6 +255,7 @@ export function OrgExplorer({ view, courses, filters }: Props) {
         <SheetContent side="left" className="w-[320px] p-0">
           <SheetHeader className="border-b border-border px-4 py-4">
             <SheetTitle>Organization tree</SheetTitle>
+            <SheetDescription className="sr-only">Browse and select organizational units</SheetDescription>
           </SheetHeader>
           <div className="h-[calc(100%-4.5rem)] p-4">
             <TreePanel view={view} filters={filters} />
@@ -431,6 +433,8 @@ function TreeNodeItem({
   )
 }
 
+import { ChildUnitChart } from "@/components/hierarchy/child-unit-chart"
+
 function OverviewSection({
   currentType,
   children,
@@ -443,9 +447,13 @@ function OverviewSection({
   filters: Filters
 }) {
   const sectionLabel = currentType ? "Child units" : "Top-level units"
+  const chartTitle = currentType === "school" || currentType === "faculty" ? "Department Throughput" : (currentType ? "Sub-unit Throughput" : "School Health Matrix")
 
   return (
     <div className="space-y-6">
+      {children.length > 0 && (
+        <ChildUnitChart children={children} title={chartTitle} />
+      )}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Hierarchy snapshot</CardTitle>
@@ -761,6 +769,7 @@ function CreateUnitSheet({
       <SheetContent side="right">
         <SheetHeader className="border-b border-border pb-4">
           <SheetTitle>Create organizational unit</SheetTitle>
+          <SheetDescription className="sr-only">Form to create a new child organizational unit</SheetDescription>
         </SheetHeader>
         <form action={formAction} className="flex flex-col gap-5 p-4">
           <div className="space-y-1.5">
@@ -843,6 +852,7 @@ function AddMemberSheet({
       <SheetContent side="right" className="flex w-[440px] max-w-[440px] flex-col gap-0 p-0">
         <SheetHeader className="border-b border-border p-4">
           <SheetTitle>Add member to {unitName}</SheetTitle>
+          <SheetDescription className="sr-only">Search for a user to add as a member to this unit</SheetDescription>
         </SheetHeader>
 
         <form action={formAction} className="flex min-h-0 flex-1 flex-col overflow-hidden">

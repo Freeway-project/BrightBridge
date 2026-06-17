@@ -10,14 +10,14 @@ const ITEMS = [
   {
     href: "/hierarchy",
     title: "Explore the Hierarchy",
-    desc: "Drill into every college, school, and department to see its courses, leadership, and progress.",
+    desc: "Drill into every school and department to see its courses, leadership, and progress.",
     icon: FolderTree,
     primary: true,
   },
   {
     href: "/provost/org",
     title: "Manage Organization",
-    desc: "Create colleges and departments, and assign deans and department heads.",
+    desc: "Create schools and departments, and assign deans and department heads.",
     icon: Building2,
     primary: false,
   },

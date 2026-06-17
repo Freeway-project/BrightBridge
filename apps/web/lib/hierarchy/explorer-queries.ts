@@ -83,14 +83,15 @@ export type OrgExplorerView = {
   userOptions: OrgUserOption[]
 }
 
-// Walk parent_id up to the root using the already-loaded unit map (no extra query).
 function buildBreadcrumb(unitId: string, unitById: Map<string, OrgUnit>): OrgCrumb[] {
   const chain: OrgCrumb[] = []
   let cur: OrgUnit | undefined = unitById.get(unitId)
   const seen = new Set<string>()
   while (cur && !seen.has(cur.id)) {
     seen.add(cur.id)
-    chain.unshift({ id: cur.id, name: cur.name, type: cur.type })
+    if (cur.type !== "college") {
+      chain.unshift({ id: cur.id, name: cur.name, type: cur.type })
+    }
     cur = cur.parentId ? unitById.get(cur.parentId) : undefined
   }
   return chain
@@ -115,9 +116,15 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   // An unknown unit id falls back to the top level rather than erroring.
   const effectiveUnitId = current ? current.id : null
 
-  const childUnits = allUnits
-    .filter((u) => (u.parentId ?? null) === effectiveUnitId)
-    .sort((a, b) => a.name.localeCompare(b.name))
+  let childUnits = allUnits.filter((u) => (u.parentId ?? null) === effectiveUnitId)
+  
+  // Flatten college: if children contain a college, replace with the college's children (schools)
+  if (childUnits.some((u) => u.type === "college")) {
+    const collegeIds = new Set(childUnits.filter((u) => u.type === "college").map((u) => u.id))
+    childUnits = allUnits.filter((u) => u.parentId && collegeIds.has(u.parentId))
+  }
+  
+  childUnits = childUnits.sort((a, b) => a.name.localeCompare(b.name))
   const unitIds = allUnits.map((u) => u.id)
 
   const memberCountByUnit = new Map<string, number>()
@@ -188,14 +195,24 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   const courseTotal = facets ? facets.total : statusCounts.reduce((sum, c) => sum + c.count, 0)
   const terms = facets ? facets.terms : []
   const tree = allUnits
-    .map((unit) => ({
-      id: unit.id,
-      parentId: unit.parentId,
-      name: unit.name,
-      type: unit.type,
-      courseCount: unitCourseCounts[unit.id] ?? 0,
-      memberCount: memberCountByUnit.get(unit.id) ?? 0,
-    }))
+    .filter((u) => u.type !== "college")
+    .map((unit) => {
+      let parentId = unit.parentId
+      if (parentId) {
+        const parent = unitById.get(parentId)
+        if (parent && parent.type === "college") {
+          parentId = parent.parentId
+        }
+      }
+      return {
+        id: unit.id,
+        parentId,
+        name: unit.name,
+        type: unit.type,
+        courseCount: unitCourseCounts[unit.id] ?? 0,
+        memberCount: memberCountByUnit.get(unit.id) ?? 0,
+      }
+    })
     .sort((a, b) => a.name.localeCompare(b.name))
   const userOptions = (usersPage?.data ?? [])
     .map((user) => ({

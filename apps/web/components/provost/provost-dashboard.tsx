@@ -8,6 +8,8 @@ import { buildProvostSummary } from "@/lib/provost/summary"
 import { ProvostWelcomeBanner } from "./provost-welcome-banner"
 import { ProvostKpiRow } from "./provost-kpi-row"
 import { ProvostExplore } from "./provost-explore"
+import type { OrgExplorerView } from "@/lib/hierarchy/explorer-queries"
+import { ChildUnitChart } from "@/components/hierarchy/child-unit-chart"
 
 /**
  * Provost executive dashboard. Scan-first oversight: welcome banner + hero KPI
@@ -19,10 +21,12 @@ export function ProvostDashboard({
   data,
   auditInitial,
   provostName,
+  orgView,
 }: {
   data: SuperAdminData
   auditInitial: PaginatedResult<AuditEvent>
   provostName: string | null
+  orgView: OrgExplorerView
 }) {
   const summary = buildProvostSummary(data, provostName)
 
@@ -40,8 +44,9 @@ export function ProvostDashboard({
       <ProvostExplore />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
           <PhaseBreakdown breakdown={breakdown} />
+          <ChildUnitChart children={orgView.children} title="School Health Matrix" />
         </div>
 
         <Card className="lg:col-span-2 border-border/60 shadow-sm">

@@ -167,6 +167,7 @@ export function BatchExportPanel({ courses }: Props) {
                 <tr className="border-b border-border bg-muted/40">
                   <th className="w-10 px-4 py-2">
                     <Checkbox
+                      className="bg-background shadow-sm border-muted-foreground/40 data-[state=checked]:bg-primary"
                       checked={allSelected}
                       onCheckedChange={toggleAll}
                       aria-label="Select all"
@@ -188,6 +189,7 @@ export function BatchExportPanel({ courses }: Props) {
                     >
                       <td className="px-4 py-2.5">
                         <Checkbox
+                          className="bg-background shadow-sm border-muted-foreground/40 data-[state=checked]:bg-primary"
                           checked={selectedIds.has(course.courseId)}
                           onCheckedChange={() => toggleOne(course.courseId)}
                           aria-label={`Select ${course.courseTitle}`}

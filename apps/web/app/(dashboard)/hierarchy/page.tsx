@@ -64,7 +64,7 @@ export default async function HierarchyPage({ searchParams }: Props) {
     <>
       <Topbar
         title="Hierarchy"
-        subtitle="Institution explorer — drill into colleges, departments, and their courses"
+        subtitle="Institution explorer — drill into schools, departments, and their courses"
       />
       <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background">
         <OrgExplorer

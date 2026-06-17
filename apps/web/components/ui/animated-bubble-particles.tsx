@@ -197,7 +197,7 @@ const AnimatedBubbleParticles: React.FC<AnimatedBubbleParticlesProps> = ({
   }, [dimensions, spawnInterval, animate, spawnParticle])
 
   const backgroundClass = (() => {
-    if (className && className.split(" ").some((c) => c.startsWith("bg-"))) return ""
+    if (typeof className === "string" && className.split(" ").some((c) => c.startsWith("bg-"))) return ""
     return `bg-[${backgroundColor}]`
   })()
 
