@@ -11,18 +11,20 @@ import {
 } from "@/lib/content-converter/templates"
 
 export const runtime = "nodejs"
-// Large PDFs/decks can take a while for Claude to read end-to-end on a
-// non-streaming request; give the route headroom before it self-aborts.
-export const maxDuration = 300
+// Large syllabi extract to a lot of JSON, and we now stream the response so the
+// generation can run for several minutes without the connection going idle.
+// Give the route plenty of headroom before it self-aborts.
+export const maxDuration = 600
 
 const CLAUDE_MODEL = "claude-sonnet-4-6"
 
 // The Anthropic API always requires a max_tokens ceiling — there is no
-// "unlimited" value. We set it high enough that the token cap is never what
-// truncates a converted document; in practice the binding limit is this route's
-// maxDuration on a non-streaming request. For genuinely huge documents,
-// switch callClaude to streaming and raise maxDuration further.
-const MAX_OUTPUT_TOKENS = 16000
+// "unlimited" value. 16k was too low: a full-length syllabus pasted as text
+// extracts to >16k output tokens, so the JSON was being truncated mid-object
+// and surfaced to the user as the misleading "Could not parse JSON from Claude".
+// 64k is Sonnet 4.6's streaming ceiling; callClaude streams (below) so a
+// generation this large doesn't trip the route/proxy idle timeout.
+const MAX_OUTPUT_TOKENS = 64000
 
 // Mirror of the page-level guard. The server holds the Anthropic key, so the
 // route must independently verify the caller — a logged-out or unauthorized
@@ -52,13 +54,13 @@ type ConvertRequest = {
   text?: string
 }
 
-type AnthropicContentBlock = { type: string; text?: string }
+type ClaudeResult = { text: string; stopReason: string | null }
 
 async function callClaude(
   apiKey: string,
   messages: unknown[],
   maxTokens: number,
-): Promise<string> {
+): Promise<ClaudeResult> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -69,23 +71,67 @@ async function callClaude(
     // This is a PDF/Word -> structured-output extraction task, not a reasoning
     // task. Disable thinking and use low effort so latency and cost stay close
     // to the prior (non-thinking) Sonnet 4 behavior — Sonnet 4.6 otherwise
-    // defaults to adaptive thinking at high effort.
+    // defaults to adaptive thinking at high effort. We stream so a large
+    // extraction (up to MAX_OUTPUT_TOKENS) keeps the connection alive instead
+    // of idling out on a multi-minute non-streaming request.
     body: JSON.stringify({
       model: CLAUDE_MODEL,
       max_tokens: maxTokens,
       thinking: { type: "disabled" },
       output_config: { effort: "low" },
+      stream: true,
       messages,
     }),
   })
 
-  if (!res.ok) {
+  if (!res.ok || !res.body) {
     const err = (await res.json().catch(() => ({}))) as { error?: { message?: string } }
     throw new Error(err.error?.message || `Anthropic API error ${res.status}`)
   }
 
-  const json = (await res.json()) as { content?: AnthropicContentBlock[] }
-  return (json.content || []).map((b) => b.text || "").join("")
+  // Parse the SSE stream: accumulate text_delta chunks and capture the final
+  // stop_reason from the message_delta event.
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let text = ""
+  let stopReason: string | null = null
+
+  const handleData = (payload: string) => {
+    let evt: {
+      type?: string
+      delta?: { type?: string; text?: string; stop_reason?: string }
+      error?: { message?: string }
+    }
+    try {
+      evt = JSON.parse(payload)
+    } catch {
+      return
+    }
+    if (evt.type === "error") {
+      throw new Error(evt.error?.message || "Anthropic streaming error")
+    }
+    if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
+      text += evt.delta.text || ""
+    } else if (evt.type === "message_delta" && evt.delta?.stop_reason) {
+      stopReason = evt.delta.stop_reason
+    }
+  }
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    // SSE events are separated by a blank line; each event has one `data:` line.
+    let nl
+    while ((nl = buffer.indexOf("\n")) !== -1) {
+      const line = buffer.slice(0, nl).trim()
+      buffer = buffer.slice(nl + 1)
+      if (line.startsWith("data:")) handleData(line.slice(5).trim())
+    }
+  }
+
+  return { text, stopReason }
 }
 
 function buildMessages(
@@ -180,7 +226,13 @@ export async function POST(request: Request) {
   const started = performance.now()
   try {
     const messages = buildMessages(template, extra, kind, body.data, body.text)
-    const response = await callClaude(apiKey, messages, MAX_OUTPUT_TOKENS)
+    const { text: response, stopReason } = await callClaude(apiKey, messages, MAX_OUTPUT_TOKENS)
+    // A max_tokens stop means the output was cut off mid-document — the JSON is
+    // incomplete by definition. Report that clearly instead of letting it fall
+    // through to a misleading "Could not parse JSON from Claude".
+    if (stopReason === "max_tokens") {
+      throw new Error("Document is too long to convert in one pass — try splitting it into smaller sections.")
+    }
     const html = extractHtml(template, response)
     logUsage({ userId, role, template, kind, outcome: "success", ms: Math.round(performance.now() - started) })
     return NextResponse.json({ html })

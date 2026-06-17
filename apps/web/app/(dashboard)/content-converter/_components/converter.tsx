@@ -20,18 +20,8 @@ import {
   type ConverterTemplate,
 } from "@/lib/content-converter/templates.shared"
 import { Check, CheckCircle2, Copy, Download, FileText, Sparkles, UploadCloud } from "lucide-react"
-import Lottie from "lottie-react"
 import { motion, AnimatePresence } from "framer-motion"
-
-import lottie1 from "@/assets/91751022-1166-11ee-9c74-138fa1e7d83d.json"
-import lottie2 from "@/assets/9612aa98-116d-11ee-b4c5-2f9cdafc1909.json"
-import lottie3 from "@/assets/9177b66a-1166-11ee-9c77-8fb1c419d11a.json"
-import lottie4 from "@/assets/e1848564-1181-11ee-8a40-a3d1fde86026.json"
-import lottie5 from "@/assets/ed56440c-30c1-11f0-bc82-bbb1176c7ff5.json"
-import lottie6 from "@/assets/eddf77f9-597b-49c0-ba61-927df26f9bf2.json"
-import lottie7 from "@/assets/7016fcb6-30c1-11f0-bcf8-57c4a2ec7739.json"
-
-const LOTTIE_ANIMATIONS = [lottie1, lottie2, lottie3, lottie4, lottie5, lottie6, lottie7]
+import { GiphyLoader } from "./giphy-loader"
 
 const MAMMOTH_CDN = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"
 const JSZIP_CDN = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
@@ -168,7 +158,6 @@ export function ContentConverter() {
   const [tab, setTab] = useState<OutputTab>("preview")
   const [dragOver, setDragOver] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [loaderIndex, setLoaderIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const log = useCallback((type: LogType, msg: string) => {
@@ -206,7 +195,6 @@ export function ContentConverter() {
 
   const convert = useCallback(async () => {
     if (!file || busy) return
-    setLoaderIndex(Math.floor(Math.random() * LOTTIE_ANIMATIONS.length))
     setBusy(true)
     setProgress(5)
     setHtml("")
@@ -486,19 +474,7 @@ export function ContentConverter() {
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm"
                 >
-                  <motion.div 
-                    key={loaderIndex}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", duration: 0.5 }}
-                    className="w-[40vw] max-w-[400px]"
-                  >
-                    <Lottie
-                      animationData={LOTTIE_ANIMATIONS[loaderIndex]}
-                      loop={true}
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </motion.div>
+                  <GiphyLoader />
                 </motion.div>
               )}
             </AnimatePresence>
