@@ -140,75 +140,48 @@ export async function getAdminCourseDetail(courseId: string): Promise<AdminCours
  * Pulls moodle_url and brightspace_url from the course_metadata review response.
  */
 export async function getReadyForInstructorCourses(): Promise<ReadyForInstructorCourse[]> {
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  const admin = createAdminClient();
-  if (!admin) return []; // Supabase env vars not configured — tab shows empty state
+  const { getPostgresPool } = await import("@/lib/postgres/pool");
+  const pool = getPostgresPool();
 
-  // Step 1: fetch courses with status ready_for_instructor that have an instructor assignment
-  const { data: courseData, error: courseError } = await admin
-    .from("courses")
-    .select(`
-      id,
-      title,
-      course_assignments!inner(
-        profile_id,
-        profiles!profile_id(email, full_name)
-      )
-    `)
-    .eq("status", "ready_for_instructor")
-    .eq("course_assignments.role", "instructor")
-    .order("updated_at", { ascending: false });
+  const { rows } = await pool.query<{
+    course_id: string;
+    title: string;
+    instructor_profile_id: string;
+    instructor_email: string;
+    instructor_name: string | null;
+    metadata: Record<string, unknown> | null;
+  }>(
+    `SELECT
+       c.id              AS course_id,
+       c.title,
+       p.id              AS instructor_profile_id,
+       p.email           AS instructor_email,
+       p.full_name       AS instructor_name,
+       rr.response_data  AS metadata
+     FROM courses c
+     INNER JOIN course_assignments ca
+       ON ca.course_id = c.id AND ca.role = 'instructor'
+     INNER JOIN profiles p
+       ON p.id = ca.profile_id
+     LEFT JOIN review_responses rr
+       ON rr.course_id = c.id
+       AND rr.section_id = (
+         SELECT id FROM review_sections WHERE key = 'course_metadata' LIMIT 1
+       )
+     WHERE c.status = 'ready_for_instructor'
+     ORDER BY c.updated_at DESC`,
+  );
 
-  if (courseError) {
-    console.error("[getReadyForInstructorCourses] courses query failed:", courseError.message);
-    return [];
-  }
-
-  if (!courseData || courseData.length === 0) return [];
-
-  const courseIds = courseData.map((c: any) => c.id);
-
-  // Step 2: fetch course_metadata review responses for these courses in one query
-  const { data: responseData, error: responseError } = await admin
-    .from("review_responses")
-    .select("course_id, response_data, review_sections!inner(key)")
-    .in("course_id", courseIds)
-    .eq("review_sections.key", "course_metadata");
-
-  if (responseError) {
-    console.error("[getReadyForInstructorCourses] metadata query failed:", responseError.message);
-    return [];
-  }
-
-  const metadataByCourseid = new Map<string, Record<string, unknown>>();
-  for (const row of (responseData ?? []) as any[]) {
-    metadataByCourseid.set(row.course_id, row.response_data ?? {});
-  }
-
-  return (courseData as any[]).flatMap((row) => {
-    // course_assignments!inner returns an array; take the first instructor
-    const assignments = Array.isArray(row.course_assignments)
-      ? row.course_assignments
-      : [row.course_assignments];
-    const assignment = assignments[0];
-    if (!assignment) return [];
-
-    const profiles = Array.isArray(assignment.profiles)
-      ? assignment.profiles
-      : [assignment.profiles];
-    const profile = profiles[0];
-    if (!profile?.email) return [];
-
-    const metadata = metadataByCourseid.get(row.id) ?? {};
-
-    return [{
-      courseId: row.id as string,
-      courseTitle: row.title as string,
-      instructorName: (profile.full_name as string | null) ?? null,
-      instructorEmail: profile.email as string,
-      instructorProfileId: assignment.profile_id as string,
+  return rows.map((row) => {
+    const metadata = (row.metadata as Record<string, unknown>) ?? {};
+    return {
+      courseId: row.course_id,
+      courseTitle: row.title,
+      instructorName: row.instructor_name,
+      instructorEmail: row.instructor_email,
+      instructorProfileId: row.instructor_profile_id,
       moodleUrl: (metadata.moodle_url as string | undefined) ?? "",
       brightspaceUrl: (metadata.brightspace_url as string | undefined) ?? "",
-    }];
+    };
   });
 }
