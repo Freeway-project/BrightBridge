@@ -143,7 +143,7 @@ export async function getReadyForInstructorCourses(): Promise<ReadyForInstructor
       title,
       course_assignments!inner(
         profile_id,
-        profiles!inner(email, full_name)
+        profiles!profile_id(email, full_name)
       )
     `)
     .eq("status", "ready_for_instructor")
