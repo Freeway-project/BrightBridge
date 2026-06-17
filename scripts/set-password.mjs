@@ -76,7 +76,7 @@ async function main() {
     console.log(`   ⚠️  Ask users to change their password after first login.`);
   } else {
     const { rows } = await pool.query(
-      `SELECT id, email, global_role FROM profiles WHERE email = $1`, [EMAIL.toLowerCase()]
+      `SELECT id, email, role FROM profiles WHERE lower(email) = $1`, [EMAIL.toLowerCase()]
     );
     if (rows.length === 0) {
       console.error(`❌  No profile found for email: ${EMAIL}`);
@@ -86,7 +86,7 @@ async function main() {
     await pool.query(
       `UPDATE profiles SET password_hash = $1 WHERE id = $2`, [hash, user.id]
     );
-    console.log(`✅ Password set for: ${user.email} (${user.global_role})`);
+    console.log(`✅ Password set for: ${user.email} (${user.role})`);
   }
 
   await pool.end();

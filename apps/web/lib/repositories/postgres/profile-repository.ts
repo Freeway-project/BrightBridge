@@ -11,6 +11,8 @@ type ProfileRow = QueryResultRow & {
   full_name: string | null;
   role: Role;
   created_at?: string | Date;
+  updated_at?: string | Date;
+  password_hash?: string | null;
 };
 
 function mapProfile(row: ProfileRow) {
@@ -51,9 +53,10 @@ export function createPostgresProfileRepository(): ProfileRepository {
       const normalizedEmail = email.trim().toLowerCase();
       const { rows } = await pool.query<ProfileRow>(
         `
-          SELECT id, email, full_name, role
+          SELECT id, email, full_name, role, updated_at, created_at
           FROM profiles
           WHERE LOWER(email) = $1
+          ORDER BY updated_at DESC NULLS LAST, created_at DESC NULLS LAST, id DESC
           LIMIT 1
         `,
         [normalizedEmail],
@@ -142,6 +145,18 @@ export function createPostgresProfileRepository(): ProfileRepository {
 
     async upsertProfile(input) {
       const pool = getPostgresPool();
+      const normalizedEmail = input.email.trim().toLowerCase();
+      const existingByEmail = await pool.query<{ id: string }>(
+        `
+          SELECT id
+          FROM profiles
+          WHERE LOWER(email) = $1
+          ORDER BY updated_at DESC NULLS LAST, created_at DESC NULLS LAST, id DESC
+          LIMIT 1
+        `,
+        [normalizedEmail],
+      );
+      const targetId = existingByEmail.rows[0]?.id ?? input.id;
       await pool.query(
         `
           INSERT INTO profiles (id, email, full_name, role)
@@ -153,7 +168,7 @@ export function createPostgresProfileRepository(): ProfileRepository {
             role = EXCLUDED.role,
             updated_at = NOW()
         `,
-        [input.id, input.email, input.fullName, input.role],
+        [targetId, normalizedEmail, input.fullName, input.role],
       );
     },
 
@@ -191,6 +206,11 @@ export function createPostgresProfileRepository(): ProfileRepository {
           SELECT id, password_hash
           FROM profiles
           WHERE LOWER(email) = $1
+          ORDER BY
+            (password_hash IS NOT NULL) DESC,
+            updated_at DESC NULLS LAST,
+            created_at DESC NULLS LAST,
+            id DESC
           LIMIT 1
         `,
         [normalizedEmail],
