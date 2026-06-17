@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import type { Role } from "@coursebridge/workflow"
 import type { NotificationItem } from "@/lib/notifications/queries"
+import { createClient } from "@/lib/supabase/client"
 
 const IS_ADMIN = (role: Role) => role === "admin_full" || role === "super_admin"
 
@@ -218,12 +219,29 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
     }
 
     void pollFeed()
-    const timer = window.setInterval(() => {
-      void pollFeed()
-    }, 15000)
+    // 60s fallback — Supabase Broadcast is the primary trigger
+    const timer = window.setInterval(() => { void pollFeed() }, 60_000)
+
+    // Immediately re-poll when the tab regains focus
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") void pollFeed()
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+
+    // Supabase Realtime Broadcast: signal-only (empty payload), triggers re-poll
+    let realtimeCleanup: (() => void) | null = null
+    const supabase = createClient()
+    if (supabase && userId) {
+      const channel = supabase.channel(`notifications:${userId}`)
+      channel.on("broadcast", { event: "new" }, () => { void pollFeed() })
+      channel.subscribe()
+      realtimeCleanup = () => { void supabase.removeChannel(channel) }
+    }
 
     return () => {
       window.clearInterval(timer)
+      document.removeEventListener("visibilitychange", handleVisibility)
+      realtimeCleanup?.()
     }
   }, [userId, role, router])
 

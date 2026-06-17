@@ -159,3 +159,12 @@ export async function leaveConversation(conversationId: string, userId: string):
   );
 }
 
+export async function getConversationMemberIds(conversationId: string): Promise<string[]> {
+  const { rows } = await getPostgresPool().query<{ user_id: string }>(
+    `select user_id from public.conversation_members
+     where conversation_id = $1 and removed_at is null`,
+    [conversationId],
+  );
+  return rows.map((r) => r.user_id);
+}
+

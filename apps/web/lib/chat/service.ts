@@ -1,6 +1,7 @@
 import "server-only"
 import { assertMember } from "./membership"
 import { broadcastChatEvent } from "./realtime"
+import { broadcastNotificationEvent } from "@/lib/notifications/realtime"
 import * as repo from "./repository"
 import { listMessages } from "./queries"
 
@@ -18,6 +19,16 @@ export async function sendMessage(input: repo.InsertMessageInput): Promise<strin
     createdAt: new Date().toISOString(),
     reactions: [],
   })
+  // Signal each other conversation member that their notification feed changed
+  void repo.getConversationMemberIds(input.conversationId).then((memberIds) => {
+    for (const memberId of memberIds) {
+      if (memberId !== input.authorId) {
+        void broadcastNotificationEvent(memberId).catch((err) =>
+          console.warn("[sendMessage] notification broadcast failed:", err),
+        )
+      }
+    }
+  }).catch((err) => console.warn("[sendMessage] member lookup failed:", err))
   return id
 }
 
