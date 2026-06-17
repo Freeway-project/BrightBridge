@@ -48,16 +48,16 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
   const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
 
   const [
-    usersPage,
-    totalCourses,
-    statusCounts,
-    stuckCourses,
-    taWorkload,
-    auditEvents,
-    units,
-    members
-  ] = await Promise.all([
-    profileRepository.listUsers(1, 5000), // Get all users for organization dropdowns
+    usersResult,
+    totalResult,
+    statusResult,
+    stuckResult,
+    workloadResult,
+    auditResult,
+    unitsResult,
+    membersResult,
+  ] = await Promise.allSettled([
+    profileRepository.listUsers(1, 5000),
     courseRepository.countCourses(),
     courseRepository.listStatusCounts(),
     courseRepository.listStuckCourses(cutoff),
@@ -67,6 +67,8 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
     hierarchyRepository.listAllMembers(),
   ])
 
+  const usersPage = usersResult.status === "fulfilled" ? usersResult.value : { data: [] }
+
   return {
     users: usersPage.data.map((user) => ({
       id: user.id,
@@ -75,13 +77,13 @@ export async function getSuperAdminData(): Promise<SuperAdminData> {
       role: user.role,
       created_at: user.createdAt,
     })),
-    totalCourses,
-    statusCounts,
-    stuckCourses,
-    taWorkload,
-    auditEvents,
-    units,
-    members,
+    totalCourses: totalResult.status === "fulfilled" ? totalResult.value : 0,
+    statusCounts: statusResult.status === "fulfilled" ? statusResult.value : [],
+    stuckCourses: stuckResult.status === "fulfilled" ? stuckResult.value : [],
+    taWorkload: workloadResult.status === "fulfilled" ? workloadResult.value : [],
+    auditEvents: auditResult.status === "fulfilled" ? auditResult.value : [],
+    units: unitsResult.status === "fulfilled" ? unitsResult.value : [],
+    members: membersResult.status === "fulfilled" ? membersResult.value : [],
   }
 }
 

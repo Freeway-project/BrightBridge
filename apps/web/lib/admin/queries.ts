@@ -61,7 +61,7 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
 export async function getAdminStatsData(): Promise<AdminStatsData> {
   const repository = getCourseRepository()
   const cutoff = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-  const [totalCourses, statusCounts, taWorkload, stuckCourses, stuckCount, auditEvents] = await Promise.all([
+  const [totalResult, statusResult, workloadResult, stuckResult, stuckCountResult, auditResult] = await Promise.allSettled([
     repository.countCourses(),
     repository.listStatusCounts(),
     repository.listTAWorkload(),
@@ -69,21 +69,30 @@ export async function getAdminStatsData(): Promise<AdminStatsData> {
     repository.countStuckCourses(cutoff),
     repository.listAuditEvents(200),
   ])
-  return { totalCourses, statusCounts, taWorkload, stuckCourses, stuckCount, auditEvents }
+  if (totalResult.status === "rejected") console.error("[getAdminStatsData] countCourses failed:", totalResult.reason)
+  if (stuckResult.status === "rejected") console.error("[getAdminStatsData] listStuckCourses failed:", stuckResult.reason)
+  if (stuckCountResult.status === "rejected") console.error("[getAdminStatsData] countStuckCourses failed:", stuckCountResult.reason)
+  return {
+    totalCourses: totalResult.status === "fulfilled" ? totalResult.value : 0,
+    statusCounts: statusResult.status === "fulfilled" ? statusResult.value : [],
+    taWorkload: workloadResult.status === "fulfilled" ? workloadResult.value : [],
+    stuckCourses: stuckResult.status === "fulfilled" ? stuckResult.value : [],
+    stuckCount: stuckCountResult.status === "fulfilled" ? stuckCountResult.value : 0,
+    auditEvents: auditResult.status === "fulfilled" ? auditResult.value : [],
+  }
 }
 
 export async function getAdminOverviewData(): Promise<AdminOverviewData> {
   const repository = getCourseRepository()
-  const [totalCourses, statusCounts, taWorkload] = await Promise.all([
+  const [totalResult, statusResult, workloadResult] = await Promise.allSettled([
     repository.countCourses(),
     repository.listStatusCounts(),
     repository.listTAWorkload(),
   ])
-
   return {
-    totalCourses,
-    statusCounts,
-    taWorkload,
+    totalCourses: totalResult.status === "fulfilled" ? totalResult.value : 0,
+    statusCounts: statusResult.status === "fulfilled" ? statusResult.value : [],
+    taWorkload: workloadResult.status === "fulfilled" ? workloadResult.value : [],
   }
 }
 
