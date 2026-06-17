@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { headers } from "next/headers"
 import { AppSidebar } from "@/components/layout/sidebar"
+import { ProvostOnboardingTour } from "@/components/provost/provost-onboarding-tour"
 import { getAuthContext } from "@/lib/auth/context"
 import type { ReactNode } from "react"
 import { TweakProvider } from "@/components/shared/tweak-provider"
@@ -46,6 +47,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         <SidebarProvider defaultOpen={sidebarOpen}>
           <div className="flex h-screen w-full overflow-hidden bg-background">
             <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
+            <ProvostOnboardingTour role={role} />
             <DashboardContentShell>
               {children}
             </DashboardContentShell>
