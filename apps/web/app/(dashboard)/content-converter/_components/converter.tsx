@@ -25,6 +25,8 @@ import { GiphyLoader } from "./giphy-loader"
 
 const MAMMOTH_CDN = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"
 const JSZIP_CDN = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+const PDFJS_CDN = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+const PDFJS_WORKER_CDN = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
 
 // Hard ceiling for a single upload. PDFs travel to the API base64-inlined in a
 // JSON body (~33% larger than the file on the wire), so anything much bigger
@@ -32,7 +34,8 @@ const JSZIP_CDN = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min
 const MAX_FILE_MB = 25
 
 // How each extension is turned into something the API understands.
-//   pdf  → sent natively as a PDF document block
+//   pdf  → text extracted in-browser via pdf.js (falls back to a native PDF
+//          document block only when the PDF has no selectable text, e.g. scans)
 //   docx → text extracted in-browser via mammoth
 //   pptx → slide text extracted in-browser via JSZip
 //   text → read directly with File.text()
@@ -131,6 +134,39 @@ async function extractPptxText(file: File): Promise<string> {
   return slides.join("\n\n")
 }
 
+// pdf.js is loaded from a CDN at runtime; this is the minimal shape we use.
+type PdfTextItem = { str?: string }
+type PdfPage = { getTextContent: () => Promise<{ items: PdfTextItem[] }> }
+type PdfDoc = { numPages: number; getPage: (n: number) => Promise<PdfPage> }
+type PdfJsLib = {
+  GlobalWorkerOptions: { workerSrc: string }
+  getDocument: (src: { data: Uint8Array }) => { promise: Promise<PdfDoc> }
+}
+
+// Extract selectable text from a PDF in the browser. Returns "" for scanned /
+// image-only PDFs (no text layer) so the caller can fall back to native PDF
+// reading. Parsing here keeps the raw PDF out of the model request — cheaper and
+// faster than shipping a base64 document block.
+async function extractPdfText(file: File): Promise<string> {
+  await loadScript(PDFJS_CDN)
+  const pdfjsLib = (window as unknown as { pdfjsLib?: PdfJsLib }).pdfjsLib
+  if (!pdfjsLib) throw new Error("Could not load the PDF reader")
+  pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_CDN
+  const doc = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise
+  const pages: string[] = []
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i)
+    const content = await page.getTextContent()
+    const line = content.items
+      .map((it) => it.str ?? "")
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim()
+    if (line) pages.push(line)
+  }
+  return pages.join("\n\n")
+}
+
 // Very light RTF → text: drop control words/groups so Claude sees the prose.
 function stripRtf(s: string): string {
   return s
@@ -203,10 +239,20 @@ export function ContentConverter() {
       let payload: Record<string, unknown>
 
       if (ext === "pdf") {
-        const data = await fileToBase64(file)
-        setProgress(20)
-        log("info", "Uploading PDF…")
-        payload = { template, extra, kind: "pdf", data }
+        // Parse the PDF to text in the browser instead of shipping the raw PDF
+        // to the model. Only fall back to the native PDF path when there's no
+        // selectable text (scanned/image-only), so Claude can still read it.
+        log("info", "Extracting PDF text…")
+        const text = await extractPdfText(file)
+        if (text.trim()) {
+          setProgress(20)
+          payload = { template, extra, kind: "text", text }
+        } else {
+          log("info", "No selectable text found — sending the PDF for visual reading…")
+          const data = await fileToBase64(file)
+          setProgress(20)
+          payload = { template, extra, kind: "pdf", data }
+        }
       } else {
         let text: string
         if (DOCX_EXTS.includes(ext)) {
