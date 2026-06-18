@@ -3,7 +3,6 @@ import type { Role } from "@coursebridge/workflow"
 import { getAuthContext } from "@/lib/auth/context"
 import {
   EXTRACTION_PROMPT,
-  SYLLABUS_JSON_SCHEMA,
   buildBrightspaceHTML,
   buildTemplatePrompt,
   isConverterTemplate,
@@ -61,9 +60,6 @@ async function callClaude(
   apiKey: string,
   messages: unknown[],
   maxTokens: number,
-  // When provided (syllabus template), constrains the response to a JSON schema
-  // via structured outputs. See the call site for why.
-  outputFormat?: unknown,
 ): Promise<ClaudeResult> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -79,18 +75,16 @@ async function callClaude(
     // extraction (up to MAX_OUTPUT_TOKENS) keeps the connection alive instead
     // of idling out on a multi-minute non-streaming request.
     //
-    // For the syllabus template, `output_config.format` constrains the output to
-    // a JSON schema so the model can only emit well-formed, schema-valid JSON.
-    // Without it, large content-heavy syllabi occasionally produced JSON that
-    // JSON.parse rejected (unescaped characters in long strings, stray preamble),
-    // surfacing as "Could not parse JSON from Claude".
+    // NOTE: We do NOT use `output_config.format` (structured outputs) for the
+    // syllabus schema. It is large/nested enough that Anthropic's structured-
+    // output grammar compiler rejects it ("The compiled grammar is too large"),
+    // which 400s every syllabus request. We instead ask for JSON in the prompt
+    // and parse it tolerantly in extractHtml().
     body: JSON.stringify({
       model: CLAUDE_MODEL,
       max_tokens: maxTokens,
       thinking: { type: "disabled" },
-      output_config: outputFormat
-        ? { effort: "low", format: outputFormat }
-        : { effort: "low" },
+      output_config: { effort: "low" },
       stream: true,
       messages,
     }),
@@ -179,6 +173,14 @@ function extractHtml(template: ConverterTemplate, response: string): string {
     let clean = response.trim()
     const fence = clean.match(/```(?:json)?\s*([\s\S]*?)```/i)
     if (fence) clean = fence[1].trim()
+    // The prompt asks for pure JSON, but the model occasionally wraps it in prose
+    // ("Here is the extracted data: { ... }"). Narrow to the outermost JSON object
+    // so a stray preamble/epilogue doesn't fail the parse.
+    const firstBrace = clean.indexOf("{")
+    const lastBrace = clean.lastIndexOf("}")
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      clean = clean.slice(firstBrace, lastBrace + 1)
+    }
     let parsed: SyllabusData
     try {
       parsed = JSON.parse(clean) as SyllabusData
@@ -238,18 +240,7 @@ export async function POST(request: Request) {
   const started = performance.now()
   try {
     const messages = buildMessages(template, extra, kind, body.data, body.text)
-    // Only the syllabus template expects JSON back; the other templates return
-    // HTML, so structured outputs apply only there.
-    const outputFormat =
-      template === "syllabus"
-        ? { type: "json_schema", schema: SYLLABUS_JSON_SCHEMA }
-        : undefined
-    const { text: response, stopReason } = await callClaude(
-      apiKey,
-      messages,
-      MAX_OUTPUT_TOKENS,
-      outputFormat,
-    )
+    const { text: response, stopReason } = await callClaude(apiKey, messages, MAX_OUTPUT_TOKENS)
     // A max_tokens stop means the output was cut off mid-document — the JSON is
     // incomplete by definition. Report that clearly instead of letting it fall
     // through to a misleading "Could not parse JSON from Claude".
