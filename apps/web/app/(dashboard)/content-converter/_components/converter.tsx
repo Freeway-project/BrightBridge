@@ -87,14 +87,27 @@ function loadScript(src: string): Promise<void> {
 }
 
 // mammoth is loaded from a CDN at runtime; this is the minimal shape we use.
-type Mammoth = { extractRawText: (opts: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }> }
+type Mammoth = {
+  extractRawText: (opts: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>
+  convertToHtml: (opts: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>
+}
 async function extractDocxText(file: File): Promise<string> {
   await loadScript(MAMMOTH_CDN)
   const mammoth = (window as unknown as { mammoth?: Mammoth }).mammoth
   if (!mammoth) throw new Error("Could not load the Word document reader")
   const buf = await file.arrayBuffer()
-  const result = await mammoth.extractRawText({ arrayBuffer: buf })
-  return result.value
+  // Convert to semantic HTML instead of raw text: this preserves headings,
+  // lists, tables, and bold/italic so Claude sees the document's structure.
+  // Raw-text extraction flattens tables (e.g. a syllabus schedule/evaluation
+  // grid) into an unreadable run of words, which badly hurts extraction quality.
+  const result = await mammoth.convertToHtml({ arrayBuffer: buf })
+  // mammoth base64-inlines images by default; strip them — we only need the
+  // text structure, and data URIs would bloat the request to the model.
+  const html = result.value.replace(/<img[^>]*>/gi, "").trim()
+  if (html) return html
+  // Fallback: if HTML conversion produced nothing, use plain raw text.
+  const raw = await mammoth.extractRawText({ arrayBuffer: buf })
+  return raw.value
 }
 
 function decodeXml(s: string): string {
