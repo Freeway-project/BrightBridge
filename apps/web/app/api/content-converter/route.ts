@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import * as Sentry from "@sentry/nextjs"
 import type { Role } from "@coursebridge/workflow"
 import { getAuthContext } from "@/lib/auth/context"
 import {
@@ -261,7 +262,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ html })
   } catch (e) {
     const message = e instanceof Error ? e.message : "Conversion failed"
-    logUsage({ userId, role, template, kind, outcome: "error", ms: Math.round(performance.now() - started), detail: message })
+    const ms = Math.round(performance.now() - started)
+    logUsage({ userId, role, template, kind, outcome: "error", ms, detail: message })
+    // Report to Sentry so conversion failures (e.g. "Could not parse JSON from
+    // Claude") are tracked with enough context to debug — never the document
+    // contents, extracted text, or generated HTML.
+    Sentry.withScope((scope) => {
+      scope.setTag("area", "content_converter")
+      scope.setTag("template", template)
+      scope.setTag("kind", kind)
+      scope.setContext("content_converter", { actorId: userId, actorRole: role, ms })
+      Sentry.captureException(e instanceof Error ? e : new Error(message))
+    })
     return NextResponse.json({ error: message }, { status: 502 })
   }
 }
