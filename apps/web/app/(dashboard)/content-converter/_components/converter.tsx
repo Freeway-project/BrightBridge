@@ -54,6 +54,7 @@ const TEMPLATE_ORDER: ConverterTemplate[] = [
   "assignment",
   "quiz",
   "conclusion",
+  "custom",
 ]
 
 type LogType = "info" | "ok" | "err"
@@ -200,6 +201,7 @@ export function ContentConverter() {
   const [file, setFile] = useState<File | null>(null)
   const [template, setTemplate] = useState<ConverterTemplate>("syllabus")
   const [extra, setExtra] = useState("")
+  const [customHtml, setCustomHtml] = useState("")
   const [busy, setBusy] = useState(false)
   const [progress, setProgress] = useState(0)
   const [logs, setLogs] = useState<LogLine[]>([{ type: "info", msg: "Waiting for upload…", time: "" }])
@@ -244,6 +246,10 @@ export function ContentConverter() {
 
   const convert = useCallback(async () => {
     if (!file || busy) return
+    if (template === "custom" && !customHtml.trim()) {
+      log("err", "Paste your custom HTML template first.")
+      return
+    }
     setBusy(true)
     setProgress(5)
     setHtml("")
@@ -287,6 +293,8 @@ export function ContentConverter() {
         payload = { template, extra, kind: "text", text }
       }
 
+      if (template === "custom") payload.customHtml = customHtml
+
       setProgress(40)
       log("info", "Claude is processing…")
       const res = await fetch("/api/content-converter", {
@@ -324,7 +332,7 @@ export function ContentConverter() {
     } finally {
       setBusy(false)
     }
-  }, [file, busy, template, extra, log])
+  }, [file, busy, template, extra, customHtml, log])
 
   const download = useCallback(() => {
     if (!html) return
@@ -436,6 +444,23 @@ export function ContentConverter() {
               <p className="font-mono text-xs leading-relaxed text-muted-foreground">
                 {TEMPLATE_DESCRIPTIONS[template]}
               </p>
+              {template === "custom" && (
+                <div>
+                  <label className="mb-1.5 block text-xs text-muted-foreground">Custom HTML template</label>
+                  <Textarea
+                    rows={10}
+                    value={customHtml}
+                    onChange={(e) => setCustomHtml(e.target.value)}
+                    placeholder={
+                      "Paste your HTML format here. Use [placeholders] where document content should go, e.g.\n\n<h1>[Course Title]</h1>\n<p>[Overview]</p>"
+                    }
+                    className="font-mono text-xs"
+                  />
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    Claude fills your template from the uploaded document and returns this exact format.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -456,7 +481,11 @@ export function ContentConverter() {
             </CardContent>
           </Card>
 
-          <Button className="w-full gap-2" disabled={!file || busy} onClick={convert}>
+          <Button
+            className="w-full gap-2"
+            disabled={!file || busy || (template === "custom" && !customHtml.trim())}
+            onClick={convert}
+          >
             {busy ? <LottieLoader className="size-4 " /> : <Sparkles className="size-4" />}
             {busy ? "Converting…" : "Convert Document"}
           </Button>

@@ -16,6 +16,9 @@ export type ConverterTemplate =
   | "assignment"
   | "quiz"
   | "conclusion"
+  // User-supplied HTML format, pasted in the UI at runtime (see the route's
+  // buildCustomPrompt). All the built-in templates above stay the defaults.
+  | "custom"
 
 export const TEMPLATE_LABELS: Record<ConverterTemplate, string> = {
   syllabus: "Course Syllabus",
@@ -26,6 +29,7 @@ export const TEMPLATE_LABELS: Record<ConverterTemplate, string> = {
   assignment: "Assignment",
   quiz: "Quiz",
   conclusion: "Conclusion",
+  custom: "Custom Template",
 }
 
 export const TEMPLATE_DESCRIPTIONS: Record<ConverterTemplate, string> = {
@@ -37,6 +41,7 @@ export const TEMPLATE_DESCRIPTIONS: Record<ConverterTemplate, string> = {
   assignment: "Assignment instructions page with details and a submission link placeholder.",
   quiz: "Quiz instructions page with details and a quiz link placeholder.",
   conclusion: "Module wrap-up page summarising learning and directing students to the next step.",
+  custom: "Paste your own HTML format with [placeholders] — Claude fills it from your document.",
 }
 
 export function isConverterTemplate(value: unknown): value is ConverterTemplate {

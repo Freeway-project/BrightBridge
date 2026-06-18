@@ -5,6 +5,7 @@ import { getAuthContext } from "@/lib/auth/context"
 import {
   EXTRACTION_PROMPT,
   buildBrightspaceHTML,
+  buildCustomPrompt,
   buildTemplatePrompt,
   isConverterTemplate,
   type ConverterTemplate,
@@ -53,6 +54,8 @@ type ConvertRequest = {
   kind?: "pdf" | "text"
   data?: string
   text?: string
+  /** For the "custom" template: the user-supplied HTML format to fill. */
+  customHtml?: string
 }
 
 type ClaudeResult = { text: string; stopReason: string | null }
@@ -147,10 +150,14 @@ function buildMessages(
   kind: "pdf" | "text",
   data: string | undefined,
   text: string | undefined,
+  customHtml: string | undefined,
 ): unknown[] {
   const extraNote = extra ? "\n\nExtra instructions: " + extra : ""
-  const prompt =
-    template === "syllabus" ? EXTRACTION_PROMPT + extraNote : buildTemplatePrompt(template) + extraNote
+  let basePrompt: string
+  if (template === "syllabus") basePrompt = EXTRACTION_PROMPT
+  else if (template === "custom") basePrompt = buildCustomPrompt(customHtml || "")
+  else basePrompt = buildTemplatePrompt(template)
+  const prompt = basePrompt + extraNote
 
   if (kind === "pdf") {
     return [
@@ -237,10 +244,13 @@ export async function POST(request: Request) {
   if (kind === "text" && !body.text) {
     return NextResponse.json({ error: "Missing document text" }, { status: 400 })
   }
+  if (template === "custom" && !body.customHtml?.trim()) {
+    return NextResponse.json({ error: "Missing custom HTML template" }, { status: 400 })
+  }
 
   const started = performance.now()
   try {
-    const messages = buildMessages(template, extra, kind, body.data, body.text)
+    const messages = buildMessages(template, extra, kind, body.data, body.text, body.customHtml)
     const { text: response, stopReason } = await callClaude(apiKey, messages, MAX_OUTPUT_TOKENS)
     // A max_tokens stop means the output was cut off mid-document — the JSON is
     // incomplete by definition. Report that clearly instead of letting it fall

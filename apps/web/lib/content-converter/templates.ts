@@ -392,7 +392,7 @@ const TMPL_CONCLUSION = `<!DOCTYPE html>
 
 </html>`
 
-const TEMPLATE_HTML: Record<Exclude<ConverterTemplate, "syllabus">, string> = {
+const TEMPLATE_HTML: Record<Exclude<ConverterTemplate, "syllabus" | "custom">, string> = {
   introduction: TMPL_INTRODUCTION,
   content: TMPL_CONTENT,
   video: TMPL_VIDEO,
@@ -402,7 +402,7 @@ const TEMPLATE_HTML: Record<Exclude<ConverterTemplate, "syllabus">, string> = {
   conclusion: TMPL_CONCLUSION,
 }
 
-export function buildTemplatePrompt(template: Exclude<ConverterTemplate, "syllabus">): string {
+export function buildTemplatePrompt(template: Exclude<ConverterTemplate, "syllabus" | "custom">): string {
   const tmpl = TEMPLATE_HTML[template]
   return `You are a Brightspace course designer. Populate the following Brightspace HTML template with content extracted from the provided document.
 
@@ -418,6 +418,26 @@ Rules:
 
 TEMPLATE:
 ${tmpl}`
+}
+
+// Custom template: the HTML format is supplied by the user at runtime (pasted in
+// the UI) instead of coming from TEMPLATE_HTML. Same fill-the-placeholders
+// contract as the built-in templates, minus the built-in-specific rules (the
+// fixed hero image, known classes) since we can't assume anything about the
+// user's markup.
+export function buildCustomPrompt(templateHtml: string): string {
+  return `You are a Brightspace course designer. Populate the following HTML template with content extracted from the provided document.
+
+Rules:
+- Return ONLY the complete HTML document. No markdown fences, no explanation, nothing before or after the HTML.
+- Include ALL content from the uploaded document. Do not summarise, condense, skip, or omit any information. Every piece of content in the document must appear in the output.
+- Replace every placeholder (text in [square brackets]) with real content from the document. Add additional elements inside the existing structure as needed to fit all the content.
+- Preserve every HTML tag, attribute, class, id, src, href, and structural element exactly as written, except where filling in content.
+- Do NOT add CSS, inline styles, or new wrapper elements/classes beyond what is needed to hold the content.
+- If the document does not contain information for a specific placeholder, remove that placeholder text but leave its surrounding HTML structure intact.
+
+TEMPLATE:
+${templateHtml}`
 }
 
 // -- Syllabus extraction prompt ------------------------------------------------
