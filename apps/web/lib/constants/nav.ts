@@ -13,6 +13,7 @@ import {
   BarChart3,
   Network,
   MessageSquare,
+  FileCode2,
   type LucideIcon,
 } from "lucide-react"
 import type { Role } from "@coursebridge/workflow"
@@ -29,6 +30,7 @@ const chatEnabled = process.env.NEXT_PUBLIC_CHAT_ENABLED === "true"
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
   standard_user: [
     { label: "My Courses",  href: "/ta",        icon: BookOpen },
+    { label: "Converter",   href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
     ...(chatEnabled ? [chatEntry] : []),
@@ -37,6 +39,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
+    { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
@@ -59,6 +62,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
+    { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
