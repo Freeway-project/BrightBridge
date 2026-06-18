@@ -540,6 +540,131 @@ export interface SyllabusData {
   pdfFilename?: string | null
 }
 
+// -- Syllabus structured-output schema -----------------------------------------
+// Passed to the Anthropic API as `output_config.format` so the model is
+// *constrained* to emit schema-valid JSON, instead of merely being asked to in
+// the prompt. This eliminates the "Could not parse JSON from Claude" failures:
+// on large, content-heavy syllabi the model would occasionally return JSON with
+// unescaped control characters/quotes inside long bodyHTML/description strings,
+// or a stray preamble — both of which broke JSON.parse. A constrained schema
+// makes the whole response a single well-formed JSON object.
+//
+// Structured-output rules: every object needs `additionalProperties: false`, and
+// optional fields are expressed as nullable type unions (the model emits null
+// when a field is absent, matching the "Use null for anything not found" prompt).
+// Keep this in sync with the SyllabusData interface above.
+const nullableString = { type: ["string", "null"] } as const
+const nullableStringArray = { type: ["array", "null"], items: { type: "string" } } as const
+
+export const SYLLABUS_JSON_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    courseCode: nullableString,
+    courseTitle: nullableString,
+    term: nullableString,
+    description: nullableString,
+    instructor: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        name: nullableString,
+        email: nullableString,
+        officeHours: nullableString,
+        officeLocation: nullableString,
+        section: nullableString,
+        campus: nullableString,
+      },
+      required: ["name", "email", "officeHours", "officeLocation", "section", "campus"],
+    },
+    schedule: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        days: nullableString,
+        times: nullableString,
+        room: nullableString,
+        deliveryFormat: nullableString,
+        creditHours: nullableString,
+        prerequisites: nullableString,
+      },
+      required: ["days", "times", "room", "deliveryFormat", "creditHours", "prerequisites"],
+    },
+    materials: nullableStringArray,
+    outcomes: nullableStringArray,
+    classSchedule: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        title: nullableString,
+        columns: nullableStringArray,
+        rows: {
+          type: ["array", "null"],
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              cells: { type: "array", items: { type: "string" } },
+              isExam: { type: "boolean" },
+            },
+            required: ["cells", "isExam"],
+          },
+        },
+      },
+      required: ["title", "columns", "rows"],
+    },
+    evaluation: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      properties: {
+        items: {
+          type: ["array", "null"],
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              component: { type: "string" },
+              weight: { type: "string" },
+            },
+            required: ["component", "weight"],
+          },
+        },
+        notes: nullableString,
+      },
+      required: ["items", "notes"],
+    },
+    policies: {
+      type: ["array", "null"],
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          title: nullableString,
+          bodyHTML: nullableString,
+        },
+        required: ["title", "bodyHTML"],
+      },
+    },
+    transferInfo: nullableString,
+    pdfFilename: nullableString,
+  },
+  required: [
+    "courseCode",
+    "courseTitle",
+    "term",
+    "description",
+    "instructor",
+    "schedule",
+    "materials",
+    "outcomes",
+    "classSchedule",
+    "evaluation",
+    "policies",
+    "transferInfo",
+    "pdfFilename",
+  ],
+} as const
+
 // -- HTML builder --------------------------------------------------------------
 // Assembles the exact Brightspace accordion HTML from the extracted JSON data.
 // Claude never touches this HTML -- it is always built here programmatically.
