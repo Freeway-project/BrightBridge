@@ -55,8 +55,8 @@ export function GiphyLoader() {
   // Fallback spinner: no GIFs available yet, or Giphy returned nothing.
   if (!current) {
     return (
-      <div className="flex flex-col items-center gap-4">
-        <div className="size-10 animate-spin rounded-full border-[3px] border-primary/30 border-t-primary" />
+      <div className="flex h-[min(45vh,360px)] flex-col items-center justify-center gap-4">
+        <div className="size-14 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
         <p className="text-sm text-muted-foreground">
           {ready ? "Converting your document…" : "Loading…"}
         </p>
@@ -65,8 +65,8 @@ export function GiphyLoader() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative flex h-[240px] w-[min(40vw,360px)] items-center justify-center overflow-hidden rounded-xl bg-muted/40 shadow-lg ring-1 ring-border">
+    <div className="flex w-full flex-col items-center">
+      <div className="relative flex h-[min(50vh,440px)] w-full max-w-[560px] items-center justify-center overflow-hidden rounded-xl bg-muted/40 shadow-lg ring-1 ring-border">
         <AnimatePresence mode="wait">
           <motion.img
             key={current.id}
@@ -80,9 +80,6 @@ export function GiphyLoader() {
           />
         </AnimatePresence>
       </div>
-      <p className="text-sm font-medium text-muted-foreground">
-        Hang tight — converting your document…
-      </p>
       {/* Preload the next GIF so the swap is instant. */}
       {gifs[(idx + 1) % gifs.length] && (
         // eslint-disable-next-line @next/next/no-img-element

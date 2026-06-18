@@ -1,7 +1,8 @@
 "use client"
 import { LottieLoader } from "@/components/ui/lottie-loader"
 
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -158,6 +159,17 @@ export function ContentConverter() {
   const [tab, setTab] = useState<OutputTab>("preview")
   const [dragOver, setDragOver] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  // While a conversion is running, lock background scroll so the full-screen
+  // loader reads as a true blocking modal.
+  useEffect(() => {
+    if (!busy) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [busy])
   const inputRef = useRef<HTMLInputElement>(null)
 
   const log = useCallback((type: LogType, msg: string) => {
@@ -466,18 +478,48 @@ export function ContentConverter() {
             )}
           </CardHeader>
           <CardContent className="relative flex-1 p-0">
-            <AnimatePresence>
-              {busy && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm"
-                >
-                  <GiphyLoader />
-                </motion.div>
+            {typeof document !== "undefined" &&
+              createPortal(
+                <AnimatePresence>
+                  {busy && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label="Converting your document"
+                      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 p-4 backdrop-blur-md"
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 8 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.97 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex w-full max-w-2xl flex-col items-center gap-6 rounded-2xl border bg-card p-6 shadow-2xl sm:p-8"
+                      >
+                        <GiphyLoader />
+                        <div className="flex w-full flex-col items-center gap-3">
+                          <p className="text-center text-lg font-semibold">
+                            {logs[logs.length - 1]?.msg || "Converting your document…"}
+                          </p>
+                          <p className="text-center text-sm text-muted-foreground">
+                            Large files can take a few minutes — please keep this tab open.
+                          </p>
+                          <div className="relative mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                            <motion.div
+                              className="absolute inset-y-0 w-1/3 rounded-full bg-primary"
+                              animate={{ x: ["-120%", "360%"] }}
+                              transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>,
+                document.body,
               )}
-            </AnimatePresence>
 
             {!html ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
