@@ -3,6 +3,7 @@ import type { Role } from "@coursebridge/workflow"
 import { getAuthContext } from "@/lib/auth/context"
 import {
   EXTRACTION_PROMPT,
+  SYLLABUS_JSON_SCHEMA,
   buildBrightspaceHTML,
   buildTemplatePrompt,
   isConverterTemplate,
@@ -60,6 +61,9 @@ async function callClaude(
   apiKey: string,
   messages: unknown[],
   maxTokens: number,
+  // When provided (syllabus template), constrains the response to a JSON schema
+  // via structured outputs. See the call site for why.
+  outputFormat?: unknown,
 ): Promise<ClaudeResult> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -74,11 +78,19 @@ async function callClaude(
     // defaults to adaptive thinking at high effort. We stream so a large
     // extraction (up to MAX_OUTPUT_TOKENS) keeps the connection alive instead
     // of idling out on a multi-minute non-streaming request.
+    //
+    // For the syllabus template, `output_config.format` constrains the output to
+    // a JSON schema so the model can only emit well-formed, schema-valid JSON.
+    // Without it, large content-heavy syllabi occasionally produced JSON that
+    // JSON.parse rejected (unescaped characters in long strings, stray preamble),
+    // surfacing as "Could not parse JSON from Claude".
     body: JSON.stringify({
       model: CLAUDE_MODEL,
       max_tokens: maxTokens,
       thinking: { type: "disabled" },
-      output_config: { effort: "low" },
+      output_config: outputFormat
+        ? { effort: "low", format: outputFormat }
+        : { effort: "low" },
       stream: true,
       messages,
     }),
@@ -226,7 +238,18 @@ export async function POST(request: Request) {
   const started = performance.now()
   try {
     const messages = buildMessages(template, extra, kind, body.data, body.text)
-    const { text: response, stopReason } = await callClaude(apiKey, messages, MAX_OUTPUT_TOKENS)
+    // Only the syllabus template expects JSON back; the other templates return
+    // HTML, so structured outputs apply only there.
+    const outputFormat =
+      template === "syllabus"
+        ? { type: "json_schema", schema: SYLLABUS_JSON_SCHEMA }
+        : undefined
+    const { text: response, stopReason } = await callClaude(
+      apiKey,
+      messages,
+      MAX_OUTPUT_TOKENS,
+      outputFormat,
+    )
     // A max_tokens stop means the output was cut off mid-document — the JSON is
     // incomplete by definition. Report that clearly instead of letting it fall
     // through to a misleading "Could not parse JSON from Claude".
