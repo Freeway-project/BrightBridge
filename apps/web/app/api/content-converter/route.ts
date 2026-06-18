@@ -15,7 +15,7 @@ export const runtime = "nodejs"
 // non-streaming request; give the route headroom before it self-aborts.
 export const maxDuration = 300
 
-const CLAUDE_MODEL = "claude-sonnet-4-20250514"
+const CLAUDE_MODEL = "claude-sonnet-4-6"
 
 // The Anthropic API always requires a max_tokens ceiling — there is no
 // "unlimited" value. We set it high enough that the token cap is never what
