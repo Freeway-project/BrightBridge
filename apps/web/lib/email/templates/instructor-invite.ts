@@ -6,11 +6,14 @@ import { sendEmail } from "@/lib/email/client";
 const PRODUCTION_SITE_URL = "https://coursebridge.okanagancollege.app";
 
 function resolveSiteUrl(): string {
+  // In production, ALWAYS use the canonical domain. NEXT_PUBLIC_* vars are inlined
+  // at build time, so relying on NEXT_PUBLIC_SITE_URL baked a stale vercel.app URL
+  // into past builds — magic links must not depend on that. Non-prod (preview/local)
+  // may still override via NEXT_PUBLIC_SITE_URL, else falls back to localhost.
+  if (process.env.NODE_ENV === "production") return PRODUCTION_SITE_URL;
   const url = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (url) return url.replace(/\/$/, "");
-  // No explicit override: default to the production domain in prod, and to
-  // localhost only in development so local magic links still resolve.
-  return process.env.NODE_ENV === "production" ? PRODUCTION_SITE_URL : "http://localhost:3000";
+  return "http://localhost:3000";
 }
 
 /** Builds the absolute magic-link URL for a raw invite token. */
