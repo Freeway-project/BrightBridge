@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,7 @@ export function BatchExportPanel({ courses }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
   const [accessMap, setAccessMap] = useState<Record<string, AccessState>>({});
+  const channelId = useId();
 
   const allSelected = courses.length > 0 && selectedIds.size === courses.length;
 
@@ -102,15 +103,18 @@ export function BatchExportPanel({ courses }: Props) {
     });
   }
 
-  // Supabase Realtime: watch for access_count changes on review_invites
+  // Supabase Realtime: watch for access_count changes on review_invites.
+  // The channel topic is unique per component instance (useId) so multiple
+  // BatchExportPanel mounts — e.g. the Ready tab and the All tab — never share
+  // one channel (Supabase dedupes by topic, which would re-.on() an already
+  // subscribed channel and throw). Deps are stable so search filtering doesn't
+  // churn the subscription.
   useEffect(() => {
-    if (courses.length === 0) return;
-
     const supabase = createClient();
     if (!supabase) return;
 
     const channel = supabase
-      .channel("batch-invite-access")
+      .channel(`batch-invite-access-${channelId}`)
       .on(
         "postgres_changes",
         {
@@ -134,7 +138,7 @@ export function BatchExportPanel({ courses }: Props) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [courses.length]);
+  }, [channelId]);
 
   if (courses.length === 0) {
     return (
