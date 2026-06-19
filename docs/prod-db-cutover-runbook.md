@@ -61,8 +61,8 @@ Because OLD prod already carries the 2026-06-18 hierarchy fixes, the copied data
 3. Smoke-test the app against NEW prod from a preview deployment: login, load chat, load a course.
 
 ## Phase 5 — Cut over
-1. Point production env at NEW prod: set Vercel prod `DATABASE_URL` + the three Supabase vars to the `ytmscglilbkmrlstvjhy` values, and `NEXT_PUBLIC_SITE_URL=https://lms.harshsaw.ca`.
-2. Remove the unnecessary vars: `SUPABASE_URL` (wrong name; app reads `NEXT_PUBLIC_SUPABASE_URL`), `ANTHROPIC_API_KEY`, `DEV_/PROD_/SOURCE_/TARGET_DATABASE_URL`, and (if unused by the deployed branch) `NEXT_PUBLIC_POSTHOG_*` / `NEXT_PUBLIC_RAPIDAPI_KEY` — none are read by master.
+1. Point production env at NEW prod: set Vercel prod `DATABASE_URL` + the three Supabase vars to the `ytmscglilbkmrlstvjhy` values, and `NEXT_PUBLIC_SITE_URL=https://coursebridge.okanagancollege.app` (canonical prod domain — supersedes the old `lms.harshsaw.ca`).
+2. Remove the unnecessary vars: `SUPABASE_URL` (wrong name; app reads `NEXT_PUBLIC_SUPABASE_URL`), `DEV_/PROD_/SOURCE_/TARGET_DATABASE_URL`, and (if unused by the deployed branch) `NEXT_PUBLIC_POSTHOG_*` / `NEXT_PUBLIC_RAPIDAPI_KEY`. **KEEP `ANTHROPIC_API_KEY`** — as of 2026-06-19 master reads it server-side in the Content Converter (`/api/content-converter`, `claude-sonnet-4-6`), so it is no longer unused. (`GIPHY_API_KEY` is optional — the converter's Giphy loader degrades gracefully without it.)
 3. Promote/redeploy. Confirm `lms.harshsaw.ca` resolves to the new deployment.
 4. Set `NEXT_PUBLIC_FORCE_MAINTENANCE=false` and redeploy to lift maintenance.
 5. Final smoke test on the live domain.
