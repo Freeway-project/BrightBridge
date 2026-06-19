@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DeploymentDetector } from "@/components/shared/deployment-detector";
 import { GlobalPointer } from "@/components/shared/global-pointer";
+import { Analytics } from "@vercel/analytics/next";
 import { type ReactNode } from "react";
 import { getDeploymentVersion } from "@/lib/deployment-version";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         </TooltipProvider>
         <DeploymentDetector initialVersion={currentVersion} />
         <GlobalPointer />
+        <Analytics />
         <Toaster
           closeButton
           position="top-right"
