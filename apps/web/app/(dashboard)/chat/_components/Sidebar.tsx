@@ -4,8 +4,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { SidebarSearch } from "./SidebarSearch";
 import { NewConversationMenu } from "./NewConversationMenu";
+import { ChatWithAdminButton } from "./ChatWithAdminButton";
 
-export async function Sidebar({ currentUserId }: { currentUserId: string }) {
+export async function Sidebar({
+  currentUserId,
+  canRequestSupport,
+}: {
+  currentUserId: string;
+  canRequestSupport: boolean;
+}) {
   const conversations = await listConversationsForUser(currentUserId);
   return (
     <div className="flex h-full flex-col border-r border-border">
@@ -16,6 +23,11 @@ export async function Sidebar({ currentUserId }: { currentUserId: string }) {
           <NewConversationMenu />
         </div>
       </div>
+      {canRequestSupport && (
+        <div className="border-b border-border px-3 py-2">
+          <ChatWithAdminButton />
+        </div>
+      )}
       <ScrollArea className="flex-1">
         <ul>
           {conversations.map((c) => (

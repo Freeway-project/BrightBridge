@@ -1,6 +1,6 @@
 import "server-only";
 
-export type ConversationType = "dm" | "course" | "role" | "group";
+export type ConversationType = "dm" | "course" | "role" | "group" | "support";
 export type NotificationPref = "all" | "mentions" | "none";
 
 export interface ConversationRow {

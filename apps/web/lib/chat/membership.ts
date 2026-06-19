@@ -1,6 +1,9 @@
 import "server-only";
 import { getPostgresPool } from "@/lib/postgres/pool";
 import { ChatPermissionError } from "./types";
+import { SUPPORT_ADMIN_ROLES } from "./support-roles";
+
+const SUPPORT_TITLE = "Admin Support";
 
 export async function assertMember(conversationId: string, userId: string): Promise<void> {
   const { rows } = await getPostgresPool().query<{ exists: boolean }>(
@@ -95,4 +98,54 @@ export async function syncRoleChannel(roleKey: string): Promise<void> {
        and user_id <> all($2::uuid[])`,
     [convId, holders.map((h) => h.id)],
   );
+}
+
+/**
+ * Returns the user's shared support conversation, creating it if needed.
+ * Membership is additive: the requesting user plus every current admin
+ * (SUPPORT_ADMIN_ROLES) are ensured as members so any admin can answer and
+ * newly-promoted admins gain access to existing threads. Members are never
+ * pruned here (unlike the role/course sync) — the requesting user is not an
+ * admin and must remain a member.
+ */
+export async function getOrCreateSupportConversation(userId: string): Promise<string> {
+  const pool = getPostgresPool();
+
+  // Find-or-create the user's single support conversation (race-safe via the
+  // conversations_support_unique partial index).
+  const { rows: convRows } = await pool.query<{ id: string }>(
+    `insert into public.conversations (type, title, created_by)
+     values ('support', $2, $1)
+     on conflict (created_by) where type = 'support'
+       do update set title = excluded.title
+     returning id`,
+    [userId, SUPPORT_TITLE],
+  );
+  const convId = convRows[0].id;
+
+  // The requesting user is always a member.
+  await pool.query(
+    `insert into public.conversation_members (conversation_id, user_id)
+     values ($1, $2)
+     on conflict (conversation_id, user_id)
+       do update set removed_at = null`,
+    [convId, userId],
+  );
+
+  // Every admin is a member.
+  const { rows: admins } = await pool.query<{ id: string }>(
+    `select id from public.profiles where role = any($1::text[])`,
+    [[...SUPPORT_ADMIN_ROLES]],
+  );
+  for (const { id } of admins) {
+    await pool.query(
+      `insert into public.conversation_members (conversation_id, user_id)
+       values ($1, $2)
+       on conflict (conversation_id, user_id)
+         do update set removed_at = null`,
+      [convId, id],
+    );
+  }
+
+  return convId;
 }

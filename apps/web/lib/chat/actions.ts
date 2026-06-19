@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { requireProfile } from "@/lib/auth/context";
 import * as service from "./service";
 import * as repo from "./repository";
+import { getOrCreateSupportConversation } from "./membership";
+import { isSupportAdmin } from "./support-roles";
 
 const sendSchema = z.object({
   conversationId: z.string().uuid(),
@@ -129,4 +131,15 @@ export async function leaveConversationAction(input: unknown): Promise<void> {
   const { conversationId } = z.object({ conversationId: z.string().uuid() }).parse(input);
   const ctx = await requireProfile();
   await repo.leaveConversation(conversationId, ctx.userId);
+}
+
+/** One-click "Chat with Admin": get-or-create the user's shared support conversation. */
+export async function openSupportChatAction(): Promise<{ conversationId: string }> {
+  const ctx = await requireProfile();
+  if (isSupportAdmin(ctx.profile.role)) {
+    throw new Error("Admins do not have their own support conversation.");
+  }
+  const conversationId = await getOrCreateSupportConversation(ctx.userId);
+  revalidatePath("/chat");
+  return { conversationId };
 }

@@ -2,6 +2,23 @@ import "server-only";
 import { getPostgresPool } from "@/lib/postgres/pool";
 import type { ConversationDetail, ConversationSummary, MessageHit, MessageRow } from "./types";
 
+/**
+ * Title shown for a conversation, from the viewer's perspective. Support
+ * conversations read "Admin Support" to the user who opened them and
+ * "Support: {name}" to the admins answering.
+ */
+function resolveDisplayTitle(
+  r: { type: string; title: string | null; created_by?: string | null; creator_name?: string | null },
+  viewerId: string,
+  partnerName: string | null,
+): string {
+  if (r.type === "dm") return partnerName ?? "Direct Message";
+  if (r.type === "support") {
+    return r.created_by === viewerId ? "Admin Support" : `Support: ${r.creator_name ?? "User"}`;
+  }
+  return r.title ?? "Group";
+}
+
 export async function listConversationsForUser(userId: string): Promise<ConversationSummary[]> {
   const { rows } = await getPostgresPool().query(
     `with my as (
@@ -43,23 +60,22 @@ export async function listConversationsForUser(userId: string): Promise<Conversa
             coalesce(unread.n, 0) as unread_count,
             last_msg.body as last_body,
             mems.user_ids,
-            partner.partner_name
+            partner.partner_name,
+            coalesce(nullif(trim(creator.full_name), ''), creator.email) as creator_name
      from public.conversations c
      join my on my.conversation_id = c.id
      left join last_msg on last_msg.conversation_id = c.id
      left join unread   on unread.conversation_id = c.id
      left join mems     on mems.conversation_id = c.id
      left join partner  on partner.conversation_id = c.id
+     left join public.profiles creator on creator.id = c.created_by
      order by coalesce(c.last_message_at, c.created_at) desc`,
     [userId],
   );
 
   return rows.map((r): ConversationSummary => {
     const partnerName: string | null = r.partner_name ?? null;
-    const displayTitle =
-      r.type === "dm"
-        ? (partnerName ?? "Direct Message")
-        : (r.title ?? "Group");
+    const displayTitle = resolveDisplayTitle(r, userId, partnerName);
     return {
       id: r.id,
       type: r.type,
@@ -83,7 +99,7 @@ export async function getConversationDetail(
   currentUserId: string,
 ): Promise<ConversationDetail | null> {
   const { rows } = await getPostgresPool().query(
-    `select c.id, c.type, c.title,
+    `select c.id, c.type, c.title, c.created_by,
             count(cm2.user_id)::int as member_count,
             (select coalesce(nullif(trim(p.full_name), ''), p.email)
              from public.conversation_members cm3
@@ -91,7 +107,9 @@ export async function getConversationDetail(
              where cm3.conversation_id = c.id
                and cm3.removed_at is null
                and cm3.user_id != $2
-             limit 1) as partner_name
+             limit 1) as partner_name,
+            (select coalesce(nullif(trim(p2.full_name), ''), p2.email)
+             from public.profiles p2 where p2.id = c.created_by) as creator_name
      from public.conversations c
      join public.conversation_members cm on cm.conversation_id = c.id and cm.user_id = $2 and cm.removed_at is null
      join public.conversation_members cm2 on cm2.conversation_id = c.id and cm2.removed_at is null
@@ -101,8 +119,7 @@ export async function getConversationDetail(
   );
   const r = rows[0];
   if (!r) return null;
-  const displayTitle =
-    r.type === "dm" ? (r.partner_name ?? "Direct Message") : (r.title ?? "Group");
+  const displayTitle = resolveDisplayTitle(r, currentUserId, r.partner_name ?? null);
   return { id: r.id, type: r.type, displayTitle, memberCount: r.member_count };
 }
 
