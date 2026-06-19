@@ -5,7 +5,6 @@ import { getAuthContext } from "@/lib/auth/context"
 import { getAdminStatsData } from "@/lib/admin/queries"
 import { Topbar } from "@/components/layout/topbar"
 import { TweakableContent } from "@/components/shared/tweakable-content"
-import { ActivityTrend } from "@/components/admin/stats/activity-trend"
 import { OperationalStatusChart } from "@/components/admin/stats/operational-status-chart"
 import { PipelineTimeline } from "@/components/admin/stats/pipeline-timeline"
 import { StatsOverview } from "@/components/admin/stats/stats-overview"
@@ -46,10 +45,7 @@ export default async function ProvostOverviewPage() {
             <WorkloadChart taWorkload={data.taWorkload} />
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <ActivityTrend auditEvents={data.auditEvents} />
-            <StuckCoursesList stuckCourses={data.stuckCourses} totalStuck={data.stuckCount} />
-          </div>
+          <StuckCoursesList stuckCourses={data.stuckCourses} totalStuck={data.stuckCount} />
         </div>
       </TweakableContent>
     </>

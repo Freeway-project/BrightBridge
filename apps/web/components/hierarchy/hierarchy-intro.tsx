@@ -10,17 +10,21 @@ import { useHierarchyTour } from "./hierarchy-guided-tour"
 // as a permanent, friendly "how do I use this" affordance.
 const SEEN_KEY = "coursebridge:hierarchy-tour-seen"
 
-export function HierarchyIntro() {
+export function HierarchyIntro({ role }: { role?: string }) {
   const { startTour } = useHierarchyTour()
 
   useEffect(() => {
     if (typeof window === "undefined") return
+    // Provost has its own onboarding modal (mounted in the dashboard layout);
+    // skip auto-launching the hierarchy tour so the two guides don't stack /
+    // appear one-after-another. The manual "Show me around" button still works.
+    if (role === "provost") return
     if (sessionStorage.getItem(SEEN_KEY)) return
     sessionStorage.setItem(SEEN_KEY, "1")
     // Wait for first paint so the tour's anchor elements exist.
     const t = setTimeout(() => startTour(), 600)
     return () => clearTimeout(t)
-  }, [startTour])
+  }, [startTour, role])
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card to-card px-4 py-2.5">

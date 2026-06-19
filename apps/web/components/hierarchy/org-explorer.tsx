@@ -78,6 +78,7 @@ type Props = {
   view: OrgExplorerView
   courses: PaginatedResult<AdminCourseRow> | null
   filters: Filters
+  role: string
 }
 
 const initialState: ManageUserState = { kind: "idle", message: null }
@@ -119,7 +120,7 @@ function countBy(statusCounts: StatusCount[], status: string) {
   return statusCounts.find((c) => c.status === status)?.count ?? 0
 }
 
-export function OrgExplorer({ view, courses, filters }: Props) {
+export function OrgExplorer({ view, courses, filters, role }: Props) {
   const [tab, setTab] = useState<WorkspaceTab>("overview")
   const [treeOpen, setTreeOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
@@ -148,7 +149,7 @@ export function OrgExplorer({ view, courses, filters }: Props) {
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
-      <HierarchyIntro />
+      <HierarchyIntro role={role} />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2" data-tour="breadcrumb">
@@ -413,7 +414,6 @@ function TreeNodeItem({
   )
 }
 
-import { ChildUnitChart } from "@/components/hierarchy/child-unit-chart"
 
 function OverviewSection({
   currentType,
@@ -427,13 +427,9 @@ function OverviewSection({
   filters: Filters
 }) {
   const sectionLabel = currentType ? "Child units" : "Top-level units"
-  const chartTitle = currentType === "school" || currentType === "faculty" ? "Department Throughput" : (currentType ? "Sub-unit Throughput" : "School Health Matrix")
 
   return (
     <div className="space-y-6">
-      {children.length > 0 && (
-        <ChildUnitChart children={children} title={chartTitle} />
-      )}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Hierarchy snapshot</CardTitle>

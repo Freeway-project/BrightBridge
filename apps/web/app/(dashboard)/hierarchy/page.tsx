@@ -71,6 +71,7 @@ export default async function HierarchyPage({ searchParams }: Props) {
           view={view}
           courses={view.current ? courses : null}
           filters={{ search, status: status ?? "", term }}
+          role={context.profile.role}
         />
       </div>
     </>
