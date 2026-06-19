@@ -101,7 +101,6 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   const context = await requireOrgViewer()
   const canManage =
     context.profile.role === "super_admin" ||
-    context.profile.role === "provost" ||
     context.profile.role === "admin_full"
   const hierarchy = getHierarchyRepository()
   const courseRepo = getCourseRepository()

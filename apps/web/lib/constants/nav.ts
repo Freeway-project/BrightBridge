@@ -4,7 +4,6 @@ import {
   Send,
   GraduationCap,
   LayoutDashboard,
-  Building2,
   Users,
   FileText,
   Clock,
@@ -65,12 +64,10 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     ...(chatEnabled ? [chatEntry] : []),
   ],
   provost: [
-    { label: "Dashboard",    href: "/provost",       icon: LayoutDashboard },
-    { label: "Stats",        href: "/provost/stats", icon: BarChart3 },
-    { label: "Hierarchy",    href: "/hierarchy",     icon: Network },
-    { label: "Organization", href: "/provost/org",   icon: Building2 },
+    { label: "Dashboard",    href: "/provost",     icon: LayoutDashboard },
+    { label: "Hierarchy",    href: "/hierarchy",   icon: Network },
     { label: "Notifications", href: "/notifications", icon: Bell },
-    { label: "Guide",        href: "/guide",         icon: HelpCircle },
+    { label: "Guide",        href: "/guide",       icon: HelpCircle },
     ...(chatEnabled ? [chatEntry] : []),
   ],
 }

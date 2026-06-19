@@ -136,7 +136,6 @@ export async function addUnitMemberAction(
   revalidatePath("/admin")
   revalidatePath("/hierarchy")
   revalidatePath("/provost")
-  revalidatePath("/provost/org")
   return { kind: "success", message: "Added member to unit." }
 }
 
@@ -147,7 +146,6 @@ export async function removeUnitMemberAction(memberId: string): Promise<void> {
   revalidatePath("/admin")
   revalidatePath("/hierarchy")
   revalidatePath("/provost")
-  revalidatePath("/provost/org")
 }
 
 // Fetches one page of audit events for the Audit Trail's infinite scroll.
@@ -170,14 +168,13 @@ async function requireSuperAdmin() {
   return context
 }
 
-// Org-chart management is shared by super_admin, provost, and admin_full
-// (institution-wide oversight). User/role management stays super_admin-only.
+// Org-chart management is shared by super_admin and admin_full (institution-wide
+// oversight). Provost is read-only oversight. User/role management stays super_admin-only.
 async function requireOrgManager() {
   const context = await requireProfile()
 
   if (
     context.profile.role !== "super_admin" &&
-    context.profile.role !== "provost" &&
     context.profile.role !== "admin_full"
   ) {
     redirect("/dashboard")

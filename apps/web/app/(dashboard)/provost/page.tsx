@@ -1,14 +1,20 @@
+import type { CourseStatus } from "@coursebridge/workflow"
+import { getPhaseBreakdown } from "@coursebridge/workflow"
 import { redirect } from "next/navigation"
-import { Topbar } from "@/components/layout/topbar"
-import { ProvostDashboard } from "@/components/provost/provost-dashboard"
-import { getSuperAdminData, getPaginatedAuditEvents } from "@/lib/super-admin/queries"
 import { getAuthContext } from "@/lib/auth/context"
+import { getAdminStatsData } from "@/lib/admin/queries"
+import { Topbar } from "@/components/layout/topbar"
+import { TweakableContent } from "@/components/shared/tweakable-content"
+import { ActivityTrend } from "@/components/admin/stats/activity-trend"
+import { OperationalStatusChart } from "@/components/admin/stats/operational-status-chart"
+import { PipelineTimeline } from "@/components/admin/stats/pipeline-timeline"
+import { StatsOverview } from "@/components/admin/stats/stats-overview"
+import { StuckCoursesList } from "@/components/admin/stats/stuck-courses-list"
+import { WorkloadChart } from "@/components/admin/stats/workload-chart"
 
-// Provost = institution-wide oversight. Sees every college, dean, department,
-// and course across the institution (global all-access, no org-unit membership).
-// This is the executive dashboard: welcome banner, hero KPIs, status breakdown,
-// at-risk courses, and the institution-wide "who did what" activity feed. Org/
-// leadership management lives on the Organization page; the org chart on /hierarchy.
+// Provost dashboard = institution-wide stats, the same surface as the admin
+// Stats page. Read-only oversight: the provost sees the numbers and the org
+// explorer (/hierarchy), but manages nothing.
 export default async function ProvostOverviewPage() {
   const context = await getAuthContext()
 
@@ -19,15 +25,33 @@ export default async function ProvostOverviewPage() {
     redirect("/dashboard")
   }
 
-  const [data, auditInitial] = await Promise.all([
-    getSuperAdminData(),
-    getPaginatedAuditEvents(1, 30),
-  ])
+  const data = await getAdminStatsData()
+
+  const countByStatus: Partial<Record<CourseStatus, number>> = Object.fromEntries(
+    data.statusCounts.map((s) => [s.status, s.count]),
+  )
+  const phases = getPhaseBreakdown(countByStatus)
 
   return (
     <>
-      <Topbar title="Provost Overview" subtitle="Institution-wide review status" />
-      <ProvostDashboard data={data} auditInitial={auditInitial} provostName={context.profile.fullName} />
+      <Topbar title="Provost Overview" subtitle="Institution-wide review status & stats" />
+      <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <PipelineTimeline phases={phases} totalCourses={data.totalCourses} />
+
+          <StatsOverview totalCourses={data.totalCourses} phases={phases} />
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)]">
+            <OperationalStatusChart phases={phases} totalCourses={data.totalCourses} />
+            <WorkloadChart taWorkload={data.taWorkload} />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <ActivityTrend auditEvents={data.auditEvents} />
+            <StuckCoursesList stuckCourses={data.stuckCourses} totalStuck={data.stuckCount} />
+          </div>
+        </div>
+      </TweakableContent>
     </>
   )
 }
