@@ -30,8 +30,6 @@ export type BatchMailMergeRow = {
   instructorName: string;
   instructorEmail: string;
   courseTitle: string;
-  moodleUrl: string;
-  brightspaceUrl: string;
   magicLink: string;
 };
 
@@ -616,24 +614,17 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
     title: string;
     instructor_email: string;
     instructor_name: string | null;
-    metadata: Record<string, unknown> | null;
   }>(
     `SELECT
        c.id              AS course_id,
        c.title,
        p.email           AS instructor_email,
-       p.full_name       AS instructor_name,
-       rr.response_data  AS metadata
+       p.full_name       AS instructor_name
      FROM courses c
      INNER JOIN course_assignments ca
        ON ca.course_id = c.id AND ca.role = 'instructor'
      INNER JOIN profiles p
        ON p.id = ca.profile_id
-     LEFT JOIN review_responses rr
-       ON rr.course_id = c.id
-       AND rr.section_id = (
-         SELECT id FROM review_sections WHERE key = 'course_metadata' LIMIT 1
-       )
      WHERE c.id = ANY($1) AND c.status = 'ready_for_instructor'`,
     [courseIds],
   );
@@ -664,14 +655,10 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
         note: "Sent to instructor via batch export.",
       });
 
-      const metadata = (course.metadata as Record<string, unknown>) ?? {};
-
       rows.push({
         instructorName: course.instructor_name ?? "",
         instructorEmail: course.instructor_email,
         courseTitle: course.title,
-        moodleUrl: (metadata.moodle_url as string | undefined) ?? "",
-        brightspaceUrl: (metadata.brightspace_url as string | undefined) ?? "",
         magicLink: buildInviteLink(token),
       });
     } catch (error) {

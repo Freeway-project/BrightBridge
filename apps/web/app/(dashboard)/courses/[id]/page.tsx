@@ -89,7 +89,7 @@ export default async function CourseWorkspacePage({ params }: Props) {
 
   // ── Metadata defaults ──
   const metadataDefaults: MetadataFormValues = {
-    term: "", section_numbers: [], brightspace_url: "", moodle_url: "",
+    term: "", section_numbers: [],
     migration_notes: "", overall_time_spent_seconds: 0,
     ...((metadataResponse?.response_data ?? {}) as Partial<MetadataFormValues>),
   }

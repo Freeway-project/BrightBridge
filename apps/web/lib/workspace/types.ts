@@ -6,8 +6,6 @@
 export type MetadataResponseData = {
   term: string;
   section_numbers: string[];
-  brightspace_url: string;
-  moodle_url: string;
   migration_notes: string;
   overall_time_spent_seconds: number;
 };

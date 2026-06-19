@@ -131,8 +131,6 @@ export function MetadataForm({ course, reviewerName, defaultValues, embedded = f
 
   const sectionNumbers = useWatch({ control: form.control, name: "section_numbers" })
   const sectionText = sectionNumbers.join(", ")
-  const brightspaceUrl = useWatch({ control: form.control, name: "brightspace_url" })
-  const moodleUrl = useWatch({ control: form.control, name: "moodle_url" })
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-4 sm:px-6 lg:px-8 pb-16">
@@ -219,32 +217,6 @@ export function MetadataForm({ course, reviewerName, defaultValues, embedded = f
             placeholder="001, 002, 003"
             value={sectionText}
           />
-        </FieldRow>
-      </Section>
-
-      {/* ── Links ─────────────────────────────────────── */}
-      <Section label="Links">
-        <FieldRow label="Brightspace URL">
-          <div className="flex items-center gap-2">
-            <CleanInput
-              placeholder="https://..."
-              className="flex-1"
-              {...form.register("brightspace_url")}
-            />
-            {brightspaceUrl?.trim() && <CopyButton value={brightspaceUrl} label="Brightspace URL" />}
-          </div>
-          <FieldError message={form.formState.errors.brightspace_url?.message} />
-        </FieldRow>
-        <FieldRow label="Moodle URL">
-          <div className="flex items-center gap-2">
-            <CleanInput
-              placeholder="https://..."
-              className="flex-1"
-              {...form.register("moodle_url")}
-            />
-            {moodleUrl?.trim() && <CopyButton value={moodleUrl} label="Moodle URL" />}
-          </div>
-          <FieldError message={form.formState.errors.moodle_url?.message} />
         </FieldRow>
       </Section>
 

@@ -5,8 +5,6 @@ import { z } from "zod";
 export const metadataSchema = z.object({
   term: z.string(),
   section_numbers: z.array(z.string()),
-  brightspace_url: z.string().url("Must be a valid URL").or(z.literal("")),
-  moodle_url: z.string().url("Must be a valid URL").or(z.literal("")),
   migration_notes: z.string(),
   overall_time_spent_seconds: z.number().int().nonnegative(),
 });

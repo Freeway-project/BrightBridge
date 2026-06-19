@@ -151,7 +151,7 @@ export function OrgExplorer({ view, courses, filters }: Props) {
       <HierarchyIntro />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
+        <div className="space-y-2" data-tour="breadcrumb">
           <OrgBreadcrumb crumbs={view.breadcrumb} filters={filters} />
           <div>
             <h2 className="text-2xl font-semibold leading-tight text-foreground">
@@ -178,12 +178,12 @@ export function OrgExplorer({ view, courses, filters }: Props) {
       </div>
 
       <div className="grid min-h-[42rem] grid-cols-1 gap-6 lg:grid-cols-[320px,minmax(0,1fr)]">
-        <aside className="hidden min-h-0 lg:block">
+        <aside className="hidden min-h-0 lg:block" data-tour="tree">
           <TreePanel view={view} filters={filters} />
         </aside>
 
         <div className="min-w-0 space-y-6">
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4" data-tour="kpis">
             <StatCard label="Courses" value={view.courseTotal} icon="book-open" index={0} />
             <StatCard label="In progress" value={inProgress} icon="clock" index={1} />
             <StatCard label="Approved" value={approved} icon="check-square" index={2} />
@@ -341,7 +341,10 @@ function TreeNodeItem({
 }) {
   const children = childrenByParent.get(node.id) ?? []
   const hasChildren = children.length > 0
-  const [open, setOpen] = useState(selectedLineage.has(node.id) || depth < 1)
+  // Collapsed by default — only the path to the currently-selected unit is
+  // expanded. Keeps the tree scannable (just the schools) instead of dumping
+  // every department on screen at once.
+  const [open, setOpen] = useState(selectedLineage.has(node.id))
   const style = unitTypeStyle(node.type)
 
   useEffect(() => {
@@ -443,7 +446,7 @@ function OverviewSection({
             {children.length === 0 ? (
               <p className="text-sm text-muted-foreground">No child units under this selection.</p>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" data-tour="subunits">
                 {children.map((child) => (
                   <SubUnitCard key={child.id} child={child} filters={filters} />
                 ))}
@@ -451,7 +454,7 @@ function OverviewSection({
             )}
           </div>
 
-          <div>
+          <div data-tour="leadership">
             <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               <Users className="size-3.5" /> Leadership
             </h3>
@@ -529,7 +532,7 @@ function CoursesSection({
   const countLabel = filteredCount !== courseTotal ? `${filteredCount} of ${courseTotal}` : `${courseTotal}`
 
   return (
-    <Card>
+    <Card data-tour="courses">
       <CardHeader className="gap-3 border-b border-border sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-base">Courses</CardTitle>

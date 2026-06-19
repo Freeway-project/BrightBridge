@@ -14,8 +14,6 @@ export type ReadyForInstructorCourse = {
   instructorName: string | null;
   instructorEmail: string;
   instructorProfileId: string;
-  moodleUrl: string;
-  brightspaceUrl: string;
 };
 
 export type SentToInstructorCourse = {
@@ -146,7 +144,6 @@ export async function getAdminCourseDetail(courseId: string): Promise<AdminCours
 /**
  * Returns all courses in ready_for_instructor status that have an assigned instructor.
  * Courses without an assigned instructor are excluded (no invite target).
- * Pulls moodle_url and brightspace_url from the course_metadata review response.
  */
 export async function getReadyForInstructorCourses(): Promise<ReadyForInstructorCourse[]> {
   const { getPostgresPool } = await import("@/lib/postgres/pool");
@@ -158,41 +155,29 @@ export async function getReadyForInstructorCourses(): Promise<ReadyForInstructor
     instructor_profile_id: string;
     instructor_email: string;
     instructor_name: string | null;
-    metadata: Record<string, unknown> | null;
   }>(
     `SELECT
        c.id              AS course_id,
        c.title,
        p.id              AS instructor_profile_id,
        p.email           AS instructor_email,
-       p.full_name       AS instructor_name,
-       rr.response_data  AS metadata
+       p.full_name       AS instructor_name
      FROM courses c
      INNER JOIN course_assignments ca
        ON ca.course_id = c.id AND ca.role = 'instructor'
      INNER JOIN profiles p
        ON p.id = ca.profile_id
-     LEFT JOIN review_responses rr
-       ON rr.course_id = c.id
-       AND rr.section_id = (
-         SELECT id FROM review_sections WHERE key = 'course_metadata' LIMIT 1
-       )
      WHERE c.status = 'ready_for_instructor'
      ORDER BY c.updated_at DESC`,
   );
 
-  return rows.map((row) => {
-    const metadata = (row.metadata as Record<string, unknown>) ?? {};
-    return {
-      courseId: row.course_id,
-      courseTitle: row.title,
-      instructorName: row.instructor_name,
-      instructorEmail: row.instructor_email,
-      instructorProfileId: row.instructor_profile_id,
-      moodleUrl: (metadata.moodle_url as string | undefined) ?? "",
-      brightspaceUrl: (metadata.brightspace_url as string | undefined) ?? "",
-    };
-  });
+  return rows.map((row) => ({
+    courseId: row.course_id,
+    courseTitle: row.title,
+    instructorName: row.instructor_name,
+    instructorEmail: row.instructor_email,
+    instructorProfileId: row.instructor_profile_id,
+  }));
 }
 
 const INSTRUCTOR_PHASE_STATUSES = [

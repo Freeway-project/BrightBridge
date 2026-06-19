@@ -2,11 +2,15 @@ import "server-only";
 
 import { sendEmail } from "@/lib/email/client";
 
+/** Production domain instructors receive their magic links on. */
+const PRODUCTION_SITE_URL = "https://coursebridge.cloud.okanagancollege.ca";
+
 function resolveSiteUrl(): string {
   const url = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (url) return url.replace(/\/$/, "");
-  // Sensible fallback for local development.
-  return "http://localhost:3000";
+  // No explicit override: default to the production domain in prod, and to
+  // localhost only in development so local magic links still resolve.
+  return process.env.NODE_ENV === "production" ? PRODUCTION_SITE_URL : "http://localhost:3000";
 }
 
 /** Builds the absolute magic-link URL for a raw invite token. */

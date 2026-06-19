@@ -30,6 +30,16 @@ const ALL_STEPS: DriveStep[] = [
     },
   },
   {
+    element: '[data-tour="tree"]',
+    popover: {
+      title: "Browse the whole structure",
+      description:
+        "Every school and department lives here. Schools start <b>collapsed</b> — click the ▸ arrow to open one, or click a name to jump straight into it.",
+      side: "right",
+      align: "start",
+    },
+  },
+  {
     element: '[data-tour="subunits"]',
     popover: {
       title: "Click to drill in",
@@ -79,10 +89,16 @@ const ALL_STEPS: DriveStep[] = [
 
 export function useHierarchyTour() {
   const startTour = useCallback(() => {
-    // Keep only the welcome/end cards and any step whose target is on screen.
-    const steps = ALL_STEPS.filter(
-      (s) => !s.element || document.querySelector(s.element as string),
-    )
+    // Keep the welcome/end cards, plus any step whose target is both present
+    // AND visible right now. offsetParent is null for display:none elements
+    // (e.g. the tree on mobile, or an inactive tab's content), so this skips
+    // anchors that exist in the DOM but aren't actually on screen — otherwise
+    // driver.js would try to spotlight an invisible box.
+    const steps = ALL_STEPS.filter((s) => {
+      if (!s.element) return true
+      const el = document.querySelector(s.element as string) as HTMLElement | null
+      return !!el && el.offsetParent !== null
+    })
 
     const d = driver({
       showProgress: true,

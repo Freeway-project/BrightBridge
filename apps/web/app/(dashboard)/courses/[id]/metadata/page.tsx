@@ -23,8 +23,6 @@ export default async function MetadataPage({ params }: Props) {
   const defaultValues: MetadataFormValues = {
     term: "",
     section_numbers: [],
-    brightspace_url: "",
-    moodle_url: "",
     migration_notes: "",
     overall_time_spent_seconds: 0,
     ...((existing?.response_data ?? {}) as Partial<MetadataFormValues>),

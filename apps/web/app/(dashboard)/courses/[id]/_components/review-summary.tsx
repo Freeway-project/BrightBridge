@@ -13,8 +13,6 @@ type ReviewSummaryProps = {
     semester?: string
   }
   metadata?: {
-    brightspaceUrl?: string
-    moodleUrl?: string
     reviewDate?: string
     timeRequired?: string
   }

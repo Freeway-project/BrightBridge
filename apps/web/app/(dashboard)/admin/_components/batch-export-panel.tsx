@@ -21,8 +21,6 @@ function buildCsv(rows: BatchMailMergeRow[]): string {
     "Instructor Name",
     "Instructor Email",
     "Course Title",
-    "Moodle URL",
-    "Brightspace URL",
     "Magic Link",
   ];
   const escape = (v: unknown) => {
@@ -35,8 +33,6 @@ function buildCsv(rows: BatchMailMergeRow[]): string {
       r.instructorName,
       r.instructorEmail,
       r.courseTitle,
-      r.moodleUrl,
-      r.brightspaceUrl,
       r.magicLink,
     ]),
   ]

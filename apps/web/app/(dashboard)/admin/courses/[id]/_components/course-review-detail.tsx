@@ -217,8 +217,6 @@ function MetadataCard({
             label="Sections"
             value={data.section_numbers?.length ? data.section_numbers.join(", ") : null}
           />
-          <Field label="Brightspace URL" value={data.brightspace_url} />
-          <Field label="Moodle URL" value={data.moodle_url} />
           <div className="sm:col-span-2">
             <Field label="Migration Notes" value={data.migration_notes} />
           </div>
