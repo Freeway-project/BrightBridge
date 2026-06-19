@@ -26,6 +26,7 @@ next-env.d.ts
 
 # local DB dumps (never commit)
 backups/
+.backups/
 
 # sensitive data
 *Educator*
@@ -35,3 +36,6 @@ backups/
 # Supabase CLI local cache
 supabase/.branches/
 supabase/.temp/
+
+# Claude Code local state
+.claude/
