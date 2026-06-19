@@ -65,11 +65,12 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     ...(chatEnabled ? [chatEntry] : []),
   ],
   provost: [
-    { label: "Hierarchy",    href: "/hierarchy",   icon: Network },
-    { label: "Dashboard",    href: "/provost",     icon: LayoutDashboard },
-    { label: "Organization", href: "/provost/org", icon: Building2 },
+    { label: "Dashboard",    href: "/provost",       icon: LayoutDashboard },
+    { label: "Stats",        href: "/provost/stats", icon: BarChart3 },
+    { label: "Hierarchy",    href: "/hierarchy",     icon: Network },
+    { label: "Organization", href: "/provost/org",   icon: Building2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
-    { label: "Guide",        href: "/guide",       icon: HelpCircle },
+    { label: "Guide",        href: "/guide",         icon: HelpCircle },
     ...(chatEnabled ? [chatEntry] : []),
   ],
 }

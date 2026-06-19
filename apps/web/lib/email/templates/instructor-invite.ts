@@ -3,7 +3,7 @@ import "server-only";
 import { sendEmail } from "@/lib/email/client";
 
 /** Production domain instructors receive their magic links on. */
-const PRODUCTION_SITE_URL = "https://coursebridge.cloud.okanagancollege.ca";
+const PRODUCTION_SITE_URL = "https://coursebridge.okanagancollege.app";
 
 function resolveSiteUrl(): string {
   const url = process.env.NEXT_PUBLIC_SITE_URL?.trim();

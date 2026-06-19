@@ -5,15 +5,12 @@ import { getPhaseBreakdown, type CourseStatus } from "@coursebridge/workflow"
 import type { SuperAdminData } from "@/lib/super-admin/queries"
 import type { AuditEvent, PaginatedResult } from "@/lib/repositories/contracts"
 import { buildProvostSummary } from "@/lib/provost/summary"
-import { ProvostWelcomeBanner } from "./provost-welcome-banner"
 import { ProvostKpiRow } from "./provost-kpi-row"
 import { ProvostExplore } from "./provost-explore"
-import type { OrgExplorerView } from "@/lib/hierarchy/explorer-queries"
-import { ChildUnitChart } from "@/components/hierarchy/child-unit-chart"
 
 /**
- * Provost executive dashboard. Scan-first oversight: welcome banner + hero KPI
- * row (bespoke), then quick links to explore the institution, the status
+ * Provost executive dashboard. Scan-first oversight: a hero KPI row
+ * (bespoke), then quick links to explore the institution, the status
  * breakdown, and the institution-wide "who did what" activity feed. All
  * theme-aware via tokens.
  */
@@ -21,12 +18,10 @@ export function ProvostDashboard({
   data,
   auditInitial,
   provostName,
-  orgView,
 }: {
   data: SuperAdminData
   auditInitial: PaginatedResult<AuditEvent>
   provostName: string | null
-  orgView: OrgExplorerView
 }) {
   const summary = buildProvostSummary(data, provostName)
 
@@ -37,8 +32,6 @@ export function ProvostDashboard({
 
   return (
     <div className="min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
-      <ProvostWelcomeBanner headline={summary.headline} />
-
       <ProvostKpiRow summary={summary} />
 
       <ProvostExplore />
@@ -46,7 +39,6 @@ export function ProvostDashboard({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-6">
           <PhaseBreakdown breakdown={breakdown} />
-          <ChildUnitChart children={orgView.children} title="School Health Matrix" />
         </div>
 
         <Card className="lg:col-span-2 border-border/60 shadow-sm">
