@@ -22,7 +22,7 @@ const THEME_LOTTIE: Record<ThemeId, unknown> = {
   ocean: aiAnimationOcean,
   // The original sunset asset references external /i/image_*.webp files that
   // are not shipped with the app, which causes repeated 404s in the sidebar.
-  sunset: aiAnimationOcean,
+  sunset: aiAnimationAurora,
   monochrome: aiAnimationMono,
   aurora: aiAnimationAurora,
 }

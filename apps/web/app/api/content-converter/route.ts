@@ -189,21 +189,57 @@ function extractHtml(template: ConverterTemplate, response: string): string {
     if (firstBrace !== -1 && lastBrace > firstBrace) {
       clean = clean.slice(firstBrace, lastBrace + 1)
     }
-    // Literal control characters inside JSON string values break JSON.parse:
-    //   • Strip non-printable chars 0x00–0x1F (except \t, \n, \r) — these must
-    //     never appear unescaped anywhere in JSON, even outside strings.
-    //   • Escape literal \n, \r, \t that appear INSIDE string values — Claude
-    //     often embeds real newlines in long bodyHTML/description fields when
-    //     parsing plain-text input (Word docs, pdf.js-extracted PDFs), producing
-    //     invalid JSON that JSON.parse rejects. We escape them only within string
-    //     delimiters so structural whitespace between keys isn't affected.
-    //     The regex `"((?:[^"\\]|\\.)*)"` matches each JSON string value:
-    //       [^"\\] — any char that is not a quote or backslash (includes literal \n)
-    //       \\.    — any already-escaped pair (e.g. \n, \\, \") — left untouched
+    // Sanitise raw Claude output before JSON.parse. Two classes of breakage:
+    //   1. Non-printable control chars (0x00–0x1F except \t/\n/\r) anywhere in
+    //      the JSON — strip them outright.
+    //   2. Inside JSON string values Claude may embed:
+    //        a) Literal \n/\r/\t — must be escaped as \\n/\\r/\\t.
+    //        b) Unescaped " — e.g. HTML attributes: <a href="url"> written directly
+    //           inside a bodyHTML value terminates the JSON string early.
+    //      We fix both with a single character-level pass that tracks whether we're
+    //      inside a JSON string. On a candidate closing ", we peek ahead past
+    //      whitespace: if the next token is , } ] or : the " closes the string;
+    //      otherwise it's an inner quote and we escape it.
     clean = clean.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
-    clean = clean.replace(/"((?:[^"\\]|\\.)*)"/gs, (_, content: string) =>
-      '"' + content.replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t") + '"',
-    )
+    {
+      const chars: string[] = []
+      let inStr = false
+      for (let i = 0; i < clean.length; ) {
+        const ch = clean[i]
+        if (!inStr) {
+          chars.push(ch)
+          if (ch === '"') inStr = true
+          i++
+          continue
+        }
+        // Preserve existing escape sequences verbatim.
+        if (ch === "\\") {
+          chars.push(ch, clean[i + 1] ?? "")
+          i += 2
+          continue
+        }
+        if (ch === '"') {
+          // Peek past whitespace to decide if this closes the string.
+          let j = i + 1
+          while (j < clean.length && (clean[j] === " " || clean[j] === "\t" || clean[j] === "\n" || clean[j] === "\r")) j++
+          const nx = j < clean.length ? clean[j] : ""
+          if (nx === "," || nx === "}" || nx === "]" || nx === ":" || nx === "") {
+            chars.push('"')
+            inStr = false
+          } else {
+            chars.push('\\"')
+          }
+          i++
+          continue
+        }
+        if (ch === "\n") { chars.push("\\n"); i++; continue }
+        if (ch === "\r") { chars.push("\\r"); i++; continue }
+        if (ch === "\t") { chars.push("\\t"); i++; continue }
+        chars.push(ch)
+        i++
+      }
+      clean = chars.join("")
+    }
     let parsed: SyllabusData
     try {
       parsed = JSON.parse(clean) as SyllabusData
