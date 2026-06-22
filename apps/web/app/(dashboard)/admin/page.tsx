@@ -10,6 +10,7 @@ import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
 import { InstructorAssignmentPanel } from "./_components/instructor-assignment-panel"
 import { AssignedCoursesTable } from "./_components/assigned-courses-table"
 import { AdminTabs } from "./_components/admin-tabs"
+import { AdminViewerDashboard } from "./_components/admin-viewer-dashboard"
 import { EscalationsTable } from "./_components/escalations-table"
 import { CompletedCoursesTable } from "./_components/completed-courses-table"
 import { TweakableContent } from "@/components/shared/tweakable-content"
@@ -17,7 +18,6 @@ import { AdminRefreshWrapper } from "./_components/admin-refresh-wrapper"
 import { RecentAssignmentsTable } from "./_components/recent-assignments-table"
 import { getCourseRepository } from "@/lib/repositories"
 import { AdminOverview } from "./_components/admin-overview"
-import { ReadOnlyNotice } from "./_components/read-only-notice"
 import { InstitutionPanel } from "@/components/super-admin/institution-panel"
 import { getSuperAdminData } from "@/lib/super-admin/queries"
 import { firstOpenedAtByCourseIds } from "@/lib/instructor-views/queries"
@@ -160,47 +160,47 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
         role={context.profile.role}
       />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background">
-        <AdminRefreshWrapper title="Admin Dashboard">
-          <AdminTabs
-            unassignedCount={unassignedPage.total}
-            openEscalationsCount={openEscalations.length}
-            overviewPanel={<AdminOverview data={overviewData} />}
-            coursesPanel={
-              <CoursesBoard
-                columns={boardColumns}
-                role={context.profile.role}
-                tas={tas}
-                readOnly={isReadOnly}
-                listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} instructorOpenedAt={instructorOpenedAt} readOnly={isReadOnly} />}
-              />
-            }
-            assignPanel={
-              isReadOnly ? (
-                <ReadOnlyNotice title="Assign TA to Courses" />
-              ) : (
+        {isReadOnly ? (
+          <AdminViewerDashboard
+            overviewData={overviewData}
+            coursesPage={coursesPage}
+            statusCounts={overviewData.statusCounts}
+          />
+        ) : (
+          <AdminRefreshWrapper title="Admin Dashboard">
+            <AdminTabs
+              unassignedCount={unassignedPage.total}
+              openEscalationsCount={openEscalations.length}
+              overviewPanel={<AdminOverview data={overviewData} />}
+              coursesPanel={
+                <CoursesBoard
+                  columns={boardColumns}
+                  role={context.profile.role}
+                  tas={tas}
+                  readOnly={isReadOnly}
+                  listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} instructorOpenedAt={instructorOpenedAt} readOnly={isReadOnly} />}
+                />
+              }
+              assignPanel={
                 <AdminAssignmentPanel
                   courses={unassignedPage.data.filter(c => c.ta === null)}
                   tas={tas}
                 />
-              )
-            }
-            instructorPanel={
-              isReadOnly ? (
-                <ReadOnlyNotice title="Create & Assign Instructor" />
-              ) : (
+              }
+              instructorPanel={
                 <InstructorAssignmentPanel
                   courses={unassignedPage.data}
                 />
-              )
-            }
-            escalationsPanel={<EscalationsTable escalations={openEscalations} readOnly={isReadOnly} />}
-            institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
-            completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
-            assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
-            sendPanel={<SendPanel readyCourses={readyForInstructor} sentCourses={sentToInstructor} readOnly={isReadOnly} />}
-            readyForInstructorCount={readyForInstructor.length}
-          />
-        </AdminRefreshWrapper>
+              }
+              escalationsPanel={<EscalationsTable escalations={openEscalations} readOnly={isReadOnly} />}
+              institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
+              completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
+              assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
+              sendPanel={<SendPanel readyCourses={readyForInstructor} sentCourses={sentToInstructor} readOnly={isReadOnly} />}
+              readyForInstructorCount={readyForInstructor.length}
+            />
+          </AdminRefreshWrapper>
+        )}
       </TweakableContent>
     </>
   )
