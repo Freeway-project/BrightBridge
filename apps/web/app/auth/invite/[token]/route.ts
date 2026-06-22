@@ -44,14 +44,18 @@ export async function GET(
       await markInviteAccepted(invite.id);
     }
 
-    const { recordInstructorView } = await import("@/lib/instructor-views/service");
-    await recordInstructorView(invite.courseId, instructorProfileId);
+    // Admin preview links must not affect course state or instructor view counts —
+    // only the real instructor opening their own link should trigger those side effects.
+    if (!invite.isAdminPreview) {
+      const { recordInstructorView } = await import("@/lib/instructor-views/service");
+      await recordInstructorView(invite.courseId, instructorProfileId);
 
-    try {
-      const { markInstructorViewingByLink } = await import("@/lib/courses/service");
-      await markInstructorViewingByLink({ courseId: invite.courseId, instructorProfileId });
-    } catch (statusError) {
-      console.error("[auth/invite] Failed to mark instructor viewing:", statusError);
+      try {
+        const { markInstructorViewingByLink } = await import("@/lib/courses/service");
+        await markInstructorViewingByLink({ courseId: invite.courseId, instructorProfileId });
+      } catch (statusError) {
+        console.error("[auth/invite] Failed to mark instructor viewing:", statusError);
+      }
     }
   } catch (error) {
     console.error("[auth/invite] Session/bookkeeping failed:", error);

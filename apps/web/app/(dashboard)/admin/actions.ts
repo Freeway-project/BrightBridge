@@ -543,6 +543,35 @@ export async function resendInstructorInviteAction(courseId: string): Promise<In
   return rows;
 }
 
+/**
+ * Generates a never-expiring magic link for a specific course+instructor so an
+ * admin can open the instructor's dashboard without consuming a one-time invite.
+ * Never-expiring links track access counts rather than marking accepted, so the
+ * instructor's ability to log in is unaffected.
+ */
+export async function generateInstructorPreviewLinkAction(
+  courseId: string,
+  instructorEmail: string,
+): Promise<string> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
+
+  const [{ createReviewInvite }, { buildInviteLink }] = await Promise.all([
+    import("@/lib/invites/service"),
+    import("@/lib/email/templates/instructor-invite"),
+  ]);
+
+  const { token } = await createReviewInvite({
+    courseId,
+    email: instructorEmail.trim().toLowerCase(),
+    createdBy: ctx.userId,
+    neverExpires: true,
+    isAdminPreview: true,
+  });
+
+  return buildInviteLink(token);
+}
+
 export async function grantFinalApprovalAction(courseId: string): Promise<void> {
   const ctx = await requireProfile();
   requireAnyRole(ctx, ["admin_full", "super_admin"]);
