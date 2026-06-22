@@ -70,8 +70,6 @@ function Kpi({ label, value, sub }: { label: string; value: string; sub?: string
 export function SystemPanel() {
   const [snap, setSnap] = useState<Snapshot | null>(null)
   const [snapErr, setSnapErr] = useState<string | null>(null)
-  const [logs, setLogs] = useState<LogEntry[]>([])
-  const [streamErr, setStreamErr] = useState<string | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -97,25 +95,7 @@ export function SystemPanel() {
     }
   }, [])
 
-  useEffect(() => {
-    const es = new EventSource("/api/super-admin/system/logs")
-    es.onmessage = (e) => {
-      try {
-        const entry = JSON.parse(e.data) as LogEntry
-        setLogs((prev) => {
-          const next = [...prev, entry]
-          return next.length > 300 ? next.slice(-300) : next
-        })
-      } catch {
-        // ignore parse errors
-      }
-    }
-    es.onerror = () => {
-      setStreamErr("Log stream disconnected — retrying…")
-    }
-    es.onopen = () => setStreamErr(null)
-    return () => es.close()
-  }, [])
+  const logs = snap?.recentLogs ?? []
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight })
@@ -156,11 +136,10 @@ export function SystemPanel() {
       </div>
 
       <Card className="border-border/60 bg-card/50 backdrop-blur-sm">
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardHeader className="pb-2">
           <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-            Live Logs
+            Recent Logs
           </CardTitle>
-          {streamErr && <span className="text-[10px] text-yellow-500">{streamErr}</span>}
         </CardHeader>
         <CardContent>
           <div
