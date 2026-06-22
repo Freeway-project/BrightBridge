@@ -65,7 +65,7 @@ async function dispatchToAllInstructors(input: {
 
 export async function notifyInstructorAction(courseId: string): Promise<void> {
   const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
   await dispatchToAllInstructors({ courseId, sentBy: ctx.userId });
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath(`/admin/courses/${courseId}/emails`);
@@ -81,7 +81,7 @@ export async function resendInstructorEmailAction(
   courseId: string,
 ): Promise<void> {
   const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
 
   const last = await lastForCourse(courseId);
   if (!last) {

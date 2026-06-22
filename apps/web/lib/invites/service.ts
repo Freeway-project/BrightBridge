@@ -16,6 +16,7 @@ export type ReviewInvite = {
   revokedAt: string | null;
   accessCount: number;
   firstAccessedAt: string | null;
+  isAdminPreview: boolean;
 };
 
 export type InstructorRecipient = {
@@ -41,6 +42,7 @@ function mapInvite(row: {
   revoked_at: string | null;
   access_count: number;
   first_accessed_at: string | null;
+  is_admin_preview: boolean;
 }): ReviewInvite {
   return {
     id: row.id,
@@ -51,6 +53,7 @@ function mapInvite(row: {
     revokedAt: row.revoked_at,
     accessCount: row.access_count,
     firstAccessedAt: row.first_accessed_at,
+    isAdminPreview: row.is_admin_preview,
   };
 }
 
@@ -90,6 +93,7 @@ export async function createReviewInvite(input: {
   email: string;
   createdBy: string;
   neverExpires?: boolean;
+  isAdminPreview?: boolean;
 }): Promise<{ token: string; invite: ReviewInvite }> {
   const pool = getPostgresPool();
   const email = input.email.trim().toLowerCase();
@@ -103,6 +107,7 @@ export async function createReviewInvite(input: {
 
   const token = randomBytes(32).toString("base64url");
   const expiresAt = input.neverExpires ? null : new Date(Date.now() + INVITE_TTL_MS).toISOString();
+  const isAdminPreview = input.isAdminPreview ?? false;
 
   const { rows } = await pool.query<{
     id: string;
@@ -113,11 +118,12 @@ export async function createReviewInvite(input: {
     revoked_at: string | null;
     access_count: number;
     first_accessed_at: string | null;
+    is_admin_preview: boolean;
   }>(
-    `INSERT INTO review_invites (course_id, email, token_hash, created_by, expires_at)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING id, course_id, email, expires_at, accepted_at, revoked_at, access_count, first_accessed_at`,
-    [input.courseId, email, hashToken(token), input.createdBy, expiresAt],
+    `INSERT INTO review_invites (course_id, email, token_hash, created_by, expires_at, is_admin_preview)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     RETURNING id, course_id, email, expires_at, accepted_at, revoked_at, access_count, first_accessed_at, is_admin_preview`,
+    [input.courseId, email, hashToken(token), input.createdBy, expiresAt, isAdminPreview],
   );
 
   const data = rows[0];
@@ -137,8 +143,9 @@ export async function redeemReviewInvite(rawToken: string): Promise<RedeemResult
     revoked_at: string | null;
     access_count: number;
     first_accessed_at: string | null;
+    is_admin_preview: boolean;
   }>(
-    `SELECT id, course_id, email, expires_at, accepted_at, revoked_at, access_count, first_accessed_at
+    `SELECT id, course_id, email, expires_at, accepted_at, revoked_at, access_count, first_accessed_at, is_admin_preview
      FROM review_invites WHERE token_hash = $1 LIMIT 1`,
     [hashToken(rawToken)],
   );

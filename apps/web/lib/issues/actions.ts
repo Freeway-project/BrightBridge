@@ -150,7 +150,7 @@ export async function updateIssueStatusAction(issueId: string, newStatus: IssueS
       throw new Error('Issue not found')
     }
 
-    const isAdmin = ['super_admin', 'admin_full', 'admin_viewer'].includes(ctx.profile.role)
+    const isAdmin = ['super_admin', 'admin_full'].includes(ctx.profile.role)
     if (!isAdmin) {
       throw new Error('Only admins can resolve issues')
     }

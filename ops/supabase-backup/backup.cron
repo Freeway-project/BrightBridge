@@ -1,0 +1,5 @@
+# Every 5 minutes, weekdays, 08:00 through 15:55
+*/5 8-15 * * 1-5 /mnt/data/projects/BrightBridge/ops/supabase-backup/backup.sh
+
+# Optional exact 4:00 PM run
+0 16 * * 1-5 /mnt/data/projects/BrightBridge/ops/supabase-backup/backup.sh

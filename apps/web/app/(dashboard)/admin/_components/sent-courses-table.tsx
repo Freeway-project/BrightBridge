@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/courses/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SentToInstructorCourse } from "@/lib/admin/queries";
 import { formatDistanceToNow } from "date-fns";
+import { InstructorPreviewButton } from "./instructor-preview-button";
 
 type Props = {
   courses: SentToInstructorCourse[];
@@ -32,6 +33,7 @@ export function SentCoursesTable({ courses }: Props) {
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Email</th>
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Status</th>
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Last Updated</th>
+                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -59,6 +61,16 @@ export function SentCoursesTable({ courses }: Props) {
                   </td>
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {course.instructorEmail ? (
+                      <InstructorPreviewButton
+                        courseId={course.courseId}
+                        instructorEmail={course.instructorEmail}
+                      />
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}

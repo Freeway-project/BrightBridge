@@ -7,6 +7,5 @@ export async function saveFinalSummaryNotesAction(courseId: string, notes: strin
   await saveFinalSummaryNotes(courseId, notes);
   revalidatePath(`/courses/${courseId}/issue-log`);
   revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath(`/communications/courses/${courseId}`);
   revalidatePath(`/instructor/courses/${courseId}`);
 }

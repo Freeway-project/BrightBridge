@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Bot,
   ClipboardList,
   Send,
   GraduationCap,
@@ -37,6 +38,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   admin_full: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
+    { label: "Assistant", href: "/assistant", icon: Bot },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
     { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
@@ -44,9 +46,13 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
     ...(chatEnabled ? [chatEntry] : []),
   ],
+  // admin_viewer mirrors admin_full's dashboard but read-only. Omits the
+  // write-capable tools admin_viewer can't open (Converter, Assistant).
   admin_viewer: [
-    { label: "Handoff Queue", href: "/communications", icon: Send },
+    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
+    { label: "Migration", href: "/migration", icon: FileText },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
     ...(chatEnabled ? [chatEntry] : []),
@@ -60,6 +66,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   super_admin: [
     { label: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
+    { label: "Assistant", href: "/assistant", icon: Bot },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
     { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
@@ -69,6 +76,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   provost: [
     { label: "Dashboard",    href: "/provost",     icon: LayoutDashboard },
+    { label: "Assistant",    href: "/assistant",   icon: Bot },
     { label: "Hierarchy",    href: "/hierarchy",   icon: Network },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",        href: "/guide",       icon: HelpCircle },

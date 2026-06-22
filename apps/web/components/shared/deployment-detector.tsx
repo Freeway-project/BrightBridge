@@ -12,7 +12,7 @@ interface DeploymentDetectorProps {
   initialVersion: string
 }
 
-const CHECK_INTERVAL = 1000 * 60 * 3 // 3 minutes
+const CHECK_INTERVAL = 1000 * 60 * 2 // 2 minutes
 const UPDATE_APPLIED_FLAG = "coursebridge:update-applied"
 
 export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) {
@@ -81,33 +81,10 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
       }
     }
 
-    // Use a robust reconnecting SSE or aggressive fallback when disconnected
-    let es: EventSource | null = new EventSource("/api/version/stream")
-
-    es.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data)
-        if (data.version && data.version !== initialVersion && data.version !== "development") {
-          triggerUpdate()
-          if (es) {
-            es.close()
-            es = null
-          }
-        }
-      } catch {
-        // Ignore malformed frames
-      }
-    }
-
-    es.onerror = () => {
-      // The server likely just went down for a PM2 restart.
-      // We do NOT close the EventSource, so the browser will auto-reconnect!
-      // But we also manually check a few times while it's restarting to be safe.
-      setTimeout(() => void checkVersion(), 4000)
-      setTimeout(() => void checkVersion(), 10000)
-      setTimeout(() => void checkVersion(), 20000)
-    }
-
+    // SSE (/api/version/stream) is intentionally NOT used here because Vercel
+    // kills long-lived connections at 300s and fs.watch never fires on serverless.
+    // Polling + chunk-error detection is sufficient for deployment detection.
+    void checkVersion()
     const interval = setInterval(() => void checkVersion(), CHECK_INTERVAL)
 
     // Intercept chunk errors (which happen if user navigates after a deployment)
@@ -126,9 +103,6 @@ export function DeploymentDetector({ initialVersion }: DeploymentDetectorProps) 
     ;(window as any).__triggerUpdate = triggerUpdate
 
     return () => {
-      if (es) {
-        es.close()
-      }
       clearInterval(interval)
       window.removeEventListener("error", handleChunkError)
     }

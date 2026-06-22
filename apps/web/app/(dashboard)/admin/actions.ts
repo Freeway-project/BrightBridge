@@ -515,17 +515,15 @@ async function createInstructorMailMergeRows(
 
 export async function sendToInstructorAction(courseId: string): Promise<InstructorMailMergeRow[]> {
   const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
   await transitionCourseStatus({
     courseId,
     toStatus: "sent_to_instructor",
-    note: "Sent to instructor by communications.",
+    note: "Sent to instructor.",
   });
   const rows = await createInstructorMailMergeRows(courseId, ctx.userId);
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath("/communications");
-  revalidatePath(`/communications/courses/${courseId}`);
   revalidatePath("/ta");
   revalidatePath("/instructor");
   return rows;
@@ -538,11 +536,40 @@ export async function sendToInstructorAction(courseId: string): Promise<Instruct
  */
 export async function resendInstructorInviteAction(courseId: string): Promise<InstructorMailMergeRow[]> {
   const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
 
   const rows = await createInstructorMailMergeRows(courseId, ctx.userId);
   revalidatePath(`/admin/courses/${courseId}`);
   return rows;
+}
+
+/**
+ * Generates a never-expiring magic link for a specific course+instructor so an
+ * admin can open the instructor's dashboard without consuming a one-time invite.
+ * Never-expiring links track access counts rather than marking accepted, so the
+ * instructor's ability to log in is unaffected.
+ */
+export async function generateInstructorPreviewLinkAction(
+  courseId: string,
+  instructorEmail: string,
+): Promise<string> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
+
+  const [{ createReviewInvite }, { buildInviteLink }] = await Promise.all([
+    import("@/lib/invites/service"),
+    import("@/lib/email/templates/instructor-invite"),
+  ]);
+
+  const { token } = await createReviewInvite({
+    courseId,
+    email: instructorEmail.trim().toLowerCase(),
+    createdBy: ctx.userId,
+    neverExpires: true,
+    isAdminPreview: true,
+  });
+
+  return buildInviteLink(token);
 }
 
 export async function grantFinalApprovalAction(courseId: string): Promise<void> {
@@ -668,7 +695,6 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
   }
 
   revalidatePath("/admin");
-  revalidatePath("/communications");
   revalidatePath("/instructor");
 
   return { rows, skipped };

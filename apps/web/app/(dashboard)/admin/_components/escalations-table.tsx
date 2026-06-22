@@ -20,6 +20,8 @@ type SortDir = "asc" | "desc"
 
 interface Props {
   escalations: OpenEscalationRow[]
+  /** When true (admin_viewer), hide the Resolve action — View stays available. */
+  readOnly?: boolean
 }
 
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
@@ -29,7 +31,7 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
     : <ArrowDown className="size-3 text-white" />
 }
 
-export function EscalationsTable({ escalations }: Props) {
+export function EscalationsTable({ escalations, readOnly = false }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>("age")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
 
@@ -95,7 +97,7 @@ export function EscalationsTable({ escalations }: Props) {
         </thead>
         <tbody className="divide-y divide-border">
           {sorted.map((row) => (
-            <EscalationRow key={row.id} row={row} />
+            <EscalationRow key={row.id} row={row} readOnly={readOnly} />
           ))}
         </tbody>
       </table>
@@ -103,7 +105,7 @@ export function EscalationsTable({ escalations }: Props) {
   )
 }
 
-function EscalationRow({ row }: { row: OpenEscalationRow }) {
+function EscalationRow({ row, readOnly }: { row: OpenEscalationRow; readOnly: boolean }) {
   const [isPending, startTransition] = useTransition()
   const [isResolving, setIsResolving] = useState(false)
   const [note, setNote] = useState("")
@@ -159,7 +161,7 @@ function EscalationRow({ row }: { row: OpenEscalationRow }) {
               View
             </Link>
           </Button>
-          {!isResolving ? (
+          {!readOnly && (!isResolving ? (
             <Button
               size="sm"
               className="h-7 px-2 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
@@ -186,7 +188,7 @@ function EscalationRow({ row }: { row: OpenEscalationRow }) {
                 </Button>
               </div>
             </div>
-          )}
+          ))}
         </div>
       </td>
     </tr>
