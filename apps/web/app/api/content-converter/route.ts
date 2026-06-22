@@ -189,10 +189,21 @@ function extractHtml(template: ConverterTemplate, response: string): string {
     if (firstBrace !== -1 && lastBrace > firstBrace) {
       clean = clean.slice(firstBrace, lastBrace + 1)
     }
-    // Control characters (0x00-0x1F except \t, \n, \r) are invalid inside JSON
-    // string values without being escaped. Claude occasionally emits them in
-    // long bodyHTML/description strings, which breaks JSON.parse. Strip them.
+    // Literal control characters inside JSON string values break JSON.parse:
+    //   • Strip non-printable chars 0x00–0x1F (except \t, \n, \r) — these must
+    //     never appear unescaped anywhere in JSON, even outside strings.
+    //   • Escape literal \n, \r, \t that appear INSIDE string values — Claude
+    //     often embeds real newlines in long bodyHTML/description fields when
+    //     parsing plain-text input (Word docs, pdf.js-extracted PDFs), producing
+    //     invalid JSON that JSON.parse rejects. We escape them only within string
+    //     delimiters so structural whitespace between keys isn't affected.
+    //     The regex `"((?:[^"\\]|\\.)*)"` matches each JSON string value:
+    //       [^"\\] — any char that is not a quote or backslash (includes literal \n)
+    //       \\.    — any already-escaped pair (e.g. \n, \\, \") — left untouched
     clean = clean.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
+    clean = clean.replace(/"((?:[^"\\]|\\.)*)"/gs, (_, content: string) =>
+      '"' + content.replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t") + '"',
+    )
     let parsed: SyllabusData
     try {
       parsed = JSON.parse(clean) as SyllabusData
