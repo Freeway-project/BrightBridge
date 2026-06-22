@@ -52,15 +52,11 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [provisionOpen, setProvisionOpen] = useState(false)
   const [provisionRows, setProvisionRows] = useState<string[]>(() => parseSummaryRows(instructorNotes))
-  const [finalSummaryRows, setFinalSummaryRows] = useState<string[]>(() => parseSummaryRows(instructorNotes))
 
   const advance = getStaffAdvance(courseStatus)
   const provisionOption =
     getStaffAdvanceOptions(courseStatus).find((option) => option.action === "provision-complete") ?? null
   const isFinalize = advance?.action === "finalize-staging"
-  // The Final Summary for Instructor is mandatory before handing a course to the
-  // instructor (Mark Ready for Instructor). Provision Complete keeps it optional.
-  const finalSummaryRequired = isFinalize && joinSummaryRows(finalSummaryRows).length === 0
   const isResubmit = Boolean(advance?.requiresNote)
   const isStatusSubmittable = advance !== null
   // Section requirements only gate the review-submit path, not staging finalize.
@@ -84,6 +80,13 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
       toast.error(message)
       return
     }
+    // If marking ready for instructor but notes haven't been written yet,
+    // send the TA to the Issues page to write them rather than blocking here.
+    if (isFinalize && !instructorNotes?.trim()) {
+      toast.info("Add instructor notes before marking ready — redirecting to Issues.")
+      window.location.href = window.location.pathname.replace("/submit", "/issue-log")
+      return
+    }
     setConfirmOpen(true)
   }
 
@@ -94,7 +97,7 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
       setErrorMsg(null)
       const res =
         advance.action === "finalize-staging"
-          ? await markStagingComplete(courseId, joinSummaryRows(finalSummaryRows))
+          ? await markStagingComplete(courseId, instructorNotes ?? "")
           : await submitReview(courseId, isResubmit ? resubmitNote.trim() : undefined)
       if (!res?.ok) {
         const message = res?.error || "Failed to advance."
@@ -353,27 +356,11 @@ export function SubmitPanel({ courseId, courseStatus, sections, reviewData, late
               : ""}
           </DialogDescription>
         </DialogHeader>
-        {isFinalize && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">
-              Final Summary for Instructor <span className="text-destructive">(required)</span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              A short, plain-language wrap-up the instructor will read before signing off. Add one point per row.
-            </p>
-            <SummaryNotesRows
-              rows={finalSummaryRows}
-              onChange={setFinalSummaryRows}
-              disabled={isPending}
-              placeholder="Summarise a key outcome or anything the instructor should know…"
-            />
-          </div>
-        )}
         <DialogFooter>
           <Button variant="outline" onClick={() => setConfirmOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={runAdvance} disabled={finalSummaryRequired}>
+          <Button onClick={runAdvance} disabled={isPending}>
             Confirm
           </Button>
         </DialogFooter>

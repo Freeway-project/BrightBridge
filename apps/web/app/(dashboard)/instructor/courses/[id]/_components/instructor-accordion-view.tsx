@@ -266,6 +266,20 @@ export function InstructorAccordionView({
 
       <div className="mx-auto max-w-3xl space-y-3 p-6">
 
+        {/* Reviewer notes — shown prominently above all accordion sections */}
+        {finalSummary?.trim() && (
+          <div className="rounded-xl border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/50 p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="size-4 text-blue-600 dark:text-blue-400" aria-hidden />
+                <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">Note from your reviewer</p>
+              </div>
+              <CopyButton value={finalSummary} label="reviewer note" />
+            </div>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap text-blue-900 dark:text-blue-100">{finalSummary}</p>
+          </div>
+        )}
+
         {/* 1 — Course Summary */}
         <AccSection
           id="summary"
@@ -304,15 +318,6 @@ export function InstructorAccordionView({
               </>
             )}
           </div>
-          {finalSummary?.trim() && (
-            <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3">
-              <div className="mb-1 flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold text-muted-foreground">Note from reviewer</p>
-                <CopyButton value={finalSummary} label="reviewer note" />
-              </div>
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{finalSummary}</p>
-            </div>
-          )}
         </AccSection>
 
         {/* 2 — What We Checked */}
