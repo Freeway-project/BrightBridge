@@ -212,7 +212,6 @@ export async function markStagingComplete(
     revalidatePath("/ta");
     revalidatePath(`/courses/${courseId}`);
     revalidatePath("/admin");
-    revalidatePath("/communications");
     return { ok: true };
   } catch (error) {
     console.error("markStagingComplete failed", {
@@ -273,7 +272,6 @@ export async function markProvisionComplete(
     revalidatePath("/ta");
     revalidatePath(`/courses/${courseId}`);
     revalidatePath("/admin");
-    revalidatePath("/communications");
     return { ok: true };
   } catch (error) {
     console.error("markProvisionComplete failed", {

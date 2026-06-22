@@ -12,6 +12,8 @@ import type { ReadyForInstructorCourse, SentToInstructorCourse } from "@/lib/adm
 type Props = {
   readyCourses: ReadyForInstructorCourse[];
   sentCourses: SentToInstructorCourse[];
+  /** When true (admin_viewer), the export/send controls are hidden. */
+  readOnly?: boolean;
 };
 
 /** Case-insensitive match on course title, instructor name, or instructor email. */
@@ -30,7 +32,7 @@ function matchesQuery(
   );
 }
 
-export function SendPanel({ readyCourses, sentCourses }: Props) {
+export function SendPanel({ readyCourses, sentCourses, readOnly = false }: Props) {
   const [tab, setTab] = useStickyTabState("send-panel", "ready");
   const [query, setQuery] = useState("");
 
@@ -89,7 +91,7 @@ export function SendPanel({ readyCourses, sentCourses }: Props) {
       </div>
 
       <TabsContent value="ready">
-        <BatchExportPanel courses={filteredReady} />
+        <BatchExportPanel courses={filteredReady} readOnly={readOnly} />
       </TabsContent>
 
       <TabsContent value="sent">
@@ -97,7 +99,7 @@ export function SendPanel({ readyCourses, sentCourses }: Props) {
       </TabsContent>
 
       <TabsContent value="all" className="space-y-6">
-        <BatchExportPanel courses={filteredReady} />
+        <BatchExportPanel courses={filteredReady} readOnly={readOnly} />
         <SentCoursesTable courses={filteredSent} />
       </TabsContent>
     </Tabs>

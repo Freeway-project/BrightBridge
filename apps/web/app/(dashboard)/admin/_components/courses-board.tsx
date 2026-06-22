@@ -43,9 +43,11 @@ type Props = {
   /** The existing detailed table, shown when the admin toggles to list view. */
   listView: React.ReactNode
   tas?: ProfileOption[]
+  /** When true (admin_viewer), hide all mutating controls (move, select, reassign). */
+  readOnly?: boolean
 }
 
-export function CoursesBoard({ columns, role, tas = [], listView }: Props) {
+export function CoursesBoard({ columns, role, tas = [], listView, readOnly = false }: Props) {
   const [view, setView] = useState<"board" | "list">("list")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [reassignOpen, setReassignOpen] = useState(false)
@@ -87,9 +89,9 @@ export function CoursesBoard({ columns, role, tas = [], listView }: Props) {
         </div>
       </div>
 
-      {view === "list" ? listView : <BoardView columns={columns} role={role} selectedIds={selectedIds} onToggleSelection={toggleSelection} />}
+      {view === "list" ? listView : <BoardView columns={columns} role={role} readOnly={readOnly} selectedIds={selectedIds} onToggleSelection={toggleSelection} />}
 
-      {view === "board" && selectedIds.size > 0 && (
+      {view === "board" && !readOnly && selectedIds.size > 0 && (
         <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 backdrop-blur">
           <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
             {selectedIds.size} course{selectedIds.size !== 1 ? "s" : ""} selected
@@ -110,7 +112,7 @@ export function CoursesBoard({ columns, role, tas = [], listView }: Props) {
         </div>
       )}
 
-      {tas.length > 0 && (
+      {!readOnly && tas.length > 0 && (
         <ReassignDialog
           open={reassignOpen}
           onOpenChange={setReassignOpen}
@@ -131,14 +133,16 @@ export function CoursesBoard({ columns, role, tas = [], listView }: Props) {
 }
 
 /** Board view: phase tabs (Migration · Staging · Provision), each showing its kanban columns. */
-function BoardView({ 
-  columns, 
-  role, 
-  selectedIds, 
+function BoardView({
+  columns,
+  role,
+  readOnly,
+  selectedIds,
   onToggleSelection 
 }: { 
   columns: BoardColumn[]; 
   role: EffectiveRole;
+  readOnly: boolean;
   selectedIds: Set<string>;
   onToggleSelection: (id: string, title: string) => void;
 }) {
@@ -166,10 +170,11 @@ function BoardView({
         <TabsContent key={p.key} value={p.key} className="mt-4 focus-visible:outline-none">
           <div className="flex gap-4 overflow-x-auto pb-4">
             {p.columns.map((col) => (
-              <Column 
-                key={col.key} 
-                column={col} 
-                role={role} 
+              <Column
+                key={col.key}
+                column={col}
+                role={role}
+                readOnly={readOnly}
                 selectedIds={selectedIds}
                 onToggleSelection={onToggleSelection}
               />
@@ -207,11 +212,13 @@ function ViewToggle({
 function Column({ 
   column, 
   role,
+  readOnly,
   selectedIds,
   onToggleSelection
-}: { 
-  column: BoardColumn; 
+}: {
+  column: BoardColumn;
   role: EffectiveRole;
+  readOnly: boolean;
   selectedIds: Set<string>;
   onToggleSelection: (id: string, title: string) => void;
 }) {
@@ -229,10 +236,11 @@ function Column({
           <p className="px-1 py-6 text-center text-xs text-muted-foreground">No courses</p>
         )}
         {column.cards.map((card) => (
-          <BoardCardItem 
-            key={card.id} 
-            card={card} 
-            role={role} 
+          <BoardCardItem
+            key={card.id}
+            card={card}
+            role={role}
+            readOnly={readOnly}
             selected={selectedIds.has(card.id)}
             onToggleSelection={() => onToggleSelection(card.id, card.title)}
           />
@@ -247,14 +255,16 @@ function Column({
   )
 }
 
-function BoardCardItem({ 
-  card, 
+function BoardCardItem({
+  card,
   role,
+  readOnly,
   selected,
   onToggleSelection
-}: { 
-  card: BoardCard; 
+}: {
+  card: BoardCard;
   role: EffectiveRole;
+  readOnly: boolean;
   selected: boolean;
   onToggleSelection: () => void;
 }) {
@@ -263,7 +273,7 @@ function BoardCardItem({
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
 
-  const nextStatuses = getAllowedTransitions({ role, from: card.status })
+  const nextStatuses = readOnly ? [] : getAllowedTransitions({ role, from: card.status })
 
   function move(to: CourseStatus) {
     setError(null)
@@ -286,18 +296,24 @@ function BoardCardItem({
     )}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <a href={`/admin/courses/${card.id}`} className="block">
-            <p className="line-clamp-2 text-sm font-medium text-foreground hover:underline">{card.title}</p>
-          </a>
+          {readOnly ? (
+            <p className="line-clamp-2 text-sm font-medium text-foreground">{card.title}</p>
+          ) : (
+            <a href={`/admin/courses/${card.id}`} className="block">
+              <p className="line-clamp-2 text-sm font-medium text-foreground hover:underline">{card.title}</p>
+            </a>
+          )}
           {card.sourceCourseId && (
             <p className="mt-0.5 text-xs text-muted-foreground">#{card.sourceCourseId}</p>
           )}
         </div>
-        <Checkbox 
-          checked={selected}
-          onCheckedChange={onToggleSelection}
-          className="mt-0.5 shrink-0"
-        />
+        {!readOnly && (
+          <Checkbox
+            checked={selected}
+            onCheckedChange={onToggleSelection}
+            className="mt-0.5 shrink-0"
+          />
+        )}
       </div>
       <div className="mt-2">
         <StatusBadge status={card.status} />

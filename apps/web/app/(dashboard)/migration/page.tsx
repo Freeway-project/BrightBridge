@@ -6,7 +6,7 @@ import { getLatestMigrationReport } from "@/lib/migration/report"
 
 export default async function MigrationPage() {
   const context = await requireProfile()
-  requireAnyRole(context, ["admin_full", "super_admin"])
+  requireAnyRole(context, ["admin_full", "admin_viewer", "super_admin"])
   const report = await getLatestMigrationReport()
 
   return (

@@ -13,7 +13,7 @@ import { WorkloadChart } from "@/components/admin/stats/workload-chart"
 
 export default async function AdminStatsPage() {
   const context = await requireProfile()
-  requireAnyRole(context, ["admin_full", "super_admin"])
+  requireAnyRole(context, ["admin_full", "admin_viewer", "super_admin"])
 
   const data = await getAdminStatsData()
 
