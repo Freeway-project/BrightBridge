@@ -42,7 +42,6 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Table,
   TableBody,
@@ -57,7 +56,6 @@ import { StatusBadge } from "@/components/courses/status-badge"
 import { PaginationControls } from "@/components/shared/pagination-controls"
 import { OrgBreadcrumb } from "@/components/hierarchy/org-breadcrumb"
 import { OrgCourseFilters } from "@/components/hierarchy/org-course-filters"
-import { HierarchyIntro } from "@/components/hierarchy/hierarchy-intro"
 import { cn } from "@/lib/utils"
 import { roleTitleStyle, ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import {
@@ -65,8 +63,6 @@ import {
   removeUnitMemberAction,
   type ManageUserState,
 } from "@/app/(dashboard)/super-admin/actions"
-
-type WorkspaceTab = "overview" | "courses" | "people" | "manage"
 
 type Filters = {
   search: string
@@ -120,23 +116,12 @@ function countBy(statusCounts: StatusCount[], status: string) {
   return statusCounts.find((c) => c.status === status)?.count ?? 0
 }
 
-export function OrgExplorer({ view, courses, filters, role }: Props) {
-  const [tab, setTab] = useState<WorkspaceTab>("overview")
+export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
   const [treeOpen, setTreeOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const [memberState, memberFormAction, memberPending] = useActionState(addUnitMemberAction, initialState)
-
-  useEffect(() => {
-    if (!view.current && tab !== "overview") {
-      setTab("overview")
-    }
-    if (!view.canManage && tab === "manage") {
-      setTab("overview")
-    }
-  }, [tab, view.canManage, view.current])
-
 
   useEffect(() => {
     if (memberState.kind === "success") setAddMemberOpen(false)
@@ -149,10 +134,9 @@ export function OrgExplorer({ view, courses, filters, role }: Props) {
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
-      <HierarchyIntro role={role} />
-
+      {/* Header */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2" data-tour="breadcrumb">
+        <div className="space-y-2">
           <OrgBreadcrumb crumbs={view.breadcrumb} filters={filters} />
           <div>
             <h2 className="text-2xl font-semibold leading-tight text-foreground">
@@ -160,12 +144,11 @@ export function OrgExplorer({ view, courses, filters, role }: Props) {
             </h2>
             <p className="text-sm text-muted-foreground">
               {view.current
-                ? `${typeLabel(view.current.type)} workspace with courses, people, and unit controls.`
-                : "Select a node from the organization tree to manage its courses and people."}
+                ? `${typeLabel(view.current.type)} — open a sub-unit below to drill in, or scroll to see its courses.`
+                : "Select a college or department from the tree to drill in and see its courses."}
             </p>
           </div>
         </div>
-
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" className="lg:hidden" onClick={() => setTreeOpen(true)}>
             <FolderTree className="mr-2 size-4" /> Browse units
@@ -178,68 +161,100 @@ export function OrgExplorer({ view, courses, filters, role }: Props) {
         </div>
       </div>
 
+      {/* Main layout: tree sidebar + content */}
       <div className="grid min-h-[42rem] grid-cols-1 gap-6 lg:grid-cols-[320px,minmax(0,1fr)]">
-        <aside className="hidden min-h-0 lg:block" data-tour="tree">
+        <aside className="hidden min-h-0 lg:block">
           <TreePanel view={view} filters={filters} />
         </aside>
 
         <div className="min-w-0 space-y-6">
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4" data-tour="kpis">
+          {/* KPI stats */}
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <StatCard label="Courses" value={view.courseTotal} icon="book-open" index={0} />
             <StatCard label="In progress" value={inProgress} icon="clock" index={1} />
             <StatCard label="Approved" value={approved} icon="check-square" index={2} />
             <StatCard label="Needs attention" value={needsAttention} icon="alert-triangle" index={3} accent={needsAttention > 0 ? "#ef4444" : "#10b981"} />
           </div>
 
-          {view.current ? (
-            <Tabs value={tab} onValueChange={(value) => setTab(value as WorkspaceTab)} className="flex min-w-0 flex-col gap-4">
-              <div className="border-b border-border">
-                <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-y-1 sm:w-fit">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="courses">Courses</TabsTrigger>
-                  <TabsTrigger value="people">People</TabsTrigger>
-                  {view.canManage ? <TabsTrigger value="manage">Manage</TabsTrigger> : null}
-                </TabsList>
-              </div>
+          {/* Child unit navigation — click to drill down */}
+          {view.children.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FolderTree className="size-4 text-primary" />
+                  {view.current ? `${typeLabel(view.current.type)} units` : "Colleges & Schools"}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">Open a unit to see its departments and courses.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {view.children.map((child) => (
+                    <SubUnitCard key={child.id} child={child} filters={filters} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-              <TabsContent value="overview" className="space-y-6">
-                <OverviewSection currentType={view.current.type} children={view.children} leadership={view.leadership} filters={filters} />
-              </TabsContent>
-              <TabsContent value="courses" className="space-y-4">
-                <CoursesSection courses={courses} courseTotal={view.courseTotal} filters={filters} terms={view.terms} />
-              </TabsContent>
-              <TabsContent value="people" className="space-y-4">
-                <PeopleSection members={view.selectedMembers} />
-              </TabsContent>
-              {view.canManage ? (
-                <TabsContent value="manage" className="space-y-4">
-                  <ManageSection
-                    currentName={view.current.name}
-                    members={view.selectedMembers}
-                    onAddMember={() => setAddMemberOpen(true)}
-                    onRemoveMember={(memberId) => {
-                      setRemovingMemberId(memberId)
-                      startTransition(async () => {
-                        try {
-                          await removeUnitMemberAction(memberId)
-                        } finally {
-                          setRemovingMemberId(null)
-                        }
-                      })
-                    }}
-                    removingMemberId={removingMemberId}
-                  />
-                </TabsContent>
-              ) : null}
-            </Tabs>
-          ) : (
-            <div className="space-y-6">
-              <OverviewSection currentType={null} children={view.children} leadership={[]} filters={filters} />
-            </div>
+          {/* Courses — always visible when a unit is selected */}
+          {view.current && courses && (
+            <CoursesSection
+              courses={courses}
+              courseTotal={view.courseTotal}
+              filters={filters}
+              terms={view.terms}
+            />
+          )}
+
+          {/* Leadership */}
+          {view.leadership.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Users className="size-4" /> Leadership
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {view.leadership.map((member) => {
+                  const style = roleTitleStyle(member.rawTitle)
+                  return (
+                    <div key={member.id} className="rounded-xl border border-border bg-card px-3 py-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium text-foreground">{member.name}</p>
+                        <span className={cn("rounded border px-2 py-0.5 text-[10px] font-medium", style.chip)}>
+                          {member.title}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Manage — super_admin only */}
+          {view.canManage && view.current && (
+            <ManageSection
+              currentName={view.current.name}
+              members={view.selectedMembers}
+              onAddMember={() => setAddMemberOpen(true)}
+              onRemoveMember={(memberId) => {
+                setRemovingMemberId(memberId)
+                startTransition(async () => {
+                  try {
+                    await removeUnitMemberAction(memberId)
+                  } finally {
+                    setRemovingMemberId(null)
+                  }
+                })
+              }}
+              removingMemberId={removingMemberId}
+            />
           )}
         </div>
       </div>
 
+      {/* Mobile tree sheet */}
       <Sheet open={treeOpen} onOpenChange={setTreeOpen}>
         <SheetContent side="left" className="w-[320px] p-0">
           <SheetHeader className="border-b border-border px-4 py-4">
@@ -342,9 +357,6 @@ function TreeNodeItem({
 }) {
   const children = childrenByParent.get(node.id) ?? []
   const hasChildren = children.length > 0
-  // Collapsed by default — only the path to the currently-selected unit is
-  // expanded. Keeps the tree scannable (just the schools) instead of dumping
-  // every department on screen at once.
   const [open, setOpen] = useState(selectedLineage.has(node.id))
   const style = unitTypeStyle(node.type)
 
@@ -414,72 +426,6 @@ function TreeNodeItem({
   )
 }
 
-
-function OverviewSection({
-  currentType,
-  children,
-  leadership,
-  filters,
-}: {
-  currentType: string | null
-  children: OrgChild[]
-  leadership: OrgExplorerView["leadership"]
-  filters: Filters
-}) {
-  const sectionLabel = currentType ? "Child units" : "Top-level units"
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Hierarchy snapshot</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-6 lg:grid-cols-[minmax(0,1fr),320px]">
-          <div>
-            <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <FolderTree className="size-3.5" /> {sectionLabel}
-            </h3>
-            {children.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No child units under this selection.</p>
-            ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" data-tour="subunits">
-                {children.map((child) => (
-                  <SubUnitCard key={child.id} child={child} filters={filters} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div data-tour="leadership">
-            <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <Users className="size-3.5" /> Leadership
-            </h3>
-            {leadership.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No leadership assigned to this unit.</p>
-            ) : (
-              <div className="space-y-2">
-                {leadership.map((member) => {
-                  const style = roleTitleStyle(member.rawTitle)
-                  return (
-                    <div key={member.id} className="rounded-xl border border-border bg-card px-3 py-2">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium text-foreground">{member.name}</p>
-                        <span className={cn("rounded border px-2 py-0.5 text-[10px] font-medium", style.chip)}>
-                          {member.title}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
 function SubUnitCard({ child, filters }: { child: OrgChild; filters: Filters }) {
   const style = unitTypeStyle(child.type)
   return (
@@ -520,15 +466,13 @@ function CoursesSection({
   filters: Filters
   terms: string[]
 }) {
-  if (!courses) {
-    return null
-  }
+  if (!courses) return null
 
   const filteredCount = courses.total
   const countLabel = filteredCount !== courseTotal ? `${filteredCount} of ${courseTotal}` : `${courseTotal}`
 
   return (
-    <Card data-tour="courses">
+    <Card>
       <CardHeader className="gap-3 border-b border-border sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-base">Courses</CardTitle>
@@ -580,53 +524,6 @@ function CoursesSection({
         <div className="px-6 pb-6">
           <PaginationControls page={courses.page} totalPages={courses.totalPages} totalItems={courses.total} />
         </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function PeopleSection({ members }: { members: OrgUnitMemberDetail[] }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">People assigned to this unit</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="pl-6 text-xs">Member</TableHead>
-              <TableHead className="text-xs">Role</TableHead>
-              <TableHead className="text-xs">Primary</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {members.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="py-10 text-center text-sm text-muted-foreground">
-                  No members are assigned to this unit.
-                </TableCell>
-              </TableRow>
-            ) : (
-              members.map((member) => (
-                <TableRow key={member.id} className="border-border">
-                  <TableCell className="pl-6">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-foreground">{member.name}</span>
-                      <span className="text-xs text-muted-foreground">{member.email}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-[10px] font-medium">
-                      {ROLE_TITLE_LABELS[member.title] ?? member.title}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{member.isPrimary ? "Primary" : "Secondary"}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
       </CardContent>
     </Card>
   )
@@ -717,7 +614,6 @@ function ManageSection({
     </div>
   )
 }
-
 
 function AddMemberSheet({
   open,
