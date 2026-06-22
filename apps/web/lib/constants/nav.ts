@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Bot,
   ClipboardList,
   Send,
   GraduationCap,
@@ -37,6 +38,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   admin_full: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
+    { label: "Assistant", href: "/assistant", icon: Bot },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
     { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
@@ -60,6 +62,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   super_admin: [
     { label: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
     { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
+    { label: "Assistant", href: "/assistant", icon: Bot },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
     { label: "Converter", href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
@@ -69,6 +72,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
   ],
   provost: [
     { label: "Dashboard",    href: "/provost",     icon: LayoutDashboard },
+    { label: "Assistant",    href: "/assistant",   icon: Bot },
     { label: "Hierarchy",    href: "/hierarchy",   icon: Network },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",        href: "/guide",       icon: HelpCircle },
