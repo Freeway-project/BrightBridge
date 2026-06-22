@@ -189,6 +189,10 @@ function extractHtml(template: ConverterTemplate, response: string): string {
     if (firstBrace !== -1 && lastBrace > firstBrace) {
       clean = clean.slice(firstBrace, lastBrace + 1)
     }
+    // Control characters (0x00-0x1F except \t, \n, \r) are invalid inside JSON
+    // string values without being escaped. Claude occasionally emits them in
+    // long bodyHTML/description strings, which breaks JSON.parse. Strip them.
+    clean = clean.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
     let parsed: SyllabusData
     try {
       parsed = JSON.parse(clean) as SyllabusData
