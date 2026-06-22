@@ -7,8 +7,6 @@ import {
   BookOpen,
   Building,
   Building2,
-  ChevronDown,
-  ChevronRight,
   Folder,
   FolderTree,
   GraduationCap,
@@ -19,7 +17,6 @@ import type { AdminCourseRow, PaginatedResult, StatusCount } from "@/lib/reposit
 import type {
   OrgChild,
   OrgExplorerView,
-  OrgTreeNode,
   OrgUnitMemberDetail,
   OrgUserOption,
 } from "@/lib/hierarchy/explorer-queries"
@@ -50,7 +47,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+
 import { StatCard } from "@/components/shared/stat-card"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { PaginationControls } from "@/components/shared/pagination-controls"
@@ -117,7 +114,6 @@ function countBy(statusCounts: StatusCount[], status: string) {
 }
 
 export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
-  const [treeOpen, setTreeOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
@@ -135,7 +131,7 @@ export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <OrgBreadcrumb crumbs={view.breadcrumb} filters={filters} />
           <div>
@@ -144,128 +140,101 @@ export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
             </h2>
             <p className="text-sm text-muted-foreground">
               {view.current
-                ? `${typeLabel(view.current.type)} — open a sub-unit below to drill in, or scroll to see its courses.`
-                : "Select a college or department from the tree to drill in and see its courses."}
+                ? `${typeLabel(view.current.type)} — open a sub-unit to drill in, or scroll to see its courses.`
+                : "Select a college or department to drill in and see its courses."}
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" className="lg:hidden" onClick={() => setTreeOpen(true)}>
-            <FolderTree className="mr-2 size-4" /> Browse units
+        {view.canManage && view.current && (
+          <Button variant="outline" onClick={() => setAddMemberOpen(true)}>
+            <Users className="mr-2 size-4" /> Add member
           </Button>
-          {view.canManage && view.current && (
-            <Button variant="outline" onClick={() => setAddMemberOpen(true)}>
-              <Users className="mr-2 size-4" /> Add member
-            </Button>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Main layout: tree sidebar + content */}
-      <div className="grid min-h-[42rem] grid-cols-1 gap-6 lg:grid-cols-[320px,minmax(0,1fr)]">
-        <aside className="hidden min-h-0 lg:block">
-          <TreePanel view={view} filters={filters} />
-        </aside>
+      {/* KPI stats */}
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatCard label="Courses" value={view.courseTotal} icon="book-open" index={0} />
+        <StatCard label="In progress" value={inProgress} icon="clock" index={1} />
+        <StatCard label="Approved" value={approved} icon="check-square" index={2} />
+        <StatCard label="Needs attention" value={needsAttention} icon="alert-triangle" index={3} accent={needsAttention > 0 ? "#ef4444" : "#10b981"} />
+      </div>
 
-        <div className="min-w-0 space-y-6">
-          {/* KPI stats */}
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <StatCard label="Courses" value={view.courseTotal} icon="book-open" index={0} />
-            <StatCard label="In progress" value={inProgress} icon="clock" index={1} />
-            <StatCard label="Approved" value={approved} icon="check-square" index={2} />
-            <StatCard label="Needs attention" value={needsAttention} icon="alert-triangle" index={3} accent={needsAttention > 0 ? "#ef4444" : "#10b981"} />
-          </div>
+      {/* Child unit navigation — click to drill down */}
+      {view.children.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <FolderTree className="size-4 text-primary" />
+              {view.current ? `${typeLabel(view.current.type)} units` : "Colleges & Schools"}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">Open a unit to see its departments and courses.</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {view.children.map((child) => (
+                <SubUnitCard key={child.id} child={child} filters={filters} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Child unit navigation — click to drill down */}
-          {view.children.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <FolderTree className="size-4 text-primary" />
-                  {view.current ? `${typeLabel(view.current.type)} units` : "Colleges & Schools"}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">Open a unit to see its departments and courses.</p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {view.children.map((child) => (
-                    <SubUnitCard key={child.id} child={child} filters={filters} />
-                  ))}
+      {/* Courses — always visible when a unit is selected */}
+      {view.current && courses && (
+        <CoursesSection
+          courses={courses}
+          courseTotal={view.courseTotal}
+          filters={filters}
+          terms={view.terms}
+        />
+      )}
+
+      {/* Leadership */}
+      {view.leadership.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="size-4" /> Leadership
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {view.leadership.map((member) => {
+              const style = roleTitleStyle(member.rawTitle)
+              return (
+                <div key={member.id} className="rounded-xl border border-border bg-card px-3 py-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium text-foreground">{member.name}</p>
+                    <span className={cn("rounded border px-2 py-0.5 text-[10px] font-medium", style.chip)}>
+                      {member.title}
+                    </span>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )
+            })}
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Courses — always visible when a unit is selected */}
-          {view.current && courses && (
-            <CoursesSection
-              courses={courses}
-              courseTotal={view.courseTotal}
-              filters={filters}
-              terms={view.terms}
-            />
-          )}
-
-          {/* Leadership */}
-          {view.leadership.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Users className="size-4" /> Leadership
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {view.leadership.map((member) => {
-                  const style = roleTitleStyle(member.rawTitle)
-                  return (
-                    <div key={member.id} className="rounded-xl border border-border bg-card px-3 py-2">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium text-foreground">{member.name}</p>
-                        <span className={cn("rounded border px-2 py-0.5 text-[10px] font-medium", style.chip)}>
-                          {member.title}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Manage — super_admin only */}
-          {view.canManage && view.current && (
-            <ManageSection
-              currentName={view.current.name}
-              members={view.selectedMembers}
-              onAddMember={() => setAddMemberOpen(true)}
-              onRemoveMember={(memberId) => {
-                setRemovingMemberId(memberId)
-                startTransition(async () => {
-                  try {
-                    await removeUnitMemberAction(memberId)
-                  } finally {
-                    setRemovingMemberId(null)
-                  }
-                })
-              }}
-              removingMemberId={removingMemberId}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Mobile tree sheet */}
-      <Sheet open={treeOpen} onOpenChange={setTreeOpen}>
-        <SheetContent side="left" className="w-[320px] p-0">
-          <SheetHeader className="border-b border-border px-4 py-4">
-            <SheetTitle>Organization tree</SheetTitle>
-            <SheetDescription className="sr-only">Browse and select organizational units</SheetDescription>
-          </SheetHeader>
-          <div className="h-[calc(100%-4.5rem)] p-4">
-            <TreePanel view={view} filters={filters} />
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* Manage — super_admin only */}
+      {view.canManage && view.current && (
+        <ManageSection
+          currentName={view.current.name}
+          members={view.selectedMembers}
+          onAddMember={() => setAddMemberOpen(true)}
+          onRemoveMember={(memberId) => {
+            setRemovingMemberId(memberId)
+            startTransition(async () => {
+              try {
+                await removeUnitMemberAction(memberId)
+              } finally {
+                setRemovingMemberId(null)
+              }
+            })
+          }}
+          removingMemberId={removingMemberId}
+        />
+      )}
 
       {view.canManage && view.current ? (
         <AddMemberSheet
@@ -283,148 +252,6 @@ export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
   )
 }
 
-function TreePanel({ view, filters }: { view: OrgExplorerView; filters: Filters }) {
-  const childrenByParent = useMemo(() => {
-    const map = new Map<string | null, OrgTreeNode[]>()
-    for (const node of view.tree) {
-      const key = node.parentId ?? null
-      const list = map.get(key) ?? []
-      list.push(node)
-      map.set(key, list)
-    }
-    for (const list of map.values()) {
-      list.sort((a, b) => a.name.localeCompare(b.name))
-    }
-    return map
-  }, [view.tree])
-  const selectedLineage = new Set(view.breadcrumb.map((crumb) => crumb.id))
-  const rootNodes = childrenByParent.get(null) ?? []
-
-  return (
-    <Card className="flex h-full min-h-0 flex-col overflow-hidden">
-      <CardHeader className="border-b border-border pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <FolderTree className="size-4 text-primary" /> Organization tree
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">Select a college, school, or department to change the workspace on the right.</p>
-      </CardHeader>
-      <ScrollArea className="flex-1">
-        <div className="space-y-1 p-3">
-          <Link
-            href={buildHierarchyHref(null, filters)}
-            className={cn(
-              "flex items-center justify-between rounded-xl px-3 py-2 text-sm transition-colors hover:bg-muted/60",
-              !view.current && "bg-primary/10 text-primary",
-            )}
-          >
-            <span className="font-medium">Institution</span>
-            <Badge variant="secondary" className="text-[10px]">{rootNodes.length} roots</Badge>
-          </Link>
-
-          <div className="space-y-1">
-            {rootNodes.map((node) => (
-              <TreeNodeItem
-                key={node.id}
-                node={node}
-                depth={0}
-                selectedId={view.current?.id ?? null}
-                selectedLineage={selectedLineage}
-                childrenByParent={childrenByParent}
-                filters={filters}
-              />
-            ))}
-          </div>
-        </div>
-      </ScrollArea>
-    </Card>
-  )
-}
-
-function TreeNodeItem({
-  node,
-  depth,
-  selectedId,
-  selectedLineage,
-  childrenByParent,
-  filters,
-}: {
-  node: OrgTreeNode
-  depth: number
-  selectedId: string | null
-  selectedLineage: Set<string>
-  childrenByParent: Map<string | null, OrgTreeNode[]>
-  filters: Filters
-}) {
-  const children = childrenByParent.get(node.id) ?? []
-  const hasChildren = children.length > 0
-  const [open, setOpen] = useState(selectedLineage.has(node.id))
-  const style = unitTypeStyle(node.type)
-
-  useEffect(() => {
-    if (selectedLineage.has(node.id)) {
-      setOpen(true)
-    }
-  }, [node.id, selectedLineage])
-
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <div className="space-y-1">
-        <div className="flex items-start gap-1">
-          <div style={{ width: depth * 12 }} className="shrink-0" />
-          {hasChildren ? (
-            <CollapsibleTrigger asChild>
-              <button
-                type="button"
-                className="mt-1 inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                aria-label={open ? `Collapse ${node.name}` : `Expand ${node.name}`}
-              >
-                {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-              </button>
-            </CollapsibleTrigger>
-          ) : (
-            <span className="mt-1 inline-flex size-6 shrink-0" />
-          )}
-          <Link
-            href={buildHierarchyHref(node.id, filters)}
-            className={cn(
-              "flex min-w-0 flex-1 items-center gap-3 rounded-xl border-l-4 px-3 py-2 transition-colors hover:bg-muted/60",
-              style.border,
-              selectedId === node.id && "bg-primary/10",
-            )}
-          >
-            <span className={cn("rounded-md p-1.5", style.iconBg)}>
-              <UnitTypeIcon type={node.type} className="size-3.5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-foreground">{node.name}</p>
-              <p className="text-[11px] text-muted-foreground">{typeLabel(node.type)}</p>
-            </div>
-            <div className="hidden shrink-0 text-right sm:block">
-              <p className="text-[11px] font-medium text-foreground">{node.courseCount}</p>
-              <p className="text-[10px] text-muted-foreground">courses</p>
-            </div>
-          </Link>
-        </div>
-
-        {hasChildren ? (
-          <CollapsibleContent className="space-y-1">
-            {children.map((child) => (
-              <TreeNodeItem
-                key={child.id}
-                node={child}
-                depth={depth + 1}
-                selectedId={selectedId}
-                selectedLineage={selectedLineage}
-                childrenByParent={childrenByParent}
-                filters={filters}
-              />
-            ))}
-          </CollapsibleContent>
-        ) : null}
-      </div>
-    </Collapsible>
-  )
-}
 
 function SubUnitCard({ child, filters }: { child: OrgChild; filters: Filters }) {
   const style = unitTypeStyle(child.type)
