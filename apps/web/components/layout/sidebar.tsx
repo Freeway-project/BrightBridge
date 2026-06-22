@@ -12,7 +12,6 @@ import { SupportMessageDialog } from "./support-message-dialog"
 import Lottie from "lottie-react"
 import aiAnimationBlush from "@/assets/3c6d4dc5-50cf-45ba-9775-ab665ca5923d.json"
 import aiAnimationOcean from "@/assets/559b1333-2acb-45f2-91d0-f47e905945dd.json"
-import aiAnimationSunset from "@/assets/08f2524d-4f10-4454-9ae8-25007a5b8c57.json"
 import aiAnimationMono from "@/assets/7151ad77-5cd9-4b4a-a8d9-eb7ae1f355f8.json"
 import aiAnimationAurora from "@/assets/9612aa98-116d-11ee-b4c5-2f9cdafc1909.json"
 import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
@@ -21,7 +20,9 @@ import { useTweaks, type ThemeId } from "@/components/shared/tweak-provider"
 const THEME_LOTTIE: Record<ThemeId, unknown> = {
   blush: aiAnimationBlush,
   ocean: aiAnimationOcean,
-  sunset: aiAnimationSunset,
+  // The original sunset asset references external /i/image_*.webp files that
+  // are not shipped with the app, which causes repeated 404s in the sidebar.
+  sunset: aiAnimationOcean,
   monochrome: aiAnimationMono,
   aurora: aiAnimationAurora,
 }
