@@ -17,6 +17,7 @@ import { AdminRefreshWrapper } from "./_components/admin-refresh-wrapper"
 import { RecentAssignmentsTable } from "./_components/recent-assignments-table"
 import { getCourseRepository } from "@/lib/repositories"
 import { AdminOverview } from "./_components/admin-overview"
+import { ReadOnlyNotice } from "./_components/read-only-notice"
 import { InstitutionPanel } from "@/components/super-admin/institution-panel"
 import { getSuperAdminData } from "@/lib/super-admin/queries"
 import { firstOpenedAtByCourseIds } from "@/lib/instructor-views/queries"
@@ -37,7 +38,11 @@ type Props = {
 
 export default async function AdminDashboardPage({ searchParams }: Props) {
   const context = await requireProfile()
-  requireAnyRole(context, ["admin_full", "super_admin"])
+  requireAnyRole(context, ["admin_full", "admin_viewer", "super_admin"])
+  // admin_viewer sees the same dashboard as admin_full but read-only: every
+  // mutating control is hidden below, and the server actions already reject the
+  // role, so this is defense-in-depth, not the only guard.
+  const isReadOnly = context.profile.role === "admin_viewer"
 
   const resolvedSearchParams = searchParams instanceof Promise ? await searchParams : searchParams
   const page = parsePositiveInt(resolvedSearchParams?.page, 1)
@@ -149,7 +154,11 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
 
   return (
     <>
-      <Topbar title="Admin" subtitle="Manage courses, assignments, and review progress" role={context.profile.role} />
+      <Topbar
+        title="Admin"
+        subtitle={isReadOnly ? "Read-only view — browse courses and progress; editing is disabled" : "Manage courses, assignments, and review progress"}
+        role={context.profile.role}
+      />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-background">
         <AdminRefreshWrapper title="Admin Dashboard">
           <AdminTabs
@@ -161,25 +170,34 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
                 columns={boardColumns}
                 role={context.profile.role}
                 tas={tas}
-                listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} instructorOpenedAt={instructorOpenedAt} />}
+                readOnly={isReadOnly}
+                listView={<AssignedCoursesTable page={coursesPage} tas={tas} statusCounts={overviewData.statusCounts} instructorOpenedAt={instructorOpenedAt} readOnly={isReadOnly} />}
               />
             }
             assignPanel={
-              <AdminAssignmentPanel
-                courses={unassignedPage.data.filter(c => c.ta === null)}
-                tas={tas}
-              />
+              isReadOnly ? (
+                <ReadOnlyNotice title="Assign TA to Courses" />
+              ) : (
+                <AdminAssignmentPanel
+                  courses={unassignedPage.data.filter(c => c.ta === null)}
+                  tas={tas}
+                />
+              )
             }
             instructorPanel={
-              <InstructorAssignmentPanel
-                courses={unassignedPage.data}
-              />
+              isReadOnly ? (
+                <ReadOnlyNotice title="Create & Assign Instructor" />
+              ) : (
+                <InstructorAssignmentPanel
+                  courses={unassignedPage.data}
+                />
+              )
             }
-            escalationsPanel={<EscalationsTable escalations={openEscalations} />}
+            escalationsPanel={<EscalationsTable escalations={openEscalations} readOnly={isReadOnly} />}
             institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
             completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
             assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
-            sendPanel={<SendPanel readyCourses={readyForInstructor} sentCourses={sentToInstructor} />}
+            sendPanel={<SendPanel readyCourses={readyForInstructor} sentCourses={sentToInstructor} readOnly={isReadOnly} />}
             readyForInstructorCount={readyForInstructor.length}
           />
         </AdminRefreshWrapper>

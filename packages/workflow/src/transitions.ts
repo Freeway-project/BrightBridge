@@ -72,7 +72,7 @@ export const COURSE_TRANSITIONS = [
   {
     from: "ready_for_instructor",
     to: "sent_to_instructor",
-    roles: ["admin_viewer", "admin_full", "super_admin"]
+    roles: ["admin_full", "super_admin"]
   },
   {
     // Auto-advanced when the instructor opens their review link.
@@ -103,7 +103,7 @@ export const COURSE_TRANSITIONS = [
   {
     from: "instructor_questions",
     to: "sent_to_instructor",
-    roles: ["admin_viewer", "admin_full", "super_admin"]
+    roles: ["admin_full", "super_admin"]
   },
   {
     from: "instructor_approved",

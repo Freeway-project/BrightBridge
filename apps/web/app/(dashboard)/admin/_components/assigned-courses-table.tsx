@@ -46,6 +46,8 @@ type Props = {
    * the server/client boundary without serialization shenanigans.
    */
   instructorOpenedAt?: Record<string, string>
+  /** When true (admin_viewer), hide all mutating controls (select, reassign, move). */
+  readOnly?: boolean
 }
 
 const INSTRUCTOR_PHASE_STATUSES = new Set<CourseStatus>([
@@ -56,7 +58,7 @@ const INSTRUCTOR_PHASE_STATUSES = new Set<CourseStatus>([
   "final_approved",
 ])
 
-export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpenedAt }: Props) {
+export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpenedAt, readOnly = false }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -416,7 +418,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpened
         ) : (
           <>
           {/* Floating batch action bar */}
-          {selectedIds.size > 0 && (
+          {!readOnly && selectedIds.size > 0 && (
             <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 backdrop-blur">
               <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
                 {selectedIds.size} course{selectedIds.size !== 1 ? "s" : ""} selected
@@ -452,7 +454,7 @@ export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpened
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-10 pl-4">
-                    {selectableIds.length > 0 && (
+                    {!readOnly && selectableIds.length > 0 && (
                       <Checkbox
                         checked={allSelectableSelected}
                         onCheckedChange={toggleAll}
@@ -471,11 +473,11 @@ export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpened
                 {filteredCourses.map((course) => (
                   <TableRow
                     key={course.id}
-                    className="cursor-pointer border-b border-border/70 hover:bg-muted/40"
-                    onClick={() => router.push(`/admin/courses/${course.id}`)}
+                    className={`border-b border-border/70 hover:bg-muted/40 ${readOnly ? "" : "cursor-pointer"}`}
+                    onClick={readOnly ? undefined : () => router.push(`/admin/courses/${course.id}`)}
                   >
                     <TableCell className="w-10 pl-4 align-middle" onClick={(e) => e.stopPropagation()}>
-                      {course.ta && (
+                      {!readOnly && course.ta && (
                         <Checkbox
                           checked={selectedIds.has(course.id)}
                           onCheckedChange={() => toggleRow(course.id)}
@@ -509,17 +511,19 @@ export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpened
                             <p className="text-sm font-medium text-foreground">{course.ta.name ?? "Unnamed TA"}</p>
                             <p className="truncate text-xs text-muted-foreground">{course.ta.email}</p>
                             <p className="text-[11px] text-muted-foreground">Current TA owner</p>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="-ml-2 mt-0.5 h-6 px-2 text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                openReassign([course])
-                              }}
-                            >
-                              Reassign
-                            </Button>
+                            {!readOnly && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="-ml-2 mt-0.5 h-6 px-2 text-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openReassign([course])
+                                }}
+                              >
+                                Reassign
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ) : (
@@ -611,19 +615,21 @@ export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpened
           </div>
         </div>
       </CardContent>
-      <ReassignDialog
-        open={reassignOpen}
-        onOpenChange={setReassignOpen}
-        courses={reassignTargets}
-        tas={tas}
-        onDone={(ids) =>
-          setSelectedIds((prev) => {
-            const next = new Set(prev)
-            ids.forEach((id) => next.delete(id))
-            return next
-          })
-        }
-      />
+      {!readOnly && (
+        <ReassignDialog
+          open={reassignOpen}
+          onOpenChange={setReassignOpen}
+          courses={reassignTargets}
+          tas={tas}
+          onDone={(ids) =>
+            setSelectedIds((prev) => {
+              const next = new Set(prev)
+              ids.forEach((id) => next.delete(id))
+              return next
+            })
+          }
+        />
+      )}
     </Card>
   )
 }

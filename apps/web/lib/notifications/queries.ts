@@ -389,7 +389,6 @@ function formatAuthorName(fullName: string | null | undefined, role: string | nu
     if (role === "super_admin" || role === "admin_full") return "Administrator";
     if (role === "admin_viewer") return "Viewer";
     if (role === "instructor") return "Instructor";
-    if (role === "communications") return "Communications Team";
   }
   return "Team Member";
 }

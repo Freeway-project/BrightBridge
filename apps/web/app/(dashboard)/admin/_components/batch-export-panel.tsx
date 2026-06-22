@@ -55,9 +55,11 @@ function downloadCsv(rows: BatchMailMergeRow[]) {
 
 type Props = {
   courses: ReadyForInstructorCourse[];
+  /** When true (admin_viewer), hide selection + export controls (read-only list). */
+  readOnly?: boolean;
 };
 
-export function BatchExportPanel({ courses }: Props) {
+export function BatchExportPanel({ courses, readOnly = false }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
   const [accessMap, setAccessMap] = useState<Record<string, AccessState>>({});
@@ -156,8 +158,14 @@ export function BatchExportPanel({ courses }: Props) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Ready for Instructor</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Select courses to export a mail-merge CSV with never-expiring magic links. All selected
-            courses will be marked <strong>Sent to Instructor</strong>.
+            {readOnly ? (
+              "Courses currently ready to be sent to instructors."
+            ) : (
+              <>
+                Select courses to export a mail-merge CSV with never-expiring magic links. All selected
+                courses will be marked <strong>Sent to Instructor</strong>.
+              </>
+            )}
           </p>
         </CardHeader>
         <CardContent className="p-0">
@@ -166,12 +174,14 @@ export function BatchExportPanel({ courses }: Props) {
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th className="w-10 px-4 py-2">
-                    <Checkbox
-                      className="bg-background shadow-sm border-muted-foreground/40 data-[state=checked]:bg-primary"
-                      checked={allSelected}
-                      onCheckedChange={toggleAll}
-                      aria-label="Select all"
-                    />
+                    {!readOnly && (
+                      <Checkbox
+                        className="bg-background shadow-sm border-muted-foreground/40 data-[state=checked]:bg-primary"
+                        checked={allSelected}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all"
+                      />
+                    )}
                   </th>
                   <th className="px-4 py-2 text-left font-medium text-muted-foreground">Course</th>
                   <th className="px-4 py-2 text-left font-medium text-muted-foreground">Instructor</th>
@@ -188,12 +198,14 @@ export function BatchExportPanel({ courses }: Props) {
                       className="border-b border-border last:border-0 hover:bg-muted/30"
                     >
                       <td className="px-4 py-2.5">
-                        <Checkbox
-                          className="bg-background shadow-sm border-muted-foreground/40 data-[state=checked]:bg-primary"
-                          checked={selectedIds.has(course.courseId)}
-                          onCheckedChange={() => toggleOne(course.courseId)}
-                          aria-label={`Select ${course.courseTitle}`}
-                        />
+                        {!readOnly && (
+                          <Checkbox
+                            className="bg-background shadow-sm border-muted-foreground/40 data-[state=checked]:bg-primary"
+                            checked={selectedIds.has(course.courseId)}
+                            onCheckedChange={() => toggleOne(course.courseId)}
+                            aria-label={`Select ${course.courseTitle}`}
+                          />
+                        )}
                       </td>
                       <td className="px-4 py-2.5 font-medium">
                         <a
@@ -228,7 +240,7 @@ export function BatchExportPanel({ courses }: Props) {
         </CardContent>
       </Card>
 
-      {selectedIds.size > 0 && (
+      {!readOnly && selectedIds.size > 0 && (
         <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 backdrop-blur">
           <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
             {selectedIds.size} course{selectedIds.size !== 1 ? "s" : ""} selected

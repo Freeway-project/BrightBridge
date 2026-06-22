@@ -7,7 +7,9 @@ import { isReadonlyMode } from "@/lib/system-migration";
 const ROLE_ROUTES: Record<Role, string> = {
   standard_user: "/ta",
   admin_full: "/admin",
-  admin_viewer: "/communications",
+  // admin_viewer gets the same Admin Dashboard as admin_full, but read-only
+  // (all mutating controls are hidden; server actions already reject the role).
+  admin_viewer: "/admin",
   instructor: "/instructor",
   super_admin: "/super-admin",
   // Provost lands on the Hierarchy explorer — the most useful view for

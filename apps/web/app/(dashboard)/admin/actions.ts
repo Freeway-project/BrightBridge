@@ -515,17 +515,15 @@ async function createInstructorMailMergeRows(
 
 export async function sendToInstructorAction(courseId: string): Promise<InstructorMailMergeRow[]> {
   const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
   await transitionCourseStatus({
     courseId,
     toStatus: "sent_to_instructor",
-    note: "Sent to instructor by communications.",
+    note: "Sent to instructor.",
   });
   const rows = await createInstructorMailMergeRows(courseId, ctx.userId);
   revalidatePath("/admin");
   revalidatePath(`/admin/courses/${courseId}`);
-  revalidatePath("/communications");
-  revalidatePath(`/communications/courses/${courseId}`);
   revalidatePath("/ta");
   revalidatePath("/instructor");
   return rows;
@@ -538,7 +536,7 @@ export async function sendToInstructorAction(courseId: string): Promise<Instruct
  */
 export async function resendInstructorInviteAction(courseId: string): Promise<InstructorMailMergeRow[]> {
   const ctx = await requireProfile();
-  requireAnyRole(ctx, ["admin_full", "admin_viewer", "super_admin"]);
+  requireAnyRole(ctx, ["admin_full", "super_admin"]);
 
   const rows = await createInstructorMailMergeRows(courseId, ctx.userId);
   revalidatePath(`/admin/courses/${courseId}`);
@@ -668,7 +666,6 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
   }
 
   revalidatePath("/admin");
-  revalidatePath("/communications");
   revalidatePath("/instructor");
 
   return { rows, skipped };

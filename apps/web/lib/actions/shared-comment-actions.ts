@@ -7,7 +7,7 @@ import { resolveDelegationContext } from "@/lib/courses/service"
 
 export async function postSharedCommentAction(courseId: string, body: string): Promise<void> {
   const ctx = await requireProfile()
-  const allowed = ["instructor", "admin_viewer", "admin_full", "super_admin", "standard_user"]
+  const allowed = ["instructor", "admin_full", "super_admin", "standard_user"]
   if (!allowed.includes(ctx.profile.role)) throw new Error("Unauthorized")
 
   // When a hierarchy leader posts on an instructor's course they don't own,
@@ -23,7 +23,6 @@ export async function postSharedCommentAction(courseId: string, body: string): P
   })
 
   revalidatePath(`/instructor/courses/${courseId}`)
-  revalidatePath(`/communications/courses/${courseId}`)
   revalidatePath(`/admin/courses/${courseId}`)
   revalidatePath(`/courses/${courseId}`)
 }

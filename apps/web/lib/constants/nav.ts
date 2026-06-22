@@ -46,9 +46,13 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
     ...(chatEnabled ? [chatEntry] : []),
   ],
+  // admin_viewer mirrors admin_full's dashboard but read-only. Omits the
+  // write-capable tools admin_viewer can't open (Converter, Assistant).
   admin_viewer: [
-    { label: "Handoff Queue", href: "/communications", icon: Send },
+    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { label: "Stats",     href: "/admin/stats", icon: BarChart3 },
     { label: "Hierarchy", href: "/hierarchy", icon: Network },
+    { label: "Migration", href: "/migration", icon: FileText },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
     ...(chatEnabled ? [chatEntry] : []),
