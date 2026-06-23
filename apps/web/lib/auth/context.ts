@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROLES, type Role } from "@coursebridge/workflow";
 import { getProfileRepository } from "@/lib/repositories";
@@ -15,7 +16,13 @@ export type AppProfile = {
 export type AuthContext =
   | { kind: "anonymous" }
   | { kind: "missing_profile"; userId: string; email: string | null }
-  | { kind: "profile"; userId: string; email: string | null; profile: AppProfile };
+  | {
+      kind: "profile";
+      userId: string;
+      email: string | null;
+      profile: AppProfile;
+      impersonatorProfile?: AppProfile;
+    };
 
 export async function getAuthContext(): Promise<AuthContext> {
   const user = await getAuthService().getCurrentSessionUser();
@@ -33,6 +40,33 @@ export async function getAuthContext(): Promise<AuthContext> {
 
   if (!isRole(profile.role)) {
     throw new Error(`Profile has unsupported role: ${profile.role}`);
+  }
+
+  if (profile.role === "admin_full") {
+    const cookieStore = await cookies();
+    const impersonateUserId = cookieStore.get("coursebridge_impersonate_user_id")?.value;
+    if (impersonateUserId) {
+      const impersonatedProfile = await profileRepository.getProfileById(impersonateUserId);
+      if (impersonatedProfile && isRole(impersonatedProfile.role)) {
+        return {
+          kind: "profile",
+          userId: impersonatedProfile.id,
+          email: impersonatedProfile.email,
+          profile: {
+            id: impersonatedProfile.id,
+            email: impersonatedProfile.email,
+            fullName: impersonatedProfile.fullName,
+            role: impersonatedProfile.role,
+          },
+          impersonatorProfile: {
+            id: profile.id,
+            email: profile.email,
+            fullName: profile.fullName,
+            role: profile.role,
+          },
+        };
+      }
+    }
   }
 
   return {

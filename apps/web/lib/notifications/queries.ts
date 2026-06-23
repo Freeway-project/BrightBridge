@@ -115,6 +115,118 @@ export type NotificationsPageData = {
   error: boolean;
 };
 
+/**
+ * Lightweight count-only query — a single CTE resolves all pending items without
+ * fetching full notification payloads. Replaces the 8-query getNotificationsPageData()
+ * path used by /api/notifications/count.
+ */
+export async function getNotificationCount(): Promise<number> {
+  const context = await requireProfile();
+  const { id: profileId, role } = context.profile;
+  const isAdmin = ADMIN_ROLES.includes(role as Role);
+  const isSuperAdmin = role === "super_admin";
+  const assignmentRole = role === "instructor" ? "instructor" : "staff";
+
+  // instructor_approved is in ADMIN_PENDING_STATUSES but courseToNotification()
+  // marks it non-pending for admins, so exclude it from the count query.
+  const pendingStatuses = getPendingStatuses(role as Role).filter(
+    (s) => !(isAdmin && s === "instructor_approved"),
+  );
+
+  if (pendingStatuses.length === 0 && !isAdmin) return 0;
+
+  const pool = getPostgresPool();
+
+  // Single CTE query — the assigned_courses CTE short-circuits for admins via
+  // the $4 boolean so no extra round-trip is needed for the course-IDs lookup.
+  const { rows } = await pool.query<{ cnt: string }>(
+    `
+    WITH
+    assigned_courses AS (
+      SELECT ca.course_id
+      FROM course_assignments ca
+      WHERE NOT $4::boolean
+        AND ca.profile_id = $1
+        AND ca.role = $6
+    ),
+    dismissed AS (
+      SELECT notification_id FROM dismissed_notifications WHERE user_id = $1
+    ),
+    pending_courses AS (
+      SELECT 'course-' || c.id || '-' || c.status AS nid
+      FROM courses c
+      WHERE c.status = ANY($2::text[])
+        AND ($4::boolean OR c.id IN (SELECT course_id FROM assigned_courses))
+        AND NOT EXISTS (
+          SELECT 1 FROM dismissed d
+          WHERE d.notification_id = 'course-' || c.id || '-' || c.status
+        )
+    ),
+    pending_issues AS (
+      SELECT 'issue-' || i.id AS nid
+      FROM course_issues i
+      WHERE i.status != 'resolved'
+        AND ($4::boolean OR i.course_id IN (SELECT course_id FROM assigned_courses))
+        AND NOT EXISTS (
+          SELECT 1 FROM dismissed d WHERE d.notification_id = 'issue-' || i.id
+        )
+    ),
+    pending_comments AS (
+      SELECT 'comment-' || c.id AS nid
+      FROM course_issue_comments c
+      INNER JOIN course_issues ci ON ci.id = c.issue_id
+      WHERE c.is_system_message = false
+        AND c.author_id != $1
+        AND c.created_at > NOW() - INTERVAL '7 days'
+        AND ($4::boolean OR ci.course_id IN (SELECT course_id FROM assigned_courses))
+        AND NOT EXISTS (
+          SELECT 1 FROM dismissed d WHERE d.notification_id = 'comment-' || c.id
+        )
+    ),
+    pending_reassignments AS (
+      SELECT 'reassign-' || r.id AS nid
+      FROM course_reassignments r
+      WHERE NOT $4::boolean
+        AND r.to_profile_id = $1
+        AND NOT EXISTS (
+          SELECT 1 FROM dismissed d WHERE d.notification_id = 'reassign-' || r.id
+        )
+    ),
+    pending_mentions AS (
+      SELECT 'mention-' || m.comment_id AS nid
+      FROM issue_comment_mentions m
+      JOIN course_issue_comments c ON c.id = m.comment_id
+      WHERE m.mentioned_profile_id = $1
+        AND c.is_system_message = false
+        AND c.created_at > NOW() - INTERVAL '7 days'
+        AND NOT EXISTS (
+          SELECT 1 FROM dismissed d WHERE d.notification_id = 'mention-' || m.comment_id
+        )
+    ),
+    pending_support AS (
+      SELECT 'support-' || s.id AS nid
+      FROM support_messages s
+      WHERE $5::boolean
+        AND s.status != 'resolved'
+        AND NOT EXISTS (
+          SELECT 1 FROM dismissed d WHERE d.notification_id = 'support-' || s.id
+        )
+    )
+    SELECT (
+      (SELECT COUNT(*) FROM pending_courses) +
+      (SELECT COUNT(*) FROM pending_issues) +
+      (SELECT COUNT(*) FROM pending_comments) +
+      (SELECT COUNT(*) FROM pending_reassignments) +
+      (SELECT COUNT(*) FROM pending_mentions) +
+      (SELECT COUNT(*) FROM pending_support)
+    ) AS cnt
+    `,
+    [profileId, pendingStatuses, null, isAdmin, isSuperAdmin, assignmentRole],
+  );
+
+  return parseInt(rows[0]?.cnt ?? "0", 10);
+}
+
 export async function getNotificationsPageData(): Promise<NotificationsPageData> {
   const context = await requireProfile();
   const role = context.profile.role;
