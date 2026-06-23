@@ -32,6 +32,7 @@ export async function issueInstructorInvites(input: {
         courseId: input.courseId,
         email: recipient.email,
         createdBy: input.createdBy,
+        neverExpires: true,
       });
       await sendInstructorInviteEmail({
         to: recipient.email,

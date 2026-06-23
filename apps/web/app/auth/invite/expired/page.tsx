@@ -13,8 +13,7 @@ export default function InviteExpiredPage() {
         <div className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">This link can&apos;t be used</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Your review link is invalid, has already been used, or has expired. Review
-            links are single-use and valid for 7 days.
+            Your review link is invalid or has been revoked.
           </p>
         </div>
 

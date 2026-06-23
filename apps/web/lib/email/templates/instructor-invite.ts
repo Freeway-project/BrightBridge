@@ -34,7 +34,7 @@ export async function sendInstructorInviteEmail(input: {
     "Open your review dashboard using this secure one-time link:",
     input.link,
     "",
-    "This link signs you in directly — no password needed — and expires in 7 days.",
+    "This link signs you in directly — no password needed. You can use it any time.",
     "If you did not expect this email, you can safely ignore it.",
   ].join("\n");
 
@@ -51,7 +51,7 @@ export async function sendInstructorInviteEmail(input: {
         </a>
       </p>
       <p style="font-size: 12px; color: #6b7280; line-height: 1.6;">
-        This link signs you in directly — no password needed — and expires in 7 days.
+        This link signs you in directly — no password needed. You can use it any time.
         If you did not expect this email, you can safely ignore it.
       </p>
     </div>
