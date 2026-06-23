@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut, UserCheck, UserMinus, Search } from "lucide-react"
+import { LogOut, UserCheck, UserMinus, Search, Network } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
@@ -56,6 +56,7 @@ interface AppSidebarProps {
   isImpersonating?: boolean
   impersonatorRole?: Role
   impersonatorName?: string
+  isHierarchyLeader?: boolean
 }
 
 function BrandLogo() {
@@ -83,9 +84,13 @@ export function AppSidebar({
   isImpersonating = false,
   impersonatorRole,
   impersonatorName,
+  isHierarchyLeader = false,
 }: AppSidebarProps) {
   const pathname = usePathname()
-  const items = NAV_ITEMS[role]
+  const items = [...NAV_ITEMS[role]]
+  if (role === "instructor" && isHierarchyLeader) {
+    items.splice(1, 0, { label: "Hierarchy", href: "/hierarchy", icon: Network })
+  }
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
   const canPokeSupport = role === "standard_user" || role === "admin_full"

@@ -12,6 +12,8 @@ import { isReadonlyMode } from "@/lib/system-migration"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
 import { getDeploymentVersion } from "@/lib/deployment-version"
 import { stopImpersonatingAction } from "@/app/dashboard/actions"
+import { getHierarchyRepository } from "@/lib/repositories"
+import { LEADERSHIP_TITLES } from "@/lib/hierarchy/leadership"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
@@ -40,6 +42,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const impersonatorRole = context.kind === "profile" ? context.impersonatorProfile?.role : undefined
   const impersonatorName = context.kind === "profile" ? context.impersonatorProfile?.fullName : undefined
 
+  const hierarchy = getHierarchyRepository()
+  const userUnits = context.kind === "profile" ? await hierarchy.getUserUnits(context.profile.id) : []
+  const isHierarchyLeader = userUnits.some((u) => LEADERSHIP_TITLES.has(u.title))
+
   const cookieStore = await cookies()
   const sidebarCookie = cookieStore.get("sidebar_state")?.value
   const sidebarOpen = sidebarCookie !== "false"
@@ -57,6 +63,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               isImpersonating={isImpersonating}
               impersonatorRole={impersonatorRole}
               impersonatorName={impersonatorName ?? undefined}
+              isHierarchyLeader={isHierarchyLeader}
             />
             <DashboardContentShell>
               {isImpersonating && (

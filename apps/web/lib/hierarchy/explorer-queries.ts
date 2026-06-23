@@ -16,13 +16,20 @@ import { ROLE_TITLE_LABELS, ROLE_TITLE_RANK } from "@/lib/super-admin/roles"
 async function requireOrgViewer() {
   const context = await requireProfile()
   const role = context.profile.role
-  if (
-    role !== "super_admin" &&
-    role !== "provost" &&
-    role !== "admin_full" &&
-    role !== "admin_viewer"
-  ) {
-    throw new Error("Unauthorized")
+  const isGlobalViewer =
+    role === "super_admin" ||
+    role === "provost" ||
+    role === "admin_full" ||
+    role === "admin_viewer"
+
+  if (!isGlobalViewer) {
+    const { LEADERSHIP_TITLES } = await import("@/lib/hierarchy/leadership")
+    const hierarchy = getHierarchyRepository()
+    const userUnits = await hierarchy.getUserUnits(context.profile.id)
+    const isLeader = userUnits.some((u) => LEADERSHIP_TITLES.has(u.title))
+    if (!isLeader) {
+      throw new Error("Unauthorized")
+    }
   }
   return context
 }
@@ -115,16 +122,43 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   // An unknown unit id falls back to the top level rather than erroring.
   const effectiveUnitId = current ? current.id : null
 
-  let childUnits = allUnits.filter((u) => (u.parentId ?? null) === effectiveUnitId)
+  const { LEADERSHIP_TITLES } = await import("@/lib/hierarchy/leadership")
+  const isGlobalViewer =
+    context.profile.role === "super_admin" ||
+    context.profile.role === "provost" ||
+    context.profile.role === "admin_full" ||
+    context.profile.role === "admin_viewer"
+
+  let allowedUnits = allUnits
+  let allowedUnitIds = new Set(allUnits.map((u) => u.id))
+
+  if (!isGlobalViewer) {
+    const userUnits = await hierarchy.getUserUnits(context.profile.id)
+    const leadershipUnits = userUnits.filter((u) => LEADERSHIP_TITLES.has(u.title))
+    const leaderUnitIds = leadershipUnits.map((u) => u.orgUnitId)
+
+    if (!effectiveUnitId) {
+      throw new Error("Unauthorized")
+    }
+
+    if (!isUnitDescendantOf(effectiveUnitId, leaderUnitIds, allUnits)) {
+      throw new Error("Unauthorized")
+    }
+
+    allowedUnits = allUnits.filter((u) => isUnitDescendantOf(u.id, leaderUnitIds, allUnits))
+    allowedUnitIds = new Set(allowedUnits.map((u) => u.id))
+  }
+
+  let childUnits = allowedUnits.filter((u) => (u.parentId ?? null) === effectiveUnitId)
   
   // Flatten college: if children contain a college, replace with the college's children (schools)
   if (childUnits.some((u) => u.type === "college")) {
     const collegeIds = new Set(childUnits.filter((u) => u.type === "college").map((u) => u.id))
-    childUnits = allUnits.filter((u) => u.parentId && collegeIds.has(u.parentId))
+    childUnits = allowedUnits.filter((u) => u.parentId && collegeIds.has(u.parentId))
   }
   
   childUnits = childUnits.sort((a, b) => a.name.localeCompare(b.name))
-  const unitIds = allUnits.map((u) => u.id)
+  const unitIds = allowedUnits.map((u) => u.id)
 
   const memberCountByUnit = new Map<string, number>()
   for (const m of allMembers) {
@@ -193,7 +227,7 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
   const statusCounts = facets ? facets.statusCounts : globalCounts ?? []
   const courseTotal = facets ? facets.total : statusCounts.reduce((sum, c) => sum + c.count, 0)
   const terms = facets ? facets.terms : []
-  const tree = allUnits
+  const tree = allowedUnits
     .filter((u) => u.type !== "college")
     .map((unit) => {
       let parentId = unit.parentId
@@ -202,6 +236,9 @@ export async function getOrgExplorerView(unitId: string | null): Promise<OrgExpl
         if (parent && parent.type === "college") {
           parentId = parent.parentId
         }
+      }
+      if (parentId && !allowedUnitIds.has(parentId)) {
+        parentId = null
       }
       return {
         id: unit.id,
@@ -246,7 +283,45 @@ export async function getOrgExplorerCourses(
     term?: string
   } = {},
 ): Promise<PaginatedResult<AdminCourseRow>> {
-  await requireOrgViewer()
+  const context = await requireOrgViewer()
+  const isGlobalViewer =
+    context.profile.role === "super_admin" ||
+    context.profile.role === "provost" ||
+    context.profile.role === "admin_full" ||
+    context.profile.role === "admin_viewer"
+
+  if (!isGlobalViewer) {
+    const hierarchy = getHierarchyRepository()
+    const [allUnits, userUnits] = await Promise.all([
+      hierarchy.listUnits(),
+      hierarchy.getUserUnits(context.profile.id)
+    ])
+    const { LEADERSHIP_TITLES } = await import("@/lib/hierarchy/leadership")
+    const leadershipUnits = userUnits.filter((u) => LEADERSHIP_TITLES.has(u.title))
+    const leaderUnitIds = leadershipUnits.map((u) => u.orgUnitId)
+
+    if (!isUnitDescendantOf(unitId, leaderUnitIds, allUnits)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const { page = 1, pageSize = 20, search, status, term } = opts
   return getCourseRepository().listCoursesByUnit(unitId, page, pageSize, { search, status, term })
+}
+
+function isUnitDescendantOf(unitId: string, ancestorIds: string[], allUnits: OrgUnit[]): boolean {
+  const ancestorSet = new Set(ancestorIds)
+  if (ancestorSet.has(unitId)) return true
+
+  const unitById = new Map(allUnits.map((u) => [u.id, u]))
+  let cur: OrgUnit | undefined = unitById.get(unitId)
+  const seen = new Set<string>()
+  while (cur && !seen.has(cur.id)) {
+    seen.add(cur.id)
+    if (cur.parentId && ancestorSet.has(cur.parentId)) {
+      return true
+    }
+    cur = cur.parentId ? unitById.get(cur.parentId) : undefined
+  }
+  return false
 }

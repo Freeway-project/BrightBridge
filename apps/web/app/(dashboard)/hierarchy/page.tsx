@@ -4,6 +4,7 @@ import { Topbar } from "@/components/layout/topbar"
 import { getAuthContext } from "@/lib/auth/context"
 import { getOrgExplorerCourses, getOrgExplorerView } from "@/lib/hierarchy/explorer-queries"
 import { OrgExplorer } from "@/components/hierarchy/org-explorer"
+import { getHierarchyRepository } from "@/lib/repositories"
 
 // Institution drill-down explorer, surfaced as its own sidebar route for everyone
 // with cross-unit oversight (admin, provost, super-admin). Navigate one level at a
@@ -27,18 +28,37 @@ function str(v: string | string[] | undefined): string {
 export default async function HierarchyPage({ searchParams }: Props) {
   const context = await getAuthContext()
 
-  if (
-    context.kind !== "profile" ||
-    (context.profile.role !== "admin_full" &&
-      context.profile.role !== "admin_viewer" &&
-      context.profile.role !== "provost" &&
-      context.profile.role !== "super_admin")
-  ) {
+  if (context.kind !== "profile") {
+    redirect("/dashboard")
+  }
+
+  const role = context.profile.role
+  const hierarchy = getHierarchyRepository()
+  const userUnits = await hierarchy.getUserUnits(context.profile.id)
+  const { LEADERSHIP_TITLES, highestLeadershipTitle } = await import("@/lib/hierarchy/leadership")
+  const leadershipUnits = userUnits.filter((u) => LEADERSHIP_TITLES.has(u.title))
+  const isLeader = leadershipUnits.length > 0
+
+  const isGlobalViewer =
+    role === "admin_full" ||
+    role === "admin_viewer" ||
+    role === "provost" ||
+    role === "super_admin"
+
+  if (!isGlobalViewer && !isLeader) {
     redirect("/dashboard")
   }
 
   const sp = searchParams instanceof Promise ? await searchParams : searchParams
-  const unit = str(sp?.unit) || null
+  let unit = str(sp?.unit) || null
+
+  if (!isGlobalViewer && isLeader && !unit) {
+    const topTitle = highestLeadershipTitle(leadershipUnits.map((u) => u.title))
+    const topUnit = leadershipUnits.find((u) => u.title === topTitle)
+    if (topUnit) {
+      redirect(`/hierarchy?unit=${topUnit.orgUnitId}`)
+    }
+  }
   const search = str(sp?.search)
   const statusParam = str(sp?.status)
   const status = (COURSE_STATUSES as readonly string[]).includes(statusParam)
