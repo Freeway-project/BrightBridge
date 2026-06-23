@@ -148,6 +148,7 @@ export function MessageItem({
       {!message.deletedAt && !editing && (
         <div className="absolute right-4 top-0.5 hidden group-hover:flex items-center gap-1">
           <EmojiPicker onPick={(emoji) => void handleReact(emoji)} />
+          {(!message.parentId || isOwn) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Message actions">
@@ -155,7 +156,9 @@ export function MessageItem({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={goToThread}>Reply in thread</DropdownMenuItem>
+              {!message.parentId && (
+                <DropdownMenuItem onSelect={goToThread}>Reply in thread</DropdownMenuItem>
+              )}
               {isOwn && (
                 <>
                   <DropdownMenuSeparator />
@@ -172,6 +175,7 @@ export function MessageItem({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
         </div>
       )}
     </div>

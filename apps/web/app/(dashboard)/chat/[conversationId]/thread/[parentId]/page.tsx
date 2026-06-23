@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { requireProfile } from "@/lib/auth/context";
 import { assertMember } from "@/lib/chat/membership";
+import { listThread } from "@/lib/chat/queries";
 import { ChatPermissionError } from "@/lib/chat/types";
-import { Composer } from "../../../_components/Composer";
+import { ThreadSseClient } from "../../../_components/ThreadSseClient";
 
 export default async function ThreadPage({
   params,
@@ -18,15 +19,15 @@ export default async function ThreadPage({
     throw err;
   }
 
+  const initialMessages = await listThread(parentId);
+  if (initialMessages.length === 0) notFound();
+
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-sm font-semibold">Thread</h2>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        <p className="text-sm text-muted-foreground">Thread {parentId}</p>
-      </div>
-      <Composer conversationId={conversationId} parentId={parentId} />
-    </div>
+    <ThreadSseClient
+      conversationId={conversationId}
+      parentId={parentId}
+      currentUserId={ctx.userId}
+      initialMessages={initialMessages}
+    />
   );
 }
