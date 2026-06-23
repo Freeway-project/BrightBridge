@@ -89,7 +89,7 @@ export function AppSidebar({
   const pathname = usePathname()
   const items = [...NAV_ITEMS[role]]
   if (role === "instructor" && isHierarchyLeader) {
-    items.splice(1, 0, { label: "Hierarchy", href: "/hierarchy", icon: Network })
+    items.splice(0, 0, { label: "Hierarchy", href: "/hierarchy", icon: Network })
   }
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
