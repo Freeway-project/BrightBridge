@@ -11,6 +11,7 @@ import { DashboardContentShell } from "@/components/layout/dashboard-content-she
 import { isReadonlyMode } from "@/lib/system-migration"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
 import { getDeploymentVersion } from "@/lib/deployment-version"
+import { ChatUpdater } from "@/components/layout/chat-updater"
 import { stopImpersonatingAction } from "@/app/dashboard/actions"
 import { getHierarchyRepository } from "@/lib/repositories"
 import { LEADERSHIP_TITLES } from "@/lib/hierarchy/leadership"
@@ -66,6 +67,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               isHierarchyLeader={isHierarchyLeader}
             />
             <DashboardContentShell>
+              {process.env.NEXT_PUBLIC_CHAT_ENABLED === "true" && <ChatUpdater />}
               {isImpersonating && (
                 <div className="bg-amber-500 text-amber-950 px-4 py-2.5 text-xs font-bold flex justify-between items-center shrink-0 border-b border-amber-600 shadow-sm animate-in slide-in-from-top duration-300">
                   <div className="flex items-center gap-2">

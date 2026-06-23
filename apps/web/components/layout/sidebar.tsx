@@ -101,6 +101,23 @@ export function AppSidebar({
   const [searchQuery, setSearchQuery] = useState("")
   const [users, setUsers] = useState<{ id: string; email: string; fullName: string | null; role: Role }[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
+  const [chatUnread, setChatUnread] = useState(0)
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_CHAT_ENABLED !== "true") return
+    const fetchUnread = async () => {
+      try {
+        const res = await fetch("/api/chat/unread-count", { cache: "no-store" })
+        if (res.ok) {
+          const data = (await res.json()) as { count: number }
+          setChatUnread(data.count ?? 0)
+        }
+      } catch { /* ignore */ }
+    }
+    void fetchUnread()
+    const id = setInterval(() => void fetchUnread(), 30_000)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     if (!impersonateOpen) return
@@ -164,6 +181,11 @@ export function AppSidebar({
                     >
                       <item.icon className={cn("size-4 shrink-0 transition-transform", active && "scale-110", item.href === "/notifications" && !active && "text-yellow-400", item.href === "/notifications" && active && "text-yellow-300")} />
                       <span>{item.label}</span>
+                      {item.href === "/chat" && chatUnread > 0 && (
+                        <span className="ml-auto flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground leading-none">
+                          {chatUnread > 99 ? "99+" : chatUnread}
+                        </span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 )
