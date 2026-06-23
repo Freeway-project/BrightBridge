@@ -11,6 +11,7 @@ import { DashboardContentShell } from "@/components/layout/dashboard-content-she
 import { isReadonlyMode } from "@/lib/system-migration"
 import { OnlinePresenceTracker } from "@/components/providers/online-presence-tracker"
 import { getDeploymentVersion } from "@/lib/deployment-version"
+import { stopImpersonatingAction } from "@/app/dashboard/actions"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
@@ -35,6 +36,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const role = context.profile.role
   const userName = context.profile.fullName ?? context.email ?? ""
 
+  const isImpersonating = context.kind === "profile" && !!context.impersonatorProfile
+  const impersonatorRole = context.kind === "profile" ? context.impersonatorProfile?.role : undefined
+  const impersonatorName = context.kind === "profile" ? context.impersonatorProfile?.fullName : undefined
+
   const cookieStore = await cookies()
   const sidebarCookie = cookieStore.get("sidebar_state")?.value
   const sidebarOpen = sidebarCookie !== "false"
@@ -45,8 +50,36 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <NotificationProvider userId={context.userId} role={role}>
         <SidebarProvider defaultOpen={sidebarOpen}>
           <div className="flex h-screen w-full overflow-hidden bg-background">
-            <AppSidebar initialVersion={currentVersion} role={role} userName={userName} />
+            <AppSidebar
+              initialVersion={currentVersion}
+              role={role}
+              userName={userName}
+              isImpersonating={isImpersonating}
+              impersonatorRole={impersonatorRole}
+              impersonatorName={impersonatorName ?? undefined}
+            />
             <DashboardContentShell>
+              {isImpersonating && (
+                <div className="bg-amber-500 text-amber-950 px-4 py-2.5 text-xs font-bold flex justify-between items-center shrink-0 border-b border-amber-600 shadow-sm animate-in slide-in-from-top duration-300">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-2 w-2 rounded-full bg-amber-900 animate-pulse" />
+                    <span>
+                      Impersonating: <strong className="text-amber-950 font-black">{userName}</strong> ({role})
+                      <span className="opacity-75 font-normal ml-1">
+                        (original: {impersonatorName} as {impersonatorRole})
+                      </span>
+                    </span>
+                  </div>
+                  <form action={stopImpersonatingAction}>
+                    <button
+                      type="submit"
+                      className="bg-amber-950 text-amber-100 hover:bg-amber-900 transition-colors px-3 py-1 rounded-lg font-bold text-[10px] uppercase tracking-wider"
+                    >
+                      Stop Impersonating
+                    </button>
+                  </form>
+                </div>
+              )}
               {children}
             </DashboardContentShell>
           </div>

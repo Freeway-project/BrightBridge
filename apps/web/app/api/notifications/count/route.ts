@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getNotificationsPageData } from "@/lib/notifications/queries";
+import { getNotificationCount } from "@/lib/notifications/queries";
 
 // Live unread count — always fresh, never cached.
 export const dynamic = "force-dynamic";
@@ -7,8 +7,8 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    const { pendingCount } = await getNotificationsPageData();
-    return NextResponse.json({ count: pendingCount });
+    const count = await getNotificationCount();
+    return NextResponse.json({ count });
   } catch {
     return NextResponse.json({ count: 0 });
   }

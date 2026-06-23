@@ -1,12 +1,13 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { LogOut, UserCheck, UserMinus, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
-import { signOut } from "@/app/dashboard/actions"
+import { signOut, impersonateUserAction, getImpersonatableUsersAction, stopImpersonatingAction } from "@/app/dashboard/actions"
 import { DisplaySettings } from "./display-settings"
 import { SupportMessageDialog } from "./support-message-dialog"
 import Lottie from "lottie-react"
@@ -16,6 +17,8 @@ import aiAnimationMono from "@/assets/7151ad77-5cd9-4b4a-a8d9-eb7ae1f355f8.json"
 import aiAnimationAurora from "@/assets/9612aa98-116d-11ee-b4c5-2f9cdafc1909.json"
 import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
 import { useTweaks, type ThemeId } from "@/components/shared/tweak-provider"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 const THEME_LOTTIE: Record<ThemeId, unknown> = {
   blush: aiAnimationBlush,
@@ -50,6 +53,9 @@ interface AppSidebarProps {
   role: Role
   userName: string
   initialVersion: string
+  isImpersonating?: boolean
+  impersonatorRole?: Role
+  impersonatorName?: string
 }
 
 function BrandLogo() {
@@ -70,7 +76,14 @@ function BrandLogo() {
   )
 }
 
-export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) {
+export function AppSidebar({
+  role,
+  userName,
+  initialVersion,
+  isImpersonating = false,
+  impersonatorRole,
+  impersonatorName,
+}: AppSidebarProps) {
   const pathname = usePathname()
   const items = NAV_ITEMS[role]
   const { state } = useSidebar()
@@ -78,6 +91,49 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
   const canPokeSupport = role === "standard_user" || role === "admin_full"
   const { settings } = useTweaks()
   const themeAnimation = THEME_LOTTIE[settings.theme] ?? aiAnimationOcean
+
+  const [impersonateOpen, setImpersonateOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [users, setUsers] = useState<{ id: string; email: string; fullName: string | null; role: Role }[]>([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+
+  useEffect(() => {
+    if (!impersonateOpen) return
+
+    let active = true
+    const fetchUsers = async () => {
+      setLoadingUsers(true)
+      try {
+        const data = await getImpersonatableUsersAction(searchQuery)
+        if (active) {
+          setUsers(data)
+        }
+      } catch (err) {
+        console.error("Failed to load users for impersonation:", err)
+      } finally {
+        if (active) {
+          setLoadingUsers(false)
+        }
+      }
+    }
+
+    const timer = setTimeout(fetchUsers, 200)
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [searchQuery, impersonateOpen])
+
+  const handleImpersonate = async (userId: string) => {
+    try {
+      await impersonateUserAction(userId)
+      setImpersonateOpen(false)
+    } catch (err) {
+      console.error("Impersonation failed:", err)
+    }
+  }
+
+  const canImpersonate = role === "admin_full" || impersonatorRole === "admin_full"
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/50 backdrop-blur-xl">
@@ -140,6 +196,99 @@ export function AppSidebar({ role, userName, initialVersion }: AppSidebarProps) 
               </span>
             </div>
           )}
+          {canImpersonate && (
+            <Dialog open={impersonateOpen} onOpenChange={setImpersonateOpen}>
+              {collapsed ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
+                      <button className="flex w-full items-center justify-center rounded-xl p-2 text-slate-400 hover:bg-white/5 hover:text-foreground transition-all">
+                        <UserCheck className="size-4 shrink-0" />
+                      </button>
+                    </DialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-popover border-border-icy font-black uppercase tracking-widest text-[9px]">
+                    Impersonate User
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <DialogTrigger asChild>
+                  <button className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 hover:bg-white/5 hover:text-foreground transition-all">
+                    <UserCheck className="size-3.5 shrink-0" />
+                    <span>Impersonate User</span>
+                  </button>
+                </DialogTrigger>
+              )}
+              <DialogContent className="sm:max-w-[425px] bg-slate-900 border border-slate-800 text-slate-100">
+                <DialogHeader>
+                  <DialogTitle className="text-sm font-semibold">Impersonate User</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Input
+                      placeholder="Search by name, email, or role..."
+                      className="pl-8 text-xs bg-slate-950 border-slate-800 text-slate-200 placeholder:text-slate-500 focus-visible:ring-primary"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <div className="max-h-[250px] overflow-y-auto space-y-1 pr-1">
+                    {loadingUsers ? (
+                      <p className="text-xs text-slate-400 text-center py-4">Loading users...</p>
+                    ) : users.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-4">No users found</p>
+                    ) : (
+                      users.map((u) => (
+                        <button
+                          key={u.id}
+                          onClick={() => handleImpersonate(u.id)}
+                          className="w-full flex items-center justify-between text-left rounded-lg p-2 text-xs hover:bg-white/5 transition-colors border border-transparent hover:border-slate-800"
+                        >
+                          <div>
+                            <p className="font-semibold text-slate-200">{u.fullName ?? "No name"}</p>
+                            <p className="text-[10px] text-slate-400">{u.email}</p>
+                          </div>
+                          <span className="text-[9px] uppercase tracking-wider font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
+                            {u.role}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {isImpersonating && (
+            <form action={stopImpersonatingAction}>
+              {collapsed ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="submit"
+                      className="flex w-full items-center justify-center rounded-xl p-2 text-destructive hover:bg-destructive/10 transition-all animate-pulse"
+                    >
+                      <UserMinus className="size-4 shrink-0" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="bg-popover border-border-icy font-black uppercase tracking-widest text-[9px] text-destructive">
+                    Stop Impersonating
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <button
+                  type="submit"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/10 transition-all animate-pulse"
+                >
+                  <UserMinus className="size-3.5 shrink-0" />
+                  <span>Stop Impersonating</span>
+                </button>
+              )}
+            </form>
+          )}
+
           {canPokeSupport && <SupportMessageDialog collapsed={collapsed} />}
           <DisplaySettings />
           <form action={signOut}>
