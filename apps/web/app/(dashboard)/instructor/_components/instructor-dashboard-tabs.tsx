@@ -1,9 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Building2, UserRound } from "lucide-react"
+import { Building2, UserRound, Network } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { InstructorInbox } from "./instructor-inbox"
+import { OrgExplorer } from "@/components/hierarchy/org-explorer"
+import type { AdminCourseRow, PaginatedResult } from "@/lib/repositories/contracts"
+import type { OrgExplorerView } from "@/lib/hierarchy/explorer-queries"
 
 type InboxCourse = {
   id: string
@@ -18,12 +21,27 @@ type InboxCourse = {
 interface Props {
   myCourses: InboxCourse[]
   departmentCourses: InboxCourse[]
+  explorerView: OrgExplorerView
+  explorerCourses: PaginatedResult<AdminCourseRow> | null
+  role: string
+  filters: {
+    search: string
+    status: string
+    term: string
+  }
 }
 
-type DashboardTab = "mine" | "department"
+type DashboardTab = "hierarchy" | "mine" | "department"
 
-export function InstructorDashboardTabs({ myCourses, departmentCourses }: Props) {
-  const [activeTab, setActiveTab] = useState<DashboardTab>("mine")
+export function InstructorDashboardTabs({
+  myCourses,
+  departmentCourses,
+  explorerView,
+  explorerCourses,
+  role,
+  filters,
+}: Props) {
+  const [activeTab, setActiveTab] = useState<DashboardTab>("hierarchy")
 
   const tabs: Array<{
     key: DashboardTab
@@ -33,6 +51,15 @@ export function InstructorDashboardTabs({ myCourses, departmentCourses }: Props)
     icon: typeof UserRound
     activeClassName: string
   }> = [
+    {
+      key: "hierarchy",
+      label: "Hierarchy",
+      description: "Explore and manage your school and department courses.",
+      count: explorerView.courseTotal,
+      icon: Network,
+      activeClassName:
+        "border-indigo-200 bg-indigo-50 text-indigo-900 shadow-[0_10px_30px_-18px_rgba(99,102,241,0.45)]",
+    },
     {
       key: "mine",
       label: "Your reviews",
@@ -56,7 +83,7 @@ export function InstructorDashboardTabs({ myCourses, departmentCourses }: Props)
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-border/70 bg-gradient-to-br from-background via-background to-muted/30 p-2">
-        <div className="grid gap-2 md:grid-cols-2">
+        <div className="grid gap-2 md:grid-cols-3">
           {tabs.map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.key
@@ -95,7 +122,15 @@ export function InstructorDashboardTabs({ myCourses, departmentCourses }: Props)
         </div>
       </div>
 
-      {activeTab === "mine" ? (
+      {activeTab === "hierarchy" ? (
+        <OrgExplorer
+          view={explorerView}
+          courses={explorerCourses}
+          filters={filters}
+          role={role}
+          basePath="/instructor"
+        />
+      ) : activeTab === "mine" ? (
         <InstructorInbox
           courses={myCourses}
           heading="Needs your review"

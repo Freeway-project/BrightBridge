@@ -30,11 +30,11 @@ const DEV_ACCOUNTS = [
   // Instructor
   { email: "jheadland@okanagan.bc.ca",  role: "instructor · 33 courses" },
   { email: "kclarkson@okanagan.bc.ca",  role: "instructor · 30 courses" },
-  // Dept Head → VP
+  // Dept Head → Dean
   { email: "afontenla@okanagan.bc.ca",  role: "dept head · Business Admin" },
   { email: "dmarques@okanagan.bc.ca",   role: "assoc. dean · Trades (75)" },
   { email: "cnewitt@okanagan.bc.ca",    role: "assoc. dean · Arts (58)" },
-  { email: "chartigan@okanagan.bc.ca",  role: "VP · Trades (75)" },
+  { email: "chartigan@okanagan.bc.ca",  role: "Dean · Trades (75)" },
 ] as const
 
 const FEATURES = [

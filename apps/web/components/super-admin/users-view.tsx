@@ -1,7 +1,7 @@
 "use client"
 
-import { useActionState } from "react"
-import { ShieldPlus, Search } from "lucide-react"
+import { useActionState, useState } from "react"
+import { ShieldPlus, Search, KeyRound } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -16,8 +16,14 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { ROLES } from "@coursebridge/workflow"
-import { createUserAction } from "@/app/(dashboard)/super-admin/actions"
+import { createUserAction, resetUserPasswordAction } from "@/app/(dashboard)/super-admin/actions"
 import { PaginationControls } from "@/components/shared/pagination-controls"
 import type { PaginatedResult } from "@/lib/repositories/contracts"
 import type { UserRow } from "@/lib/super-admin/queries"
@@ -49,12 +55,65 @@ function fmt(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
 
+type SelectedUser = { id: string; email: string; fullName: string | null }
+
+function ResetPasswordDialog({
+  user,
+  onClose,
+}: {
+  user: SelectedUser
+  onClose: () => void
+}) {
+  const [state, formAction, pending] = useActionState(resetUserPasswordAction, initialManageUserState)
+
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="text-sm font-medium flex items-center gap-2">
+            <KeyRound className="size-4" /> Reset Password
+          </DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">{user.fullName ?? user.email}</p>
+        <p className="text-xs text-muted-foreground -mt-2">{user.email}</p>
+        <form action={formAction} className="flex flex-col gap-3 mt-1">
+          <input type="hidden" name="userId" value={user.id} />
+          <Input
+            name="password"
+            type="password"
+            placeholder="New password (min 8 chars)"
+            required
+            minLength={8}
+            autoFocus
+          />
+          {state.message && (
+            <p className={`text-xs ${state.kind === "error" ? "text-destructive" : "text-green-500"}`}>
+              {state.message}
+            </p>
+          )}
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
+            <Button type="submit" size="sm" disabled={pending}>
+              {pending ? "Saving…" : "Set Password"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function UsersView({ result, search }: { result: PaginatedResult<UserRow>, search: string }) {
   const { data: users, total, page, totalPages } = result
   const [createState, createFormAction, createPending] = useActionState(createUserAction, initialManageUserState)
+  const [resetTarget, setResetTarget] = useState<SelectedUser | null>(null)
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-6 overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
+      {resetTarget && (
+        <ResetPasswordDialog user={resetTarget} onClose={() => setResetTarget(null)} />
+      )}
+
       <Card className="shrink-0">
         <CardHeader><CardTitle className="text-sm font-medium flex items-center gap-2"><ShieldPlus className="size-4" /> Create User</CardTitle></CardHeader>
         <CardContent>
@@ -94,12 +153,13 @@ export function UsersView({ result, search }: { result: PaginatedResult<UserRow>
                 <TableHead className="text-xs">Email</TableHead>
                 <TableHead className="text-xs">Role</TableHead>
                 <TableHead className="text-xs">Joined</TableHead>
+                <TableHead className="text-xs w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
                     No users found.
                   </TableCell>
                 </TableRow>
@@ -110,6 +170,17 @@ export function UsersView({ result, search }: { result: PaginatedResult<UserRow>
                     <TableCell className="max-w-[14rem] whitespace-normal break-words text-xs text-muted-foreground sm:max-w-none">{u.email}</TableCell>
                     <TableCell className="whitespace-normal"><Badge variant="outline" className={`text-xs ${ROLE_BADGE_CLASS[u.role]}`}>{ROLE_LABELS[u.role]}</Badge></TableCell>
                     <TableCell className="whitespace-normal text-xs text-muted-foreground">{fmt(u.created_at)}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 text-muted-foreground hover:text-foreground"
+                        title="Reset password"
+                        onClick={() => setResetTarget({ id: u.id, email: u.email, fullName: u.full_name ?? null })}
+                      >
+                        <KeyRound className="size-3.5" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               )}

@@ -60,6 +60,37 @@ export async function createUserAction(
   return { kind: "success", message: `Created ${email} as ${role}.` }
 }
 
+export async function resetUserPasswordAction(
+  _state: ManageUserState,
+  formData: FormData,
+): Promise<ManageUserState> {
+  await requireSuperAdmin()
+
+  const userId = String(formData.get("userId") ?? "").trim()
+  const password = String(formData.get("password") ?? "").trim()
+
+  if (!userId) {
+    return { kind: "error", message: "Missing user." }
+  }
+
+  if (!password || password.length < 8) {
+    return { kind: "error", message: "Password must be at least 8 characters." }
+  }
+
+  try {
+    const hash = await hashPassword(password)
+    await getProfileRepository().setPasswordHash(userId, hash)
+  } catch (error) {
+    return {
+      kind: "error",
+      message: error instanceof Error ? error.message : "Could not reset password.",
+    }
+  }
+
+  revalidatePath("/super-admin")
+  return { kind: "success", message: "Password updated." }
+}
+
 export async function updateUserRoleAction(
   _state: ManageUserState,
   formData: FormData,
