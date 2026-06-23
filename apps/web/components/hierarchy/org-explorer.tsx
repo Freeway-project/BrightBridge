@@ -72,6 +72,7 @@ type Props = {
   courses: PaginatedResult<AdminCourseRow> | null
   filters: Filters
   role: string
+  basePath?: string
 }
 
 const initialState: ManageUserState = { kind: "idle", message: null }
@@ -99,21 +100,21 @@ function typeLabel(type: string) {
   return type.charAt(0).toUpperCase() + type.slice(1)
 }
 
-function buildHierarchyHref(unitId: string | null, filters: Filters) {
+function buildHierarchyHref(unitId: string | null, filters: Filters, basePath = "/hierarchy") {
   const params = new URLSearchParams()
   if (unitId) params.set("unit", unitId)
   if (filters.search) params.set("search", filters.search)
   if (filters.status) params.set("status", filters.status)
   if (filters.term) params.set("term", filters.term)
   const query = params.toString()
-  return query ? `/hierarchy?${query}` : "/hierarchy"
+  return query ? `${basePath}?${query}` : basePath
 }
 
 function countBy(statusCounts: StatusCount[], status: string) {
   return statusCounts.find((c) => c.status === status)?.count ?? 0
 }
 
-export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
+export function OrgExplorer({ view, courses, filters, role: _role, basePath = "/hierarchy" }: Props) {
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
@@ -133,7 +134,7 @@ export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <OrgBreadcrumb crumbs={view.breadcrumb} filters={filters} />
+          <OrgBreadcrumb crumbs={view.breadcrumb} filters={filters} basePath={basePath} />
           <div>
             <h2 className="text-2xl font-semibold leading-tight text-foreground">
               {view.current ? view.current.name : "Institution overview"}
@@ -173,7 +174,7 @@ export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
           <CardContent>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {view.children.map((child) => (
-                <SubUnitCard key={child.id} child={child} filters={filters} />
+                <SubUnitCard key={child.id} child={child} filters={filters} basePath={basePath} />
               ))}
             </div>
           </CardContent>
@@ -253,11 +254,11 @@ export function OrgExplorer({ view, courses, filters, role: _role }: Props) {
 }
 
 
-function SubUnitCard({ child, filters }: { child: OrgChild; filters: Filters }) {
+function SubUnitCard({ child, filters, basePath }: { child: OrgChild; filters: Filters; basePath?: string }) {
   const style = unitTypeStyle(child.type)
   return (
     <Link
-      href={buildHierarchyHref(child.id, filters)}
+      href={buildHierarchyHref(child.id, filters, basePath)}
       className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <Card className={cn("h-full border-l-4 transition-all group-hover:-translate-y-0.5 group-hover:shadow-md", style.border)}>
