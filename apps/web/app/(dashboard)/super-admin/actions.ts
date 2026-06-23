@@ -42,8 +42,12 @@ export async function createUserAction(
   try {
     const profiles = getProfileRepository()
     const existing = await profiles.getProfileByEmail(email)
-    const userId = existing?.id ?? randomUUID()
 
+    if (existing) {
+      return { kind: "error", message: `An account already exists for ${email}. Use the role dropdown or reset-password button to modify it.` }
+    }
+
+    const userId = randomUUID()
     await profiles.upsertProfile({ id: userId, email, fullName, role })
 
     const hash = await hashPassword(password)
@@ -78,6 +82,13 @@ export async function resetUserPasswordAction(
   }
 
   try {
+    const profile = await getProfileRepository().getProfileById(userId)
+    if (!profile) {
+      return { kind: "error", message: "User not found." }
+    }
+    if (profile.role === "super_admin") {
+      return { kind: "error", message: "Super admin passwords cannot be reset from this panel." }
+    }
     const hash = await hashPassword(password)
     await getProfileRepository().setPasswordHash(userId, hash)
   } catch (error) {
