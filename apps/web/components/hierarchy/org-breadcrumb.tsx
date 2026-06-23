@@ -9,22 +9,21 @@ type Props = {
     status?: string
     term?: string
   }
-  basePath?: string
 }
 
-function buildHref(unitId: string | null, filters?: Props["filters"], basePath = "/hierarchy") {
+function buildHref(unitId: string | null, filters?: Props["filters"]) {
   const params = new URLSearchParams()
   if (unitId) params.set("unit", unitId)
   if (filters?.search) params.set("search", filters.search)
   if (filters?.status) params.set("status", filters.status)
   if (filters?.term) params.set("term", filters.term)
   const query = params.toString()
-  return query ? `${basePath}?${query}` : basePath
+  return query ? `/hierarchy?${query}` : "/hierarchy"
 }
 
 // Root -> current trail. "Institution" is the always-present root that clears the
 // `unit` param; each crumb links to that unit; the last (current) crumb is plain.
-export function OrgBreadcrumb({ crumbs, filters, basePath = "/hierarchy" }: Props) {
+export function OrgBreadcrumb({ crumbs, filters }: Props) {
   const items: { id: string | null; name: string }[] = [
     { id: null, name: "Institution" },
     ...crumbs.map((c) => ({ id: c.id, name: c.name })),
@@ -34,7 +33,7 @@ export function OrgBreadcrumb({ crumbs, filters, basePath = "/hierarchy" }: Prop
     <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm">
       {items.map((it, i) => {
         const isLast = i === items.length - 1
-        const href = buildHref(it.id, filters, basePath)
+        const href = buildHref(it.id, filters)
         return (
           <span key={it.id ?? "__root"} className="flex items-center gap-1">
             {i > 0 && <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" />}
