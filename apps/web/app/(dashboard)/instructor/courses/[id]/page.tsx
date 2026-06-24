@@ -8,6 +8,7 @@ import { CourseSwitcher } from "./_components/course-switcher"
 import { CourseSwitchSidebar } from "./_components/course-switch-sidebar"
 import { InstructorReviewDetail } from "./_components/instructor-review-detail"
 import { InstructorAccordionView } from "./_components/instructor-accordion-view"
+import { InstructorCourseShell } from "./_components/instructor-course-shell"
 import { getSharedComments } from "@/lib/services/comments"
 
 interface Props {
@@ -79,26 +80,43 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           currentId={id}
           courses={myCourses.map((c) => ({ id: c.id, title: c.title, status: c.status, term: c.term }))}
         />
-        <InstructorAccordionView
+        <InstructorCourseShell
           courseId={id}
           status={course.status}
           finalSummary={course.instructorSummaryNotes}
           readOnly={readOnly}
-          sharedComments={sharedComments}
-          currentUserId={context.userId}
           actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
           actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
-          meta={{
-            term: course.term,
-            department: course.department,
-            sourceCourseId: course.sourceCourseId,
-            targetCourseId: course.targetCourseId,
-          }}
           reviewNode={
             <InstructorReviewDetail
               course={course}
               responses={responses}
               sectionKeyById={sectionKeyById}
+            />
+          }
+          full={
+            <InstructorAccordionView
+              courseId={id}
+              status={course.status}
+              finalSummary={course.instructorSummaryNotes}
+              readOnly={readOnly}
+              sharedComments={sharedComments}
+              currentUserId={context.userId}
+              actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
+              actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
+              meta={{
+                term: course.term,
+                department: course.department,
+                sourceCourseId: course.sourceCourseId,
+                targetCourseId: course.targetCourseId,
+              }}
+              reviewNode={
+                <InstructorReviewDetail
+                  course={course}
+                  responses={responses}
+                  sectionKeyById={sectionKeyById}
+                />
+              }
             />
           }
         />
