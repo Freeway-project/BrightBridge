@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
 
 const POLL_MS = 30_000
@@ -34,8 +35,17 @@ export function ChatUpdater({ userId }: { userId: string }) {
         document.title = count > 0 ? `(${count}) ${stripped}` : stripped
 
         if (prevCount.current !== null && count > prevCount.current) {
-          // Refresh server components so the chat sidebar unread badges update.
           router.refresh()
+
+          // Toast when not already on the chat page
+          if (!window.location.pathname.startsWith("/chat")) {
+            const delta = count - prevCount.current
+            toast.info("💬 New chat message", {
+              description:
+                delta === 1 ? "You have 1 new message" : `You have ${delta} new messages`,
+              action: { label: "Open", onClick: () => router.push("/chat") },
+            })
+          }
 
           if (
             document.visibilityState !== "visible" &&
@@ -58,8 +68,6 @@ export function ChatUpdater({ userId }: { userId: string }) {
     void poll()
     timerRef.current = setInterval(() => void poll(), POLL_MS)
 
-    // Subscribe to the per-user Supabase notification channel so we get
-    // real-time signals instead of relying solely on the 30-second poll.
     const supabase = createClient()
     let channel: ReturnType<NonNullable<typeof supabase>["channel"]> | null = null
     if (supabase) {

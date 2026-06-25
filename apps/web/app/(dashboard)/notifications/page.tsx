@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, LifeBuoy, MessageSquare, TriangleAlert } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, CircleAlert, Clock, ExternalLink, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Topbar } from "@/components/layout/topbar";
 import { Badge } from "@/components/ui/badge";
@@ -11,22 +11,14 @@ import { cn } from "@/lib/utils";
 import { HideButton } from "./_components/notification-row-client";
 import { ClearAllButton } from "./_components/clear-all-button";
 
-const KIND_ICON = {
-  assignment: Bell,
+const KIND_ICON: Record<NotificationItem["kind"], typeof Bell> = {
   course_action: Clock,
-  issue: TriangleAlert,
   comment: MessageSquare,
-  support: LifeBuoy,
 };
 
-// Section headers for grouping "All notifications" by where each item came
-// from (its `kind`). Order here is the order the groups render in.
 const KIND_LABEL: { kind: NotificationItem["kind"]; label: string }[] = [
-  { kind: "course_action", label: "Course actions" },
-  { kind: "assignment", label: "Assignments" },
-  { kind: "issue", label: "Issues" },
-  { kind: "comment", label: "Comments" },
-  { kind: "support", label: "Support" },
+  { kind: "course_action", label: "Instructor questions" },
+  { kind: "comment", label: "Instructor messages" },
 ];
 
 const TONE_STYLES = {
@@ -43,7 +35,7 @@ export default async function NotificationsPage() {
 
   return (
     <>
-      <Topbar title="Notifications" subtitle="Pending work, issue updates, and recent activity" />
+      <Topbar title="Notifications" subtitle="Instructor messages and questions" />
       <TweakableContent className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-4 sm:p-6">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
           {error && (
@@ -94,7 +86,7 @@ export default async function NotificationsPage() {
             </CardHeader>
             <CardContent className="p-0">
               {notifications.length === 0 ? (
-                <EmptyState title="No notifications yet" description="New assignments, open issues, and comments will appear here." />
+                <EmptyState title="No notifications yet" description="Instructor messages and questions will appear here." />
               ) : (
                 <GroupedNotificationList items={notifications} />
               )}

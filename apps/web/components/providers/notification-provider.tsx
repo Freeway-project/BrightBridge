@@ -7,20 +7,6 @@ import type { Role } from "@coursebridge/workflow"
 import type { NotificationItem } from "@/lib/notifications/queries"
 import { createClient } from "@/lib/supabase/client"
 
-const IS_ADMIN = (role: Role) => role === "admin_full" || role === "super_admin"
-
-const SEVERITY_ICON: Record<string, string> = {
-  critical: "🔴",
-  major:    "🟠",
-  minor:    "🟡",
-}
-
-const TYPE_LABEL: Record<string, string> = {
-  escalation: "Escalation",
-  question:   "Question",
-  fix_needed: "Fix Needed",
-  general:    "Note",
-}
 
 let audioContext: AudioContext | null = null
 
@@ -129,29 +115,13 @@ export function NotificationProvider({ children, userId, role }: NotificationPro
     }
 
     function iconFor(item: NotificationItem): string {
-      if (item.kind === "issue") {
-        const meta = item.meta.toLowerCase()
-        if (meta.includes("critical")) return SEVERITY_ICON.critical
-        if (meta.includes("major")) return SEVERITY_ICON.major
-        return SEVERITY_ICON.minor
-      }
       if (item.kind === "comment") return "💬"
-      if (item.kind === "assignment") return "📚"
-      if (item.kind === "support") return "🛟"
-      return "📌"
+      return "❓" // course_action (instructor_questions)
     }
 
     function labelFor(item: NotificationItem): string {
-      if (item.kind === "issue") {
-        const lower = item.description.toLowerCase()
-        const key = Object.keys(TYPE_LABEL).find((candidate) => lower.includes(candidate.replace(/_/g, " ")))
-        if (key) return TYPE_LABEL[key]
-        return "Issue"
-      }
-      if (item.kind === "comment") return "Comment"
-      if (item.kind === "assignment") return "Assignment"
-      if (item.kind === "support") return "Support"
-      return "Course"
+      if (item.kind === "comment") return "Instructor message"
+      return "Instructor questions"
     }
 
     function showNotification(item: NotificationItem) {
