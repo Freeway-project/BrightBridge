@@ -23,7 +23,7 @@ interface Props {
 type DashboardTab = "mine" | "department"
 
 export function InstructorDashboardTabs({ myCourses, departmentCourses }: Props) {
-  const [activeTab, setActiveTab] = useState<DashboardTab>("mine")
+  const [activeTab, setActiveTab] = useState<DashboardTab>("department")
 
   const tabs: Array<{
     key: DashboardTab
