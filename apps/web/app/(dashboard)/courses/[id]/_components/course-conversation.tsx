@@ -8,6 +8,7 @@ import {
   createEscalationAction,
 } from "../escalation-actions"
 import { postCommentAction } from "@/app/(dashboard)/admin/courses/[id]/actions"
+import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -29,6 +30,7 @@ interface Props {
   courseId: string
   currentUserId: string
   comments: CourseComment[]
+  sharedComments: CourseComment[]
   escalations: EscalationWithMessages[]
 }
 
@@ -36,8 +38,8 @@ type TimelineItem =
   | { type: "comment"; id: string; date: string; authorName: string; authorId: string; body: string }
   | { type: "escalation"; id: string; date: string; authorName: string; authorId: string; body: string; title: string; severity: string; status: string; resolved_at: string | null; resolutionNote: string | null; messages: EscalationWithMessages["messages"] }
 
-export function CourseConversation({ courseId, currentUserId, comments, escalations }: Props) {
-  const [activeTab, setActiveTab] = useState<"chat" | "escalate">("chat")
+export function CourseConversation({ courseId, currentUserId, comments, sharedComments, escalations }: Props) {
+  const [activeTab, setActiveTab] = useState<"shared" | "internal" | "escalate">("shared")
   const [body, setBody] = useState("")
   const [isPending, startTransition] = useTransition()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -94,139 +96,160 @@ export function CourseConversation({ courseId, currentUserId, comments, escalati
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0 gap-4">
-      <ScrollArea className="flex-1 min-h-[200px] rounded-2xl border border-border-icy bg-background/50 p-4 shadow-inner backdrop-blur-md" ref={scrollRef}>
-        <div className="space-y-6">
-          {timeline.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center opacity-30">
-              <MessageSquare className="size-10 mb-3 text-primary/40" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Audit log empty</p>
-            </div>
-          )}
-          {timeline.map((item) => {
-            if (item.type === "comment") {
-              const isMe = item.authorId === currentUserId
-              return (
-                <div key={item.id} className={cn("flex gap-3 max-w-[95%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
-                  <Avatar className={cn("size-7 shrink-0 border", isMe ? "border-primary/30" : "border-border-icy")}>
-                    <AvatarFallback className={cn("text-[10px] font-black", isMe ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-                      {getInitials(item.authorName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className={cn("space-y-1.5", isMe ? "items-end text-right" : "items-start text-left")}>
-                    <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/60 px-1">
-                      {item.authorName} • {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
-                    </p>
-                    <div className={cn(
-                      "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm font-medium",
-                      isMe
-                        ? "bg-primary text-primary-foreground rounded-tr-none ring-1 ring-primary/20"
-                        : "bg-white/5 text-foreground border border-border-icy rounded-tl-none"
-                    )}>
-                      {item.body}
-                    </div>
-                  </div>
-                </div>
-              )
-            } else {
-              return (
-                <div key={item.id} className="space-y-4 py-2">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-destructive/10 border border-destructive/20 shadow-[0_0_15px_rgba(220,38,38,0.1)]">
-                    <AlertTriangle className="size-3.5 text-destructive animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-destructive">
-                      Escalation: {item.title}
-                    </span>
-                    <span className={cn(
-                      "ml-auto px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-tighter",
-                      item.status === "open"
-                        ? "bg-destructive text-destructive-foreground border-destructive/20"
-                        : "bg-success text-success-foreground border-success/20"
-                    )}>
-                      {item.status}
-                    </span>
-                  </div>
-                  {item.status === "resolved" && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20">
-                      <CheckCircle2 className="size-3.5 text-green-600" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-green-700">
-                        Resolved{item.resolved_at ? ` • ${formatDistanceToNow(new Date(item.resolved_at), { addSuffix: true })}` : ""}
-                      </span>
-                    </div>
-                  )}
-                  {item.resolutionNote && (
-                    <div className="flex gap-2 px-3 py-2 rounded-xl bg-green-500/5 border border-green-500/15 text-xs text-green-800">
-                      <span className="font-bold shrink-0">Admin note:</span>
-                      <span>{item.resolutionNote}</span>
-                    </div>
-                  )}
-                  {item.messages.map((msg) => {
-                    const isMe = msg.author_id === currentUserId
-                    return (
-                      <div key={msg.id} className={cn("flex gap-3 max-w-[95%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
-                        <Avatar className={cn("size-7 shrink-0 border", isMe ? "border-destructive/30" : "border-border-icy")}>
-                          <AvatarFallback className={cn("text-[10px] font-black", isMe ? "bg-destructive text-destructive-foreground" : "bg-muted text-muted-foreground")}>
-                            {getInitials(msg.author_name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className={cn("space-y-1.5", isMe ? "items-end text-right" : "items-start text-left")}>
-                          <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/60 px-1">
-                            {msg.author_name} • {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
-                          </p>
-                          <div className={cn(
-                            "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm border font-bold",
-                            isMe
-                              ? "bg-destructive/10 text-foreground border-destructive/30 rounded-tr-none"
-                              : "bg-destructive/5 text-foreground border-destructive/20 rounded-tl-none"
-                          )}>
-                            {msg.body}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-            }
-          })}
-        </div>
-      </ScrollArea>
-
-      <div className="space-y-4 p-1">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "chat" | "escalate")} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-9 bg-white/5 border border-border-icy p-1">
-            <TabsTrigger value="chat" className="text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Discussion</TabsTrigger>
+    <div className="flex flex-col h-full min-h-0 gap-2">
+      {/* Tab selector */}
+      <div className="px-1 pt-1.5 pb-0">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "shared" | "internal" | "escalate")} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 h-9 bg-white/5 border border-border-icy p-1">
+            <TabsTrigger value="shared" className="text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Shared</TabsTrigger>
+            <TabsTrigger value="internal" className="text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Internal</TabsTrigger>
             <TabsTrigger value="escalate" className="text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground">Escalate</TabsTrigger>
           </TabsList>
         </Tabs>
-
-        {activeTab === "chat" ? (
-          <div className="flex gap-3 items-end">
-            <div className="relative flex-1 group">
-              <Textarea
-                placeholder="Internal discussion..."
-                className="min-h-[80px] resize-none text-[13px] font-medium bg-background/50 border-border-icy focus:border-primary/50 transition-all rounded-xl pr-10"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment() }
-                }}
-              />
-              <div className="absolute right-2 bottom-2">
-                 <Button
-                    size="icon"
-                    className="size-8 rounded-full shadow-lg shadow-primary/20 transition-transform active:scale-95"
-                    disabled={!body.trim() || isPending}
-                    onClick={handleSendComment}
-                  >
-                    <Send className="size-3.5" />
-                  </Button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <EscalationCreateForm courseId={courseId} />
-        )}
       </div>
+
+      {/* Shared discussion — visible to instructor, TA, and admin */}
+      {activeTab === "shared" && (
+        <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border-icy">
+          <CourseDiscussion
+            courseId={courseId}
+            comments={sharedComments}
+            currentUserId={currentUserId}
+            canPost={true}
+          />
+        </div>
+      )}
+
+      {/* Internal channel — TA / admin only */}
+      {(activeTab === "internal" || activeTab === "escalate") && (
+        <>
+          <ScrollArea className="flex-1 min-h-[200px] rounded-2xl border border-border-icy bg-background/50 p-4 shadow-inner backdrop-blur-md" ref={scrollRef}>
+            <div className="space-y-6">
+              {timeline.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center opacity-30">
+                  <MessageSquare className="size-10 mb-3 text-primary/40" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em]">Audit log empty</p>
+                </div>
+              )}
+              {timeline.map((item) => {
+                if (item.type === "comment") {
+                  const isMe = item.authorId === currentUserId
+                  return (
+                    <div key={item.id} className={cn("flex gap-3 max-w-[95%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
+                      <Avatar className={cn("size-7 shrink-0 border", isMe ? "border-primary/30" : "border-border-icy")}>
+                        <AvatarFallback className={cn("text-[10px] font-black", isMe ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                          {getInitials(item.authorName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className={cn("space-y-1.5", isMe ? "items-end text-right" : "items-start text-left")}>
+                        <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/60 px-1">
+                          {item.authorName} • {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
+                        </p>
+                        <div className={cn(
+                          "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm font-medium",
+                          isMe
+                            ? "bg-primary text-primary-foreground rounded-tr-none ring-1 ring-primary/20"
+                            : "bg-white/5 text-foreground border border-border-icy rounded-tl-none"
+                        )}>
+                          {item.body}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                } else {
+                  return (
+                    <div key={item.id} className="space-y-4 py-2">
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-destructive/10 border border-destructive/20 shadow-[0_0_15px_rgba(220,38,38,0.1)]">
+                        <AlertTriangle className="size-3.5 text-destructive animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-destructive">
+                          Escalation: {item.title}
+                        </span>
+                        <span className={cn(
+                          "ml-auto px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-tighter",
+                          item.status === "open"
+                            ? "bg-destructive text-destructive-foreground border-destructive/20"
+                            : "bg-success text-success-foreground border-success/20"
+                        )}>
+                          {item.status}
+                        </span>
+                      </div>
+                      {item.status === "resolved" && (
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/20">
+                          <CheckCircle2 className="size-3.5 text-green-600" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-green-700">
+                            Resolved{item.resolved_at ? ` • ${formatDistanceToNow(new Date(item.resolved_at), { addSuffix: true })}` : ""}
+                          </span>
+                        </div>
+                      )}
+                      {item.resolutionNote && (
+                        <div className="flex gap-2 px-3 py-2 rounded-xl bg-green-500/5 border border-green-500/15 text-xs text-green-800">
+                          <span className="font-bold shrink-0">Admin note:</span>
+                          <span>{item.resolutionNote}</span>
+                        </div>
+                      )}
+                      {item.messages.map((msg) => {
+                        const isMe = msg.author_id === currentUserId
+                        return (
+                          <div key={msg.id} className={cn("flex gap-3 max-w-[95%]", isMe ? "ml-auto flex-row-reverse" : "mr-auto")}>
+                            <Avatar className={cn("size-7 shrink-0 border", isMe ? "border-destructive/30" : "border-border-icy")}>
+                              <AvatarFallback className={cn("text-[10px] font-black", isMe ? "bg-destructive text-destructive-foreground" : "bg-muted text-muted-foreground")}>
+                                {getInitials(msg.author_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className={cn("space-y-1.5", isMe ? "items-end text-right" : "items-start text-left")}>
+                              <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/60 px-1">
+                                {msg.author_name} • {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                              </p>
+                              <div className={cn(
+                                "rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed shadow-sm border font-bold",
+                                isMe
+                                  ? "bg-destructive/10 text-foreground border-destructive/30 rounded-tr-none"
+                                  : "bg-destructive/5 text-foreground border-destructive/20 rounded-tl-none"
+                              )}>
+                                {msg.body}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                }
+              })}
+            </div>
+          </ScrollArea>
+
+          <div className="p-1">
+            {activeTab === "internal" ? (
+              <div className="flex gap-3 items-end">
+                <div className="relative flex-1 group">
+                  <Textarea
+                    placeholder="Internal discussion (TA & admin only)..."
+                    className="min-h-[80px] resize-none text-[13px] font-medium bg-background/50 border-border-icy focus:border-primary/50 transition-all rounded-xl pr-10"
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment() }
+                    }}
+                  />
+                  <div className="absolute right-2 bottom-2">
+                    <Button
+                      size="icon"
+                      className="size-8 rounded-full shadow-lg shadow-primary/20 transition-transform active:scale-95"
+                      disabled={!body.trim() || isPending}
+                      onClick={handleSendComment}
+                    >
+                      <Send className="size-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <EscalationCreateForm courseId={courseId} />
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }

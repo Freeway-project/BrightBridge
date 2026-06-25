@@ -7,6 +7,7 @@ import { resolveDelegationContext, transitionCourseStatus } from "@/lib/courses/
 import { createIssueAction } from "@/lib/issues/actions"
 import { getCourseRepository } from "@/lib/repositories"
 import { getPostgresPool } from "@/lib/postgres/pool"
+import type { IssueComment } from "@/lib/issues/types"
 
 async function assertInstructorOrLeader(courseId: string, profile: AppProfile): Promise<void> {
   if (profile.role === "instructor" || profile.role === "super_admin") return
@@ -59,6 +60,72 @@ export async function instructorRaiseQuestionAction(
       note: `Instructor question: ${questionTitle.trim()}`,
     })
   }
+
+  revalidateInstructorCourse(courseId)
+}
+
+/**
+ * Fetches the comments for a specific issue the instructor raised.
+ * Allows the instructor to read admin/TA replies inline.
+ */
+export async function getIssueCommentsAction(
+  courseId: string,
+  issueId: string,
+): Promise<IssueComment[]> {
+  const ctx = await requireProfile()
+  await assertInstructorOrLeader(courseId, ctx.profile)
+
+  const pool = getPostgresPool()
+  const { rows } = await pool.query<{
+    id: string
+    issue_id: string
+    author_id: string
+    body: string
+    is_system_message: boolean
+    created_at: string
+    author_full_name: string | null
+    author_role: string | null
+  }>(
+    `SELECT c.id, c.issue_id, c.author_id, c.body, c.is_system_message, c.created_at,
+            p.full_name AS author_full_name, p.role AS author_role
+     FROM course_issue_comments c
+     INNER JOIN profiles p ON p.id = c.author_id
+     INNER JOIN course_issues ci ON ci.id = c.issue_id
+     WHERE c.issue_id = $1 AND ci.course_id = $2
+     ORDER BY c.created_at ASC`,
+    [issueId, courseId],
+  )
+
+  return rows.map((r) => ({
+    id: r.id,
+    issue_id: r.issue_id,
+    author_id: r.author_id,
+    body: r.body,
+    is_system_message: r.is_system_message,
+    created_at: r.created_at,
+    author: r.author_full_name ? { full_name: r.author_full_name, role: r.author_role ?? "" } : undefined,
+  }))
+}
+
+/**
+ * Instructor posts a reply to an issue thread (responding to admin/TA).
+ */
+export async function postIssueCommentAction(
+  courseId: string,
+  issueId: string,
+  body: string,
+): Promise<void> {
+  const ctx = await requireProfile()
+  await assertInstructorOrLeader(courseId, ctx.profile)
+
+  const delegation = await resolveDelegationContext({ courseId, profile: ctx.profile })
+  const pool = getPostgresPool()
+  await pool.query(
+    `INSERT INTO course_issue_comments (issue_id, author_id, body, acting_on_behalf_of)
+     SELECT $1, $2, $3, $4
+     WHERE EXISTS (SELECT 1 FROM course_issues WHERE id = $1 AND course_id = $5)`,
+    [issueId, ctx.profile.id, body.trim(), delegation.onBehalfOf, courseId],
+  )
 
   revalidateInstructorCourse(courseId)
 }

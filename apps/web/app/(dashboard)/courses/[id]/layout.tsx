@@ -5,7 +5,7 @@ import { getCourseById } from "@/lib/services/courses";
 import { getReviewResponses, getReviewSectionByKey } from "@/lib/services/review";
 import { getEscalationsForCourse } from "@/lib/services/escalations";
 import { getCourseInstructor } from "@/lib/services/profiles";
-import { getCourseComments } from "@/lib/services/comments";
+import { getCourseComments, getSharedComments } from "@/lib/services/comments";
 import { getOpenIssuesCountAction } from "@/lib/issues";
 import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
@@ -34,11 +34,12 @@ export default async function CourseWorkspaceLayout({
 
   if (!course) notFound();
 
-  const [responses, escalations, instructor, comments, openIssueCount] = await Promise.all([
+  const [responses, escalations, instructor, comments, sharedComments, openIssueCount] = await Promise.all([
     getReviewResponses(id),
     getEscalationsForCourse(id),
     getCourseInstructor(id),
     getCourseComments(id),
+    getSharedComments(id),
     getOpenIssuesCountAction(id),
   ]);
   const respondedSectionIds = new Set(
@@ -95,6 +96,7 @@ export default async function CourseWorkspaceLayout({
         lastSavedAt={lastSavedAt}
         escalations={escalations}
         comments={comments}
+        sharedComments={sharedComments}
       />
     </div>
   );

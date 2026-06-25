@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import {
   ChevronDown,
+  ChevronRight,
   CheckCircle2,
   MessageCircleQuestion,
   ClipboardList,
@@ -14,21 +15,24 @@ import {
   Loader2,
   CircleCheck,
   Clock,
+  Send,
 } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
 import type { CourseStatus } from "@coursebridge/workflow"
 import type { CourseComment } from "@/lib/services/comments"
-import type { CourseIssue } from "@/lib/issues/types"
+import type { CourseIssue, IssueComment } from "@/lib/issues/types"
 import { getInstructorSimpleState } from "@/lib/courses/instructor-view"
 import { getIssuesForCourseAction } from "@/lib/issues/actions"
 import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import { CourseDiscussion } from "@/components/shared/course-discussion"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { instructorRaiseQuestionAction, instructorSignOffAction } from "../actions"
+import { instructorRaiseQuestionAction, instructorSignOffAction, getIssueCommentsAction, postIssueCommentAction } from "../actions"
 
 // --- Accordion section wrapper ---
 
@@ -88,23 +92,124 @@ function AccSection({
 
 // --- Questions section internals ---
 
-function QuestionItem({ issue }: { issue: CourseIssue }) {
-  const hasReply = (issue.comment_count ?? 0) > 0
-  const date = new Date(issue.created_at).toLocaleDateString("en-CA", {
-    month: "short",
-    day: "numeric",
-  })
+const REPLY_ROLE_LABELS: Record<string, string> = {
+  admin_full: "Admin",
+  admin_viewer: "Comms",
+  super_admin: "Admin",
+  standard_user: "TA",
+  instructor: "Instructor",
+}
+
+function getInitials(name?: string) {
+  if (!name) return "?"
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+}
+
+function QuestionItem({ issue, courseId }: { issue: CourseIssue; courseId: string }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [comments, setComments] = useState<IssueComment[] | null>(null)
+  const [replyBody, setReplyBody] = useState("")
+  const [loadPending, startLoad] = useTransition()
+  const [replyPending, startReply] = useTransition()
+
+  const replyCount = comments !== null ? comments.filter((c) => !c.is_system_message).length : (issue.comment_count ?? 0)
+  const hasReply = replyCount > 0
+  const date = new Date(issue.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })
+
+  function handleToggle() {
+    const opening = !isOpen
+    setIsOpen(opening)
+    if (opening && comments === null) {
+      startLoad(async () => {
+        const rows = await getIssueCommentsAction(courseId, issue.id)
+        setComments(rows)
+      })
+    }
+  }
+
+  function handleReply() {
+    if (!replyBody.trim() || replyPending) return
+    startReply(async () => {
+      await postIssueCommentAction(courseId, issue.id, replyBody.trim())
+      setReplyBody("")
+      const rows = await getIssueCommentsAction(courseId, issue.id)
+      setComments(rows)
+    })
+  }
+
+  const visibleComments = (comments ?? []).filter((c) => !c.is_system_message)
+
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3 space-y-1.5">
-      <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{issue.title}</p>
-      <p className="text-xs text-amber-700 dark:text-amber-400">Asked · {date}</p>
-      {issue.description?.trim() && (
-        <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{issue.description}</p>
+    <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 overflow-hidden">
+      <button
+        type="button"
+        className="w-full flex items-start gap-2.5 p-3 text-left hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-colors"
+        onClick={handleToggle}
+      >
+        <ChevronRight className={cn("size-3.5 mt-0.5 shrink-0 text-amber-600 transition-transform duration-200", isOpen && "rotate-90")} aria-hidden />
+        <div className="flex-1 min-w-0 space-y-1">
+          <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{issue.title}</p>
+          <p className="text-xs text-amber-700 dark:text-amber-400">Asked · {date}</p>
+          {issue.description?.trim() && !isOpen && (
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed line-clamp-2">{issue.description}</p>
+          )}
+          <div className={cn("inline-flex items-center gap-1 text-xs font-medium", hasReply ? "text-emerald-600" : "text-amber-600 dark:text-amber-400")}>
+            {hasReply ? <CircleCheck className="size-3.5" aria-hidden /> : <Clock className="size-3.5" aria-hidden />}
+            {hasReply ? `${replyCount} repl${replyCount === 1 ? "y" : "ies"}` : "Waiting for reply…"}
+          </div>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="border-t border-amber-200 dark:border-amber-800 bg-white dark:bg-amber-950/10 p-3 space-y-3">
+          {issue.description?.trim() && (
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{issue.description}</p>
+          )}
+
+          {loadPending ? (
+            <p className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+              <Loader2 className="size-3.5 animate-spin" aria-hidden /> Loading replies…
+            </p>
+          ) : visibleComments.length === 0 ? (
+            <p className="text-xs text-muted-foreground italic py-1">No replies yet — your question is with the reviewer.</p>
+          ) : (
+            <div className="space-y-2">
+              {visibleComments.map((c) => {
+                const name = c.author?.full_name ?? "Unknown"
+                const roleLabel = REPLY_ROLE_LABELS[c.author?.role ?? ""] ?? "Team"
+                return (
+                  <div key={c.id} className="flex gap-2">
+                    <Avatar className="size-6 shrink-0 mt-0.5">
+                      <AvatarFallback className="text-[9px] font-bold bg-muted">{getInitials(name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold">{name}</span>
+                        <span className="rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-1.5 text-[10px] font-semibold">{roleLabel}</span>
+                        <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}</span>
+                      </div>
+                      <div className="rounded-lg bg-muted/60 border border-border px-2.5 py-1.5 text-sm">{c.body}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <Textarea
+              placeholder="Reply to the reviewer…"
+              className="min-h-[60px] resize-none text-xs"
+              value={replyBody}
+              onChange={(e) => setReplyBody(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply() } }}
+            />
+            <Button size="icon" className="self-end shrink-0 size-8" disabled={!replyBody.trim() || replyPending} onClick={handleReply}>
+              {replyPending ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+            </Button>
+          </div>
+        </div>
       )}
-      <div className={cn("inline-flex items-center gap-1 text-xs font-medium", hasReply ? "text-emerald-600" : "text-amber-600 dark:text-amber-400")}>
-        {hasReply ? <CircleCheck className="size-3.5" aria-hidden /> : <Clock className="size-3.5" aria-hidden />}
-        {hasReply ? `Replied (${issue.comment_count} message${issue.comment_count === 1 ? "" : "s"})` : "Waiting for reply…"}
-      </div>
     </div>
   )
 }
@@ -373,7 +478,7 @@ export function InstructorAccordionView({
             <p className="text-sm text-muted-foreground py-1">No questions yet.</p>
           ) : (
             <div className="space-y-2 mb-3">
-              {questions.map((q) => <QuestionItem key={q.id} issue={q} />)}
+              {questions.map((q) => <QuestionItem key={q.id} issue={q} courseId={courseId} />)}
             </div>
           )}
 

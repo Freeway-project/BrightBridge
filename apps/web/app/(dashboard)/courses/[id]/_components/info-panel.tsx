@@ -2,6 +2,7 @@
 import { CheckCircle2, Clock3, AlertTriangle, ChevronRight, ChevronLeft, Layout } from "lucide-react"
 import { useState, useEffect } from "react"
 import type { EscalationWithMessages } from "@/lib/services/escalations"
+import type { CourseComment } from "@/lib/services/comments"
 import { cn } from "@/lib/utils"
 import { CourseConversation } from "./course-conversation"
 import { Button } from "@/components/ui/button"
@@ -18,7 +19,8 @@ type InfoPanelProps = {
   progress: SectionProgress[]
   lastSavedAt: string | null
   escalations: EscalationWithMessages[]
-  comments: any[]
+  comments: CourseComment[]
+  sharedComments: CourseComment[]
 }
 
 const INFO_PANEL_COLLAPSED_KEY = "coursebridge:course-review-info-panel-collapsed"
@@ -30,6 +32,7 @@ export function InfoPanel({
   lastSavedAt,
   escalations,
   comments,
+  sharedComments,
 }: InfoPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [formattedDate, setFormattedDate] = useState<string | null>(null)
@@ -161,6 +164,7 @@ export function InfoPanel({
                     currentUserId={reviewerId}
                     escalations={escalations}
                     comments={comments}
+                    sharedComments={sharedComments}
                   />
                 </div>
               </section>
