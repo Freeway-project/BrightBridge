@@ -478,13 +478,13 @@ function cleanOptionalText(value: string | null | undefined) {
 export type InstructorDashboardData = {
   myCourses: InstructorCourse[];
   departmentCourses: CourseSummary[];
-  isDeptHead: boolean;
+  isLeader: boolean;
 };
 
 export async function getInstructorDashboardData(): Promise<InstructorDashboardData> {
   const context = await requireProfile();
   if (context.kind !== "profile") {
-    return { myCourses: [], departmentCourses: [], isDeptHead: false };
+    return { myCourses: [], departmentCourses: [], isLeader: false };
   }
 
   const profileId = context.profile.id;
@@ -497,11 +497,11 @@ export async function getInstructorDashboardData(): Promise<InstructorDashboardD
   const leadershipUnits = userUnits.filter((u) => LEADERSHIP_TITLES.has(u.title));
 
   if (leadershipUnits.length === 0) {
-    return { myCourses, departmentCourses: [], isDeptHead: false };
+    return { myCourses, departmentCourses: [], isLeader: false };
   }
 
   const unitIds = leadershipUnits.map((u) => u.orgUnitId);
   const departmentCourses = await getCourseRepository().listCoursesByUnitAncestry(unitIds);
 
-  return { myCourses, departmentCourses, isDeptHead: true };
+  return { myCourses, departmentCourses, isLeader: true };
 }

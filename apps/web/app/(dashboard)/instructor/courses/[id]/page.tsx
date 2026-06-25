@@ -19,10 +19,6 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
   const { id } = await params
   const context = await requireProfile()
 
-  if (context.profile.role !== "instructor" && context.profile.role !== "super_admin") {
-    notFound()
-  }
-
   // Assigned instructors get the full workspace. Org-hierarchy leaders (dean /
   // dept-head / etc.) may ACT on the assigned instructor's behalf — approve, ask,
   // talk to the TA — for any course in their subtree. Super admins keep a

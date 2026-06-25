@@ -2,15 +2,16 @@
 
 import { revalidatePath } from "next/cache"
 import { requireProfile } from "@/lib/auth/context"
+import type { AppProfile } from "@/lib/auth/context"
 import { resolveDelegationContext, transitionCourseStatus } from "@/lib/courses/service"
 import { createIssueAction } from "@/lib/issues/actions"
 import { getCourseRepository } from "@/lib/repositories"
 import { getPostgresPool } from "@/lib/postgres/pool"
 
-function assertInstructor(role: string) {
-  if (role !== "instructor" && role !== "super_admin") {
-    throw new Error("Unauthorized")
-  }
+async function assertInstructorOrLeader(courseId: string, profile: AppProfile): Promise<void> {
+  if (profile.role === "instructor" || profile.role === "super_admin") return
+  const delegation = await resolveDelegationContext({ courseId, profile })
+  if (!delegation.delegated) throw new Error("Unauthorized")
 }
 
 function revalidateInstructorCourse(courseId: string) {
@@ -32,7 +33,7 @@ export async function instructorRaiseQuestionAction(
   questionDescription?: string,
 ): Promise<void> {
   const ctx = await requireProfile()
-  assertInstructor(ctx.profile.role)
+  await assertInstructorOrLeader(courseId, ctx.profile)
 
   // Route the question to the assigned TA when there is one.
   const course = await getCourseRepository().getAdminCourse(courseId)
@@ -72,7 +73,7 @@ export async function instructorSignOffAction(
   acknowledgedIssueIds: string[],
 ): Promise<void> {
   const ctx = await requireProfile()
-  assertInstructor(ctx.profile.role)
+  await assertInstructorOrLeader(courseId, ctx.profile)
 
   if (acknowledgedIssueIds.length > 0) {
     // When a hierarchy leader signs off for the instructor, record the

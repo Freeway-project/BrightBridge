@@ -5,14 +5,14 @@ import { InstructorInbox } from "./_components/instructor-inbox"
 import { InstructorDashboardTabs } from "./_components/instructor-dashboard-tabs"
 
 export default async function InstructorDashboardPage() {
-  const { myCourses, departmentCourses, isDeptHead } = await getInstructorDashboardData()
+  const { myCourses, departmentCourses, isLeader } = await getInstructorDashboardData()
 
   return (
     <>
       <Topbar title="My Course Reviews" />
       <TweakableContent className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-5xl space-y-10">
-          {isDeptHead ? (
+          {isLeader ? (
             <InstructorDashboardTabs myCourses={myCourses} departmentCourses={departmentCourses} />
           ) : (
             <InstructorInbox
