@@ -170,7 +170,8 @@ export async function searchMessages(
 ): Promise<MessageHit[]> {
   const { rows } = await getPostgresPool().query(
     `select m.id as message_id, m.conversation_id, m.created_at,
-            ts_headline('simple', m.body, plainto_tsquery('simple', $2),
+            ts_headline('simple', regexp_replace(m.body, E'<[^>]+>', '', 'g'),
+                        plainto_tsquery('simple', $2),
                         'MaxFragments=1,MaxWords=18,MinWords=6') as snippet
      from public.messages m
      where m.deleted_at is null

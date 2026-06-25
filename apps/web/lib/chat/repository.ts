@@ -168,3 +168,17 @@ export async function getConversationMemberIds(conversationId: string): Promise<
   return rows.map((r) => r.user_id);
 }
 
+export async function getConversationMembersWithPrefs(
+  conversationId: string,
+): Promise<Array<{ userId: string; notificationPref: string }>> {
+  const { rows } = await getPostgresPool().query<{
+    user_id: string;
+    notification_pref: string | null;
+  }>(
+    `select user_id, notification_pref from public.conversation_members
+     where conversation_id = $1 and removed_at is null`,
+    [conversationId],
+  );
+  return rows.map((r) => ({ userId: r.user_id, notificationPref: r.notification_pref ?? "all" }));
+}
+

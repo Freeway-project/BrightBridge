@@ -25,14 +25,16 @@ export async function sendMessage(
     createdAt: new Date().toISOString(),
     reactions: [],
   })
-  // Signal each other conversation member that their notification feed changed
-  void repo.getConversationMemberIds(input.conversationId).then((memberIds) => {
-    for (const memberId of memberIds) {
-      if (memberId !== input.authorId) {
-        void broadcastNotificationEvent(memberId).catch((err) =>
-          console.warn("[sendMessage] notification broadcast failed:", err),
-        )
-      }
+  // Signal each other conversation member that their notification feed changed,
+  // but respect their notification_pref: skip "none", skip "mentions" unless they were @mentioned.
+  void repo.getConversationMembersWithPrefs(input.conversationId).then((members) => {
+    for (const { userId, notificationPref } of members) {
+      if (userId === input.authorId) continue
+      if (notificationPref === "none") continue
+      if (notificationPref === "mentions" && !input.mentionIds?.includes(userId)) continue
+      void broadcastNotificationEvent(userId).catch((err) =>
+        console.warn("[sendMessage] notification broadcast failed:", err),
+      )
     }
   }).catch((err) => console.warn("[sendMessage] member lookup failed:", err))
   return id

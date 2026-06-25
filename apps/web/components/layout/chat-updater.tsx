@@ -1,10 +1,13 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 const POLL_MS = 30_000
 
-export function ChatUpdater() {
+export function ChatUpdater({ userId }: { userId: string }) {
+  const router = useRouter()
   const prevCount = useRef<number | null>(null)
   const baseTitle = useRef<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -30,17 +33,20 @@ export function ChatUpdater() {
         if (!baseTitle.current) baseTitle.current = stripped
         document.title = count > 0 ? `(${count}) ${stripped}` : stripped
 
-        if (
-          prevCount.current !== null &&
-          count > prevCount.current &&
-          document.visibilityState !== "visible" &&
-          typeof Notification !== "undefined" &&
-          Notification.permission === "granted"
-        ) {
-          new Notification("New message", {
-            body: "You have unread chat messages",
-            icon: "/favicon.ico",
-          })
+        if (prevCount.current !== null && count > prevCount.current) {
+          // Refresh server components so the chat sidebar unread badges update.
+          router.refresh()
+
+          if (
+            document.visibilityState !== "visible" &&
+            typeof Notification !== "undefined" &&
+            Notification.permission === "granted"
+          ) {
+            new Notification("New message", {
+              body: "You have unread chat messages",
+              icon: "/favicon.ico",
+            })
+          }
         }
 
         prevCount.current = count
@@ -52,11 +58,25 @@ export function ChatUpdater() {
     void poll()
     timerRef.current = setInterval(() => void poll(), POLL_MS)
 
+    // Subscribe to the per-user Supabase notification channel so we get
+    // real-time signals instead of relying solely on the 30-second poll.
+    const supabase = createClient()
+    let channel: ReturnType<NonNullable<typeof supabase>["channel"]> | null = null
+    if (supabase) {
+      channel = supabase.channel(`notifications:${userId}`)
+      channel.on("broadcast", { event: "new" }, () => {
+        void poll()
+      })
+      channel.subscribe()
+    }
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (baseTitle.current) document.title = baseTitle.current
+      if (supabase && channel) void supabase.removeChannel(channel)
     }
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
 
   return null
 }
