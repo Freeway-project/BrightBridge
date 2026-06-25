@@ -5,7 +5,7 @@
 // can import it. The style class strings are literal so Tailwind's JIT keeps them.
 
 export const ROLE_TITLE_LABELS: Record<string, string> = {
-  vp: "Vice President",
+  vp: "Dean",
   dean: "Dean",
   associate_dean: "Associate Dean",
   assistant_dean: "Assistant Dean",
