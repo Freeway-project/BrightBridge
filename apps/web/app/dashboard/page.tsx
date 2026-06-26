@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import type { Role } from "@coursebridge/workflow";
 import { getAuthContext } from "@/lib/auth/context";
 import { isReadonlyMode } from "@/lib/system-migration";
+import { getHierarchyRepository } from "@/lib/repositories";
+import { LEADERSHIP_TITLES } from "@/lib/hierarchy/leadership";
 
 const ROLE_ROUTES: Record<Role, string> = {
   standard_user: "/ta",
@@ -46,5 +48,16 @@ export default async function DashboardPage() {
     );
   }
 
-  redirect(ROLE_ROUTES[context.profile.role]);
+  const role = context.profile.role;
+
+  // Hierarchy leaders (Dean, VP, etc.) land on the org explorer — it's more
+  // useful as a home base than their personal course review queue.
+  if (role === "instructor") {
+    const hierarchy = getHierarchyRepository();
+    const userUnits = await hierarchy.getUserUnits(context.profile.id);
+    const isLeader = userUnits.some((u) => LEADERSHIP_TITLES.has(u.title));
+    if (isLeader) redirect("/hierarchy");
+  }
+
+  redirect(ROLE_ROUTES[role]);
 }
