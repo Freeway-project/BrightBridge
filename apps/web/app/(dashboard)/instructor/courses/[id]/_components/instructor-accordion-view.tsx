@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useTransition, type ReactNode } from "react"
+import { useState, useEffect, useTransition, useContext, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import {
   CheckCircle2,
@@ -22,6 +22,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { cn } from "@/lib/utils"
 import { instructorSignOffAction } from "../actions"
 import { CourseChatPanel } from "./course-chat-panel"
+import { CourseTabContext } from "./instructor-course-shell"
 
 export interface InstructorAccordionCourseMeta {
   term?: string | null
@@ -42,9 +43,6 @@ interface Props {
   actingOnBehalfOfName?: string | null
   actingAsTitle?: string | null
   meta: InstructorAccordionCourseMeta
-  /** Optional: controlled active tab (driven by shell when wizard requests chat). */
-  activeTab?: TabId
-  onTabChange?: (tab: TabId) => void
 }
 
 export type TabId = "summary" | "review" | "chat" | "approve"
@@ -63,28 +61,28 @@ export function InstructorAccordionView({
   actingOnBehalfOfName,
   actingAsTitle,
   meta,
-  activeTab: controlledTab,
-  onTabChange,
 }: Props) {
+  const shellTab = useContext(CourseTabContext)
   const router = useRouter()
   const { canApprove, statusMessage } = getInstructorSimpleState(status, readOnly)
 
   const [internalTab, setInternalTab] = useState<TabId>("review")
-  const activeTab = controlledTab ?? internalTab
+  // If rendered inside InstructorCourseShell, use context-controlled tab; otherwise self-manage
+  const activeTab = shellTab?.activeTab ?? internalTab
 
   useEffect(() => {
-    if (controlledTab) return // externally controlled
+    if (shellTab) return // context-controlled — shell handles persistence
     try {
       const saved = localStorage.getItem(STORAGE_KEY(courseId))
       if (saved && ["summary", "review", "chat", "approve"].includes(saved)) {
         setInternalTab(saved as TabId)
       }
     } catch { /* ignore */ }
-  }, [courseId, controlledTab])
+  }, [courseId, shellTab])
 
   const gotoTab = (id: TabId) => {
-    if (controlledTab !== undefined) {
-      onTabChange?.(id)
+    if (shellTab) {
+      shellTab.setActiveTab(id)
     } else {
       setInternalTab(id)
       try { localStorage.setItem(STORAGE_KEY(courseId), id) } catch { /* ignore */ }

@@ -90,7 +90,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
           actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
           reviewNode={reviewNode}
-          full={(activeTab, onTabChange) => (
+          full={
             <InstructorAccordionView
               courseId={id}
               status={course.status}
@@ -108,10 +108,8 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
                 targetCourseId: course.targetCourseId,
               }}
               reviewNode={reviewNode}
-              activeTab={activeTab}
-              onTabChange={onTabChange}
             />
-          )}
+          }
         />
       </main>
     </>
