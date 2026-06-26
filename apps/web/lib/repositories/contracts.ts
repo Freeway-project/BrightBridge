@@ -251,6 +251,8 @@ export type CourseComment = {
   visibility: "internal" | "instructor_visible";
   parent_comment_id: string | null;
   created_at: string;
+  is_question: boolean;
+  is_answered: boolean;
 };
 
 export type CourseAssignmentRecord = {
@@ -318,6 +320,7 @@ export type PostCourseCommentInput = {
   parentCommentId?: string | null;
   /** Set when a hierarchy leader posted on behalf of the assigned instructor. */
   actingOnBehalfOf?: string | null;
+  isQuestion?: boolean;
 };
 
 export type UpsertReviewResponseInput = {
@@ -451,6 +454,7 @@ export interface ReviewRepository {
 export interface CommentRepository {
   listCourseComments(courseId: string, visibility?: "internal" | "instructor_visible"): Promise<CourseComment[]>;
   postCourseComment(input: PostCourseCommentInput): Promise<CourseComment>;
+  markCommentAnswered(commentId: string, courseId: string): Promise<void>;
 }
 
 // ── Escalations ──────────────────────────────────────────────────────────────

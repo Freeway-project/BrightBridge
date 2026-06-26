@@ -15,14 +15,12 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
+const CAN_MARK_ANSWERED_ROLES = ["admin_full", "super_admin", "standard_user"] as const
+
 export default async function InstructorCourseDetailPage({ params }: Props) {
   const { id } = await params
   const context = await requireProfile()
 
-  // Assigned instructors get the full workspace. Org-hierarchy leaders (dean /
-  // dept-head / etc.) may ACT on the assigned instructor's behalf — approve, ask,
-  // talk to the TA — for any course in their subtree. Super admins keep a
-  // read-only hierarchy view.
   const assignedCourse = await getCourseRepository().getAssignedCourseById(id, context.profile.id, "instructor")
   const delegation = assignedCourse
     ? null
@@ -35,17 +33,17 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
       (await getHierarchyRepository().hasHierarchyAccess(context.profile.id, id)))
   if (!assignedCourse && !canViewViaHierarchy) notFound()
 
-  // Read-only unless you're the assigned instructor OR a leader acting on their
-  // behalf. (Super-admin hierarchy views stay read-only.)
   const readOnly = !assignedCourse && !canActViaDelegation
 
-  // Record the dashboard open for the indicator dot. Only the assigned
-  // instructor counts — hierarchy/super-admin read-only views shouldn't
-  // pollute the "did the instructor open it?" signal.
   if (assignedCourse && context.profile.role === "instructor") {
     const { recordInstructorView } = await import("@/lib/instructor-views/service")
     await recordInstructorView(id, context.profile.id)
   }
+
+  // Only full-access admins and TAs can mark questions answered (matches markAnsweredAction allow-list)
+  const canMarkAnswered = CAN_MARK_ANSWERED_ROLES.includes(
+    context.profile.role as typeof CAN_MARK_ANSWERED_ROLES[number],
+  )
 
   const [detail, sharedComments, myCourses] = await Promise.all([
     getAdminCourseDetail(id),
@@ -55,6 +53,14 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
   if (!detail) notFound()
 
   const { course, responses, sectionKeyById } = detail
+
+  const reviewNode = (
+    <InstructorReviewDetail
+      course={course}
+      responses={responses}
+      sectionKeyById={sectionKeyById}
+    />
+  )
 
   return (
     <>
@@ -71,7 +77,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           />
         }
       />
-      <main className="flex-1 flex overflow-hidden bg-background">
+      <main className="flex flex-1 overflow-hidden bg-background">
         <CourseSwitchSidebar
           currentId={id}
           courses={myCourses.map((c) => ({ id: c.id, title: c.title, status: c.status, term: c.term }))}
@@ -83,14 +89,8 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           readOnly={readOnly}
           actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
           actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
-          reviewNode={
-            <InstructorReviewDetail
-              course={course}
-              responses={responses}
-              sectionKeyById={sectionKeyById}
-            />
-          }
-          full={
+          reviewNode={reviewNode}
+          full={(activeTab, onTabChange) => (
             <InstructorAccordionView
               courseId={id}
               status={course.status}
@@ -98,6 +98,7 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
               readOnly={readOnly}
               sharedComments={sharedComments}
               currentUserId={context.userId}
+              canMarkAnswered={canMarkAnswered}
               actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
               actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
               meta={{
@@ -106,15 +107,11 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
                 sourceCourseId: course.sourceCourseId,
                 targetCourseId: course.targetCourseId,
               }}
-              reviewNode={
-                <InstructorReviewDetail
-                  course={course}
-                  responses={responses}
-                  sectionKeyById={sectionKeyById}
-                />
-              }
+              reviewNode={reviewNode}
+              activeTab={activeTab}
+              onTabChange={onTabChange}
             />
-          }
+          )}
         />
       </main>
     </>
