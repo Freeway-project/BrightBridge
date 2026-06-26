@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { HelpCircle, PanelsTopLeft, ShieldCheck, Sparkles } from "lucide-react"
 import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import type { CourseStatus } from "@coursebridge/workflow"
@@ -12,6 +12,15 @@ import { Button } from "@/components/ui/button"
 import { InstructorSimpleWizard } from "./instructor-simple-wizard"
 import { useInstructorTour } from "./instructor-guided-tour"
 
+export const CourseTabContext = createContext<{
+  activeTab: TabId
+  setActiveTab: (tab: TabId) => void
+} | null>(null)
+
+export function useCourseTab() {
+  return useContext(CourseTabContext)
+}
+
 const SEEN_KEY = "coursebridge:instructor-tour-seen"
 
 interface Props {
@@ -20,7 +29,7 @@ interface Props {
   finalSummary: string | null
   readOnly: boolean
   reviewNode: ReactNode
-  full: (activeTab: TabId, onTabChange: (t: TabId) => void) => ReactNode
+  full: ReactNode
   actingOnBehalfOfName?: string | null
   actingAsTitle?: string | null
 }
@@ -142,7 +151,9 @@ export function InstructorCourseShell({
           />
         </div>
       ) : (
-        full(activeFullTab, setActiveFullTab)
+        <CourseTabContext.Provider value={{ activeTab: activeFullTab, setActiveTab: setActiveFullTab }}>
+          {full}
+        </CourseTabContext.Provider>
       )}
     </div>
   )
