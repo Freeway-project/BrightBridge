@@ -70,7 +70,11 @@ export function CourseChatPanel({
 
   function handleMarkAnswered(commentId: string) {
     startAnswer(async () => {
-      await markAnsweredAction(courseId, commentId)
+      try {
+        await markAnsweredAction(courseId, commentId)
+      } catch (err) {
+        console.error("Failed to mark comment answered:", err)
+      }
     })
   }
 

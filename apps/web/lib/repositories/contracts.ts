@@ -454,7 +454,7 @@ export interface ReviewRepository {
 export interface CommentRepository {
   listCourseComments(courseId: string, visibility?: "internal" | "instructor_visible"): Promise<CourseComment[]>;
   postCourseComment(input: PostCourseCommentInput): Promise<CourseComment>;
-  markCommentAnswered(commentId: string): Promise<void>;
+  markCommentAnswered(commentId: string, courseId: string): Promise<void>;
 }
 
 // ── Escalations ──────────────────────────────────────────────────────────────

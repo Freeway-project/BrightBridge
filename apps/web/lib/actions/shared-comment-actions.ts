@@ -64,7 +64,7 @@ export async function markAnsweredAction(
   const allowed = ["admin_full", "super_admin", "standard_user"]
   if (!allowed.includes(ctx.profile.role)) throw new Error("Unauthorized")
 
-  await getCommentRepository().markCommentAnswered(commentId)
+  await getCommentRepository().markCommentAnswered(commentId, courseId)
 
   revalidateCourse(courseId)
 }

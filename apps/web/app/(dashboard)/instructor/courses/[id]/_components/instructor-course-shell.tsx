@@ -37,7 +37,9 @@ export function InstructorCourseShell({
 }: Props) {
   const [mode, setMode] = useStickyTabState("instructor-view-mode", "simple")
   const [step, setStep] = useState(0)
-  const [activeFullTab, setActiveFullTab] = useState<TabId>("review")
+  // Persisted per-course so refreshing the page restores the last open tab.
+  // Key matches the accordion's own key: coursebridge:tab:${courseId}
+  const [activeFullTab, setActiveFullTab] = useStickyTabState(courseId, "review") as [TabId, (t: TabId) => void]
   const { startTour } = useInstructorTour(setStep)
 
   const { canApprove } = getInstructorSimpleState(status, readOnly)

@@ -162,7 +162,7 @@ export function InstructorSimpleWizard({
               variant="outline"
               data-tour="ask-question"
               className="h-auto flex-col items-start gap-1 p-5 text-left"
-              onClick={() => onRequestChat?.()}
+              onClick={() => onRequestChat ? onRequestChat() : onStepChange(2)}
             >
               <span className="flex items-center gap-2 text-base font-semibold">
                 <MessageCircleQuestion className="size-5 text-primary" /> Yes, I have a question

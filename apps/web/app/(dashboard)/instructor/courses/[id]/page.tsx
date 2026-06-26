@@ -15,8 +15,7 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
-const ADMIN_ROLES = ["admin_full", "super_admin", "admin_viewer"]
-const TA_ROLES = ["standard_user"]
+const CAN_MARK_ANSWERED_ROLES = ["admin_full", "super_admin", "standard_user"] as const
 
 export default async function InstructorCourseDetailPage({ params }: Props) {
   const { id } = await params
@@ -41,9 +40,10 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
     await recordInstructorView(id, context.profile.id)
   }
 
-  // Admin and TA roles can mark questions as answered
-  const canMarkAnswered =
-    ADMIN_ROLES.includes(context.profile.role) || TA_ROLES.includes(context.profile.role)
+  // Only full-access admins and TAs can mark questions answered (matches markAnsweredAction allow-list)
+  const canMarkAnswered = CAN_MARK_ANSWERED_ROLES.includes(
+    context.profile.role as typeof CAN_MARK_ANSWERED_ROLES[number],
+  )
 
   const [detail, sharedComments, myCourses] = await Promise.all([
     getAdminCourseDetail(id),

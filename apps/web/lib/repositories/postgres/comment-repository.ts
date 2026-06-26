@@ -104,11 +104,11 @@ export function createPostgresCommentRepository(): CommentRepository {
       };
     },
 
-    async markCommentAnswered(commentId) {
+    async markCommentAnswered(commentId, courseId) {
       const pool = getPostgresPool();
       await pool.query(
-        `UPDATE course_comments SET is_answered = true WHERE id = $1`,
-        [commentId],
+        `UPDATE course_comments SET is_answered = true WHERE id = $1 AND course_id = $2`,
+        [commentId, courseId],
       );
     },
   };

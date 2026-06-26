@@ -37,8 +37,8 @@ export async function instructorRaiseQuestionAction(
     ? `${questionTitle.trim()}\n\n${questionDescription.trim()}`
     : questionTitle.trim()
 
+  // postSharedCommentAction already calls revalidateCourse(courseId); no second revalidation needed.
   await postSharedCommentAction(courseId, body, true)
-  revalidateInstructorCourse(courseId)
 }
 
 /**
