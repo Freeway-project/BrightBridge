@@ -7,7 +7,6 @@ import { getCourseRepository, getHierarchyRepository } from "@/lib/repositories"
 import { CourseSwitcher } from "./_components/course-switcher"
 import { CourseSwitchSidebar } from "./_components/course-switch-sidebar"
 import { InstructorReviewDetail } from "./_components/instructor-review-detail"
-import { InstructorAccordionView } from "./_components/instructor-accordion-view"
 import { InstructorCourseShell } from "./_components/instructor-course-shell"
 import { getSharedComments } from "@/lib/services/comments"
 
@@ -87,29 +86,18 @@ export default async function InstructorCourseDetailPage({ params }: Props) {
           status={course.status}
           finalSummary={course.instructorSummaryNotes}
           readOnly={readOnly}
+          sharedComments={sharedComments}
+          currentUserId={context.userId}
+          canMarkAnswered={canMarkAnswered}
+          meta={{
+            term: course.term,
+            department: course.department,
+            sourceCourseId: course.sourceCourseId,
+            targetCourseId: course.targetCourseId,
+          }}
           actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
           actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
           reviewNode={reviewNode}
-          full={
-            <InstructorAccordionView
-              courseId={id}
-              status={course.status}
-              finalSummary={course.instructorSummaryNotes}
-              readOnly={readOnly}
-              sharedComments={sharedComments}
-              currentUserId={context.userId}
-              canMarkAnswered={canMarkAnswered}
-              actingOnBehalfOfName={canActViaDelegation ? (delegation?.onBehalfOfName ?? null) : null}
-              actingAsTitle={canActViaDelegation ? (delegation?.leaderTitle ?? null) : null}
-              meta={{
-                term: course.term,
-                department: course.department,
-                sourceCourseId: course.sourceCourseId,
-                targetCourseId: course.targetCourseId,
-              }}
-              reviewNode={reviewNode}
-            />
-          }
         />
       </main>
     </>
