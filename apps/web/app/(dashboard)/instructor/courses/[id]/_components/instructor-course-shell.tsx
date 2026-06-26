@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { HelpCircle, PanelsTopLeft, ShieldCheck, Sparkles } from "lucide-react"
+import type { CourseComment } from "@/lib/services/comments"
 import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import type { CourseStatus } from "@coursebridge/workflow"
-import type { TabId } from "./instructor-accordion-view"
+import { InstructorAccordionView, type InstructorAccordionCourseMeta, type TabId } from "./instructor-accordion-view"
 import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 import { getInstructorSimpleState } from "@/lib/courses/instructor-view"
 import { cn } from "@/lib/utils"
@@ -29,7 +30,10 @@ interface Props {
   finalSummary: string | null
   readOnly: boolean
   reviewNode: ReactNode
-  full: ReactNode
+  sharedComments: CourseComment[]
+  currentUserId: string
+  canMarkAnswered: boolean
+  meta: InstructorAccordionCourseMeta
   actingOnBehalfOfName?: string | null
   actingAsTitle?: string | null
 }
@@ -40,7 +44,10 @@ export function InstructorCourseShell({
   finalSummary,
   readOnly,
   reviewNode,
-  full,
+  sharedComments,
+  currentUserId,
+  canMarkAnswered,
+  meta,
   actingOnBehalfOfName,
   actingAsTitle,
 }: Props) {
@@ -148,11 +155,24 @@ export function InstructorCourseShell({
             step={step}
             onStepChange={setStep}
             onRequestChat={handleRequestChat}
+            sharedComments={sharedComments}
           />
         </div>
       ) : (
         <CourseTabContext.Provider value={{ activeTab: activeFullTab, setActiveTab: setActiveFullTab }}>
-          {full}
+          <InstructorAccordionView
+            courseId={courseId}
+            status={status}
+            finalSummary={finalSummary}
+            readOnly={readOnly}
+            reviewNode={reviewNode}
+            sharedComments={sharedComments}
+            currentUserId={currentUserId}
+            canMarkAnswered={canMarkAnswered}
+            actingOnBehalfOfName={actingOnBehalfOfName}
+            actingAsTitle={actingAsTitle}
+            meta={meta}
+          />
         </CourseTabContext.Provider>
       )}
     </div>
