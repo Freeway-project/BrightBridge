@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { requireProfile } from "@/lib/auth/context"
 import { postCourseComment } from "@/lib/services/comments"
-import { getCommentRepository } from "@/lib/repositories"
+import { getCommentRepository, getCourseRepository } from "@/lib/repositories"
 import { resolveDelegationContext, transitionCourseStatus } from "@/lib/courses/service"
-import { getCourseRepository } from "@/lib/repositories"
 
 function revalidateCourse(courseId: string) {
   revalidatePath(`/instructor/courses/${courseId}`)
