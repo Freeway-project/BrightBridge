@@ -50,6 +50,7 @@ export async function postCourseComment({
   visibility = "internal",
   parentCommentId = null,
   actingOnBehalfOf = null,
+  isQuestion = false,
 }: {
   courseId: string
   authorId: string
@@ -57,6 +58,7 @@ export async function postCourseComment({
   visibility?: "internal" | "instructor_visible"
   parentCommentId?: string | null
   actingOnBehalfOf?: string | null
+  isQuestion?: boolean
 }): Promise<CourseComment> {
   return getCommentRepository().postCourseComment({
     courseId,
@@ -65,5 +67,6 @@ export async function postCourseComment({
     visibility,
     parentCommentId,
     actingOnBehalfOf,
+    isQuestion,
   })
 }

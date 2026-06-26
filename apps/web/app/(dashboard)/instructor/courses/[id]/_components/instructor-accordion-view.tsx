@@ -31,7 +31,10 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { instructorRaiseQuestionAction, instructorSignOffAction, getIssueCommentsAction, postIssueCommentAction } from "../actions"
+import { instructorRaiseQuestionAction, instructorSignOffAction } from "../actions"
+// TODO(Task 6): QuestionItem + these stubs will be replaced by the unified chat panel.
+async function getIssueCommentsAction(_courseId: string, _issueId: string): Promise<IssueComment[]> { return [] }
+async function postIssueCommentAction(_courseId: string, _issueId: string, _body: string): Promise<void> {}
 
 
 // --- Questions section internals ---
