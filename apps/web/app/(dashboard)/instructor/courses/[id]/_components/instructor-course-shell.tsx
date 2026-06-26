@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react"
 import { HelpCircle, PanelsTopLeft, ShieldCheck, Sparkles } from "lucide-react"
 import { ROLE_TITLE_LABELS } from "@/lib/super-admin/roles"
 import type { CourseStatus } from "@coursebridge/workflow"
+import type { TabId } from "./instructor-accordion-view"
 import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 import { getInstructorSimpleState } from "@/lib/courses/instructor-view"
 import { cn } from "@/lib/utils"
@@ -18,22 +19,12 @@ interface Props {
   status: CourseStatus
   finalSummary: string | null
   readOnly: boolean
-  /** Server-rendered review summary for the Simple view. */
   reviewNode: ReactNode
-  /** The existing full workspace, rendered when "Full details" is chosen. */
-  full: ReactNode
-  /** Assigned instructor's name when a hierarchy leader is acting on their behalf. */
+  full: (activeTab: TabId, onTabChange: (t: TabId) => void) => ReactNode
   actingOnBehalfOfName?: string | null
-  /** The acting leader's org title (e.g. "dean") when delegating. */
   actingAsTitle?: string | null
 }
 
-/**
- * Wraps the instructor course view with a Simple / Full toggle. Simple is a
- * guided wizard tuned for non-technical instructors (with a "show me around"
- * walkthrough); Full is the unchanged accordion workspace. The choice is
- * remembered across courses.
- */
 export function InstructorCourseShell({
   courseId,
   status,
@@ -46,40 +37,35 @@ export function InstructorCourseShell({
 }: Props) {
   const [mode, setMode] = useStickyTabState("instructor-view-mode", "simple")
   const [step, setStep] = useState(0)
+  const [activeFullTab, setActiveFullTab] = useState<TabId>("review")
   const { startTour } = useInstructorTour(setStep)
 
   const { canApprove } = getInstructorSimpleState(status, readOnly)
   const tourAvailable = canApprove
   const isSimple = mode === "simple"
 
-  // Auto-run the tour once, ever, on the first actionable course opened.
   useEffect(() => {
     if (!tourAvailable || !isSimple) return
     let seen = false
-    try {
-      seen = !!localStorage.getItem(SEEN_KEY)
-    } catch {
-      seen = true
-    }
+    try { seen = !!localStorage.getItem(SEEN_KEY) } catch { seen = true }
     if (seen) return
     let cancelled = false
     const t = setTimeout(() => {
       if (cancelled) return
-      try {
-        localStorage.setItem(SEEN_KEY, "1")
-      } catch {
-        // ignore
-      }
+      try { localStorage.setItem(SEEN_KEY, "1") } catch { /* ignore */ }
       startTour()
     }, 500)
-    return () => {
-      cancelled = true
-      clearTimeout(t)
-    }
+    return () => { cancelled = true; clearTimeout(t) }
   }, [tourAvailable, isSimple, startTour])
 
   const actingAsLeader = !!actingAsTitle
   const leaderLabel = actingAsTitle ? (ROLE_TITLE_LABELS[actingAsTitle] ?? "Leader") : null
+
+  // Called from the simple wizard when instructor wants to open chat
+  function handleRequestChat() {
+    setActiveFullTab("chat")
+    setMode("full")
+  }
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -150,10 +136,11 @@ export function InstructorCourseShell({
             reviewNode={reviewNode}
             step={step}
             onStepChange={setStep}
+            onRequestChat={handleRequestChat}
           />
         </div>
       ) : (
-        full
+        full(activeFullTab, setActiveFullTab)
       )}
     </div>
   )

@@ -13,14 +13,12 @@ import {
 } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LottieLoader } from "@/components/ui/lottie-loader"
 import { getIssuesForCourseAction } from "@/lib/issues/actions"
 import type { CourseIssue } from "@/lib/issues/types"
 import { getInstructorSimpleState } from "@/lib/courses/instructor-view"
-import { instructorRaiseQuestionAction, instructorSignOffAction } from "../actions"
+import { instructorSignOffAction } from "../actions"
 
 const STEP_TITLES = ["Look at your course", "Have any questions?", "Approve the course"]
 
@@ -34,6 +32,7 @@ interface Props {
   /** Controlled step (0-2) so the guided tour can drive the wizard. */
   step: number
   onStepChange: (step: number) => void
+  onRequestChat?: () => void
 }
 
 function ProgressDots({ count, active }: { count: number; active: number }) {
@@ -64,26 +63,11 @@ export function InstructorSimpleWizard({
   reviewNode,
   step,
   onStepChange,
+  onRequestChat,
 }: Props) {
   const router = useRouter()
   const { canAsk, canApprove, statusMessage } = getInstructorSimpleState(status, readOnly)
   const isWizard = canAsk && canApprove
-
-  const [askOpen, setAskOpen] = useState(false)
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [askPending, startAsk] = useTransition()
-
-  const submitQuestion = () => {
-    if (!title.trim()) return
-    startAsk(async () => {
-      await instructorRaiseQuestionAction(courseId, title, description)
-      setAskOpen(false)
-      setTitle("")
-      setDescription("")
-      router.refresh()
-    })
-  }
 
   const [issues, setIssues] = useState<CourseIssue[] | null>(null)
   const [acked, setAcked] = useState(false)
@@ -159,73 +143,38 @@ export function InstructorSimpleWizard({
             Is there anything you&apos;re unsure about, or would like changed?
           </p>
 
-          {!askOpen ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-auto flex-col items-start gap-1 p-5 text-left"
-                onClick={() => onStepChange(2)}
-              >
-                <span className="flex items-center gap-2 text-base font-semibold">
-                  <CheckCircle2 className="size-5 text-green-600" /> No, it looks fine
-                </span>
-                <span className="text-sm font-normal text-muted-foreground">
-                  Continue to approve the course.
-                </span>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                data-tour="ask-question"
-                className="h-auto flex-col items-start gap-1 p-5 text-left"
-                onClick={() => setAskOpen(true)}
-              >
-                <span className="flex items-center gap-2 text-base font-semibold">
-                  <MessageCircleQuestion className="size-5 text-primary" /> Yes, I have a question
-                </span>
-                <span className="text-sm font-normal text-muted-foreground">
-                  Send it straight to the reviewer.
-                </span>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4 rounded-xl border border-border bg-card p-5">
-              <div className="space-y-1.5">
-                <p className="text-sm font-medium">
-                  Your question <span className="text-destructive">*</span>
-                </p>
-                <Input
-                  placeholder="What would you like to ask?"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Any details <span className="text-xs">(optional)</span>
-                </p>
-                <Textarea
-                  placeholder="Add anything that helps explain it…"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={() => setAskOpen(false)} disabled={askPending}>
-                  Cancel
-                </Button>
-                <Button onClick={submitQuestion} disabled={askPending || !title.trim()}>
-                  {askPending ? "Sending…" : "Send to reviewer"}
-                </Button>
-              </div>
-            </div>
-          )}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-auto flex-col items-start gap-1 p-5 text-left"
+              onClick={() => onStepChange(2)}
+            >
+              <span className="flex items-center gap-2 text-base font-semibold">
+                <CheckCircle2 className="size-5 text-green-600" /> No, it looks fine
+              </span>
+              <span className="text-sm font-normal text-muted-foreground">
+                Continue to approve the course.
+              </span>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              data-tour="ask-question"
+              className="h-auto flex-col items-start gap-1 p-5 text-left"
+              onClick={() => onRequestChat?.()}
+            >
+              <span className="flex items-center gap-2 text-base font-semibold">
+                <MessageCircleQuestion className="size-5 text-primary" /> Yes, I have a question
+              </span>
+              <span className="text-sm font-normal text-muted-foreground">
+                Open the chat to message the reviewer team.
+              </span>
+            </Button>
+          </div>
 
           <div className="flex justify-start">
-            <Button variant="ghost" className="gap-2" onClick={() => onStepChange(0)} disabled={askPending}>
+            <Button variant="ghost" className="gap-2" onClick={() => onStepChange(0)}>
               <ArrowLeft className="size-5" /> Back
             </Button>
           </div>
