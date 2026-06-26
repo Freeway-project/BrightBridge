@@ -10,8 +10,10 @@ import {
   ArrowLeft,
   Eye,
   Info,
+  MessageSquare,
 } from "lucide-react"
 import type { CourseStatus } from "@coursebridge/workflow"
+import type { CourseComment } from "@/lib/services/comments"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LottieLoader } from "@/components/ui/lottie-loader"
@@ -33,6 +35,7 @@ interface Props {
   step: number
   onStepChange: (step: number) => void
   onRequestChat?: () => void
+  sharedComments?: CourseComment[]
 }
 
 function ProgressDots({ count, active }: { count: number; active: number }) {
@@ -64,10 +67,42 @@ export function InstructorSimpleWizard({
   step,
   onStepChange,
   onRequestChat,
+  sharedComments = [],
 }: Props) {
   const router = useRouter()
   const { canAsk, canApprove, statusMessage } = getInstructorSimpleState(status, readOnly)
   const isWizard = canAsk && canApprove
+
+  const unansweredCount = sharedComments.filter((c) => c.is_question && !c.is_answered).length
+  const lastMessage = sharedComments.at(-1)
+
+  const chatBanner = !readOnly && sharedComments.length > 0 ? (
+    <button
+      type="button"
+      onClick={() => onRequestChat ? onRequestChat() : undefined}
+      className="mb-5 w-full text-left rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 hover:bg-primary/10 transition-colors"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <MessageSquare className="size-4 shrink-0 text-primary" aria-hidden />
+          <span className="text-sm font-semibold text-foreground truncate">
+            {unansweredCount > 0
+              ? `${unansweredCount} unanswered question${unansweredCount > 1 ? "s" : ""} in chat`
+              : `${sharedComments.length} message${sharedComments.length > 1 ? "s" : ""} in chat`}
+          </span>
+        </div>
+        <span className="text-xs font-medium text-primary shrink-0 flex items-center gap-1">
+          Open chat <ArrowRight className="size-3" />
+        </span>
+      </div>
+      {lastMessage && (
+        <p className="mt-1.5 text-xs text-muted-foreground line-clamp-1">
+          <span className="font-medium">{lastMessage.author_name ?? "Team"}:</span>{" "}
+          {lastMessage.body}
+        </p>
+      )}
+    </button>
+  ) : null
 
   const [issues, setIssues] = useState<CourseIssue[] | null>(null)
   const [acked, setAcked] = useState(false)
@@ -96,6 +131,7 @@ export function InstructorSimpleWizard({
   if (!isWizard) {
     return (
       <div className="mx-auto max-w-3xl space-y-6 p-2">
+        {chatBanner}
         {readOnly ? (
           <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
             <Eye className="size-4 shrink-0" aria-hidden />
@@ -114,6 +150,7 @@ export function InstructorSimpleWizard({
 
   return (
     <div className="mx-auto max-w-3xl p-2">
+      {chatBanner}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">{STEP_TITLES[step]}</h2>
         <ProgressDots count={3} active={step} />

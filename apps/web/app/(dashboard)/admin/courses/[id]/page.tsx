@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import { Topbar } from "@/components/layout/topbar"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
 import { getAdminCourseDetail } from "@/lib/admin/queries"
-import { getCourseComments } from "@/lib/services/comments"
+import { getCourseComments, getSharedComments } from "@/lib/services/comments"
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StickyTabs } from "@/components/ui/sticky-tabs"
 import { CourseReviewDetail } from "./_components/course-review-detail"
@@ -20,6 +20,7 @@ import { getCourseTimeline } from "@/lib/courses/timeline"
 import { CourseTimeline } from "@/components/courses/course-timeline"
 import { viewForCourse } from "@/lib/instructor-views/queries"
 import { OpenedDot } from "@/components/instructor/opened-dot"
+import { InstructorChatPanel } from "./_components/instructor-chat-panel"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -30,9 +31,10 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, comments, submissionHistory, questionRounds, timeline, instructorView] = await Promise.all([
+  const [detail, comments, sharedComments, submissionHistory, questionRounds, timeline, instructorView] = await Promise.all([
     getAdminCourseDetail(id),
     getCourseComments(id),
+    getSharedComments(id),
     getSubmissionHistory(id),
     getQuestionRoundHistory(id),
     getCourseTimeline(id, { includeInternalComments: true }),
@@ -136,8 +138,13 @@ export default async function AdminCourseDetailPage({ params }: Props) {
           </TabsContent>
 
           {/* Timeline Tab */}
-          <TabsContent value="timeline" className="flex-1 overflow-hidden p-6">
+          <TabsContent value="timeline" className="flex-1 overflow-y-auto p-6">
             <CourseTimeline items={timeline} />
+            <InstructorChatPanel
+              courseId={id}
+              comments={sharedComments}
+              currentUserId={context.userId}
+            />
           </TabsContent>
 
         </StickyTabs>

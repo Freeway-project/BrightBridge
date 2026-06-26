@@ -146,7 +146,7 @@ export function BatchExportPanel({ courses, readOnly = false }: Props) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-sm text-muted-foreground">
-          No courses are currently in &quot;Ready for Instructor&quot; status.
+          No courses are currently queued in &quot;Ready for Instructor&quot; status.
         </CardContent>
       </Card>
     );
@@ -159,11 +159,11 @@ export function BatchExportPanel({ courses, readOnly = false }: Props) {
           <CardTitle className="text-base">Ready for Instructor</CardTitle>
           <p className="text-sm text-muted-foreground">
             {readOnly ? (
-              "Courses currently ready to be sent to instructors."
+              "Courses in ready_for_instructor that have an assigned instructor and are queued to be emailed."
             ) : (
               <>
                 Select courses to export a mail-merge CSV with never-expiring magic links. All selected
-                courses will be marked <strong>Sent to Instructor</strong>.
+                courses will move into <strong>Instructor Review</strong> after send.
               </>
             )}
           </p>

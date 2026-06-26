@@ -1,7 +1,7 @@
 "use client";
 
 import { StatusBadge } from "@/components/courses/status-badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SentToInstructorCourse } from "@/lib/admin/queries";
 import { formatDistanceToNow } from "date-fns";
 import { InstructorPreviewButton } from "./instructor-preview-button";
@@ -23,6 +23,12 @@ export function SentCoursesTable({ courses }: Props) {
 
   return (
     <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Instructor Review</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Courses that have already been sent to instructors or are currently being reviewed by them.
+        </p>
+      </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
