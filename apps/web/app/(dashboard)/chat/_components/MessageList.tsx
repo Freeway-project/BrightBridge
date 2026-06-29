@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import type { MessageRow } from "@/lib/chat/types";
 import { MessageItem } from "./MessageItem";
+import { DateSeparator } from "./DateSeparator";
 
 const GROUP_GAP_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -46,15 +47,21 @@ export function MessageList({
             prev
               ? new Date(msg.createdAt).getTime() - new Date(prev.createdAt).getTime() < GROUP_GAP_MS
               : false;
-          const showHeader = !(sameAuthor && withinWindow);
+          const newDay =
+            !prev ||
+            new Date(msg.createdAt).toDateString() !== new Date(prev.createdAt).toDateString();
+          // A day boundary always starts a fresh group so the author + time show.
+          const showHeader = newDay || !(sameAuthor && withinWindow);
           return (
-            <MessageItem
-              key={msg.id}
-              message={msg}
-              currentUserId={currentUserId}
-              conversationId={conversationId}
-              showHeader={showHeader}
-            />
+            <Fragment key={msg.id}>
+              {newDay && <DateSeparator iso={msg.createdAt} />}
+              <MessageItem
+                message={msg}
+                currentUserId={currentUserId}
+                conversationId={conversationId}
+                showHeader={showHeader}
+              />
+            </Fragment>
           );
         })}
         <div ref={bottomRef} />
