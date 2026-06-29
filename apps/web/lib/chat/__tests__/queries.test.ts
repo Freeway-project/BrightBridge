@@ -13,3 +13,13 @@ describe("searchMessages query text", () => {
     expect(src).toMatch(/deleted_at is null/);
   });
 });
+
+describe("timestamp serialization in row mappers", () => {
+  it("coerces created_at to an ISO string instead of leaking a node-pg Date", () => {
+    const src = readFileSync(join(__dirname, "../queries.ts"), "utf8");
+    // Must run through the serializer so client components receive a string —
+    // a raw Date crosses the RSC boundary intact and breaks .localeCompare.
+    expect(src).toMatch(/createdAt:\s*toIsoString\(r\.created_at\)/);
+    expect(src).not.toMatch(/createdAt:\s*r\.created_at\b/);
+  });
+});

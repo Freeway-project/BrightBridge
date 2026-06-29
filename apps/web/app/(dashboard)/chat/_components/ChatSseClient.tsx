@@ -93,7 +93,7 @@ export function ChatSseClient(props: {
   }, [props.conversationId, state.messages.size]);
 
   const messages = useMemo(
-    () => [...state.messages.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    () => [...state.messages.values()].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     [state.messages],
   );
 
