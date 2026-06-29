@@ -1,6 +1,7 @@
 import "server-only";
 import { getPostgresPool } from "@/lib/postgres/pool";
 import type { ConversationDetail, ConversationSummary, MessageHit, MessageRow } from "./types";
+import { toIsoString, toIsoStringOrNull } from "./serialize";
 
 /**
  * Title shown for a conversation, from the viewer's perspective. Support
@@ -83,8 +84,8 @@ export async function listConversationsForUser(userId: string): Promise<Conversa
       courseId: r.course_id,
       roleKey: r.role_key,
       createdBy: r.created_by,
-      createdAt: r.created_at,
-      lastMessageAt: r.last_message_at,
+      createdAt: toIsoString(r.created_at),
+      lastMessageAt: toIsoStringOrNull(r.last_message_at),
       unreadCount: r.unread_count ?? 0,
       lastMessagePreview: r.last_body ?? null,
       memberIds: r.user_ids ?? [],
@@ -189,7 +190,7 @@ export async function searchMessages(
     messageId: r.message_id,
     conversationId: r.conversation_id,
     snippet: r.snippet,
-    createdAt: r.created_at,
+    createdAt: toIsoString(r.created_at),
   }));
 }
 
@@ -208,9 +209,9 @@ function mapMessage(r: any): MessageRow {
     authorName: r.author_name ?? r.author_id,
     parentId: r.parent_id,
     body: r.body,
-    editedAt: r.edited_at,
-    deletedAt: r.deleted_at,
-    createdAt: r.created_at,
+    editedAt: toIsoStringOrNull(r.edited_at),
+    deletedAt: toIsoStringOrNull(r.deleted_at),
+    createdAt: toIsoString(r.created_at),
     mentions: r.mentions ?? [],
     reactions: [...byEmoji.entries()].map(([emoji, userIds]) => ({ emoji, userIds })),
     attachments: (r.attachments ?? []).map((a: any) => ({
