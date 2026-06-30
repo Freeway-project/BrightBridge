@@ -15,10 +15,6 @@ import { ChatUpdater } from "@/components/layout/chat-updater"
 import { stopImpersonatingAction } from "@/app/dashboard/actions"
 import { getHierarchyRepository } from "@/lib/repositories"
 import { LEADERSHIP_TITLES } from "@/lib/hierarchy/leadership"
-import { isBirthdayUser } from "@/lib/birthday/config"
-import { BirthdaySkinController } from "@/components/birthday/birthday-skin-controller"
-import { BirthdayDecorations } from "@/components/birthday/birthday-decorations"
-import { BirthdaySurprise } from "@/components/birthday/birthday-surprise"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
@@ -51,10 +47,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const userUnits = context.kind === "profile" ? await hierarchy.getUserUnits(context.profile.id) : []
   const isHierarchyLeader = userUnits.some((u) => LEADERSHIP_TITLES.has(u.title))
 
-  // Birthday surprise — one user, one day. Gated entirely by isBirthdayUser.
-  const isBirthday = isBirthdayUser(context.profile)
-  const firstName = (context.profile.fullName ?? "").trim().split(/\s+/)[0] || ""
-
   const cookieStore = await cookies()
   const sidebarCookie = cookieStore.get("sidebar_state")?.value
   const sidebarOpen = sidebarCookie !== "false"
@@ -73,7 +65,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               impersonatorRole={impersonatorRole}
               impersonatorName={impersonatorName ?? undefined}
               isHierarchyLeader={isHierarchyLeader}
-              isBirthday={isBirthday}
             />
             <DashboardContentShell>
               {process.env.NEXT_PUBLIC_CHAT_ENABLED === "true" && <ChatUpdater userId={context.userId} />}
@@ -100,13 +91,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               )}
               {children}
             </DashboardContentShell>
-            {isBirthday && (
-              <>
-                <BirthdaySkinController />
-                <BirthdayDecorations name={firstName} />
-                <BirthdaySurprise name={firstName} />
-              </>
-            )}
           </div>
         </SidebarProvider>
       </NotificationProvider>
