@@ -2,6 +2,7 @@
 
 import { RefreshHeader } from "@/components/shared/refresh-header"
 import { useAutoRefresh } from "@/lib/workspace/use-auto-refresh"
+import { useCourseCommentRealtime } from "@/lib/workspace/use-course-comment-realtime"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 
@@ -12,7 +13,7 @@ interface CourseDetailRefreshWrapperProps {
 }
 
 export function CourseDetailRefreshWrapper({
-  courseId: _courseId,
+  courseId,
   title,
   children,
 }: CourseDetailRefreshWrapperProps) {
@@ -21,8 +22,9 @@ export function CourseDetailRefreshWrapper({
     router.refresh()
   }, [router])
 
-  // Auto-refresh every 10 seconds for course detail (shows escalation messages, TA updates)
-  useAutoRefresh(refresh, 10000)
+  // Live push via Supabase Realtime; 60s polling as fallback
+  useCourseCommentRealtime(courseId, () => router.refresh())
+  useAutoRefresh(refresh, 60000)
 
   return (
     <div className="flex flex-col gap-4">
