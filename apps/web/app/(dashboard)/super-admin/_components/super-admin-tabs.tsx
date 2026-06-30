@@ -13,6 +13,7 @@ type Props = {
   auditPanel: React.ReactNode
   supportPanel: React.ReactNode
   systemPanel: React.ReactNode
+  announcementPanel: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
   openSupportCount: number
@@ -28,6 +29,7 @@ export function SuperAdminTabs({
   auditPanel,
   supportPanel,
   systemPanel,
+  announcementPanel,
   unassignedCount,
   openEscalationsCount,
   openSupportCount,
@@ -68,6 +70,7 @@ export function SuperAdminTabs({
           <TabsTrigger value="migration">Migration</TabsTrigger>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="announcement">Announcement</TabsTrigger>
         </TabsList>
       </div>
 
@@ -80,6 +83,7 @@ export function SuperAdminTabs({
       <TabsContent value="migration">{migrationPanel}</TabsContent>
       <TabsContent value="audit">{auditPanel}</TabsContent>
       <TabsContent value="system">{systemPanel}</TabsContent>
+      <TabsContent value="announcement">{announcementPanel}</TabsContent>
     </Tabs>
   )
 }

@@ -10,6 +10,7 @@ import { getPaginatedAuditEvents } from "@/lib/super-admin/queries"
 import type { PaginatedResult, AuditEvent } from "@/lib/repositories/contracts"
 import { syncRoleChannel } from "@/lib/chat/membership"
 import { hashPassword } from "@/lib/auth/service"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 export type ManageUserState = {
   kind: "idle" | "success" | "error"
@@ -199,6 +200,69 @@ export async function loadMoreAuditEvents(
   await requireSuperAdmin()
   return getPaginatedAuditEvents(page, pageSize)
 }
+
+// ─── Announcement banner ──────────────────────────────────────────────────────
+
+export type AnnouncementState = {
+  kind: "idle" | "success" | "error"
+  message: string | null
+}
+
+export async function publishAnnouncementAction(
+  _state: AnnouncementState,
+  formData: FormData,
+): Promise<AnnouncementState> {
+  const context = await requireSuperAdmin()
+  const supabase = createAdminClient()
+  if (!supabase) return { kind: "error", message: "Database unavailable." }
+
+  const message = String(formData.get("message") ?? "").trim()
+  const severity = String(formData.get("severity") ?? "info")
+  const isActive = formData.get("is_active") === "true"
+
+  if (!message) return { kind: "error", message: "Message is required." }
+  if (message.length > 280) return { kind: "error", message: "Message must be 280 characters or fewer." }
+  if (!["info", "warning", "critical"].includes(severity)) {
+    return { kind: "error", message: "Invalid severity." }
+  }
+
+  const now = new Date().toISOString()
+
+  const { data: existing } = await supabase
+    .from("announcements")
+    .select("id")
+    .limit(1)
+    .single()
+
+  if (existing) {
+    const { error } = await supabase
+      .from("announcements")
+      .update({ message, severity, is_active: isActive, created_by_id: context.profile.id, updated_at: now })
+      .eq("id", existing.id)
+    if (error) return { kind: "error", message: error.message }
+  } else {
+    const { error } = await supabase
+      .from("announcements")
+      .insert({ message, severity, is_active: isActive, created_by_id: context.profile.id })
+    if (error) return { kind: "error", message: error.message }
+  }
+
+  revalidatePath("/", "layout")
+  return { kind: "success", message: isActive ? "Announcement published." : "Draft saved." }
+}
+
+export async function clearAnnouncementAction(): Promise<AnnouncementState> {
+  await requireSuperAdmin()
+  const supabase = createAdminClient()
+  if (!supabase) return { kind: "error", message: "Database unavailable." }
+
+  await supabase.from("announcements").delete().neq("id", "00000000-0000-0000-0000-000000000000")
+
+  revalidatePath("/", "layout")
+  return { kind: "success", message: "Announcement cleared." }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 async function requireSuperAdmin() {
   const context = await requireProfile()
