@@ -16,7 +16,6 @@ import aiAnimationOcean from "@/assets/559b1333-2acb-45f2-91d0-f47e905945dd.json
 import aiAnimationMono from "@/assets/7151ad77-5cd9-4b4a-a8d9-eb7ae1f355f8.json"
 import aiAnimationAurora from "@/assets/9612aa98-116d-11ee-b4c5-2f9cdafc1909.json"
 import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
-import { SidebarBirthday } from "@/components/birthday/sidebar-birthday"
 import { SidebarAnnouncementBanner } from "@/components/layout/sidebar-announcement-banner"
 import type { ActiveAnnouncement } from "@/lib/announcements/types"
 import { useTweaks, type ThemeId } from "@/components/shared/tweak-provider"
@@ -60,7 +59,6 @@ interface AppSidebarProps {
   impersonatorRole?: Role
   impersonatorName?: string
   isHierarchyLeader?: boolean
-  isBirthday?: boolean
   announcement?: ActiveAnnouncement | null
 }
 
@@ -90,7 +88,6 @@ export function AppSidebar({
   impersonatorRole,
   impersonatorName,
   isHierarchyLeader = false,
-  isBirthday = false,
   announcement = null,
 }: AppSidebarProps) {
   const pathname = usePathname()
@@ -215,15 +212,11 @@ export function AppSidebar({
 
         <SidebarAnnouncementBanner initial={announcement} />
 
-        {!collapsed && isBirthday ? (
-          <div className="mt-auto mb-4 px-2">
-            <SidebarBirthday name={userName.split(" ")[0]} />
-          </div>
-        ) : !collapsed && (role === "admin_full" || role === "standard_user") ? (
+        {!collapsed && (role === "admin_full" || role === "standard_user") && (
           <div className="mt-auto mb-4 px-4 flex justify-center">
             <Lottie key={settings.theme} animationData={themeAnimation} loop={true} className="w-full max-w-[120px]" />
           </div>
-        ) : null}
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-3">
