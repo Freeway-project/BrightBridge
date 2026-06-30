@@ -5,6 +5,7 @@ import { requireProfile } from "@/lib/auth/context"
 import { postCourseComment } from "@/lib/services/comments"
 import { getCommentRepository, getCourseRepository } from "@/lib/repositories"
 import { resolveDelegationContext, transitionCourseStatus } from "@/lib/courses/service"
+import { broadcastCourseCommentEvent } from "@/lib/supabase/broadcast"
 
 function revalidateCourse(courseId: string) {
   revalidatePath(`/instructor/courses/${courseId}`)
@@ -54,6 +55,7 @@ export async function postSharedCommentAction(
   }
 
   revalidateCourse(courseId)
+  void broadcastCourseCommentEvent(courseId)
 }
 
 export async function markAnsweredAction(
@@ -67,4 +69,5 @@ export async function markAnsweredAction(
   await getCommentRepository().markCommentAnswered(commentId, courseId)
 
   revalidateCourse(courseId)
+  void broadcastCourseCommentEvent(courseId)
 }

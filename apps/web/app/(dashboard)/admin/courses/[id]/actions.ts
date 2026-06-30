@@ -7,6 +7,7 @@ import { postCourseComment } from "@/lib/services/comments"
 import { addEscalationMessage, resolveEscalation } from "@/lib/services/escalations"
 import { overrideCourseStatus } from "@/lib/services/course-status-override"
 import type { CourseStatus } from "@coursebridge/workflow"
+import { broadcastCourseCommentEvent } from "@/lib/supabase/broadcast"
 
 export async function postCommentAction(courseId: string, body: string) {
   const profile = await requireProfile()
@@ -34,6 +35,7 @@ export async function postCommentAction(courseId: string, body: string) {
   }
 
   revalidatePath(`/admin/courses/${courseId}`)
+  void broadcastCourseCommentEvent(courseId)
 }
 
 export async function sendEscalationReplyAction(
