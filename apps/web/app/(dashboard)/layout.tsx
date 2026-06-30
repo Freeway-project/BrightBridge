@@ -19,6 +19,7 @@ import { isBirthdayUser } from "@/lib/birthday/config"
 import { BirthdaySkinController } from "@/components/birthday/birthday-skin-controller"
 import { BirthdayDecorations } from "@/components/birthday/birthday-decorations"
 import { BirthdaySurprise } from "@/components/birthday/birthday-surprise"
+import { getActiveAnnouncement } from "@/lib/announcements/queries"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
@@ -48,7 +49,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const impersonatorName = context.kind === "profile" ? context.impersonatorProfile?.fullName : undefined
 
   const hierarchy = getHierarchyRepository()
-  const userUnits = context.kind === "profile" ? await hierarchy.getUserUnits(context.profile.id) : []
+  const [userUnits, announcement] = await Promise.all([
+    context.kind === "profile" ? hierarchy.getUserUnits(context.profile.id) : Promise.resolve([]),
+    getActiveAnnouncement(context.userId),
+  ])
   const isHierarchyLeader = userUnits.some((u) => LEADERSHIP_TITLES.has(u.title))
 
   // Birthday surprise — one user, one day. Gated entirely by isBirthdayUser.
@@ -74,6 +78,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               impersonatorName={impersonatorName ?? undefined}
               isHierarchyLeader={isHierarchyLeader}
               isBirthday={isBirthday}
+              announcement={announcement}
             />
             <DashboardContentShell>
               {process.env.NEXT_PUBLIC_CHAT_ENABLED === "true" && <ChatUpdater userId={context.userId} />}

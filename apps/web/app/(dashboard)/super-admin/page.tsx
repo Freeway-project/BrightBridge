@@ -18,6 +18,8 @@ import { AdminRefreshWrapper } from "../admin/_components/admin-refresh-wrapper"
 import { getLatestMigrationReport } from "@/lib/migration/report"
 import { SupportMessagesView } from "@/components/super-admin/support-messages-view"
 import { SystemPanel } from "@/components/super-admin/system-panel"
+import { AnnouncementPanel } from "@/components/super-admin/announcement-panel"
+import { getCurrentAnnouncement } from "@/lib/announcements/queries"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -47,6 +49,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     supportMessagesPage,
     openSupportCount,
     auditPage,
+    currentAnnouncement,
   ] = await Promise.all([
     getSuperAdminData(),
     getPaginatedSuperAdminCourses(page, 50, search),
@@ -58,6 +61,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
     getPaginatedSuperAdminSupportMessages(page, 50, search),
     getOpenSupportMessageCount(),
     getPaginatedAuditEvents(1, 30),
+    getCurrentAnnouncement(),
   ])
 
   return (
@@ -83,6 +87,7 @@ export default async function SuperAdminDashboardPage({ searchParams }: Props) {
             migrationPanel={<MigrationPanel report={migrationReport} />}
             auditPanel={<AuditView initial={auditPage} />}
             systemPanel={<SystemPanel />}
+            announcementPanel={<AnnouncementPanel initial={currentAnnouncement} />}
           />
         </AdminRefreshWrapper>
       </TweakableContent>
