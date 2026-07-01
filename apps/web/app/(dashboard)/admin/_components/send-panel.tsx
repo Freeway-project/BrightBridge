@@ -43,24 +43,20 @@ function SendPanelTab({
       <TooltipTrigger asChild>
         <TabsTrigger
           value={value}
-          className="h-auto min-h-14 items-start justify-start px-4 py-2.5 text-left data-[state=active]:bg-muted/30"
+          className="gap-1.5 data-[state=active]:bg-muted/30"
         >
-          <span className="flex items-center gap-2 text-sm font-semibold md:text-[15px]">
-            <span>{copy.label}</span>
-            {count > 0 && (
-              <span className="rounded-full bg-muted px-1.5 py-0 text-[10px] font-semibold text-muted-foreground">
-                {count}
-              </span>
-            )}
-            <Info className="size-3.5 text-muted-foreground" aria-hidden />
-          </span>
-          <span className="text-xs font-medium text-muted-foreground md:text-[13px]">
-            {copy.helper}
-          </span>
+          <span className="text-sm font-semibold md:text-[15px]">{copy.label}</span>
+          {count > 0 && (
+            <span className="rounded-full bg-muted px-1.5 py-0 text-[10px] font-semibold text-muted-foreground">
+              {count}
+            </span>
+          )}
+          <Info className="size-3.5 text-muted-foreground" aria-hidden />
         </TabsTrigger>
       </TooltipTrigger>
-      <TooltipContent side="bottom" sideOffset={6} className="max-w-sm leading-relaxed">
-        {copy.tooltip}
+      <TooltipContent side="bottom" sideOffset={6} className="max-w-sm flex-col items-start gap-0.5 leading-relaxed">
+        <span className="font-semibold">{copy.helper}</span>
+        <span className="text-background/80">{copy.tooltip}</span>
       </TooltipContent>
     </Tooltip>
   );
