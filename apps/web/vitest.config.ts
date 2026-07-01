@@ -6,6 +6,9 @@ export default defineConfig({
     environment: "node",
     include: ["lib/**/__tests__/**/*.test.ts"],
     testTimeout: 10_000,
+    // Pin the timezone so relative date/time helpers format deterministically
+    // regardless of the machine/CI timezone.
+    env: { TZ: "UTC" },
   },
   resolve: {
     alias: {

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import type { MessageRow } from "@/lib/chat/types";
+import { formatMessageTime, formatFullDateTime } from "@/lib/chat/format-time";
 import { MessageBody } from "./MessageBody";
 import { EmojiPicker } from "./EmojiPicker";
 import {
@@ -88,8 +89,12 @@ export function MessageItem({
         {showHeader && (
           <div className="flex items-baseline gap-2 mb-0.5">
             <span className="text-sm font-medium leading-none">{message.authorName}</span>
-            <span className="text-xs text-muted-foreground">
-              {new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            <span
+              className="text-xs text-muted-foreground"
+              title={formatFullDateTime(message.createdAt)}
+              suppressHydrationWarning
+            >
+              {formatMessageTime(message.createdAt)}
             </span>
             {message.editedAt && (
               <span className="text-xs text-muted-foreground">(edited)</span>
