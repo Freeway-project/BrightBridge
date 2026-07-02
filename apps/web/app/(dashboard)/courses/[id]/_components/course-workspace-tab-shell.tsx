@@ -62,20 +62,20 @@ export function CourseWorkspaceTabShell({
       </div>
 
       {/* Tab strip */}
-      <div className="relative z-10 flex shrink-0 items-center gap-1 border-b border-border bg-muted/20 px-4">
+      <div className="relative z-10 flex shrink-0 items-center gap-2 border-b border-border bg-background px-4 py-2">
 
         {/* Workspace tab */}
         <button
           type="button"
           onClick={() => setTab("workspace")}
           className={cn(
-            "flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors",
+            "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200",
             tab === "workspace"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
-          <Layout className="size-3.5" aria-hidden />
+          <Layout className="size-4" aria-hidden />
           Workspace
         </button>
 
@@ -84,18 +84,23 @@ export function CourseWorkspaceTabShell({
           type="button"
           onClick={handleChatClick}
           className={cn(
-            "relative flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors",
+            "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200",
             tab === "chat"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
-          <MessageSquare className="size-3.5" aria-hidden />
+          <MessageSquare className="size-4" aria-hidden />
           Chat
           {newCount > 0 && (
             <span
               key={bump}
-              className="ml-0.5 inline-flex h-[18px] min-w-[18px] animate-in zoom-in-50 duration-200 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold leading-none text-white shadow-md"
+              className={cn(
+                "ml-0.5 inline-flex h-5 min-w-[20px] animate-in zoom-in-50 duration-200 items-center justify-center rounded-full px-1.5 text-[11px] font-bold leading-none shadow-md",
+                tab === "chat"
+                  ? "bg-white/30 text-white"
+                  : "bg-red-500 text-white",
+              )}
             >
               {newCount > 99 ? "99+" : newCount}
             </span>
@@ -104,7 +109,7 @@ export function CourseWorkspaceTabShell({
           {bump > 0 && tab !== "chat" && (
             <span
               key={`ring-${bump}`}
-              className="absolute right-1 top-1.5 size-2 rounded-full bg-red-500 animate-ping"
+              className="absolute right-1 top-1 size-2.5 rounded-full bg-red-500 animate-ping"
             />
           )}
         </button>

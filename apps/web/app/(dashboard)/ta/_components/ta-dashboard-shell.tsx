@@ -30,20 +30,20 @@ export function TaDashboardShell({
   return (
     <TweakableContent className="flex min-w-0 flex-1 flex-col overflow-hidden">
       {/* Tab strip */}
-      <div className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-border bg-muted/20 px-4">
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-border bg-background px-4 py-2">
 
         {/* My Courses tab */}
         <button
           type="button"
           onClick={() => handleTabClick("courses")}
           className={cn(
-            "flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors",
+            "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200",
             tab === "courses"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
-          <BookOpen className="size-3.5" aria-hidden />
+          <BookOpen className="size-4" aria-hidden />
           My Courses
         </button>
 
@@ -52,27 +52,32 @@ export function TaDashboardShell({
           type="button"
           onClick={() => handleTabClick("chat")}
           className={cn(
-            "relative flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors",
+            "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200",
             tab === "chat"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
-          <MessageSquare className="size-3.5" aria-hidden />
+          <MessageSquare className="size-4" aria-hidden />
           Chat
           {unread > 0 && (
             <span
               key={bump}
-              className="ml-0.5 inline-flex h-[18px] min-w-[18px] animate-in zoom-in-50 duration-200 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold leading-none text-white shadow-md"
+              className={cn(
+                "ml-0.5 inline-flex h-5 min-w-[20px] animate-in zoom-in-50 duration-200 items-center justify-center rounded-full px-1.5 text-[11px] font-bold leading-none shadow-md",
+                tab === "chat"
+                  ? "bg-white/30 text-white"
+                  : "bg-red-500 text-white",
+              )}
             >
               {unread > 99 ? "99+" : unread}
             </span>
           )}
-          {/* Pulse ring on new message */}
+          {/* Pulse ring on new message while tab is inactive */}
           {bump > 0 && tab !== "chat" && (
             <span
               key={`ring-${bump}`}
-              className="absolute right-1 top-1.5 size-2 rounded-full bg-red-500 animate-ping"
+              className="absolute right-1 top-1 size-2.5 rounded-full bg-red-500 animate-ping"
             />
           )}
         </button>
