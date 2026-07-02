@@ -76,7 +76,9 @@ export function SidebarAnnouncementBanner({ initial }: { initial: ActiveAnnounce
           })
         },
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (err) console.warn("announcements-live channel error:", err)
+      })
 
     return () => { void supabase.removeChannel(channel) }
   }, [])
