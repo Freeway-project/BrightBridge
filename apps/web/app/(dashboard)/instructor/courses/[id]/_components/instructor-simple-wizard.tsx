@@ -218,9 +218,9 @@ export function InstructorSimpleWizard({
         </div>
       )}
 
-      {/* Step 3 — approve */}
+      {/* Step 3 — final review context (the approve action lives in the sticky bar below) */}
       {step === 2 && (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-4">
           <section className="space-y-2 rounded-xl border border-border bg-muted/30 p-5">
             <div className="flex items-center gap-2">
               <ClipboardList className="size-4 text-muted-foreground" aria-hidden />
@@ -257,35 +257,48 @@ export function InstructorSimpleWizard({
             </p>
           )}
 
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-4 hover:bg-muted/40">
-            <Checkbox
-              checked={acked}
-              onCheckedChange={(v) => setAcked(v === true)}
-              className="mt-0.5"
-              aria-label="Confirm you've reviewed and approve"
-            />
-            <span className="text-base font-medium">
-              I&apos;ve reviewed everything and approve this course.
-            </span>
-          </label>
-
-          <div className="flex items-center justify-between">
+          <div className="flex justify-start">
             <Button variant="ghost" className="gap-2" onClick={() => onStepChange(1)} disabled={signPending}>
               <ArrowLeft className="size-5" /> Back
-            </Button>
-            <Button
-              size="lg"
-              data-tour="approve"
-              className="h-12 gap-2 bg-green-600 px-6 text-base text-white hover:bg-green-700"
-              disabled={!acked || signPending || issues === null}
-              onClick={confirmSignOff}
-            >
-              <CheckCircle2 className="size-5" />
-              {signPending ? "Approving…" : "Approve this course"}
             </Button>
           </div>
         </div>
       )}
+
+      {/* Always-visible approve bar — reachable from any step so the checkbox + button are never buried */}
+      <div className="sticky bottom-0 z-10 -mx-2 mt-8 border-t border-border bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <label className="flex cursor-pointer items-center gap-2.5">
+            <Checkbox
+              checked={acked}
+              onCheckedChange={(v) => setAcked(v === true)}
+              aria-label="Confirm you've reviewed and approve"
+            />
+            <span className="text-sm font-medium">
+              I&apos;ve reviewed everything and approve this course.
+            </span>
+          </label>
+          <Button
+            size="lg"
+            data-tour="approve"
+            className="h-11 gap-2 bg-green-600 px-6 text-base text-white hover:bg-green-700"
+            disabled={!acked || signPending || issues === null}
+            onClick={confirmSignOff}
+          >
+            <CheckCircle2 className="size-5" />
+            {signPending ? "Approving…" : "Approve this course"}
+          </Button>
+        </div>
+        {issues && issues.length > 0 && step !== 2 && (
+          <button
+            type="button"
+            onClick={() => onStepChange(2)}
+            className="mt-2 text-xs font-medium text-amber-700 underline-offset-2 hover:underline dark:text-amber-300"
+          >
+            The reviewer flagged {issues.length} item{issues.length > 1 ? "s" : ""} — review before approving
+          </button>
+        )}
+      </div>
     </div>
   )
 }
