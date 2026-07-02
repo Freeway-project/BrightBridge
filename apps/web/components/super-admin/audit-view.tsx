@@ -83,7 +83,7 @@ export function AuditView({ initial }: { initial: PaginatedResult<AuditEvent> })
                       <span className="text-muted-foreground"> → on behalf of {e.on_behalf_of_name}</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{fmt(e.created_at)}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground" suppressHydrationWarning>{fmt(e.created_at)}</TableCell>
                 </TableRow>
               ))
             )}

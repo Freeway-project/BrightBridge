@@ -98,7 +98,7 @@ export function SupportMessagesView({ result, search }: { result: PaginatedResul
                   <TableCell className="align-top">
                     <StatusPill status={m.status} />
                   </TableCell>
-                  <TableCell className="align-top whitespace-nowrap text-xs text-muted-foreground">{fmt(m.created_at)}</TableCell>
+                  <TableCell className="align-top whitespace-nowrap text-xs text-muted-foreground" suppressHydrationWarning>{fmt(m.created_at)}</TableCell>
                   <TableCell className="pr-4 align-top text-right">
                     {m.status !== "resolved" && <ResolveButton id={m.id} />}
                   </TableCell>

@@ -169,7 +169,7 @@ export function UsersView({ result, search }: { result: PaginatedResult<UserRow>
                     <TableCell className="whitespace-normal break-words pl-4 text-sm font-medium">{u.full_name ?? "No name"}</TableCell>
                     <TableCell className="max-w-[14rem] whitespace-normal break-words text-xs text-muted-foreground sm:max-w-none">{u.email}</TableCell>
                     <TableCell className="whitespace-normal"><Badge variant="outline" className={`text-xs ${ROLE_BADGE_CLASS[u.role]}`}>{ROLE_LABELS[u.role]}</Badge></TableCell>
-                    <TableCell className="whitespace-normal text-xs text-muted-foreground">{fmt(u.created_at)}</TableCell>
+                    <TableCell className="whitespace-normal text-xs text-muted-foreground" suppressHydrationWarning>{fmt(u.created_at)}</TableCell>
                     <TableCell>
                       <Button
                         variant="ghost"
