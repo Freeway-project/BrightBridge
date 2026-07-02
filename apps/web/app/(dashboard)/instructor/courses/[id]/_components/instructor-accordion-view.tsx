@@ -123,19 +123,19 @@ export function InstructorAccordionView({
     {
       id: "summary",
       label: "Summary",
-      icon: <ClipboardList className="size-3.5" aria-hidden />,
+      icon: <ClipboardList className="size-4" aria-hidden />,
     },
     {
       id: "review",
       label: "Review",
-      icon: <MessageSquare className="size-3.5" aria-hidden />,
+      icon: <MessageSquare className="size-4" aria-hidden />,
     },
     {
       id: "chat",
       label: "Chat",
-      icon: <MessageSquare className="size-3.5" aria-hidden />,
+      icon: <MessageSquare className="size-4" aria-hidden />,
       badge: unansweredQuestions > 0 ? (
-        <span className="ml-1 rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold leading-none text-amber-700 dark:text-amber-300">
+        <span className="ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500 px-1.5 text-[11px] font-bold leading-none text-white shadow-sm">
           {unansweredQuestions}
         </span>
       ) : undefined,
@@ -143,7 +143,7 @@ export function InstructorAccordionView({
     {
       id: "approve",
       label: "Approve",
-      icon: <CheckCircle2 className="size-3.5" aria-hidden />,
+      icon: <CheckCircle2 className="size-4" aria-hidden />,
     },
   ]
 
@@ -172,17 +172,17 @@ export function InstructorAccordionView({
       )}
 
       {/* Tab strip */}
-      <div className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-border bg-muted/20 px-4">
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-border bg-background px-4 py-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => gotoTab(tab.id)}
             className={cn(
-              "flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors",
+              "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200",
               activeTab === tab.id
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
             {tab.icon}
