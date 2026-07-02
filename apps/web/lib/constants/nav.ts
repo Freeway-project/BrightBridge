@@ -25,15 +25,14 @@ export interface NavItem {
 }
 
 const chatEntry: NavItem = { label: "Chat", href: "/chat", icon: MessageSquare }
-const chatEnabled = process.env.NEXT_PUBLIC_CHAT_ENABLED === "true"
 
 export const NAV_ITEMS: Record<Role, NavItem[]> = {
+  // standard_user (TA) gets chat as a tab on the TA dashboard, not a nav item
   standard_user: [
     { label: "My Courses",  href: "/ta",        icon: BookOpen },
     { label: "Converter",   href: "/content-converter", icon: FileCode2 },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
-    ...(chatEnabled ? [chatEntry] : []),
   ],
   admin_full: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -44,7 +43,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
-    ...(chatEnabled ? [chatEntry] : []),
+    chatEntry,
   ],
   // admin_viewer mirrors admin_full's dashboard but read-only. Omits the
   // write-capable tools admin_viewer can't open (Converter, Assistant).
@@ -55,13 +54,13 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
-    ...(chatEnabled ? [chatEntry] : []),
+    chatEntry,
   ],
   instructor: [
     { label: "My Course Reviews", href: "/instructor", icon: GraduationCap },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
-    ...(chatEnabled ? [chatEntry] : []),
+    chatEntry,
   ],
   super_admin: [
     { label: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
@@ -72,7 +71,7 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Migration", href: "/migration", icon: FileText },
     { label: "Guide",       href: "/guide",      icon: HelpCircle },
-    ...(chatEnabled ? [chatEntry] : []),
+    chatEntry,
   ],
   provost: [
     { label: "Dashboard",    href: "/provost",     icon: LayoutDashboard },
@@ -80,6 +79,6 @@ export const NAV_ITEMS: Record<Role, NavItem[]> = {
     { label: "Hierarchy",    href: "/hierarchy",   icon: Network },
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Guide",        href: "/guide",       icon: HelpCircle },
-    ...(chatEnabled ? [chatEntry] : []),
+    chatEntry,
   ],
 }

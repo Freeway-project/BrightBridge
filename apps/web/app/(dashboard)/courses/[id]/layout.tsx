@@ -9,7 +9,7 @@ import { getCourseComments, getSharedComments } from "@/lib/services/comments";
 import { getOpenIssuesCountAction } from "@/lib/issues";
 import { WorkspaceNav } from "./_components/workspace-nav";
 import { InfoPanel } from "./_components/info-panel";
-import { TweakableContent } from "@/components/shared/tweakable-content";
+import { CourseWorkspaceTabShell } from "./_components/course-workspace-tab-shell";
 import { MilestoneReward } from "@/components/milestone-reward/MilestoneReward";
 import { ScreenMeteors } from "@/components/shared/screen-meteors";
 
@@ -75,18 +75,14 @@ export default async function CourseWorkspaceLayout({
         reviewerName={ctx.profile.fullName ?? ctx.email ?? ""}
         instructorName={instructor?.fullName ?? instructor?.email ?? null}
       />
-      <TweakableContent className="relative flex flex-1 flex-col overflow-hidden bg-card/[0.01]">
-        {/* Animated Background blobs for Apple glassmorphism - completely theme-adaptive */}
-        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-          {/* Blob 1 - uses primary accent color */}
-          <div className="absolute -top-[10%] left-[5%] w-[40%] h-[50%] rounded-full bg-primary/[0.03] dark:bg-primary/[0.015] blur-[120px] animate-pulse" style={{ animationDuration: "12s" }} />
-          {/* Blob 2 - uses secondary accent color */}
-          <div className="absolute top-[30%] -right-[5%] w-[45%] h-[55%] rounded-full bg-secondary/[0.05] dark:bg-secondary/[0.025] blur-[150px] animate-pulse" style={{ animationDuration: "18s" }} />
-          {/* Blob 3 - uses primary accent color */}
-          <div className="absolute -bottom-[15%] left-[20%] w-[35%] h-[45%] rounded-full bg-primary/[0.02] dark:bg-primary/[0.01] blur-[130px] animate-pulse" style={{ animationDuration: "15s" }} />
-        </div>
+      <CourseWorkspaceTabShell
+        courseId={id}
+        currentUserId={ctx.userId}
+        role={ctx.profile.role}
+        sharedComments={sharedComments}
+      >
         {children}
-      </TweakableContent>
+      </CourseWorkspaceTabShell>
       <ScreenMeteors />
       <MilestoneReward userEmail={ctx.email ?? ""} courseId={id} />
       <InfoPanel
