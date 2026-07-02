@@ -72,7 +72,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               announcement={announcement}
             />
             <DashboardContentShell>
-              {process.env.NEXT_PUBLIC_CHAT_ENABLED === "true" && <ChatUpdater userId={context.userId} />}
+              <ChatUpdater userId={context.userId} />
               {isImpersonating && (
                 <div className="bg-amber-500 text-amber-950 px-4 py-2.5 text-xs font-bold flex justify-between items-center shrink-0 border-b border-amber-600 shadow-sm animate-in slide-in-from-top duration-300">
                   <div className="flex items-center gap-2">

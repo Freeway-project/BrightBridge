@@ -5,8 +5,10 @@ import { revalidatePath } from "next/cache";
 import { requireProfile } from "@/lib/auth/context";
 import * as service from "./service";
 import * as repo from "./repository";
-import { getOrCreateSupportConversation } from "./membership";
+import { getOrCreateSupportConversation, assertMember } from "./membership";
 import { isSupportAdmin } from "./support-roles";
+import { listConversationsForUser, listMessages, getConversationDetail } from "./queries";
+import type { ConversationSummary, ConversationDetail, MessageRow } from "./types";
 
 const sendSchema = z.object({
   conversationId: z.string().uuid(),
@@ -131,6 +133,24 @@ export async function leaveConversationAction(input: unknown): Promise<void> {
   const { conversationId } = z.object({ conversationId: z.string().uuid() }).parse(input);
   const ctx = await requireProfile();
   await repo.leaveConversation(conversationId, ctx.userId);
+}
+
+export async function listMyConversationsAction(): Promise<ConversationSummary[]> {
+  const ctx = await requireProfile();
+  return listConversationsForUser(ctx.userId);
+}
+
+export async function getConversationAction(
+  conversationId: string,
+): Promise<{ messages: MessageRow[]; conversation: ConversationDetail }> {
+  const ctx = await requireProfile();
+  try { await assertMember(conversationId, ctx.userId); } catch { throw new Error("Not a member of this conversation."); }
+  const [messages, conversation] = await Promise.all([
+    listMessages(conversationId, { limit: 50 }),
+    getConversationDetail(conversationId, ctx.userId),
+  ]);
+  if (!conversation) throw new Error("Conversation not found.");
+  return { messages, conversation };
 }
 
 /** One-click "Chat with Admin": get-or-create the user's shared support conversation. */

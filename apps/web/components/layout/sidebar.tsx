@@ -108,7 +108,6 @@ export function AppSidebar({
   const [chatUnread, setChatUnread] = useState(0)
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_CHAT_ENABLED !== "true") return
     const fetchUnread = async () => {
       try {
         const res = await fetch("/api/chat/unread-count", { cache: "no-store" })
