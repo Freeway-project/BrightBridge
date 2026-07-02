@@ -16,8 +16,11 @@ interface Props {
 
 const CAN_MARK_ANSWERED_ROLES = ["admin_full", "super_admin", "standard_user"] as const
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export default async function InstructorCourseDetailPage({ params }: Props) {
   const { id } = await params
+  if (!UUID_RE.test(id)) notFound()
   const context = await requireProfile()
 
   const assignedCourse = await getCourseRepository().getAssignedCourseById(id, context.profile.id, "instructor")
