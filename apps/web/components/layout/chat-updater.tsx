@@ -40,10 +40,15 @@ export function ChatUpdater({ userId }: { userId: string }) {
           // Toast when not already on the chat page
           if (!window.location.pathname.startsWith("/chat")) {
             const delta = count - prevCount.current
-            toast.info("💬 New chat message", {
+            toast("💬 New message", {
               description:
-                delta === 1 ? "You have 1 new message" : `You have ${delta} new messages`,
-              action: { label: "Open", onClick: () => router.push("/chat") },
+                delta === 1 ? "1 new unread message" : `${delta} new unread messages`,
+              action: { label: "Open Chat", onClick: () => router.push("/chat") },
+              duration: 7000,
+              style: {
+                borderLeft: "4px solid hsl(var(--primary))",
+                fontWeight: 600,
+              },
             })
           }
 
