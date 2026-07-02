@@ -25,7 +25,7 @@ export async function syncCourseChannel(courseId: string): Promise<void> {
   );
   if (!courseRows.length) return;
   const { rows: members } = await pool.query<{ user_id: string }>(
-    `select distinct user_id
+    `select distinct profile_id as user_id
      from public.course_assignments
      where course_id = $1`,
     [courseId],
