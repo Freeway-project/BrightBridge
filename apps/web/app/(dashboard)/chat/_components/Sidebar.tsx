@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { SidebarSearch } from "./SidebarSearch";
 import { NewConversationMenu } from "./NewConversationMenu";
 import { ChatWithAdminButton } from "./ChatWithAdminButton";
+import { RelativeTime } from "./RelativeTime";
 
 export async function Sidebar({
   currentUserId,
@@ -34,9 +35,13 @@ export async function Sidebar({
             <li key={c.id}>
               <Link
                 href={`/chat/${c.id}`}
-                className="flex items-center justify-between gap-2 px-3 py-2 hover:bg-muted/40"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-muted/40"
               >
-                <span className="truncate text-sm">{c.displayTitle}</span>
+                <span className="flex-1 truncate text-sm">{c.displayTitle}</span>
+                <RelativeTime
+                  iso={c.lastMessageAt}
+                  className="shrink-0 text-xs text-muted-foreground"
+                />
                 {c.unreadCount > 0 && <Badge variant="secondary">{c.unreadCount}</Badge>}
               </Link>
             </li>
