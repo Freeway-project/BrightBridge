@@ -75,7 +75,7 @@ export function CoursesView({ result, search }: { result: PaginatedResult<Course
                   <TableCell className="align-top"><StatusBadge status={c.status} /></TableCell>
                   <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs sm:max-w-none">{c.ta?.name ?? c.ta?.email ?? "—"}</TableCell>
                   <TableCell className="max-w-[12rem] whitespace-normal break-words text-xs sm:max-w-none">{c.instructor?.name ?? c.instructor?.email ?? "—"}</TableCell>
-                  <TableCell className="whitespace-normal text-xs text-muted-foreground">{fmt(c.updated_at)}</TableCell>
+                  <TableCell className="whitespace-normal text-xs text-muted-foreground" suppressHydrationWarning>{fmt(c.updated_at)}</TableCell>
                   <TableCell className="pr-4">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
