@@ -224,8 +224,31 @@ function ViewToggle({
   )
 }
 
-function Column({ 
-  column, 
+const PHASE_COLORS: Record<PipelineStage, { header: string; badge: string; border: string }> = {
+  migration: {
+    header: "bg-sky-500/10 border-sky-500/30 text-sky-400",
+    badge: "bg-sky-500/20 text-sky-300",
+    border: "border-sky-500/20",
+  },
+  staging: {
+    header: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+    badge: "bg-amber-500/20 text-amber-300",
+    border: "border-amber-500/20",
+  },
+  instructor: {
+    header: "bg-violet-500/10 border-violet-500/30 text-violet-400",
+    badge: "bg-violet-500/20 text-violet-300",
+    border: "border-violet-500/20",
+  },
+  provision: {
+    header: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+    badge: "bg-emerald-500/20 text-emerald-300",
+    border: "border-emerald-500/20",
+  },
+}
+
+function Column({
+  column,
   role,
   readOnly,
   selectedIds,
@@ -238,11 +261,12 @@ function Column({
   onToggleSelection: (id: string, title: string) => void;
 }) {
   const hidden = column.count - column.cards.length
+  const colors = PHASE_COLORS[column.phase] ?? PHASE_COLORS.staging
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-lg border border-border bg-muted/30">
-      <div className="flex items-center justify-between border-b border-border px-3 py-2">
-        <span className="text-sm font-semibold text-foreground">{column.label}</span>
-        <span className="rounded-full bg-background px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+    <div className={cn("flex w-72 shrink-0 flex-col rounded-xl border bg-muted/20 shadow-sm", colors.border)}>
+      <div className={cn("flex items-center justify-between rounded-t-xl border-b px-3 py-2.5", colors.header)}>
+        <span className="text-sm font-bold">{column.label}</span>
+        <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold", colors.badge)}>
           {column.count.toLocaleString()}
         </span>
       </div>
@@ -305,8 +329,10 @@ function BoardCardItem({
 
   return (
     <div className={cn(
-      "rounded-md border p-3 shadow-sm transition-colors", 
-      selected ? "border-primary bg-primary/5" : "border-border bg-background",
+      "rounded-lg border p-3 shadow-sm transition-all duration-150",
+      selected
+        ? "border-[var(--accent-indigo)] bg-[var(--accent-indigo-soft)] shadow-[0_0_0_1px_var(--accent-indigo)]"
+        : "border-border bg-background hover:border-[var(--accent-indigo)]/40 hover:shadow-md",
       pending && "opacity-50"
     )}>
       <div className="flex items-start justify-between gap-2">

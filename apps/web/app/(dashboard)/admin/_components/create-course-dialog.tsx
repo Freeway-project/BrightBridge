@@ -3,15 +3,13 @@
 import { useActionState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { BookPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog"
 import { createCourseAction, type CreateCourseState } from "../actions"
 
@@ -50,18 +48,24 @@ export function CreateCourseDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add course</DialogTitle>
-          <DialogDescription>
-            Manually create a new course record. It will start in the{" "}
-            <span className="font-medium">Course Created</span> status.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="overflow-hidden p-0 gap-0">
+        {/* Coloured header band */}
+        <div className="flex items-center gap-3 bg-gradient-to-r from-[var(--ev-600)] to-[var(--accent-indigo)] px-6 py-5">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/15 shadow-inner">
+            <BookPlus className="size-5 text-white" />
+          </span>
+          <div>
+            <h2 className="text-base font-semibold text-white">Add course</h2>
+            <p className="text-xs text-white/70">
+              Starts in <span className="font-medium text-white/90">Course Created</span> status
+            </p>
+          </div>
+        </div>
 
-        <form ref={formRef} action={formAction} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="title">
+        <form ref={formRef} action={formAction} className="space-y-5 p-6">
+          {/* Title */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground" htmlFor="title">
               Title <span className="text-destructive">*</span>
             </label>
             <Input
@@ -73,49 +77,57 @@ export function CreateCourseDialog({ open, onOpenChange }: Props) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="sourceCourseId">
-                Source course ID
-              </label>
-              <Input
-                id="sourceCourseId"
-                name="sourceCourseId"
-                placeholder="e.g. PSYC-101"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="targetCourseId">
-                Target course ID
-              </label>
-              <Input
-                id="targetCourseId"
-                name="targetCourseId"
-                placeholder="e.g. PSYC-101-2026"
-              />
+          {/* Course IDs */}
+          <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Course IDs</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" htmlFor="sourceCourseId">
+                  Source ID
+                </label>
+                <Input
+                  id="sourceCourseId"
+                  name="sourceCourseId"
+                  placeholder="e.g. PSYC-101"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" htmlFor="targetCourseId">
+                  Target ID
+                </label>
+                <Input
+                  id="targetCourseId"
+                  name="targetCourseId"
+                  placeholder="e.g. PSYC-101-2026"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="term">
-                Term
-              </label>
-              <Input
-                id="term"
-                name="term"
-                placeholder="e.g. Fall 2026"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="department">
-                Department
-              </label>
-              <Input
-                id="department"
-                name="department"
-                placeholder="e.g. Psychology"
-              />
+          {/* Meta */}
+          <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Details</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" htmlFor="term">
+                  Term
+                </label>
+                <Input
+                  id="term"
+                  name="term"
+                  placeholder="e.g. Fall 2026"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium" htmlFor="department">
+                  Department
+                </label>
+                <Input
+                  id="department"
+                  name="department"
+                  placeholder="e.g. Psychology"
+                />
+              </div>
             </div>
           </div>
 
@@ -123,7 +135,11 @@ export function CreateCourseDialog({ open, onOpenChange }: Props) {
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={pending}>
+            <Button
+              type="submit"
+              disabled={pending}
+              className="bg-[var(--ev-600)] hover:bg-[var(--ev-500)] text-white"
+            >
               {pending ? "Creating…" : "Create course"}
             </Button>
           </DialogFooter>
