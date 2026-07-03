@@ -20,7 +20,6 @@ type InfoPanelProps = {
   lastSavedAt: string | null
   escalations: EscalationWithMessages[]
   comments: CourseComment[]
-  sharedComments: CourseComment[]
 }
 
 const INFO_PANEL_COLLAPSED_KEY = "coursebridge:course-review-info-panel-collapsed"
@@ -32,7 +31,6 @@ export function InfoPanel({
   lastSavedAt,
   escalations,
   comments,
-  sharedComments,
 }: InfoPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [formattedDate, setFormattedDate] = useState<string | null>(null)
@@ -164,7 +162,6 @@ export function InfoPanel({
                     currentUserId={reviewerId}
                     escalations={escalations}
                     comments={comments}
-                    sharedComments={sharedComments}
                   />
                 </div>
               </section>

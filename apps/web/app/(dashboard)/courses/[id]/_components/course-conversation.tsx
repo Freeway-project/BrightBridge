@@ -8,7 +8,6 @@ import {
   createEscalationAction,
 } from "../escalation-actions"
 import { postCommentAction } from "@/app/(dashboard)/admin/courses/[id]/actions"
-import { CourseDiscussion } from "@/components/shared/course-discussion"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -30,7 +29,6 @@ interface Props {
   courseId: string
   currentUserId: string
   comments: CourseComment[]
-  sharedComments: CourseComment[]
   escalations: EscalationWithMessages[]
 }
 
@@ -38,8 +36,8 @@ type TimelineItem =
   | { type: "comment"; id: string; date: string; authorName: string; authorId: string; body: string }
   | { type: "escalation"; id: string; date: string; authorName: string; authorId: string; body: string; title: string; severity: string; status: string; resolved_at: string | null; resolutionNote: string | null; messages: EscalationWithMessages["messages"] }
 
-export function CourseConversation({ courseId, currentUserId, comments, sharedComments, escalations }: Props) {
-  const [activeTab, setActiveTab] = useState<"shared" | "internal" | "escalate">("shared")
+export function CourseConversation({ courseId, currentUserId, comments, escalations }: Props) {
+  const [activeTab, setActiveTab] = useState<"internal" | "escalate">("internal")
   const [body, setBody] = useState("")
   const [isPending, startTransition] = useTransition()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -99,26 +97,13 @@ export function CourseConversation({ courseId, currentUserId, comments, sharedCo
     <div className="flex flex-col h-full min-h-0 gap-2">
       {/* Tab selector */}
       <div className="px-1 pt-1.5 pb-0">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "shared" | "internal" | "escalate")} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-9 bg-white/5 border border-border-icy p-1">
-            <TabsTrigger value="shared" className="text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Shared</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "internal" | "escalate")} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-9 bg-white/5 border border-border-icy p-1">
             <TabsTrigger value="internal" className="text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Internal</TabsTrigger>
             <TabsTrigger value="escalate" className="text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground">Escalate</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
-
-      {/* Shared discussion — visible to instructor, TA, and admin */}
-      {activeTab === "shared" && (
-        <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-border-icy">
-          <CourseDiscussion
-            courseId={courseId}
-            comments={sharedComments}
-            currentUserId={currentUserId}
-            canPost={true}
-          />
-        </div>
-      )}
 
       {/* Internal channel — TA / admin only */}
       {(activeTab === "internal" || activeTab === "escalate") && (

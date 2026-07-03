@@ -92,7 +92,6 @@ export default async function CourseWorkspaceLayout({
         lastSavedAt={lastSavedAt}
         escalations={escalations}
         comments={comments}
-        sharedComments={sharedComments}
       />
     </div>
   );
