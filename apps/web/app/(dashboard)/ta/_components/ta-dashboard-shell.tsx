@@ -18,7 +18,7 @@ export function TaDashboardShell({
 }: {
   userId: string
   initialConversations: ConversationSummary[]
-  coursesContent: ReactNode
+  coursesContent: (openChat: () => void) => ReactNode
 }) {
   const [tab, setTab] = useState<TabId>("courses")
   const { count: unread, bump } = useChatUnreadCount(userId)
@@ -87,7 +87,7 @@ export function TaDashboardShell({
       {/* Content area */}
       {tab === "courses" && (
         <div className="min-h-0 flex-1 overflow-hidden">
-          {coursesContent}
+          {coursesContent(() => handleTabClick("chat"))}
         </div>
       )}
       {tab === "chat" && (
