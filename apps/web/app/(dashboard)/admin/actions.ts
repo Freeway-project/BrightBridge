@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   assignUserToCourse,
+  createCourse,
   transitionCourseStatus,
   reassignCourseStaff,
 } from "@/lib/courses/service";
@@ -37,6 +38,34 @@ export type BatchExportResult = {
   rows: BatchMailMergeRow[];
   skipped: number;
 };
+
+export type CreateCourseState = {
+  kind: "idle" | "success" | "error";
+  message: string | null;
+  courseId?: string;
+};
+
+export async function createCourseAction(
+  _state: CreateCourseState,
+  formData: FormData,
+): Promise<CreateCourseState> {
+  try {
+    const title = String(formData.get("title") ?? "").trim();
+    const sourceCourseId = String(formData.get("sourceCourseId") ?? "").trim() || null;
+    const targetCourseId = String(formData.get("targetCourseId") ?? "").trim() || null;
+    const term = String(formData.get("term") ?? "").trim() || null;
+    const department = String(formData.get("department") ?? "").trim() || null;
+
+    const course = await createCourse({ title, sourceCourseId, targetCourseId, term, department });
+    revalidatePath("/admin");
+    return { kind: "success", message: `"${course.title}" created.`, courseId: course.id };
+  } catch (error) {
+    return {
+      kind: "error",
+      message: error instanceof Error ? error.message : "Failed to create course.",
+    };
+  }
+}
 
 export async function searchAssignableCoursesAction(searchTerm: string): Promise<AssignableCourseOption[]> {
   const context = await requireProfile();
