@@ -18,7 +18,9 @@ import { cn } from "@/lib/utils"
 import { transitionCourseAction } from "../actions"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
+import { CreateCourseDialog } from "./create-course-dialog"
 import type { ProfileOption } from "@/lib/repositories/contracts"
+import { Plus } from "lucide-react"
 
 export type BoardCard = {
   id: string
@@ -52,6 +54,7 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [reassignOpen, setReassignOpen] = useState(false)
   const [reassignTargets, setReassignTargets] = useState<ReassignTarget[]>([])
+  const [createOpen, setCreateOpen] = useState(false)
 
   function toggleSelection(id: string, title: string) {
     setSelectedIds((prev) => {
@@ -79,13 +82,21 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
             ? "Drag-free workflow board — click a course to move it to its next step."
             : "Full searchable list of every course."}
         </p>
-        <div className="inline-flex rounded-md border border-border p-0.5">
-          <ViewToggle active={view === "board"} onClick={() => setView("board")}>
-            Board
-          </ViewToggle>
-          <ViewToggle active={view === "list"} onClick={() => setView("list")}>
-            List
-          </ViewToggle>
+        <div className="flex items-center gap-2">
+          {!readOnly && (
+            <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              Add course
+            </Button>
+          )}
+          <div className="inline-flex rounded-md border border-border p-0.5">
+            <ViewToggle active={view === "board"} onClick={() => setView("board")}>
+              Board
+            </ViewToggle>
+            <ViewToggle active={view === "list"} onClick={() => setView("list")}>
+              List
+            </ViewToggle>
+          </div>
         </div>
       </div>
 
@@ -127,6 +138,10 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
             setReassignTargets((targets) => targets.filter((t) => !ids.includes(t.id)))
           }}
         />
+      )}
+
+      {!readOnly && (
+        <CreateCourseDialog open={createOpen} onOpenChange={setCreateOpen} />
       )}
     </div>
   )
