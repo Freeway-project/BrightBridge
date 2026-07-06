@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { MessageSquare } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -14,6 +14,7 @@ import { NewConversationMenu } from "@/app/(dashboard)/chat/_components/NewConve
 import { ChatWithAdminButton } from "@/app/(dashboard)/chat/_components/ChatWithAdminButton"
 import { RelativeTime } from "@/app/(dashboard)/chat/_components/RelativeTime"
 import type { ConversationSummary, ConversationDetail, MessageRow } from "@/lib/chat/types"
+import { useConversationListRealtime } from "@/lib/chat/use-conversation-list-realtime"
 
 export function TaChatTab({
   userId,
@@ -29,11 +30,9 @@ export function TaChatTab({
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
-  useEffect(() => {
-    listMyConversationsAction()
-      .then(setConversations)
-      .catch(() => {})
-  }, [])
+  useConversationListRealtime(userId, selectedId, () => {
+    listMyConversationsAction().then(setConversations).catch(() => {})
+  })
 
   async function selectConversation(id: string) {
     if (id === selectedId) return
