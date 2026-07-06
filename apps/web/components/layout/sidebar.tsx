@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LogOut, UserCheck, UserMinus, Search, Network } from "lucide-react"
@@ -17,6 +17,7 @@ import aiAnimationMono from "@/assets/7151ad77-5cd9-4b4a-a8d9-eb7ae1f355f8.json"
 import aiAnimationAurora from "@/assets/9612aa98-116d-11ee-b4c5-2f9cdafc1909.json"
 import { OCLoadingLogo } from "@/components/shared/oc-loading-logo"
 import { SidebarAnnouncementBanner } from "@/components/layout/sidebar-announcement-banner"
+import { useChatUnreadCount } from "@/hooks/use-chat-unread-count"
 import type { ActiveAnnouncement } from "@/lib/announcements/types"
 import { useTweaks, type ThemeId } from "@/components/shared/tweak-provider"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -54,6 +55,7 @@ import {
 interface AppSidebarProps {
   role: Role
   userName: string
+  userId: string
   initialVersion: string
   isImpersonating?: boolean
   impersonatorRole?: Role
@@ -83,6 +85,7 @@ function BrandLogo() {
 export function AppSidebar({
   role,
   userName,
+  userId,
   initialVersion,
   isImpersonating = false,
   impersonatorRole,
@@ -105,22 +108,7 @@ export function AppSidebar({
   const [searchQuery, setSearchQuery] = useState("")
   const [users, setUsers] = useState<{ id: string; email: string; fullName: string | null; role: Role }[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
-  const [chatUnread, setChatUnread] = useState(0)
-
-  useEffect(() => {
-    const fetchUnread = async () => {
-      try {
-        const res = await fetch("/api/chat/unread-count", { cache: "no-store" })
-        if (res.ok) {
-          const data = (await res.json()) as { count: number }
-          setChatUnread(data.count ?? 0)
-        }
-      } catch { /* ignore */ }
-    }
-    void fetchUnread()
-    const id = setInterval(() => void fetchUnread(), 30_000)
-    return () => clearInterval(id)
-  }, [])
+  const { count: chatUnread } = useChatUnreadCount(userId)
 
   useEffect(() => {
     if (!impersonateOpen) return

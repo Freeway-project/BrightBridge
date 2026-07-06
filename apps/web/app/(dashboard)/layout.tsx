@@ -64,6 +64,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             <AppSidebar
               initialVersion={currentVersion}
               role={role}
+              userId={context.userId}
               userName={userName}
               isImpersonating={isImpersonating}
               impersonatorRole={impersonatorRole}

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import {
   listMyConversationsAction,
   getConversationAction,
+  markReadAction,
 } from "@/lib/chat/actions"
 import { ChatSseClient } from "@/app/(dashboard)/chat/_components/ChatSseClient"
 import { NewConversationMenu } from "@/app/(dashboard)/chat/_components/NewConversationMenu"
@@ -19,9 +20,11 @@ import { useConversationListRealtime } from "@/lib/chat/use-conversation-list-re
 export function TaChatTab({
   userId,
   initialConversations,
+  onConversationRead,
 }: {
   userId: string
   initialConversations: ConversationSummary[]
+  onConversationRead?: () => void
 }) {
   const [conversations, setConversations] = useState<ConversationSummary[]>(initialConversations)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -41,6 +44,14 @@ export function TaChatTab({
     setDetail(null)
     setErr(null)
     setLoading(true)
+    // Optimistically clear the per-conversation badge immediately
+    setConversations((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)),
+    )
+    // Mark read in DB and refresh the tab badge
+    markReadAction({ conversationId: id })
+      .then(() => onConversationRead?.())
+      .catch(() => {})
     try {
       const result = await getConversationAction(id)
       setMessages(result.messages)
