@@ -10,6 +10,7 @@ import { useCourseCommentRealtime } from "@/lib/workspace/use-course-comment-rea
 import { useRouter } from "next/navigation"
 import type { CourseComment } from "@/lib/services/comments"
 import type { Role } from "@coursebridge/workflow"
+import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 
 const CAN_MARK_ANSWERED: readonly string[] = ["admin_full", "super_admin", "standard_user"]
 
@@ -28,7 +29,7 @@ export function CourseWorkspaceTabShell({
   sharedComments: CourseComment[]
   children: ReactNode
 }) {
-  const [tab, setTab] = useState<TabId>("workspace")
+  const [tab, setTab] = useStickyTabState(`course-workspace-${courseId}`, "workspace") as [TabId, (t: TabId) => void]
   const [newCount, setNewCount] = useState(0)
   const [bump, setBump] = useState(0)
   const prevLen = useRef(sharedComments.length)

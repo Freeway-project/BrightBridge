@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, type ReactNode } from "react"
-import { useState } from "react"
+import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
 import { BookOpen, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { TweakableContent } from "@/components/shared/tweakable-content"
@@ -26,7 +26,7 @@ export function TaDashboardShell({
   initialConversations: ConversationSummary[]
   coursesContent: ReactNode
 }) {
-  const [tab, setTab] = useState<TabId>("courses")
+  const [tab, setTab] = useStickyTabState("ta-dashboard", "courses") as [TabId, (t: TabId) => void]
   const { count: unread, bump } = useChatUnreadCount(userId)
 
   function handleTabClick(id: TabId) {
