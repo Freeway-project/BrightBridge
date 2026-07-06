@@ -27,7 +27,7 @@ export function TaDashboardShell({
   coursesContent: ReactNode
 }) {
   const [tab, setTab] = useStickyTabState("ta-dashboard", "courses") as [TabId, (t: TabId) => void]
-  const { count: unread, bump } = useChatUnreadCount(userId)
+  const { count: unread, bump, refresh: refreshUnreadCount } = useChatUnreadCount(userId)
 
   function handleTabClick(id: TabId) {
     setTab(id)
@@ -100,7 +100,7 @@ export function TaDashboardShell({
       </OpenChatContext.Provider>
       {tab === "chat" && (
         <div className="min-h-0 flex-1 overflow-hidden">
-          <TaChatTab userId={userId} initialConversations={initialConversations} />
+          <TaChatTab userId={userId} initialConversations={initialConversations} onConversationRead={refreshUnreadCount} />
         </div>
       )}
     </TweakableContent>

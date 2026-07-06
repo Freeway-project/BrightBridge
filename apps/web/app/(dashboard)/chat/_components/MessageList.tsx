@@ -38,7 +38,10 @@ export function MessageList({
   }, [messages.length]);
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-y-auto">
+    <div
+      ref={containerRef}
+      className="flex-1 overflow-y-auto bg-[image:radial-gradient(circle,#cbd5e1_1px,transparent_1px)] bg-[size:20px_20px] dark:bg-[image:radial-gradient(circle,#334155_1px,transparent_1px)]"
+    >
       <div className="flex flex-col gap-0.5 py-4">
         {messages.map((msg, i) => {
           const prev = messages[i - 1];
