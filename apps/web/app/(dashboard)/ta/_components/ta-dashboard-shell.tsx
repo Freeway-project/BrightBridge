@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { createContext, useContext, type ReactNode } from "react"
 import { useState } from "react"
 import { BookOpen, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -11,6 +11,12 @@ import type { ConversationSummary } from "@/lib/chat/types"
 
 type TabId = "courses" | "chat"
 
+const OpenChatContext = createContext<(() => void) | null>(null)
+
+export function useOpenChat() {
+  return useContext(OpenChatContext)
+}
+
 export function TaDashboardShell({
   userId,
   initialConversations,
@@ -18,7 +24,7 @@ export function TaDashboardShell({
 }: {
   userId: string
   initialConversations: ConversationSummary[]
-  coursesContent: (openChat: () => void) => ReactNode
+  coursesContent: ReactNode
 }) {
   const [tab, setTab] = useState<TabId>("courses")
   const { count: unread, bump } = useChatUnreadCount(userId)
@@ -85,11 +91,13 @@ export function TaDashboardShell({
       </div>
 
       {/* Content area */}
-      {tab === "courses" && (
-        <div className="min-h-0 flex-1 overflow-hidden">
-          {coursesContent(() => handleTabClick("chat"))}
-        </div>
-      )}
+      <OpenChatContext.Provider value={() => handleTabClick("chat")}>
+        {tab === "courses" && (
+          <div className="min-h-0 flex-1 overflow-hidden">
+            {coursesContent}
+          </div>
+        )}
+      </OpenChatContext.Provider>
       {tab === "chat" && (
         <div className="min-h-0 flex-1 overflow-hidden">
           <TaChatTab userId={userId} initialConversations={initialConversations} />

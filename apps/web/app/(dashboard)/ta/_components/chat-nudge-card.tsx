@@ -3,13 +3,14 @@
 import { MessageSquare, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ConversationSummary } from "@/lib/chat/types"
+import { useOpenChat } from "./ta-dashboard-shell"
 
 interface Props {
   conversations: ConversationSummary[]
-  onOpenChat: () => void
 }
 
-export function ChatNudgeCard({ conversations, onOpenChat }: Props) {
+export function ChatNudgeCard({ conversations }: Props) {
+  const openChat = useOpenChat()
   const unread = conversations.filter((c) => c.unreadCount > 0)
   if (unread.length === 0) return null
 
@@ -19,7 +20,7 @@ export function ChatNudgeCard({ conversations, onOpenChat }: Props) {
   return (
     <button
       type="button"
-      onClick={onOpenChat}
+      onClick={() => openChat?.()}
       className={cn(
         "group relative w-full overflow-hidden rounded-2xl border border-[var(--ev-600)]/30 bg-card p-5 text-left shadow-[0_0_28px_var(--accent-indigo-glow)]",
         "transition-all duration-200 hover:border-[var(--ev-600)]/60 hover:shadow-[0_0_36px_var(--accent-indigo-glow)]",

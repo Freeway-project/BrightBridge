@@ -38,7 +38,7 @@ export default async function TADashboardPage() {
     <TaDashboardShell
       userId={ctx.userId}
       initialConversations={initialConversations}
-      coursesContent={(openChat) => (
+      coursesContent={(
         <div id="ta-dashboard-scroll" className="relative h-full overflow-y-auto overflow-x-hidden p-6 sm:p-8">
           <ScrollCollapsibleHeader>
             <TaDashboardHeader firstName={firstName} subtitle={subtitle} />
@@ -48,7 +48,7 @@ export default async function TADashboardPage() {
                 {today.length > 0 && (
                   <TodayCard courses={today} totalWaiting={totalOwned} />
                 )}
-                <ChatNudgeCard conversations={initialConversations} onOpenChat={openChat} />
+                <ChatNudgeCard conversations={initialConversations} />
               </div>
               <div className="min-w-[280px] space-y-2">
                 <PipelineStrip counts={buckets} />
@@ -81,5 +81,5 @@ export default async function TADashboardPage() {
         </div>
       )}
     />
-  );
+  )
 }
