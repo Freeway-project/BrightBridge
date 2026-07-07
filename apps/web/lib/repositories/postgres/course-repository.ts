@@ -589,6 +589,16 @@ export function createPostgresCourseRepository(): CourseRepository {
       );
     },
 
+    async setCourseInstructor(input) {
+      // `set_course_instructor` assigns the instructor (or swaps the existing
+      // one) atomically and records the course_instructor_reassignments trace.
+      const pool = getPostgresPool();
+      await pool.query(
+        `SELECT set_course_instructor($1::uuid, $2::uuid, $3::uuid, $4) AS ok`,
+        [input.courseId, input.newProfileId, input.actorId, input.reason],
+      );
+    },
+
     async insertStatusEvent(input: InsertStatusEventInput) {
       const pool = getPostgresPool();
       await pool.query(

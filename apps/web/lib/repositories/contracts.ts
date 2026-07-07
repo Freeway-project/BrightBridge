@@ -301,6 +301,14 @@ export type ReassignCourseStaffRecordInput = {
   reason: string | null;
 };
 
+/** Input for the unified assign-or-swap of a course's instructor. */
+export type SetCourseInstructorRecordInput = {
+  courseId: string;
+  newProfileId: string;
+  actorId: string;
+  reason: string | null;
+};
+
 export type InsertStatusEventInput = {
   courseId: string;
   fromStatus: CourseStatus | null;
@@ -388,6 +396,8 @@ export interface CourseRepository {
   hasAssignment(courseId: string, profileId: string, role: AssignmentRole): Promise<boolean>;
   assignUserToCourse(input: AssignUserToCourseRecordInput): Promise<void>;
   reassignCourseStaff(input: ReassignCourseStaffRecordInput): Promise<void>;
+  /** Assigns the course's instructor, atomically swapping any existing one. */
+  setCourseInstructor(input: SetCourseInstructorRecordInput): Promise<void>;
   insertStatusEvent(input: InsertStatusEventInput): Promise<void>;
   listAdminCourses(): Promise<AdminCourseRow[]>;
   listAdminCoursesPage(

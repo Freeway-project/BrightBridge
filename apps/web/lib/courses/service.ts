@@ -304,6 +304,37 @@ export async function reassignCourseStaff(input: ReassignCourseStaffInput) {
   });
 }
 
+export type SetCourseInstructorInput = {
+  courseId: string;
+  newProfileId: string;
+  reason?: string | null;
+};
+
+/**
+ * Assigns the course's instructor, atomically swapping any existing one. The
+ * repository RPC enforces the one-instructor-per-course invariant and records
+ * the course_instructor_reassignments trace (who/from/to/when/why).
+ */
+export async function setCourseInstructor(input: SetCourseInstructorInput) {
+  const context = await requireProfile();
+  requireAnyRole(context, adminRoles); // ["admin_full", "super_admin"]
+
+  const profile = await getProfileRepository().getProfileById(input.newProfileId);
+  if (!profile) {
+    throw new Error("Selected instructor does not exist.");
+  }
+  if (profile.role !== "instructor") {
+    throw new Error("Courses can only be assigned to an instructor.");
+  }
+
+  await getCourseRepository().setCourseInstructor({
+    courseId: input.courseId,
+    newProfileId: input.newProfileId,
+    actorId: context.profile.id,
+    reason: input.reason ?? null,
+  });
+}
+
 export async function updateCourseDepartment(courseId: string, orgUnitId: string | null) {
   const context = await requireProfile();
   requireAnyRole(context, adminRoles);
