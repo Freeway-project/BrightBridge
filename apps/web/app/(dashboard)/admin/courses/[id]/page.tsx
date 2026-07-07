@@ -21,6 +21,8 @@ import { CourseTimeline } from "@/components/courses/course-timeline"
 import { viewForCourse } from "@/lib/instructor-views/queries"
 import { OpenedDot } from "@/components/instructor/opened-dot"
 import { InstructorChatPanel } from "./_components/instructor-chat-panel"
+import { InstructorSection } from "./_components/instructor-section"
+import { getProfilesByRole } from "@/lib/services/profiles"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -31,7 +33,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "super_admin"])
 
-  const [detail, comments, sharedComments, submissionHistory, questionRounds, timeline, instructorView] = await Promise.all([
+  const [detail, comments, sharedComments, submissionHistory, questionRounds, timeline, instructorView, instructors] = await Promise.all([
     getAdminCourseDetail(id),
     getCourseComments(id),
     getSharedComments(id),
@@ -39,6 +41,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
     getQuestionRoundHistory(id),
     getCourseTimeline(id, { includeInternalComments: true }),
     viewForCourse(id),
+    getProfilesByRole("instructor"),
   ])
 
   if (!detail) notFound()
@@ -68,6 +71,11 @@ export default async function AdminCourseDetailPage({ params }: Props) {
               title="Course Review"
             >
               <div className="space-y-[var(--card-spacing,1.5rem)]">
+                <InstructorSection
+                  courseId={id}
+                  current={course.instructor ?? null}
+                  instructors={instructors}
+                />
                 {(course.status === "sent_to_instructor" ||
                   course.status === "instructor_viewing" ||
                   course.status === "instructor_questions" ||

@@ -8,6 +8,7 @@ import {
   createCourse,
   transitionCourseStatus,
   reassignCourseStaff,
+  setCourseInstructor,
 } from "@/lib/courses/service";
 import { requireAnyRole, requireProfile } from "@/lib/auth/context";
 import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
@@ -386,8 +387,7 @@ export async function createInstructorAndAssignAction(
     };
   }
 
-  const { getProfileRepository, getCourseRepository } = await import("@/lib/repositories");
-  const { assignUserToCourse } = await import("@/lib/courses/service");
+  const { getProfileRepository } = await import("@/lib/repositories");
   const { randomUUID } = await import("node:crypto");
 
   try {
@@ -404,12 +404,9 @@ export async function createInstructorAndAssignAction(
       role: "instructor",
     });
 
-    // 3. Assign to course
-    await assignUserToCourse({
-      courseId,
-      profileId: userId,
-      role: "instructor",
-    });
+    // Assign to course via the single-instructor RPC — swaps any existing
+    // instructor atomically and records the reassignment trace.
+    await setCourseInstructor({ courseId, newProfileId: userId });
 
     revalidatePath("/admin");
     revalidatePath(`/courses/${courseId}`);
@@ -425,6 +422,84 @@ export async function createInstructorAndAssignAction(
     return {
       kind: "error",
       message: error instanceof Error ? error.message : "Could not create/assign instructor.",
+    };
+  }
+}
+
+/**
+ * Assigns or changes a course's instructor from the admin course detail page.
+ * `mode="existing"` picks an existing instructor profile; `mode="new"` creates
+ * (or reuses by email) an instructor profile, then assigns it. The swap and its
+ * who/from/to/why trace are handled atomically by setCourseInstructor.
+ */
+export async function changeCourseInstructorAction(
+  _state: AssignTaState,
+  formData: FormData,
+): Promise<AssignTaState> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["admin_full", "super_admin"]);
+
+  const requestId = `change-instructor-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const courseId = String(formData.get("courseId") ?? "").trim();
+  const mode = String(formData.get("mode") ?? "existing").trim();
+  const reason = String(formData.get("reason") ?? "").trim() || null;
+
+  if (!courseId) {
+    return { kind: "error", message: "Course is required." };
+  }
+
+  try {
+    let profileId: string;
+
+    if (mode === "new") {
+      const email = String(formData.get("email") ?? "").trim().toLowerCase();
+      const fullName = String(formData.get("fullName") ?? "").trim();
+      if (!email || !fullName) {
+        return { kind: "error", message: "New instructor name and email are required." };
+      }
+
+      const { getProfileRepository } = await import("@/lib/repositories");
+      const { randomUUID } = await import("node:crypto");
+      const profiles = getProfileRepository();
+      const existing = await profiles.getProfileByEmail(email);
+      profileId = existing?.id ?? randomUUID();
+      await profiles.upsertProfile({ id: profileId, email, fullName, role: "instructor" });
+    } else {
+      profileId = String(formData.get("profileId") ?? "").trim();
+      if (!profileId) {
+        return { kind: "error", message: "Please select an instructor." };
+      }
+    }
+
+    console.info("[changeCourseInstructorAction] Attempt started", { requestId, courseId, mode });
+
+    await setCourseInstructor({ courseId, newProfileId: profileId, reason });
+
+    revalidatePath("/admin");
+    revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath(`/courses/${courseId}`);
+
+    try { await syncCourseChannel(courseId); } catch (e) { console.error("syncCourseChannel failed:", e); }
+
+    console.info("[changeCourseInstructorAction] Attempt succeeded", { requestId, courseId });
+    return { kind: "success", message: "Instructor updated." };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not update instructor.";
+    const isAlreadyAssigned = message.includes("already assigned to this instructor");
+
+    if (!isAlreadyAssigned) {
+      Sentry.withScope((scope) => {
+        scope.setTag("area", "admin_assignment");
+        scope.setTag("action", "change_course_instructor");
+        scope.setContext("instructor_change_attempt", { requestId, courseId, mode });
+        Sentry.captureException(error);
+      });
+    }
+
+    console.error("[changeCourseInstructorAction] Attempt failed", { requestId, courseId, message });
+    return {
+      kind: "error",
+      message: isAlreadyAssigned ? "This course is already assigned to that instructor." : message,
     };
   }
 }
