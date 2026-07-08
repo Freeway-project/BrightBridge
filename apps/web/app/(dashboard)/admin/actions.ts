@@ -13,8 +13,10 @@ import {
 import { requireAnyRole, requireProfile } from "@/lib/auth/context";
 import { getAdminCoursesPage, getAdminCourseDetail } from "@/lib/admin/queries";
 import { resolveEscalation } from "@/lib/services/escalations";
-import { getCourseStatusLabel, type CourseStatus } from "@coursebridge/workflow";
+import { getCourseStatusLabel, type CourseStatus, type Role } from "@coursebridge/workflow";
 import { syncCourseChannel } from "@/lib/chat/membership";
+import { getProfileRepository } from "@/lib/repositories";
+import { createLoginLink, buildLoginLink } from "@/lib/login-links/service";
 
 export type AssignTaState = {
   kind: "idle" | "success" | "error";
@@ -802,4 +804,58 @@ export async function batchExportAndSendAction(courseIds: string[]): Promise<Bat
   revalidatePath("/instructor");
 
   return { rows, skipped };
+}
+
+// ─── Login links (passwordless "magic link" for an existing user) ─────────────
+
+export type LoginLinkUser = {
+  id: string;
+  fullName: string | null;
+  email: string;
+  role: Role;
+};
+
+/**
+ * Search existing users to mint a login link for. super_admins are excluded — a
+ * login link can never target the highest privilege.
+ */
+export async function searchUsersForLoginLinkAction(term: string): Promise<LoginLinkUser[]> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["admin_full", "super_admin"]);
+
+  const result = await getProfileRepository().listUsers(1, 50, term?.trim() ?? "");
+  return result.data
+    .filter((u) => u.role !== "super_admin")
+    .map((u) => ({ id: u.id, fullName: u.fullName, email: u.email, role: u.role }));
+}
+
+/**
+ * Mint a never-expiring, reusable login link for an existing user. Returns the
+ * absolute URL. Refuses missing users and super_admin targets; minting revokes
+ * any prior active link for that user (one live link per user).
+ */
+export async function generateLoginLinkAction(
+  profileId: string,
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const context = await requireProfile();
+  requireAnyRole(context, ["admin_full", "super_admin"]);
+
+  const id = profileId?.trim();
+  if (!id) return { ok: false, error: "Missing user." };
+
+  const target = await getProfileRepository().getProfileById(id);
+  if (!target) return { ok: false, error: "User not found." };
+  if (target.role === "super_admin") {
+    return { ok: false, error: "Login links cannot be created for super admins." };
+  }
+
+  try {
+    const { token } = await createLoginLink({ profileId: target.id, createdBy: context.profile.id });
+    return { ok: true, url: buildLoginLink(token) };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Could not create login link.",
+    };
+  }
 }
