@@ -64,8 +64,8 @@ function InsightCard({ children, className, index = 0 }: { children: ReactNode; 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut", delay: index * 0.08 }}
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5",
-        "shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200",
+        "relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5",
+        "shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-accent-indigo/40",
         className,
       )}
     >
@@ -111,12 +111,12 @@ export function TaDashboardInsights({ courses, issueCounts }: Props) {
         <div className="flex items-center gap-4">
           <div className="relative shrink-0">
             <DonutRing pct={metrics.completionPct} color="#22c55e" />
-            <span className="absolute inset-0 flex items-center justify-center text-sm font-black tabular-nums">
+            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold tabular-nums">
               {Math.round(metrics.completionPct)}%
             </span>
           </div>
           <div>
-            <p className="text-2xl font-black tabular-nums leading-none">{metrics.done}</p>
+            <p className="text-2xl font-bold tabular-nums leading-none">{metrics.done}</p>
             <p className="mt-1 text-xs text-muted-foreground">of {metrics.total} courses done</p>
           </div>
         </div>
@@ -137,11 +137,11 @@ export function TaDashboardInsights({ courses, issueCounts }: Props) {
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Issues</p>
         <div className="flex items-end justify-between mb-3">
           <div>
-            <p className="text-2xl font-black tabular-nums leading-none text-amber-500">{metrics.totalOpen}</p>
+            <p className="text-2xl font-bold tabular-nums leading-none text-amber-500">{metrics.totalOpen}</p>
             <p className="mt-1 text-xs text-muted-foreground">open</p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-black tabular-nums leading-none text-emerald-500">{metrics.totalResolved}</p>
+            <p className="text-2xl font-bold tabular-nums leading-none text-emerald-500">{metrics.totalResolved}</p>
             <p className="mt-1 text-xs text-muted-foreground">resolved</p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export function TaDashboardInsights({ courses, issueCounts }: Props) {
         <div className="flex items-end gap-6">
           <div>
             <p className={cn(
-              "text-2xl font-black tabular-nums leading-none",
+              "text-2xl font-bold tabular-nums leading-none",
               metrics.attentionNeeded > 0 ? "text-red-500" : "text-emerald-500"
             )}>
               {metrics.attentionNeeded}
@@ -173,7 +173,7 @@ export function TaDashboardInsights({ courses, issueCounts }: Props) {
           </div>
           {metrics.stalled > 0 && (
             <div>
-              <p className="text-2xl font-black tabular-nums leading-none text-amber-500">{metrics.stalled}</p>
+              <p className="text-2xl font-bold tabular-nums leading-none text-amber-500">{metrics.stalled}</p>
               <p className="mt-1 text-xs text-muted-foreground">not started</p>
             </div>
           )}

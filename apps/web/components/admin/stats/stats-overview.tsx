@@ -55,21 +55,21 @@ export function StatsOverview({ totalCourses, phases }: Props) {
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-      <Card className="relative overflow-hidden border-blue-500/20 bg-card/80 shadow-sm">
+      <Card className="relative overflow-hidden border-accent-indigo/25 bg-card/80 shadow-sm">
         <div
           className="pointer-events-none absolute inset-0 opacity-100"
           style={{
-            background: "linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(14,165,233,0.06) 38%, transparent 72%), radial-gradient(circle at top right, rgba(59,130,246,0.16), transparent 36%)",
+            background: "linear-gradient(135deg, rgba(99,102,241,0.14) 0%, rgba(129,140,248,0.07) 38%, transparent 72%), radial-gradient(circle at top right, rgba(129,140,248,0.16), transparent 36%)",
           }}
         />
         <CardContent className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
-              <span className="inline-flex w-fit items-center rounded-full bg-blue-500/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-blue-700 dark:text-blue-300">
+              <span className="inline-flex w-fit items-center rounded-full bg-accent-indigo-soft px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-accent-indigo">
                 Primary Queue
               </span>
               <div className="space-y-2">
-                <h2 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {readyForInstructor.toLocaleString()} courses are staged and waiting for instructor handoff.
                 </h2>
                 <p className="max-w-xl text-sm leading-6 text-muted-foreground">
@@ -141,12 +141,12 @@ function HeroStat({
   icon: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-white/40 bg-background/75 p-3 backdrop-blur-sm">
+    <div className="rounded-2xl border border-border/70 bg-background/75 p-3 backdrop-blur-sm">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
-        <div className="rounded-full bg-blue-500/12 p-1.5 text-blue-600 dark:text-blue-300">{icon}</div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">{label}</p>
+        <div className="grid size-7 place-items-center rounded-lg bg-accent-indigo-soft text-accent-indigo">{icon}</div>
       </div>
-      <p className="mt-3 text-2xl font-black tracking-tight text-foreground">{value}</p>
+      <p className="mt-3 text-2xl font-bold tracking-tight text-foreground">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
     </div>
   )
@@ -168,16 +168,16 @@ function MetricCard({
   const styles = TONE_STYLES[tone]
 
   return (
-    <Card className={cn("relative overflow-hidden bg-card/70 shadow-sm", styles.border)}>
+    <Card className={cn("relative overflow-hidden bg-card/70 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md", styles.border)}>
       <div className="pointer-events-none absolute inset-0" style={{ background: styles.glow }} />
       <CardContent className="relative p-4">
         <div className="flex items-start justify-between gap-3">
-          <span className={cn("inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]", styles.chip)}>
+          <span className={cn("inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em]", styles.chip)}>
             {label}
           </span>
-          <div className={cn("rounded-full p-2", styles.chip)}>{icon}</div>
+          <div className={cn("grid size-8 place-items-center rounded-lg", styles.chip)}>{icon}</div>
         </div>
-        <p className={cn("mt-4 text-3xl font-black tracking-tight tabular-nums", styles.value)}>{value}</p>
+        <p className={cn("mt-4 text-3xl font-bold tracking-tight tabular-nums", styles.value)}>{value}</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">{sub}</p>
       </CardContent>
     </Card>

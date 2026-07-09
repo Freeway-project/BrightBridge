@@ -82,8 +82,9 @@ export function TaChatTab({
                   type="button"
                   onClick={() => selectConversation(c.id)}
                   className={cn(
-                    "flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-muted/40 transition-colors",
-                    selectedId === c.id && "bg-muted/60",
+                    "flex w-full items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-accent-indigo-soft",
+                    selectedId === c.id &&
+                      "bg-accent-indigo-soft ring-1 ring-inset ring-accent-indigo-ring",
                   )}
                 >
                   <span className="flex-1 truncate text-sm">{c.displayTitle}</span>

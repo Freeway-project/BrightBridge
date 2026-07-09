@@ -6,16 +6,14 @@ import {
   BookOpen,
   ChevronRight,
   ExternalLink,
-  Search,
   Users,
-  X,
 } from "lucide-react"
 import type { AdminCourseRow, AdminCoursesPage, AdminOverviewData } from "@/lib/admin/queries"
 import type { StatusCount } from "@/lib/repositories/contracts"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import {
   Select,
   SelectContent,
@@ -62,7 +60,6 @@ export function AdminViewerDashboard({ overviewData, coursesPage, statusCounts }
   const [sheetOpen, setSheetOpen] = useState(false)
   const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "")
 
-  const search = searchParams.get("search") ?? ""
   const statusFilter = searchParams.get("status") ?? "all"
   const currentPage = Math.max(coursesPage.page, 1)
 
@@ -82,11 +79,6 @@ export function AdminViewerDashboard({ overviewData, coursesPage, statusCounts }
     else params.delete(key)
     params.delete("page")
     startTransition(() => router.push(`${pathname}?${params.toString()}`))
-  }
-
-  function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    pushParam("search", searchInput.trim())
   }
 
   function openSheet(course: AdminCourseRow) {
@@ -150,27 +142,14 @@ export function AdminViewerDashboard({ overviewData, coursesPage, statusCounts }
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search courses…"
-                className="h-9 w-52 pl-8 text-sm"
-              />
-              {searchInput && searchInput !== search && (
-                <button type="submit" className="sr-only">Search</button>
-              )}
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => { setSearchInput(""); pushParam("search", "") }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </form>
+            <SearchBar
+              containerClassName="w-52"
+              value={searchInput}
+              onValueChange={setSearchInput}
+              onSearch={(v) => pushParam("search", v)}
+              debounceMs={350}
+              placeholder="Search courses…"
+            />
 
             <Select value={statusFilter} onValueChange={(v) => pushParam("status", v)}>
               <SelectTrigger className="h-9 w-44 text-xs">

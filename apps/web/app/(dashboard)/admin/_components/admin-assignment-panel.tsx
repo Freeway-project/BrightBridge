@@ -3,11 +3,11 @@ import { LottieLoader } from "@/components/ui/lottie-loader"
 
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import type { ProfileOption } from "@/lib/services/profiles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { SearchBar } from "@/components/ui/search-bar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, Search, X } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { batchAssignTaAction, searchAssignableCoursesAction, type AssignTaState } from "../actions";
 
@@ -60,7 +60,6 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
   const [availableCourses, setAvailableCourses] = useState<AssignableCourse[]>(courses);
   const [searchResults, setSearchResults] = useState<AssignableCourse[] | null>(null);
   const [isSearching, startSearch] = useTransition();
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const canAssign = availableCourses.length > 0 || (searchResults?.length ?? 0) > 0;
   const normalizedTaSearch = taSearch.trim().toLowerCase();
@@ -100,31 +99,26 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     [tas, selectedTaId]
   );
 
-  const handleCourseSearchChange = useCallback((value: string) => {
-    setCourseSearch(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    const trimmed = value.trim();
-    if (!trimmed) {
+  const runCourseSearch = useCallback((value: string) => {
+    if (!value) {
       setSearchResults(null);
       return;
     }
-    debounceRef.current = setTimeout(() => {
-      startSearch(async () => {
-        try {
-          const results = await searchAssignableCoursesAction(trimmed);
-          setSearchResults(results);
-        } catch (error) {
-          Sentry.withScope((scope) => {
-            scope.setTag("area", "admin_assignment");
-            scope.setTag("action", "search_assignable_courses");
-            scope.setContext("search", { term: trimmed });
-            Sentry.captureException(error instanceof Error ? error : new Error("Course search failed"));
-          });
-          toast.error("Search failed. Please try again.");
-          setSearchResults([]);
-        }
-      });
-    }, SEARCH_DEBOUNCE_MS);
+    startSearch(async () => {
+      try {
+        const results = await searchAssignableCoursesAction(value);
+        setSearchResults(results);
+      } catch (error) {
+        Sentry.withScope((scope) => {
+          scope.setTag("area", "admin_assignment");
+          scope.setTag("action", "search_assignable_courses");
+          scope.setContext("search", { term: value });
+          Sentry.captureException(error instanceof Error ? error : new Error("Course search failed"));
+        });
+        toast.error("Search failed. Please try again.");
+        setSearchResults([]);
+      }
+    });
   }, []);
 
   const toggleCourse = useCallback((course: AssignableCourse) => {
@@ -146,8 +140,6 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
     setSelectedCourseIds((current) => current.filter((cid) => cid !== id));
     setSelectedCourseObjs((current) => current.filter((c) => c.id !== id));
   }, []);
-
-  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
   useEffect(() => {
     if (state.kind === "success" && state.message) {
@@ -251,26 +243,13 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                   </PopoverTrigger>
                   <PopoverContent align="start" className="w-[min(460px,calc(100vw-2rem))] p-0">
                     <div className="border-b p-3">
-                      <div className="relative">
-                        <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          autoFocus
-                          value={taSearch}
-                          onChange={(e) => setTaSearch(e.target.value)}
-                          placeholder="Search TA by name or email..."
-                          className="h-10 pl-9 pr-8"
-                        />
-                        {taSearch ? (
-                          <button
-                            type="button"
-                            aria-label="Clear TA search"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
-                            onClick={() => setTaSearch("")}
-                          >
-                            ×
-                          </button>
-                        ) : null}
-                      </div>
+                      <SearchBar
+                        autoFocus
+                        value={taSearch}
+                        onValueChange={setTaSearch}
+                        placeholder="Search TA by name or email..."
+                        inputClassName="h-10"
+                      />
                       <p className="mt-2 text-xs text-muted-foreground">
                         {filteredTas.length.toLocaleString()} matching TA{filteredTas.length === 1 ? "" : "s"}
                       </p>
@@ -366,28 +345,17 @@ export function AdminAssignmentPanel({ courses, tas }: AdminAssignmentPanelProps
                             <SelectItem value="31">Fall CS (31)</SelectItem>
                           </SelectContent>
                         </Select>
-                        <div className="relative flex-1">
-                          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            autoFocus
-                            value={courseSearch}
-                            onChange={(e) => handleCourseSearchChange(e.target.value)}
-                            placeholder="Search by title or ID..."
-                            className="h-10 pl-9 pr-8"
-                          />
-                          {isSearching ? (
-                            <LottieLoader className="absolute right-2 top-1/2 -translate-y-1/2 size-4  text-muted-foreground" />
-                          ) : courseSearch ? (
-                            <button
-                              type="button"
-                              aria-label="Clear course search"
-                              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
-                              onClick={() => { handleCourseSearchChange(""); }}
-                            >
-                              ×
-                            </button>
-                          ) : null}
-                        </div>
+                        <SearchBar
+                          autoFocus
+                          value={courseSearch}
+                          onValueChange={setCourseSearch}
+                          onSearch={runCourseSearch}
+                          debounceMs={SEARCH_DEBOUNCE_MS}
+                          loading={isSearching}
+                          placeholder="Search by title or ID..."
+                          containerClassName="flex-1"
+                          inputClassName="h-10"
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-xs text-muted-foreground">

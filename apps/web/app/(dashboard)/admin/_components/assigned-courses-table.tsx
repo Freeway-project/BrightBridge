@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/courses/status-badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Search, SlidersHorizontal, CheckCircle2, Circle, Send } from "lucide-react"
+import { SlidersHorizontal, CheckCircle2, Circle, Send } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { WORKFLOW_PHASES, getPipelineStage, COURSE_STATUS_LABELS } from "@coursebridge/workflow"
 import type { CourseStatus, PipelineStage } from "@coursebridge/workflow"
@@ -220,24 +220,6 @@ export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpened
     setSearchInput(search)
   }, [search])
 
-  useEffect(() => {
-    const trimmedInput = searchInput.trim()
-    if (trimmedInput === search) {
-      return
-    }
-
-    const timer = setTimeout(() => {
-      setQuery({
-        page: "1",
-        search: trimmedInput || null,
-      })
-    }, 350)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [searchInput, search, searchParams, pathname])
-
   function goToPage(nextPage: number) {
     setQuery({
       page: String(nextPage),
@@ -265,25 +247,14 @@ export function AssignedCoursesTable({ page, tas, statusCounts, instructorOpened
       </CardHeader>
       <CardContent className="space-y-[var(--card-spacing,1rem)]">
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <div className="relative flex min-w-0 flex-1 items-center gap-2">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search by title, IDs, term, department, TA name, or TA email..."
-              className="pl-9 pr-3"
-            />
-            {searchInput && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                onClick={() => { setSearchInput(""); setQuery({ page: "1", search: null }) }}
-              >
-                ×
-              </Button>
-            )}
-          </div>
+          <SearchBar
+            containerClassName="flex-1"
+            value={searchInput}
+            onValueChange={setSearchInput}
+            onSearch={(v) => setQuery({ page: "1", search: v || null })}
+            debounceMs={350}
+            placeholder="Search by title, IDs, term, department, TA name, or TA email..."
+          />
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
             <Select
               value={taFilter}

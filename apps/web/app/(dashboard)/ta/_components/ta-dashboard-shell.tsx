@@ -45,7 +45,7 @@ export function TaDashboardShell({
           className={cn(
             "flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200",
             tab === "courses"
-              ? "bg-primary text-primary-foreground shadow-sm"
+              ? "bg-accent-indigo-hover text-white shadow-sm ring-1 ring-inset ring-white/10"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
@@ -60,7 +60,7 @@ export function TaDashboardShell({
           className={cn(
             "relative flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200",
             tab === "chat"
-              ? "bg-primary text-primary-foreground shadow-sm"
+              ? "bg-accent-indigo-hover text-white shadow-sm ring-1 ring-inset ring-white/10"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >

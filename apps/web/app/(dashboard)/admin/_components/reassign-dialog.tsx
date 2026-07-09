@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import type { ProfileOption } from "@/lib/repositories/contracts"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -91,10 +91,10 @@ export function ReassignDialog({ open, onOpenChange, courses, tas, onDone }: Pro
 
           <div className="space-y-2">
             <label className="text-sm font-medium">New TA</label>
-            <Input
+            <SearchBar
               placeholder="Search TAs by name or email"
               value={taSearch}
-              onChange={(e) => setTaSearch(e.target.value)}
+              onValueChange={setTaSearch}
             />
             <Select name="profileId" value={taId} onValueChange={setTaId}>
               <SelectTrigger>

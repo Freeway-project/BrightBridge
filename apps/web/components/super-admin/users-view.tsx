@@ -1,9 +1,11 @@
 "use client"
 
 import { useActionState, useState } from "react"
-import { ShieldPlus, Search, KeyRound } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ShieldPlus, KeyRound } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -105,6 +107,8 @@ function ResetPasswordDialog({
 
 export function UsersView({ result, search }: { result: PaginatedResult<UserRow>, search: string }) {
   const { data: users, total, page, totalPages } = result
+  const router = useRouter()
+  const [searchValue, setSearchValue] = useState(search)
   const [createState, createFormAction, createPending] = useActionState(createUserAction, initialManageUserState)
   const [resetTarget, setResetTarget] = useState<SelectedUser | null>(null)
 
@@ -134,15 +138,15 @@ export function UsersView({ result, search }: { result: PaginatedResult<UserRow>
       <div className="flex flex-col flex-1 min-h-0">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="shrink-0 text-sm text-muted-foreground">{total} users</p>
-          <form method="GET" action="/super-admin/users" className="relative min-w-0 w-full sm:w-64 sm:shrink-0">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-            <Input
-              name="search"
-              placeholder="Search by name, email, role…"
-              className="pl-8 h-8 text-sm"
-              defaultValue={search}
-            />
-          </form>
+          <SearchBar
+            value={searchValue}
+            onValueChange={setSearchValue}
+            onSearch={(v) => router.push(v ? `/super-admin/users?search=${encodeURIComponent(v)}` : "/super-admin/users")}
+            name="search"
+            placeholder="Search by name, email, role…"
+            containerClassName="w-full sm:w-64 sm:shrink-0"
+            inputClassName="h-8 text-sm md:text-sm"
+          />
         </div>
 
         <div className="rounded-lg border border-border bg-card overflow-hidden flex-1 flex flex-col">

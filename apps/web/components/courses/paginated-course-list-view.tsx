@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import { CourseCard } from "./course-card"
 import type { CourseSummary, AccessibleCourseAggregates, PaginatedResult } from "@/lib/repositories/contracts"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import {
   Select,
   SelectContent,
@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Search as SearchIcon, AlertCircle, Filter, Loader2 } from "lucide-react"
+import { AlertCircle, Filter, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { WORKFLOW_PHASES, getPipelineStage, type CourseStatus, type PipelineStage } from "@coursebridge/workflow"
@@ -81,12 +81,6 @@ export function PaginatedCourseListView({
   const fetchSeq = useRef(0)
   // Skip the first effect run — the SSR'd initialPage already covers it.
   const isFirstRun = useRef(true)
-
-  // 250ms tuned to "feels live, doesn't thrash the DB."
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(filters.search.trim()), 250)
-    return () => clearTimeout(t)
-  }, [filters.search])
 
   const filterArgs = useMemo(
     () => ({
@@ -176,7 +170,10 @@ export function PaginatedCourseListView({
 
   const onSubGroupChange = (next: string) => setActiveStatus(next as CourseStatus)
 
-  const clearFilters = () => setFilters(EMPTY_FILTERS)
+  const clearFilters = () => {
+    setFilters(EMPTY_FILTERS)
+    setDebouncedSearch("")
+  }
 
   return (
     <div className={cn("space-y-6 bg-background", scrollable ? "min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 scrollbar-thin" : "p-0")}>
@@ -185,15 +182,14 @@ export function PaginatedCourseListView({
         animate={{ opacity: 1, y: 0 }}
         className="sticky top-0 z-10 flex flex-col gap-3 rounded-xl border border-border/60 bg-background/60 p-3 backdrop-blur-md sm:flex-row sm:items-center"
       >
-        <div className="relative min-w-0 flex-1 sm:max-w-sm">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search courses..."
-            className="border-none bg-transparent pl-9 shadow-none focus-visible:ring-0"
-            value={filters.search}
-            onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-          />
-        </div>
+        <SearchBar
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
+          placeholder="Search courses..."
+          value={filters.search}
+          onValueChange={(v) => setFilters((f) => ({ ...f, search: v }))}
+          onSearch={setDebouncedSearch}
+          debounceMs={250}
+        />
 
         <div className="flex items-center gap-2 sm:ml-auto">
           <div className="h-8 w-px bg-border/40 hidden sm:block" />
