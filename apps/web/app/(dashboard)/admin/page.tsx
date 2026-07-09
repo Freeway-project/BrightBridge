@@ -10,6 +10,7 @@ import { AdminAssignmentPanel } from "./_components/admin-assignment-panel"
 import { InstructorAssignmentPanel } from "./_components/instructor-assignment-panel"
 import { AssignedCoursesTable } from "./_components/assigned-courses-table"
 import { AdminTabs } from "./_components/admin-tabs"
+import { LoginLinkPanel } from "./_components/login-link-panel"
 import { AdminViewerDashboard } from "./_components/admin-viewer-dashboard"
 import { EscalationsTable } from "./_components/escalations-table"
 import { CompletedCoursesTable } from "./_components/completed-courses-table"
@@ -197,6 +198,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
               assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
               sendPanel={<SendPanel readyCourses={readyForInstructor} sentCourses={sentToInstructor} readOnly={isReadOnly} />}
+              accessLinksPanel={isReadOnly ? undefined : <LoginLinkPanel />}
               readyForInstructorCount={readyForInstructor.length}
             />
           </AdminRefreshWrapper>

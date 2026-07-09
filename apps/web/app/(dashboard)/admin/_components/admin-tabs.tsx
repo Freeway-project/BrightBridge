@@ -13,6 +13,8 @@ type Props = {
   institutionPanel: React.ReactNode
   assignmentLogsPanel: React.ReactNode
   sendPanel: React.ReactNode
+  // Optional: omitted for read-only (admin_viewer) so the tab is hidden entirely.
+  accessLinksPanel?: React.ReactNode
   unassignedCount: number
   openEscalationsCount: number
   readyForInstructorCount: number
@@ -28,6 +30,7 @@ export function AdminTabs({
   institutionPanel,
   assignmentLogsPanel,
   sendPanel,
+  accessLinksPanel,
   unassignedCount,
   openEscalationsCount,
   readyForInstructorCount,
@@ -67,6 +70,7 @@ export function AdminTabs({
           </TabsTrigger>
           <TabsTrigger value="institution">Institution</TabsTrigger>
           <TabsTrigger value="completed">Provision</TabsTrigger>
+          {accessLinksPanel && <TabsTrigger value="access-links">Access Links</TabsTrigger>}
         </TabsList>
       </div>
 
@@ -84,6 +88,7 @@ export function AdminTabs({
       <TabsContent value="escalations">{escalationsPanel}</TabsContent>
       <TabsContent value="institution">{institutionPanel}</TabsContent>
       <TabsContent value="completed">{completedPanel}</TabsContent>
+      {accessLinksPanel && <TabsContent value="access-links">{accessLinksPanel}</TabsContent>}
     </Tabs>
   )
 }
