@@ -22,18 +22,22 @@ export function ChatNudgeCard({ conversations }: Props) {
       type="button"
       onClick={() => openChat?.()}
       className={cn(
-        "group relative w-full overflow-hidden rounded-2xl border border-[var(--ev-600)]/30 bg-card p-5 text-left shadow-[0_0_28px_var(--accent-indigo-glow)]",
-        "transition-all duration-200 hover:border-[var(--ev-600)]/60 hover:shadow-[0_0_36px_var(--accent-indigo-glow)]",
+        "group relative w-full overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left shadow-sm",
+        "transition-all duration-200 hover:border-accent-indigo/40 hover:shadow-[0_0_28px_var(--accent-indigo-glow)]",
       )}
       aria-label={`${totalUnread} unread message${totalUnread !== 1 ? "s" : ""} — open Chat`}
     >
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--ev-500)]">
-          <MessageSquare className="size-3.5" />
-          Messages
+        <div className="flex items-center gap-2">
+          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-accent-indigo-soft text-accent-indigo">
+            <MessageSquare className="size-4" />
+          </span>
+          <span className="text-xs font-bold uppercase tracking-widest text-accent-indigo">
+            Messages
+          </span>
         </div>
-        <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--ev-600)] px-1.5 text-[11px] font-bold leading-none text-white shadow">
+        <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-indigo-hover px-1.5 text-[11px] font-bold leading-none text-white shadow-sm">
           {totalUnread > 99 ? "99+" : totalUnread}
         </span>
       </div>
@@ -43,14 +47,14 @@ export function ChatNudgeCard({ conversations }: Props) {
         {previews.map((c) => (
           <li key={c.id} className="flex items-start gap-2.5">
             {/* Unread dot */}
-            <span className="mt-[5px] size-1.5 shrink-0 rounded-full bg-[var(--ev-500)]" />
+            <span className="mt-[5px] size-1.5 shrink-0 rounded-full bg-accent-indigo" />
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="truncate text-xs font-semibold text-foreground">
                   {c.displayTitle}
                 </span>
                 {c.unreadCount > 1 && (
-                  <span className="shrink-0 text-[10px] font-bold text-[var(--ev-500)]">
+                  <span className="shrink-0 text-[10px] font-bold text-accent-indigo">
                     {c.unreadCount}
                   </span>
                 )}
@@ -71,7 +75,7 @@ export function ChatNudgeCard({ conversations }: Props) {
       </ul>
 
       {/* CTA */}
-      <div className="flex items-center justify-end gap-1 text-xs font-semibold text-[var(--ev-500)] group-hover:text-[var(--ev-600)]">
+      <div className="flex items-center justify-end gap-1 text-xs font-semibold text-accent-indigo group-hover:text-accent-indigo-hover">
         Open Chat
         <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
       </div>

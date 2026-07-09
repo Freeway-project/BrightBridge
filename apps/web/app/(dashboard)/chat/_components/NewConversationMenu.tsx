@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { SearchBar } from "@/components/ui/search-bar";
 import { createDmAction, createGroupAction } from "@/lib/chat/actions";
 
 type UserOption = { id: string; name: string; email: string };
@@ -31,7 +32,6 @@ function UserPicker({
 }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<UserOption[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!q.trim()) { setResults([]); return; }
@@ -50,7 +50,7 @@ function UserPicker({
         <span className="text-xs text-muted-foreground">{value.email}</span>
         <button
           type="button"
-          onClick={() => { onChange(null); setQ(""); setTimeout(() => inputRef.current?.focus(), 0); }}
+          onClick={() => { onChange(null); setQ(""); }}
           className="text-muted-foreground hover:text-foreground"
         >
           <X className="h-3.5 w-3.5" />
@@ -61,10 +61,9 @@ function UserPicker({
 
   return (
     <div className="relative">
-      <Input
-        ref={inputRef}
+      <SearchBar
         value={q}
-        onChange={(e) => setQ(e.target.value)}
+        onValueChange={setQ}
         placeholder="Search by name or email…"
         autoFocus
       />

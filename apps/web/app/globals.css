@@ -52,6 +52,7 @@
   --accent-indigo-hover: #6366f1;
   --accent-indigo-soft: color-mix(in srgb, #818cf8 12%, transparent);
   --accent-indigo-glow: color-mix(in srgb, #818cf8 8%, transparent);
+  --accent-indigo-ring: color-mix(in srgb, #818cf8 45%, transparent);  /* selected / active edge */
 
   /* TA dashboard redesign — section / pipeline state hues */
   --status-info: #38bdf8;
@@ -339,6 +340,7 @@ a {
   --color-accent-indigo-hover: var(--accent-indigo-hover);
   --color-accent-indigo-soft: var(--accent-indigo-soft);
   --color-accent-indigo-glow: var(--accent-indigo-glow);
+  --color-accent-indigo-ring: var(--accent-indigo-ring);
   --color-status-info: var(--status-info);
   --color-status-warning: var(--status-warning);
   --color-status-success: var(--status-success);

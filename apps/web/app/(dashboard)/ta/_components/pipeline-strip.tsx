@@ -20,6 +20,7 @@ export function PipelineStrip({ counts }: Props) {
 
   return (
     <div className="space-y-2" aria-label="Course pipeline">
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Pipeline</p>
       <div className="flex h-2 w-full overflow-hidden rounded-full bg-border/30">
         {SEGMENTS.map((s) => {
           const value = counts[s.key];
