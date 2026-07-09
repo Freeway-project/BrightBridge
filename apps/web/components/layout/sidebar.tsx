@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut, UserCheck, UserMinus, Search, Network } from "lucide-react"
+import { LogOut, UserCheck, UserMinus, Network } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Role } from "@coursebridge/workflow"
 import { NAV_ITEMS } from "@/lib/constants/nav"
@@ -21,7 +21,7 @@ import { useChatUnreadCount } from "@/hooks/use-chat-unread-count"
 import type { ActiveAnnouncement } from "@/lib/announcements/types"
 import { useTweaks, type ThemeId } from "@/components/shared/tweak-provider"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 
 const THEME_LOTTIE: Record<ThemeId, unknown> = {
   blush: aiAnimationBlush,
@@ -244,15 +244,12 @@ export function AppSidebar({
                   <DialogTitle className="text-sm font-semibold">Impersonate User</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
-                    <Input
-                      placeholder="Search by name, email, or role..."
-                      className="pl-8 text-xs bg-slate-950 border-slate-800 text-slate-200 placeholder:text-slate-500 focus-visible:ring-primary"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
+                  <SearchBar
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                    placeholder="Search by name, email, or role..."
+                    loading={loadingUsers}
+                  />
                   <div className="max-h-[250px] overflow-y-auto space-y-1 pr-1">
                     {loadingUsers ? (
                       <p className="text-xs text-slate-400 text-center py-4">Loading users...</p>

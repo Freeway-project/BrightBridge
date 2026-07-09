@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
-import { Info, Search } from "lucide-react";
+import { SearchBar } from "@/components/ui/search-bar";
+import { Info } from "lucide-react";
 import { useStickyTabState } from "@/hooks/use-sticky-tab-state";
 import { BatchExportPanel } from "./batch-export-panel";
 import { SentCoursesTable } from "./sent-courses-table";
@@ -110,16 +110,14 @@ export function SendPanel({ readyCourses, sentCourses, readOnly = false }: Props
           </TabsList>
         </div>
 
-        <div className="relative w-full sm:w-72">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search course or instructor…"
-            className="h-9 pl-8 text-sm"
-            aria-label="Search courses"
-          />
-        </div>
+        <SearchBar
+          value={query}
+          onValueChange={setQuery}
+          placeholder="Search course or instructor…"
+          aria-label="Search courses"
+          containerClassName="w-full sm:w-72"
+          inputClassName="h-9 text-sm"
+        />
       </div>
 
       <TabsContent value="ready">

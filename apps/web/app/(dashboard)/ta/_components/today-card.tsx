@@ -19,12 +19,16 @@ export function TodayCard({ courses, totalWaiting }: Props) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-accent-indigo/30 bg-card p-5 shadow-[0_0_32px_var(--accent-indigo-glow)]"
+      className="relative overflow-hidden rounded-2xl border border-accent-indigo/25 bg-card p-5 shadow-sm transition-shadow duration-200 hover:shadow-[0_0_28px_var(--accent-indigo-glow)]"
       aria-label="Today's queue"
     >
-      <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-indigo">
-        <Sparkles className="size-3.5" />
-        Today
+      <div className="mb-3 flex items-center gap-2">
+        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-accent-indigo-soft text-accent-indigo">
+          <Sparkles className="size-4" />
+        </span>
+        <span className="text-xs font-bold uppercase tracking-widest text-accent-indigo">
+          Today
+        </span>
       </div>
 
       <p className="mb-4 text-sm text-muted-foreground">

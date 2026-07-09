@@ -1,10 +1,11 @@
 "use client";
 import { LottieLoader } from "@/components/ui/lottie-loader"
 
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { SearchBar } from "@/components/ui/search-bar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, Search, UserPlus } from "lucide-react";
+import { Check, ChevronsUpDown, UserPlus } from "lucide-react";
 import { createInstructorAndAssignAction, searchCoursesForInstructorAction, type AssignTaState } from "../actions";
 
 type AssignableCourse = {
@@ -49,7 +50,6 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
   const [email, setEmail] = useState("");
   const [searchResults, setSearchResults] = useState<AssignableCourse[] | null>(null);
   const [isSearching, startSearch] = useTransition();
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeCourseList = courseSearch.trim() ? (searchResults ?? []) : courses;
 
@@ -82,23 +82,16 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
     [filteredCourseList, courses, selectedCourseId]
   );
 
-  const handleCourseSearchChange = useCallback((value: string) => {
-    setCourseSearch(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    const trimmed = value.trim();
-    if (!trimmed) {
+  const runCourseSearch = (value: string) => {
+    if (!value) {
       setSearchResults(null);
       return;
     }
-    debounceRef.current = setTimeout(() => {
-      startSearch(async () => {
-        const results = await searchCoursesForInstructorAction(trimmed);
-        setSearchResults(results);
-      });
-    }, SEARCH_DEBOUNCE_MS);
-  }, []);
-
-  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
+    startSearch(async () => {
+      const results = await searchCoursesForInstructorAction(value);
+      setSearchResults(results);
+    });
+  };
 
   useEffect(() => {
     if (state.kind === "success" && state.message) {
@@ -206,27 +199,17 @@ export function InstructorAssignmentPanel({ courses }: InstructorAssignmentPanel
                         <SelectItem value="31">Fall CS (31)</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="relative flex-1">
-                      <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        autoFocus
-                        value={courseSearch}
-                        onChange={(e) => handleCourseSearchChange(e.target.value)}
-                        placeholder="Search by title or ID..."
-                        className="h-10 pl-9 pr-8"
-                      />
-                      {isSearching ? (
-                        <LottieLoader className="absolute right-2 top-1/2 -translate-y-1/2 size-4  text-muted-foreground" />
-                      ) : courseSearch ? (
-                        <button
-                          type="button"
-                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
-                          onClick={() => { handleCourseSearchChange(""); }}
-                        >
-                          ×
-                        </button>
-                      ) : null}
-                    </div>
+                    <SearchBar
+                      autoFocus
+                      value={courseSearch}
+                      onValueChange={setCourseSearch}
+                      onSearch={runCourseSearch}
+                      debounceMs={SEARCH_DEBOUNCE_MS}
+                      loading={isSearching}
+                      placeholder="Search by title or ID..."
+                      containerClassName="flex-1"
+                      inputClassName="h-10"
+                    />
                   </div>
                 </div>
                 <ScrollArea className="h-[360px]">

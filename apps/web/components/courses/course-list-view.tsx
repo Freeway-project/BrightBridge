@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { CourseCard } from "./course-card"
 import type { CourseSummary } from "@/lib/courses/service"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import {
   Select,
   SelectContent,
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useStickyTabState } from "@/hooks/use-sticky-tab-state"
-import { Search as SearchIcon, AlertCircle, Filter } from "lucide-react"
+import { AlertCircle, Filter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { WORKFLOW_PHASES, getPipelineStage, type PipelineStage } from "@coursebridge/workflow"
@@ -111,15 +111,12 @@ export function CourseListView({ initialCourses, issueCounts = {}, canExport = f
         animate={{ opacity: 1, y: 0 }}
         className="sticky top-0 z-10 flex flex-col gap-3 rounded-xl border border-border/60 bg-background/60 p-3 backdrop-blur-md sm:flex-row sm:items-center"
       >
-        <div className="relative min-w-0 flex-1 sm:max-w-sm">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search courses..."
-            className="border-none bg-transparent pl-9 shadow-none focus-visible:ring-0"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchBar
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search courses..."
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
+        />
         
         <div className="flex items-center gap-2 sm:ml-auto">
           <div className="h-8 w-px bg-border/40 hidden sm:block" />

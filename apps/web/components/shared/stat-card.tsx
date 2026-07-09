@@ -66,8 +66,8 @@ export function StatCard({ label, value, icon, className, index = 0, accent, sub
       className="group"
     >
       <Card className={cn(
-        "relative overflow-hidden border-border/60 bg-card/50 transition-all duration-300 backdrop-blur-sm shadow-sm",
-        "hover:border-primary/30 hover:shadow-md hover:-translate-y-1",
+        "relative overflow-hidden border-border/70 bg-card/50 transition-all duration-300 backdrop-blur-sm shadow-sm",
+        "hover:border-accent-indigo/40 hover:shadow-md hover:-translate-y-1",
         className
       )}>
         {/* Colored top accent bar */}
@@ -82,12 +82,12 @@ export function StatCard({ label, value, icon, className, index = 0, accent, sub
 
         <CardHeader className="pb-1 pt-5 px-4">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
               {label}
             </p>
             {Icon && (
               <div
-                className="rounded-full p-1.5 transition-all"
+                className="grid size-7 place-items-center rounded-lg transition-all"
                 style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
               >
                 <Icon className="size-3.5" />
@@ -97,7 +97,7 @@ export function StatCard({ label, value, icon, className, index = 0, accent, sub
         </CardHeader>
         <CardContent className="px-4 pb-4">
           <p
-            className="text-4xl font-black tracking-tight tabular-nums transition-all group-hover:scale-105 origin-left"
+            className="text-3xl font-bold tracking-tight tabular-nums transition-all group-hover:scale-105 origin-left"
             style={{ color: accentColor }}
           >
             {displayValue}

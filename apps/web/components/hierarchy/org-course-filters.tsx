@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Search } from "lucide-react"
 import { COURSE_STATUSES, getCourseStatusLabel } from "@coursebridge/workflow"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import {
   Select,
   SelectContent,
@@ -48,27 +47,18 @@ export function OrgCourseFilters({
     startTransition(() => router.replace(`${pathname}?${params.toString()}`, { scroll: false }))
   }
 
-  // Debounce the search box so we don't navigate on every keystroke.
-  useEffect(() => {
-    const trimmed = value.trim()
-    if (trimmed === search) return
-    const t = setTimeout(() => setParam("search", trimmed || undefined), 350)
-    return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
-
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <div className="relative w-full sm:w-56">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Search courses…"
-          aria-label="Search courses by title, code, term, department, or staff"
-          className="h-8 pl-8 text-xs"
-        />
-      </div>
+      <SearchBar
+        containerClassName="w-full sm:w-56"
+        value={value}
+        onValueChange={setValue}
+        onSearch={(v) => setParam("search", v || undefined)}
+        debounceMs={350}
+        placeholder="Search courses…"
+        aria-label="Search courses by title, code, term, department, or staff"
+        inputClassName="h-8 text-xs md:text-xs"
+      />
 
       <Select value={status || ALL} onValueChange={(v) => setParam("status", v === ALL ? undefined : v)}>
         <SelectTrigger className="h-8 w-full text-xs sm:w-48" aria-label="Filter by status">

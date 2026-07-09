@@ -1,11 +1,11 @@
 "use client"
 
-import { useTransition } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Check, Search, Zap } from "lucide-react"
+import { Check, Zap } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
@@ -39,20 +39,22 @@ function roleLabel(role: string | null | undefined): string {
 
 export function SupportMessagesView({ result, search }: { result: PaginatedResult<SupportMessageRow>, search: string }) {
   const { data: messages, total, page, totalPages } = result
+  const router = useRouter()
+  const [searchValue, setSearchValue] = useState(search)
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background p-4 sm:p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="shrink-0 text-sm text-muted-foreground">{total.toLocaleString()} support {total === 1 ? "message" : "messages"}</p>
-        <form method="GET" action="/super-admin" className="relative min-w-0 w-full sm:w-64 sm:shrink-0">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-          <Input
-            name="search"
-            placeholder="Search messages…"
-            className="pl-8 h-8 text-sm"
-            defaultValue={search}
-          />
-        </form>
+        <SearchBar
+          value={searchValue}
+          onValueChange={setSearchValue}
+          onSearch={(v) => router.push(v ? `/super-admin?search=${encodeURIComponent(v)}` : "/super-admin")}
+          name="search"
+          placeholder="Search messages…"
+          containerClassName="w-full sm:w-64 sm:shrink-0"
+          inputClassName="h-8 text-sm md:text-sm"
+        />
       </div>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
         <Table>

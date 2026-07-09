@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { SearchBar } from "@/components/ui/search-bar"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
@@ -66,15 +67,12 @@ export function OrganizationView({ data }: { data: SuperAdminData }) {
                   <span className="text-xs font-normal text-muted-foreground">({units.length})</span>
                 </CardTitle>
               </div>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-                <Input
-                  value={unitSearch}
-                  onChange={e => setUnitSearch(e.target.value)}
-                  placeholder="Search by name or type..."
-                  className="h-8 pl-8 text-xs"
-                />
-              </div>
+              <SearchBar
+                value={unitSearch}
+                onValueChange={setUnitSearch}
+                placeholder="Search by name or type..."
+                inputClassName="h-8 text-xs md:text-xs"
+              />
               {unitSearch.trim() && (
                 <p className="text-[10px] text-muted-foreground -mt-1">
                   {filteredUnits.length} of {units.length} units
