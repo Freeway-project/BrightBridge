@@ -21,6 +21,7 @@
     "dev:db:reset": "docker compose down -v && docker compose up -d postgres",
     "dev:db:migrate": "DB_PROVIDER=postgres DEV_DATABASE_URL=postgres://coursebridge_user:localdev@localhost:5433/coursebridge node scripts/db-migrate-all.mjs",
     "dev:db:seed": "DATABASE_URL=postgres://coursebridge_user:localdev@localhost:5433/coursebridge node scripts/seed-local-postgres.mjs",
+    "dev:setup": "node scripts/dev-setup.mjs",
     "db:inspect": "node scripts/db-inspect.mjs",
     "import:dry-run": "node scripts/import-course-instructors-dry-run.mjs",
     "db:backup": "bash scripts/backup-db.sh",

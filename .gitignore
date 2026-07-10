@@ -39,3 +39,8 @@ supabase/.temp/
 
 # Claude Code local state
 .claude/
+
+# DB dumps & PDF generated guides
+*.dump
+docs/dev-guides/*.pdf
+
