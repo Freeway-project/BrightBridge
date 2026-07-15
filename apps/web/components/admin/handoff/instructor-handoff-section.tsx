@@ -1,7 +1,8 @@
 import { Send } from "lucide-react"
 import type { InstructorHandoffData } from "@/lib/admin/queries"
 import { HandoffSummaryView } from "./handoff-summary"
-import { HandoffCourseList } from "./handoff-course-list"
+import { HandoffLegend } from "./handoff-legend"
+import { HandoffTabs } from "./handoff-tabs"
 
 interface Props {
   data: InstructorHandoffData
@@ -29,8 +30,9 @@ export function InstructorHandoffSection({ data }: Props) {
         </div>
       </div>
 
-      <HandoffSummaryView summary={data.summary} byInstructor={data.byInstructor} />
-      <HandoffCourseList courses={data.courses} />
+      <HandoffSummaryView summary={data.summary} />
+      <HandoffLegend />
+      <HandoffTabs courses={data.courses} byInstructor={data.byInstructor} />
     </section>
   )
 }

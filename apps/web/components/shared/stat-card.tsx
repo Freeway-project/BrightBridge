@@ -16,6 +16,8 @@ interface StatCardProps {
   index?: number
   accent?: string
   sub?: string
+  /** Optional native-tooltip text explaining what the metric means. */
+  hint?: string
 }
 
 const ICONS: Record<StatCardIcon, LucideIcon> = {
@@ -34,7 +36,7 @@ const ACCENT_DEFAULTS: Record<StatCardIcon, string> = {
   "user-check":     "#f59e0b",
 }
 
-export function StatCard({ label, value, icon, className, index = 0, accent, sub }: StatCardProps) {
+export function StatCard({ label, value, icon, className, index = 0, accent, sub, hint }: StatCardProps) {
   const Icon = icon ? ICONS[icon] : null
   const accentColor = accent ?? (icon ? ACCENT_DEFAULTS[icon] : "#6366f1")
   const [displayValue, setDisplayValue] = useState<number | string>(typeof value === "number" ? 0 : value)
@@ -64,6 +66,7 @@ export function StatCard({ label, value, icon, className, index = 0, accent, sub
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1, ease: [0.23, 1, 0.32, 1] }}
       className="group"
+      title={hint}
     >
       <Card className={cn(
         "relative overflow-hidden border-border/70 bg-card/50 transition-all duration-300 backdrop-blur-sm shadow-sm",

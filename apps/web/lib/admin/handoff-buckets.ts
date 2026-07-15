@@ -54,32 +54,62 @@ export interface HandoffSummary {
   fresh: number;
   aging: number;
   overdue: number;
+  /** Opened at least once by the assigned instructor. */
+  opened: number;
   /** Never opened by the instructor ("untouched"). */
   neverOpened: number;
   /** Status is `instructor_questions`. */
   hasQuestions: number;
   /** Overdue AND never opened — the most urgent slice. */
   overdueUnopened: number;
+  /** Share opened at least once, as a whole 0–100 percent. 0 when total is 0. */
+  openRate: number;
+  /** Mean whole-days-since-sent over courses with a known send date; null if none. */
+  avgDaysSinceSent: number | null;
+  /** Largest whole-days-since-sent (the longest-waiting course); null if none. */
+  oldestDaysSinceSent: number | null;
 }
 
-/** Roll a set of classified courses up into bucket/engagement counts. */
+/** Roll a set of classified courses up into bucket, engagement, and timing stats. */
 export function summarize(items: readonly HandoffClassification[]): HandoffSummary {
   const summary: HandoffSummary = {
     total: items.length,
     fresh: 0,
     aging: 0,
     overdue: 0,
+    opened: 0,
     neverOpened: 0,
     hasQuestions: 0,
     overdueUnopened: 0,
+    openRate: 0,
+    avgDaysSinceSent: null,
+    oldestDaysSinceSent: null,
   };
+
+  let dayTotal = 0;
+  let dayCount = 0;
 
   for (const item of items) {
     summary[item.bucket] += 1;
-    if (!item.opened) summary.neverOpened += 1;
+    if (item.opened) summary.opened += 1;
+    else summary.neverOpened += 1;
     if (item.hasQuestions) summary.hasQuestions += 1;
     if (item.bucket === "overdue" && !item.opened) summary.overdueUnopened += 1;
+
+    if (item.daysSinceSent !== null) {
+      dayTotal += item.daysSinceSent;
+      dayCount += 1;
+      if (
+        summary.oldestDaysSinceSent === null ||
+        item.daysSinceSent > summary.oldestDaysSinceSent
+      ) {
+        summary.oldestDaysSinceSent = item.daysSinceSent;
+      }
+    }
   }
+
+  summary.openRate = summary.total > 0 ? Math.round((summary.opened / summary.total) * 100) : 0;
+  summary.avgDaysSinceSent = dayCount > 0 ? Math.round(dayTotal / dayCount) : null;
 
   return summary;
 }

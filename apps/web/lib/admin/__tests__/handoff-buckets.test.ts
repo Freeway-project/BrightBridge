@@ -52,33 +52,52 @@ describe("summarize", () => {
     ...over,
   });
 
-  it("returns all zeros for an empty list", () => {
+  it("returns all zeros / nulls for an empty list", () => {
     expect(summarize([])).toEqual({
       total: 0,
       fresh: 0,
       aging: 0,
       overdue: 0,
+      opened: 0,
       neverOpened: 0,
       hasQuestions: 0,
       overdueUnopened: 0,
+      openRate: 0,
+      avgDaysSinceSent: null,
+      oldestDaysSinceSent: null,
     });
   });
 
   it("counts buckets, engagement, and the urgent overdue-unopened slice", () => {
     const items = [
-      c({ bucket: "fresh", opened: true }),
-      c({ bucket: "aging", opened: false }), // never opened
-      c({ bucket: "overdue", opened: false, hasQuestions: false }), // urgent
-      c({ bucket: "overdue", opened: true, hasQuestions: true }), // opened + questions
+      c({ bucket: "fresh", daysSinceSent: 1, opened: true }),
+      c({ bucket: "aging", daysSinceSent: 4, opened: false }), // never opened
+      c({ bucket: "overdue", daysSinceSent: 8, opened: false, hasQuestions: false }), // urgent
+      c({ bucket: "overdue", daysSinceSent: 10, opened: true, hasQuestions: true }), // opened + questions
     ];
     expect(summarize(items)).toEqual({
       total: 4,
       fresh: 1,
       aging: 1,
       overdue: 2,
+      opened: 2,
       neverOpened: 2,
       hasQuestions: 1,
       overdueUnopened: 1,
+      openRate: 50, // 2 of 4 opened
+      avgDaysSinceSent: 6, // round((1+4+8+10)/4) = round(5.75)
+      oldestDaysSinceSent: 10,
     });
+  });
+
+  it("ignores null send dates in timing stats", () => {
+    const items = [
+      c({ bucket: "fresh", daysSinceSent: null, opened: false }),
+      c({ bucket: "overdue", daysSinceSent: 9, opened: true }),
+    ];
+    const s = summarize(items);
+    expect(s.avgDaysSinceSent).toBe(9); // only the one with a known date
+    expect(s.oldestDaysSinceSent).toBe(9);
+    expect(s.openRate).toBe(50);
   });
 });

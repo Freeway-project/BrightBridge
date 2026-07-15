@@ -8,11 +8,12 @@ import type { HandoffBucket } from "@/lib/admin/handoff-buckets"
  */
 export const BUCKET_META: Record<
   HandoffBucket,
-  { label: string; range: string; chip: string; accent: string; dot: string }
+  { label: string; range: string; description: string; chip: string; accent: string; dot: string }
 > = {
   overdue: {
     label: "Overdue",
     range: "7+ days",
+    description: "Sent 7+ days ago and still not approved — likely needs a nudge.",
     chip: "bg-red-500/10 text-red-500",
     accent: "#ef4444",
     dot: "bg-red-500",
@@ -20,6 +21,7 @@ export const BUCKET_META: Record<
   aging: {
     label: "Aging",
     range: "3–6 days",
+    description: "Sent 3–6 days ago — watch these before they slip into overdue.",
     chip: "bg-orange-500/10 text-orange-500",
     accent: "#f59e0b",
     dot: "bg-orange-500",
@@ -27,6 +29,7 @@ export const BUCKET_META: Record<
   fresh: {
     label: "Fresh",
     range: "< 3 days",
+    description: "Sent in the last 3 days — still within a normal review window.",
     chip: "bg-emerald-500/10 text-emerald-500",
     accent: "#10b981",
     dot: "bg-emerald-500",
