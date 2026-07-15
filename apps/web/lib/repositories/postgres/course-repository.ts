@@ -16,6 +16,7 @@ import type {
   CreateCourseRecordInput,
   InsertStatusEventInput,
   InstructorCourse,
+  InstructorHandoffCourse,
   PaginatedResult,
   StatusCount,
   StuckCourse,
@@ -87,6 +88,13 @@ const ADMIN_COURSE_INSTRUCTOR_JOIN = `
     LIMIT 1
   ) instr ON TRUE
 `;
+
+// Statuses that mean "the ball is in the instructor's court, not yet approved".
+const INSTRUCTOR_HANDOFF_STATUSES = [
+  "sent_to_instructor",
+  "instructor_viewing",
+  "instructor_questions",
+] as const;
 
 function cleanOptionalText(value: string | null | undefined) {
   const cleaned = value?.trim();
@@ -940,6 +948,69 @@ export function createPostgresCourseRepository(): CourseRepository {
         [cutoffIso],
       );
       return Number(rows[0]?.count ?? "0");
+    },
+
+    async listInstructorHandoffCourses() {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        title: string;
+        status: string;
+        instructor_name: string | null;
+        instructor_email: string | null;
+        sent_at: string | null;
+        first_opened_at: string | null;
+        last_opened_at: string | null;
+        open_count: number | string | null;
+      }>(
+        `
+          SELECT
+            c.id,
+            c.title,
+            c.status,
+            instr.full_name  AS instructor_name,
+            instr.email      AS instructor_email,
+            sent.sent_at,
+            v.first_opened_at,
+            v.last_opened_at,
+            v.open_count
+          FROM courses c
+          LEFT JOIN LATERAL (
+            SELECT p.id, p.full_name, p.email
+            FROM course_assignments ca
+            INNER JOIN profiles p ON p.id = ca.profile_id
+            WHERE ca.course_id = c.id AND ca.role = 'instructor'
+            ORDER BY ca.assigned_at DESC
+            LIMIT 1
+          ) instr ON TRUE
+          LEFT JOIN LATERAL (
+            SELECT e.created_at AS sent_at
+            FROM course_status_events e
+            WHERE e.course_id = c.id AND e.to_status = 'sent_to_instructor'
+            ORDER BY e.created_at DESC
+            LIMIT 1
+          ) sent ON TRUE
+          LEFT JOIN instructor_dashboard_views v
+            ON v.course_id = c.id AND v.profile_id = instr.id
+          WHERE c.status = ANY($1::text[])
+          ORDER BY sent.sent_at ASC NULLS LAST, c.title ASC
+        `,
+        [INSTRUCTOR_HANDOFF_STATUSES],
+      );
+
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        status: toCourseStatus(row.status),
+        instructorName: row.instructor_name,
+        instructorEmail: row.instructor_email,
+        // pg returns timestamptz as JS Date despite the `string` typing; normalize
+        // to ISO so the declared types are honest and RSC serialization stays plain.
+        sentAt: row.sent_at ? new Date(row.sent_at).toISOString() : null,
+        firstOpenedAt: row.first_opened_at ? new Date(row.first_opened_at).toISOString() : null,
+        lastOpenedAt: row.last_opened_at ? new Date(row.last_opened_at).toISOString() : null,
+        openCount: Number(row.open_count ?? 0),
+      })) satisfies InstructorHandoffCourse[];
     },
 
     async listTAWorkload() {

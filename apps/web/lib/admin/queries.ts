@@ -3,7 +3,13 @@ import "server-only"
 import type { CourseStatus } from "@coursebridge/workflow"
 import { fetchReviewProgressForCourses } from "@/lib/courses/service"
 import { getCourseRepository, getReviewRepository } from "@/lib/repositories"
-import type { AdminCourseRow, AuditEvent, PaginatedResult, StatusCount, StuckCourse, TAWorkload } from "@/lib/repositories/contracts"
+import type { AdminCourseRow, AuditEvent, InstructorHandoffCourse, PaginatedResult, StatusCount, StuckCourse, TAWorkload } from "@/lib/repositories/contracts"
+import {
+  bucketForDays,
+  daysSince,
+  summarize,
+  type HandoffSummary,
+} from "@/lib/admin/handoff-buckets"
 import { getReviewResponses, type ReviewResponse } from "@/lib/services/review"
 export type { AdminCourseRow } from "@/lib/repositories/contracts"
 export type AdminCoursesPage = PaginatedResult<AdminCourseRow>
@@ -225,4 +231,72 @@ export async function getSentToInstructorCourses(): Promise<SentToInstructorCour
     instructorEmail: r.instructor_email,
     updatedAt: r.updated_at,
   }));
+}
+
+/** A handoff course enriched with its computed staleness classification. */
+export type HandoffCourseView = InstructorHandoffCourse & {
+  daysSinceSent: number | null
+  bucket: ReturnType<typeof bucketForDays>
+  opened: boolean
+  hasQuestions: boolean
+}
+
+export type InstructorRollup = {
+  instructorName: string | null
+  instructorEmail: string | null
+  summary: HandoffSummary
+}
+
+export type InstructorHandoffData = {
+  courses: HandoffCourseView[]
+  summary: HandoffSummary
+  /** Per-instructor rollups, most overdue-heavy first. */
+  byInstructor: InstructorRollup[]
+}
+
+/**
+ * Instructor Handoff Tracker feed: every course currently in the instructor's
+ * hands, classified into staleness buckets, plus overall and per-instructor
+ * rollups. "Days since sent" comes from the course_status_events log, not
+ * courses.updated_at, so it is not disturbed by unrelated edits.
+ */
+export async function getInstructorHandoffData(): Promise<InstructorHandoffData> {
+  const rows = await getCourseRepository().listInstructorHandoffCourses()
+  const now = Date.now()
+
+  const courses: HandoffCourseView[] = rows.map((row) => {
+    const daysSinceSent = daysSince(row.sentAt, now)
+    return {
+      ...row,
+      daysSinceSent,
+      bucket: bucketForDays(daysSinceSent),
+      opened: row.firstOpenedAt !== null,
+      hasQuestions: row.status === "instructor_questions",
+    }
+  })
+
+  const summary = summarize(courses)
+
+  const groups = new Map<string, HandoffCourseView[]>()
+  for (const course of courses) {
+    const key = course.instructorEmail ?? "__unassigned__"
+    const bucket = groups.get(key)
+    if (bucket) bucket.push(course)
+    else groups.set(key, [course])
+  }
+
+  const byInstructor: InstructorRollup[] = Array.from(groups.values())
+    .map((group) => ({
+      instructorName: group[0].instructorName,
+      instructorEmail: group[0].instructorEmail,
+      summary: summarize(group),
+    }))
+    .sort(
+      (a, b) =>
+        b.summary.overdue - a.summary.overdue ||
+        b.summary.aging - a.summary.aging ||
+        b.summary.total - a.summary.total,
+    )
+
+  return { courses, summary, byInstructor }
 }

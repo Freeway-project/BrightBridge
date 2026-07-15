@@ -158,6 +158,26 @@ export type StuckCourse = {
   updated_at: string;
 };
 
+/**
+ * A course currently in the instructor's hands (status `sent_to_instructor`,
+ * `instructor_viewing`, or `instructor_questions`), enriched with the accurate
+ * send timestamp and the assigned instructor's open activity. Drives the
+ * Instructor Handoff Tracker on /admin/stats.
+ */
+export type InstructorHandoffCourse = {
+  id: string;
+  title: string;
+  status: CourseStatus;
+  instructorName: string | null;
+  instructorEmail: string | null;
+  /** `created_at` of the latest `-> sent_to_instructor` status event; null if none recorded. */
+  sentAt: string | null;
+  /** From instructor_dashboard_views; null = the assigned instructor never opened it. */
+  firstOpenedAt: string | null;
+  lastOpenedAt: string | null;
+  openCount: number;
+};
+
 export type TAWorkload = {
   id: string;
   full_name: string | null;
@@ -411,6 +431,8 @@ export interface CourseRepository {
   listStatusCounts(): Promise<StatusCount[]>;
   listStuckCourses(cutoffIso: string, limit?: number): Promise<StuckCourse[]>;
   countStuckCourses(cutoffIso: string): Promise<number>;
+  /** Courses currently in the instructor-handoff phase, with send time + open activity. */
+  listInstructorHandoffCourses(): Promise<InstructorHandoffCourse[]>;
   listTAWorkload(): Promise<TAWorkload[]>;
   listAuditEvents(limit: number): Promise<AuditEvent[]>;
   listAuditEventsPage(page: number, pageSize: number): Promise<PaginatedResult<AuditEvent>>;

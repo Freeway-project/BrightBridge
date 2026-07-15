@@ -1,7 +1,7 @@
 import type { CourseStatus } from "@coursebridge/workflow"
 import { getPhaseBreakdown } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
-import { getAdminStatsData } from "@/lib/admin/queries"
+import { getAdminStatsData, getInstructorHandoffData } from "@/lib/admin/queries"
 import { Topbar } from "@/components/layout/topbar"
 import { TweakableContent } from "@/components/shared/tweakable-content"
 import { ActivityTrend } from "@/components/admin/stats/activity-trend"
@@ -10,12 +10,16 @@ import { PipelineTimeline } from "@/components/admin/stats/pipeline-timeline"
 import { StatsOverview } from "@/components/admin/stats/stats-overview"
 import { StuckCoursesList } from "@/components/admin/stats/stuck-courses-list"
 import { WorkloadChart } from "@/components/admin/stats/workload-chart"
+import { InstructorHandoffSection } from "@/components/admin/handoff/instructor-handoff-section"
 
 export default async function AdminStatsPage() {
   const context = await requireProfile()
   requireAnyRole(context, ["admin_full", "admin_viewer", "super_admin"])
 
-  const data = await getAdminStatsData()
+  const [data, handoffData] = await Promise.all([
+    getAdminStatsData(),
+    getInstructorHandoffData(),
+  ])
 
   const countByStatus: Partial<Record<CourseStatus, number>> = Object.fromEntries(
     data.statusCounts.map((s) => [s.status, s.count]),
@@ -43,6 +47,8 @@ export default async function AdminStatsPage() {
             <ActivityTrend auditEvents={data.auditEvents} />
             <StuckCoursesList stuckCourses={data.stuckCourses} totalStuck={data.stuckCount} />
           </div>
+
+          <InstructorHandoffSection data={handoffData} />
         </div>
       </TweakableContent>
     </>
