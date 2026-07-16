@@ -626,7 +626,9 @@ export async function Sidebar({
 }) {
   const [conversations, courseChats] = await Promise.all([
     listConversationsForUser(currentUserId),
-    getCourseChatInbox(),
+    // Isolate the course-chat inbox: if its query fails, the messenger list
+    // must still render (spec error contract).
+    getCourseChatInbox().catch(() => []),
   ]);
   return (
     <div className="flex h-full flex-col border-r border-border">
@@ -703,22 +705,24 @@ export function CourseCommentThreadClient({
   comments: CourseComment[];
   canPost: boolean;
   canMarkAnswered: boolean;
-  openCourseHref: string;
+  openCourseHref: string | null;
 }) {
   const router = useRouter();
   useCourseCommentRealtime(courseId, () => router.refresh());
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-end border-b border-border px-3 py-2">
-        <Link
-          href={openCourseHref}
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ExternalLink className="size-3.5" />
-          Open course
-        </Link>
-      </div>
+      {openCourseHref && (
+        <div className="flex items-center justify-end border-b border-border px-3 py-2">
+          <Link
+            href={openCourseHref}
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ExternalLink className="size-3.5" />
+            Open course
+          </Link>
+        </div>
+      )}
       <div className="min-h-0 flex-1">
         <CourseChatPanel
           courseId={courseId}
@@ -748,10 +752,11 @@ import { CourseCommentThreadClient } from "./CourseCommentThreadClient";
 const CAN_POST: Role[] = ["instructor", "admin_full", "super_admin", "standard_user"];
 const CAN_MARK_ANSWERED: Role[] = ["admin_full", "super_admin", "standard_user"];
 
-function courseHrefForRole(role: Role, courseId: string): string {
+function courseHrefForRole(role: Role, courseId: string): string | null {
   if (role === "instructor") return `/instructor/courses/${courseId}`;
   if (role === "standard_user") return `/courses/${courseId}`;
-  return `/admin/courses/${courseId}`; // admin_full | admin_viewer | super_admin | provost
+  if (role === "admin_full" || role === "super_admin") return `/admin/courses/${courseId}`;
+  return null; // admin_viewer, provost: no course-detail page they can open
 }
 
 export async function CourseCommentThread({ courseId }: { courseId: string }) {

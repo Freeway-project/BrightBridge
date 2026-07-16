@@ -59,9 +59,10 @@ Nothing about the messenger changes. We add a parallel view backed by `course_co
 ## View — components
 
 - **`Sidebar`** gains a two-item tab header. **Courses** renders `<CourseChatList>` — one row per course, showing `{ course title, who last messaged (last author), preview snippet, last-activity time, unanswered badge }`, sorted by recency. Surfacing the **author + preview** directly on the row is a core requirement: with many courses, the user needs to see *who* messaged and *what* about at a glance, without opening each course.
-- **`<CourseCommentThread courseId>`** — the extracted, context-free shared unit (Approach C). Renders the `course_comments` timeline + composer + mark-answered, and an **"Open course"** link that routes to the role-appropriate course page:
-  - admin → `/admin/courses/[id]`, instructor → `/instructor/courses/[id]`, else → `/courses/[id]`.
-- The existing per-course chat panels (`course-conversation.tsx`, `course-chat-panel.tsx`, `course-chat.tsx`) are refactored to render this same component so there is a single thread implementation.
+- **`<CourseCommentThread courseId>`** — the context-free shared unit (Approach C). Renders the `course_comments` timeline + composer + mark-answered, and — **for roles that have an accessible course-detail page** — an **"Open course"** link:
+  - instructor → `/instructor/courses/[id]`, standard_user → `/courses/[id]`, admin_full / super_admin → `/admin/courses/[id]`.
+  - `admin_viewer` and `provost` have **no** course-detail page they can open (the admin page is gated to admin_full/super_admin; `/courses/[id]` is assignment-scoped and those roles aren't assigned), so `courseHrefForRole` returns `null` and the "Open course" link is **hidden** for them. They still read the thread inline (they're read-only — no post/answer).
+- **No course-page refactor was needed:** `course-chat-panel.tsx` (`CourseChatPanel`) is already the shared thread used by the existing course pages, so `<CourseCommentThread>` reuses it directly. (`course-conversation.tsx` is a separate escalation/internal-log feature and is left untouched.)
 
 ## Data flow
 
