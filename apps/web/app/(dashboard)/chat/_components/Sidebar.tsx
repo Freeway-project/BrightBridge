@@ -1,11 +1,9 @@
-import Link from "next/link";
 import { listConversationsForUser } from "@/lib/chat/queries";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { getCourseChatInbox } from "@/lib/services/course-chat";
 import { SidebarSearch } from "./SidebarSearch";
 import { NewConversationMenu } from "./NewConversationMenu";
 import { ChatWithAdminButton } from "./ChatWithAdminButton";
-import { RelativeTime } from "./RelativeTime";
+import { ChatSidebarTabs } from "./ChatSidebarTabs";
 
 export async function Sidebar({
   currentUserId,
@@ -14,7 +12,10 @@ export async function Sidebar({
   currentUserId: string;
   canRequestSupport: boolean;
 }) {
-  const conversations = await listConversationsForUser(currentUserId);
+  const [conversations, courseChats] = await Promise.all([
+    listConversationsForUser(currentUserId),
+    getCourseChatInbox(),
+  ]);
   return (
     <div className="flex h-full flex-col border-r border-border">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
@@ -29,30 +30,7 @@ export async function Sidebar({
           <ChatWithAdminButton />
         </div>
       )}
-      <ScrollArea className="flex-1">
-        <ul>
-          {conversations.map((c) => (
-            <li key={c.id}>
-              <Link
-                href={`/chat/${c.id}`}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-muted/40"
-              >
-                <span className="flex-1 truncate text-sm">{c.displayTitle}</span>
-                <RelativeTime
-                  iso={c.lastMessageAt}
-                  className="shrink-0 text-xs text-muted-foreground"
-                />
-                {c.unreadCount > 0 && <Badge variant="secondary">{c.unreadCount}</Badge>}
-              </Link>
-            </li>
-          ))}
-          {conversations.length === 0 && (
-            <li className="px-3 py-6 text-center text-xs text-muted-foreground">
-              No conversations yet.
-            </li>
-          )}
-        </ul>
-      </ScrollArea>
+      <ChatSidebarTabs conversations={conversations} courseChats={courseChats} />
     </div>
   );
 }
