@@ -275,6 +275,16 @@ export type CourseComment = {
   is_answered: boolean;
 };
 
+export type CourseChatInboxItem = {
+  courseId: string;
+  courseTitle: string;
+  /** ISO timestamp of the most recent instructor-visible comment. */
+  lastActivityAt: string;
+  lastPreview: string | null;
+  lastAuthorName: string | null;
+  unansweredCount: number;
+};
+
 export type CourseAssignmentRecord = {
   profileId: string;
   courseId: string;
@@ -487,6 +497,11 @@ export interface CommentRepository {
   listCourseComments(courseId: string, visibility?: "internal" | "instructor_visible"): Promise<CourseComment[]>;
   postCourseComment(input: PostCourseCommentInput): Promise<CourseComment>;
   markCommentAnswered(commentId: string, courseId: string): Promise<void>;
+}
+
+export interface CourseChatRepository {
+  listCourseChatInbox(scope: AccessibleCourseScope): Promise<CourseChatInboxItem[]>;
+  isCourseAccessible(scope: AccessibleCourseScope, courseId: string): Promise<boolean>;
 }
 
 // ── Escalations ──────────────────────────────────────────────────────────────
