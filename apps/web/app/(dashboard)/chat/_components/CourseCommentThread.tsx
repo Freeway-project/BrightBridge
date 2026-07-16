@@ -8,10 +8,11 @@ import { CourseCommentThreadClient } from "./CourseCommentThreadClient";
 const CAN_POST: Role[] = ["instructor", "admin_full", "super_admin", "standard_user"];
 const CAN_MARK_ANSWERED: Role[] = ["admin_full", "super_admin", "standard_user"];
 
-function courseHrefForRole(role: Role, courseId: string): string {
+function courseHrefForRole(role: Role, courseId: string): string | null {
   if (role === "instructor") return `/instructor/courses/${courseId}`;
   if (role === "standard_user") return `/courses/${courseId}`;
-  return `/admin/courses/${courseId}`; // admin_full | admin_viewer | super_admin | provost
+  if (role === "admin_full" || role === "super_admin") return `/admin/courses/${courseId}`;
+  return null; // admin_viewer, provost: no course-detail page they can open
 }
 
 export async function CourseCommentThread({ courseId }: { courseId: string }) {

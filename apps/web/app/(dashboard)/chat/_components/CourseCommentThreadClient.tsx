@@ -20,22 +20,24 @@ export function CourseCommentThreadClient({
   comments: CourseComment[];
   canPost: boolean;
   canMarkAnswered: boolean;
-  openCourseHref: string;
+  openCourseHref: string | null;
 }) {
   const router = useRouter();
   useCourseCommentRealtime(courseId, () => router.refresh());
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-end border-b border-border px-3 py-2">
-        <Link
-          href={openCourseHref}
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ExternalLink className="size-3.5" />
-          Open course
-        </Link>
-      </div>
+      {openCourseHref && (
+        <div className="flex items-center justify-end border-b border-border px-3 py-2">
+          <Link
+            href={openCourseHref}
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ExternalLink className="size-3.5" />
+            Open course
+          </Link>
+        </div>
+      )}
       <div className="min-h-0 flex-1">
         <CourseChatPanel
           courseId={courseId}
