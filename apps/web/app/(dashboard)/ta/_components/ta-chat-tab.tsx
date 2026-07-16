@@ -112,7 +112,7 @@ export function TaChatTab({
           <ChatWithAdminButton />
         </div>
         {tab === "messages" ? (
-          <ScrollArea className="flex-1">
+          <ScrollArea className="min-h-0 flex-1">
             <ul>
               {conversations.map((c) => (
                 <li key={c.id}>
@@ -142,7 +142,7 @@ export function TaChatTab({
             </ul>
           </ScrollArea>
         ) : (
-          <ScrollArea className="flex-1">
+          <ScrollArea className="min-h-0 flex-1">
             {courseChats === null ? (
               <p className="px-3 py-6 text-center text-xs text-muted-foreground">Loading…</p>
             ) : courseChats.length === 0 ? (
