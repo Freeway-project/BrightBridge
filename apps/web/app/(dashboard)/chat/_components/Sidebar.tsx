@@ -14,7 +14,9 @@ export async function Sidebar({
 }) {
   const [conversations, courseChats] = await Promise.all([
     listConversationsForUser(currentUserId),
-    getCourseChatInbox(),
+    // Isolate the course-chat inbox: if its query fails, the messenger list
+    // must still render (spec error contract).
+    getCourseChatInbox().catch(() => []),
   ]);
   return (
     <div className="flex h-full flex-col border-r border-border">
