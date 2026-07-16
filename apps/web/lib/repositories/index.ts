@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   CommentRepository,
+  CourseChatRepository,
   CourseRepository,
   EscalationRepository,
   HierarchyRepository,
@@ -9,6 +10,7 @@ import type {
   ReviewRepository,
 } from "@/lib/repositories/contracts";
 import { createPostgresCommentRepository } from "./postgres/comment-repository";
+import { createPostgresCourseChatRepository } from "./postgres/course-chat-repository";
 import { createPostgresCourseRepository } from "./postgres/course-repository";
 import { createPostgresEscalationRepository } from "./postgres/escalation-repository";
 import { createPostgresHierarchyRepository } from "./postgres/hierarchy-repository";
@@ -21,6 +23,7 @@ let reviewRepository: ReviewRepository | null = null;
 let commentRepository: CommentRepository | null = null;
 let hierarchyRepository: HierarchyRepository | null = null;
 let escalationRepository: EscalationRepository | null = null;
+let courseChatRepository: CourseChatRepository | null = null;
 
 export function getCourseRepository(): CourseRepository {
   courseRepository ??= createPostgresCourseRepository();
@@ -50,4 +53,9 @@ export function getHierarchyRepository(): HierarchyRepository {
 export function getEscalationRepository(): EscalationRepository {
   escalationRepository ??= createPostgresEscalationRepository();
   return escalationRepository;
+}
+
+export function getCourseChatRepository(): CourseChatRepository {
+  courseChatRepository ??= createPostgresCourseChatRepository();
+  return courseChatRepository;
 }
