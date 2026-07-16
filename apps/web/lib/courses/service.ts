@@ -160,7 +160,7 @@ export type AccessibleCourseListInput = {
   term?: string;
 };
 
-async function resolveAccessibleScope(): Promise<{
+export async function resolveAccessibleScope(): Promise<{
   scope: AccessibleCourseScope | null;
   canExport: boolean;
 }> {
