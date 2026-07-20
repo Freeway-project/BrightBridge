@@ -5,12 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SentToInstructorCourse } from "@/lib/admin/queries";
 import { formatDistanceToNow } from "date-fns";
 import { InstructorPreviewButton } from "./instructor-preview-button";
+import { BucketBadge } from "@/components/admin/handoff/bucket-badge";
+import type { HandoffLookup } from "@/lib/admin/handoff-lookup";
 
 type Props = {
   courses: SentToInstructorCourse[];
+  /** Per-course staleness; when omitted (handoff query failed) the Sent column is hidden. */
+  handoffLookup?: HandoffLookup;
 };
 
-export function SentCoursesTable({ courses }: Props) {
+export function SentCoursesTable({ courses, handoffLookup }: Props) {
+  const showStaleness = handoffLookup !== undefined;
   if (courses.length === 0) {
     return (
       <Card>
@@ -38,48 +43,63 @@ export function SentCoursesTable({ courses }: Props) {
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Instructor</th>
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Email</th>
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Status</th>
+                {showStaleness && (
+                  <th className="px-4 py-2 text-left font-medium text-muted-foreground">Sent</th>
+                )}
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Last Updated</th>
                 <th className="px-4 py-2 text-left font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {courses.map((course) => (
-                <tr
-                  key={course.courseId}
-                  className="border-b border-border last:border-0 hover:bg-muted/30"
-                >
-                  <td className="px-4 py-2.5 font-medium">
-                    <a
-                      href={`/admin/courses/${course.courseId}`}
-                      className="hover:underline"
-                    >
-                      {course.courseTitle}
-                    </a>
-                  </td>
-                  <td className="px-4 py-2.5 text-muted-foreground">
-                    {course.instructorName ?? "—"}
-                  </td>
-                  <td className="px-4 py-2.5 text-muted-foreground">
-                    {course.instructorEmail ?? "—"}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <StatusBadge status={course.status} className="h-5" />
-                  </td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {course.instructorEmail ? (
-                      <InstructorPreviewButton
-                        courseId={course.courseId}
-                        instructorEmail={course.instructorEmail}
-                      />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
+              {courses.map((course) => {
+                const staleness = handoffLookup?.[course.courseId];
+                return (
+                  <tr
+                    key={course.courseId}
+                    className="border-b border-border last:border-0 hover:bg-muted/30"
+                  >
+                    <td className="px-4 py-2.5 font-medium">
+                      <a
+                        href={`/admin/courses/${course.courseId}`}
+                        className="hover:underline"
+                      >
+                        {course.courseTitle}
+                      </a>
+                    </td>
+                    <td className="px-4 py-2.5 text-muted-foreground">
+                      {course.instructorName ?? "—"}
+                    </td>
+                    <td className="px-4 py-2.5 text-muted-foreground">
+                      {course.instructorEmail ?? "—"}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <StatusBadge status={course.status} className="h-5" />
+                    </td>
+                    {showStaleness && (
+                      <td className="px-4 py-2.5">
+                        {staleness ? (
+                          <BucketBadge bucket={staleness.bucket} days={staleness.daysSinceSent} />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </td>
                     )}
-                  </td>
-                </tr>
-              ))}
+                    <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(course.updatedAt), { addSuffix: true })}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {course.instructorEmail ? (
+                        <InstructorPreviewButton
+                          courseId={course.courseId}
+                          instructorEmail={course.instructorEmail}
+                        />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

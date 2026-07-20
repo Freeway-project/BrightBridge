@@ -1,7 +1,9 @@
 import { Topbar } from "@/components/layout/topbar"
 import { COURSE_STATUSES, WORKFLOW_PHASES, type CourseStatus, type PipelineStage } from "@coursebridge/workflow"
 import { requireAnyRole, requireProfile } from "@/lib/auth/context"
-import { getAdminCoursesPage, getAdminOverviewData, getReadyForInstructorCourses, getSentToInstructorCourses, type AdminCourseRow } from "@/lib/admin/queries"
+import { getAdminCoursesPage, getAdminOverviewData, getInstructorHandoffData, getReadyForInstructorCourses, getSentToInstructorCourses, type AdminCourseRow } from "@/lib/admin/queries"
+import { buildHandoffLookup } from "@/lib/admin/handoff-lookup"
+import { HandoffSummaryView } from "@/components/admin/handoff/handoff-summary"
 import { SendPanel } from "./_components/send-panel"
 import { CoursesBoard, type BoardColumn } from "./_components/courses-board"
 import { getProfilesByRole } from "@/lib/services/profiles"
@@ -73,6 +75,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     r_institution,
     r_ready,
     r_sent,
+    r_handoff,
   ] = await Promise.allSettled([
     getAdminCoursesPage({ page, pageSize, search, status, statuses: phaseStatuses, taProfileId }),
     getAdminCoursesPage({ page: 1, pageSize: 200, status: "course_created" }),
@@ -84,6 +87,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     getSuperAdminData(),
     getReadyForInstructorCourses(),
     getSentToInstructorCourses(),
+    getInstructorHandoffData(),
   ])
 
   const coursesPage = r_courses.status === "fulfilled" ? r_courses.value : emptyPage
@@ -100,6 +104,11 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     : { users: [], totalCourses: 0, statusCounts: [], stuckCourses: [], taWorkload: [], auditEvents: [], units: [], members: [] }
   const readyForInstructor = r_ready.status === "fulfilled" ? r_ready.value : []
   const sentToInstructor = r_sent.status === "fulfilled" ? r_sent.value : []
+
+  // Handoff staleness is additive: a failure here must leave the dashboard
+  // rendering exactly as it did before this feature existed.
+  const handoffData = r_handoff.status === "fulfilled" ? r_handoff.value : null
+  const handoffLookup = buildHandoffLookup(handoffData?.courses)
 
   // ---- Workflow board data (All Courses tab) -----------------------------
   // One column per status, derived from the shared WORKFLOW_PHASES so the admin
@@ -141,14 +150,19 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     count: col.statuses.reduce((n, s) => n + (countByStatus.get(s) ?? 0), 0),
     cards: col.statuses
       .flatMap((s) => rowsByStatus.get(s) ?? [])
-      .map((r) => ({
-        id: r.id,
-        title: r.title,
-        sourceCourseId: r.sourceCourseId,
-        taName: r.ta?.name ?? null,
-        status: r.status,
-        updatedAt: r.updatedAt,
-      }))
+      .map((r) => {
+        const staleness = handoffLookup[r.id]
+        return {
+          id: r.id,
+          title: r.title,
+          sourceCourseId: r.sourceCourseId,
+          taName: r.ta?.name ?? null,
+          status: r.status,
+          updatedAt: r.updatedAt,
+          bucket: staleness?.bucket,
+          daysSinceSent: staleness?.daysSinceSent ?? null,
+        }
+      })
       .sort((a, b) => toSortableTimestamp(b.updatedAt) - toSortableTimestamp(a.updatedAt))
       .slice(0, 18),
   }))
@@ -197,7 +211,22 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
               institutionPanel={<InstitutionPanel data={institutionData} storageKey="admin-institution" />}
               completedPanel={<CompletedCoursesTable courses={completedPage.data} />}
               assignmentLogsPanel={<RecentAssignmentsTable logs={recentAssignments} />}
-              sendPanel={<SendPanel readyCourses={readyForInstructor} sentCourses={sentToInstructor} readOnly={isReadOnly} />}
+              sendPanel={
+                <SendPanel
+                  readyCourses={readyForInstructor}
+                  sentCourses={sentToInstructor}
+                  readOnly={isReadOnly}
+                  handoffLookup={handoffData ? handoffLookup : undefined}
+                  handoffSummary={
+                    handoffData ? (
+                      <HandoffSummaryView
+                        summary={handoffData.summary}
+                        byInstructor={handoffData.byInstructor}
+                      />
+                    ) : undefined
+                  }
+                />
+              }
               accessLinksPanel={isReadOnly ? undefined : <LoginLinkPanel />}
               readyForInstructorCount={readyForInstructor.length}
             />

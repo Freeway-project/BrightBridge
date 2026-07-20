@@ -11,6 +11,8 @@ import {
   type PipelineStage,
 } from "@coursebridge/workflow"
 import { StatusBadge } from "@/components/courses/status-badge"
+import { BucketBadge } from "@/components/admin/handoff/bucket-badge"
+import type { HandoffBucket } from "@/lib/admin/handoff-buckets"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -29,6 +31,9 @@ export type BoardCard = {
   taName: string | null
   status: CourseStatus
   updatedAt: string
+  /** Handoff staleness — present only for courses the handoff tracker covers. */
+  bucket?: HandoffBucket
+  daysSinceSent?: number | null
 }
 
 export type BoardColumn = {
@@ -356,8 +361,11 @@ function BoardCardItem({
           />
         )}
       </div>
-      <div className="mt-2">
+      <div className="mt-2 flex items-center justify-between gap-2">
         <StatusBadge status={card.status} />
+        {card.bucket && (
+          <BucketBadge bucket={card.bucket} days={card.daysSinceSent ?? null} />
+        )}
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         {card.taName ? `TA: ${card.taName}` : "Unassigned"}

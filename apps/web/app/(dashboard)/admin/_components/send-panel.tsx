@@ -9,6 +9,7 @@ import { useStickyTabState } from "@/hooks/use-sticky-tab-state";
 import { BatchExportPanel } from "./batch-export-panel";
 import { SentCoursesTable } from "./sent-courses-table";
 import type { ReadyForInstructorCourse, SentToInstructorCourse } from "@/lib/admin/queries";
+import type { HandoffLookup } from "@/lib/admin/handoff-lookup";
 
 
 const SEND_PANEL_TAB_COPY = {
@@ -67,6 +68,10 @@ type Props = {
   sentCourses: SentToInstructorCourse[];
   /** When true (admin_viewer), the export/send controls are hidden. */
   readOnly?: boolean;
+  /** Server-rendered <HandoffSummaryView>; omitted when the handoff query failed. */
+  handoffSummary?: React.ReactNode;
+  /** Per-course staleness; omitted when the handoff query failed. */
+  handoffLookup?: HandoffLookup;
 };
 
 /** Case-insensitive match on course title, instructor name, or instructor email. */
@@ -85,7 +90,7 @@ function matchesQuery(
   );
 }
 
-export function SendPanel({ readyCourses, sentCourses, readOnly = false }: Props) {
+export function SendPanel({ readyCourses, sentCourses, readOnly = false, handoffSummary, handoffLookup }: Props) {
   const [tab, setTab] = useStickyTabState("send-panel", "ready");
   const [query, setQuery] = useState("");
 
@@ -124,13 +129,15 @@ export function SendPanel({ readyCourses, sentCourses, readOnly = false }: Props
         <BatchExportPanel courses={filteredReady} readOnly={readOnly} />
       </TabsContent>
 
-      <TabsContent value="sent">
-        <SentCoursesTable courses={filteredSent} />
+      <TabsContent value="sent" className="space-y-4">
+        {handoffSummary}
+        <SentCoursesTable courses={filteredSent} handoffLookup={handoffLookup} />
       </TabsContent>
 
       <TabsContent value="all" className="space-y-6">
         <BatchExportPanel courses={filteredReady} readOnly={readOnly} />
-        <SentCoursesTable courses={filteredSent} />
+        {handoffSummary}
+        <SentCoursesTable courses={filteredSent} handoffLookup={handoffLookup} />
       </TabsContent>
     </Tabs>
   );
