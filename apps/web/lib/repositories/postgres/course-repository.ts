@@ -17,6 +17,7 @@ import type {
   InsertStatusEventInput,
   InstructorCourse,
   InstructorHandoffCourse,
+  InstructorPendingCourse,
   PaginatedResult,
   StatusCount,
   StuckCourse,
@@ -1525,6 +1526,57 @@ export function createPostgresCourseRepository(): CourseRepository {
         status: toCourseStatus(row.status),
         updatedAt: row.updated_at,
       })) satisfies InstructorCourse[];
+    },
+
+    async listInstructorPendingCourses(profileId) {
+      const pool = getPostgresPool();
+      const { rows } = await pool.query<{
+        id: string;
+        title: string;
+        term: string | null;
+        department: string | null;
+        status: string;
+        sent_at: string | null;
+        first_opened_at: string | null;
+      }>(
+        `
+          SELECT
+            c.id,
+            c.title,
+            c.term,
+            c.department,
+            c.status,
+            sent.sent_at,
+            v.first_opened_at
+          FROM courses c
+          INNER JOIN course_assignments ca
+            ON ca.course_id = c.id AND ca.profile_id = $1 AND ca.role = 'instructor'
+          LEFT JOIN LATERAL (
+            SELECT e.created_at AS sent_at
+            FROM course_status_events e
+            WHERE e.course_id = c.id AND e.to_status = 'sent_to_instructor'
+            ORDER BY e.created_at DESC
+            LIMIT 1
+          ) sent ON TRUE
+          LEFT JOIN instructor_dashboard_views v
+            ON v.course_id = c.id AND v.profile_id = $1
+          WHERE c.status = ANY($2::text[])
+          ORDER BY sent.sent_at ASC NULLS LAST, c.title ASC
+        `,
+        [profileId, INSTRUCTOR_HANDOFF_STATUSES],
+      );
+
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        term: row.term,
+        department: row.department,
+        status: toCourseStatus(row.status),
+        // pg returns timestamptz as JS Date despite the `string` typing; normalize
+        // to ISO so the declared types are honest and RSC serialization stays plain.
+        sentAt: row.sent_at ? new Date(row.sent_at).toISOString() : null,
+        firstOpenedAt: row.first_opened_at ? new Date(row.first_opened_at).toISOString() : null,
+      })) satisfies InstructorPendingCourse[];
     },
   };
 }
