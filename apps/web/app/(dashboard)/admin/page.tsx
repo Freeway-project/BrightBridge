@@ -150,14 +150,19 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
     count: col.statuses.reduce((n, s) => n + (countByStatus.get(s) ?? 0), 0),
     cards: col.statuses
       .flatMap((s) => rowsByStatus.get(s) ?? [])
-      .map((r) => ({
-        id: r.id,
-        title: r.title,
-        sourceCourseId: r.sourceCourseId,
-        taName: r.ta?.name ?? null,
-        status: r.status,
-        updatedAt: r.updatedAt,
-      }))
+      .map((r) => {
+        const staleness = handoffLookup[r.id]
+        return {
+          id: r.id,
+          title: r.title,
+          sourceCourseId: r.sourceCourseId,
+          taName: r.ta?.name ?? null,
+          status: r.status,
+          updatedAt: r.updatedAt,
+          bucket: staleness?.bucket,
+          daysSinceSent: staleness?.daysSinceSent ?? null,
+        }
+      })
       .sort((a, b) => toSortableTimestamp(b.updatedAt) - toSortableTimestamp(a.updatedAt))
       .slice(0, 18),
   }))
