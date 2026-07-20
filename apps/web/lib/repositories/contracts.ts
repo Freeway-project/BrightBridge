@@ -178,6 +178,24 @@ export type InstructorHandoffCourse = {
   openCount: number;
 };
 
+/**
+ * A course pending the viewing instructor's action (status `sent_to_instructor`,
+ * `instructor_viewing`, or `instructor_questions`), enriched with the accurate
+ * send timestamp and whether *this* instructor has ever opened it. Drives the
+ * overdue reminder banner + pending cards on the instructor dashboard.
+ */
+export type InstructorPendingCourse = {
+  id: string;
+  title: string;
+  term: string | null;
+  department: string | null;
+  status: CourseStatus;
+  /** `created_at` of the latest `-> sent_to_instructor` status event; null if none recorded. */
+  sentAt: string | null;
+  /** From instructor_dashboard_views for this profile; null = never opened it. */
+  firstOpenedAt: string | null;
+};
+
 export type TAWorkload = {
   id: string;
   full_name: string | null;
@@ -465,6 +483,8 @@ export interface CourseRepository {
   /** Subtree course count for each of the given (sibling) child units, keyed by unit id. */
   getChildUnitCourseCounts(childUnitIds: string[]): Promise<Record<string, number>>;
   listInstructorCourses(profileId: string): Promise<InstructorCourse[]>;
+  /** This instructor's not-yet-approved courses, with send time + own open activity. */
+  listInstructorPendingCourses(profileId: string): Promise<InstructorPendingCourse[]>;
 }
 
 export interface ProfileRepository {

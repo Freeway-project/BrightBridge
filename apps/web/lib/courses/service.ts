@@ -21,6 +21,7 @@ import type {
   InstructorCourse,
 } from "@/lib/repositories/contracts";
 import { LEADERSHIP_TITLES, highestLeadershipTitle } from "@/lib/hierarchy/leadership";
+import { classifyPendingCourses, type PendingCourseView } from "@/lib/instructor-reminders/pending";
 
 const adminRoles: readonly Role[] = ["admin_full", "super_admin"];
 const roleWideCourseRoles: readonly Role[] = ["admin_full", "admin_viewer", "super_admin", "provost"];
@@ -510,29 +511,34 @@ export type InstructorDashboardData = {
   myCourses: InstructorCourse[];
   departmentCourses: CourseSummary[];
   isLeader: boolean;
+  /** This instructor's not-yet-approved courses, classified and sorted most pending first. */
+  pendingCourses: PendingCourseView[];
 };
 
 export async function getInstructorDashboardData(): Promise<InstructorDashboardData> {
   const context = await requireProfile();
   if (context.kind !== "profile") {
-    return { myCourses: [], departmentCourses: [], isLeader: false };
+    return { myCourses: [], departmentCourses: [], isLeader: false, pendingCourses: [] };
   }
 
   const profileId = context.profile.id;
 
-  const [myCourses, userUnits] = await Promise.all([
+  const [myCourses, pendingRows, userUnits] = await Promise.all([
     getCourseRepository().listInstructorCourses(profileId),
+    getCourseRepository().listInstructorPendingCourses(profileId),
     getHierarchyRepository().getUserUnits(profileId),
   ]);
+
+  const pendingCourses = classifyPendingCourses(pendingRows, Date.now());
 
   const leadershipUnits = userUnits.filter((u) => LEADERSHIP_TITLES.has(u.title));
 
   if (leadershipUnits.length === 0) {
-    return { myCourses, departmentCourses: [], isLeader: false };
+    return { myCourses, departmentCourses: [], isLeader: false, pendingCourses };
   }
 
   const unitIds = leadershipUnits.map((u) => u.orgUnitId);
   const departmentCourses = await getCourseRepository().listCoursesByUnitAncestry(unitIds);
 
-  return { myCourses, departmentCourses, isLeader: true };
+  return { myCourses, departmentCourses, isLeader: true, pendingCourses };
 }
