@@ -186,7 +186,7 @@ export default async function AdminDashboardPage({ searchParams }: Props) {
             <AdminTabs
               unassignedCount={unassignedPage.total}
               openEscalationsCount={openEscalations.length}
-              overviewPanel={<AdminOverview data={overviewData} />}
+              overviewPanel={<AdminOverview data={overviewData} handoff={handoffData ?? undefined} />}
               coursesPanel={
                 <CoursesBoard
                   columns={boardColumns}
