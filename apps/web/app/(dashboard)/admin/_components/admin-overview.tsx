@@ -1,3 +1,5 @@
+import Link from "next/link"
+import { ArrowUpRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -5,10 +7,17 @@ import {
 } from "@/components/ui/table"
 import { StatCard } from "@/components/shared/stat-card"
 import { PhaseBreakdown } from "@/components/admin/stats/phase-breakdown"
+import { HandoffSummaryView } from "@/components/admin/handoff/handoff-summary"
 import { getPhaseBreakdown, type CourseStatus } from "@coursebridge/workflow"
-import type { AdminOverviewData } from "@/lib/admin/queries"
+import type { AdminOverviewData, InstructorHandoffData } from "@/lib/admin/queries"
 
-export function AdminOverview({ data }: { data: AdminOverviewData }) {
+type Props = {
+  data: AdminOverviewData
+  /** Instructor handoff stats; omitted when the handoff query failed. */
+  handoff?: InstructorHandoffData
+}
+
+export function AdminOverview({ data, handoff }: Props) {
   const { totalCourses, statusCounts, taWorkload } = data
 
   const countByStatus: Partial<Record<CourseStatus, number>> =
@@ -24,6 +33,24 @@ export function AdminOverview({ data }: { data: AdminOverviewData }) {
         <StatCard label="Total Courses" value={totalCourses} icon="book-open" />
         <StatCard label="Completed" value={completed} icon="check-square" sub={`${completedPct}% of total`} />
       </div>
+
+      {handoff && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Instructor Handoff
+            </h2>
+            <Link
+              href="/admin/stats"
+              className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Full tracker
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          </div>
+          <HandoffSummaryView summary={handoff.summary} byInstructor={handoff.byInstructor} />
+        </section>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1">
