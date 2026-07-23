@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isAdminOverride } from "./transitions";
+import { canProvisionComplete, isAdminOverride } from "./transitions";
+import type { CourseStatus } from "./statuses";
 import type { Role } from "./roles";
 
 describe("isAdminOverride", () => {
@@ -22,4 +23,32 @@ describe("isAdminOverride", () => {
       expect(isAdminOverride({ role, from: "submitted_to_admin", to: "waiting_on_admin" })).toBe(false);
     },
   );
+});
+
+describe("canProvisionComplete", () => {
+  it("allows super_admin and standard_user from staging_in_progress", () => {
+    expect(canProvisionComplete("super_admin", "staging_in_progress")).toBe(true);
+    expect(canProvisionComplete("standard_user", "staging_in_progress")).toBe(true);
+  });
+
+  it("rejects admin_full — the staging→final edge does not grant it", () => {
+    expect(canProvisionComplete("admin_full", "staging_in_progress")).toBe(false);
+  });
+
+  it.each<Role>(["admin_viewer", "instructor", "provost"])(
+    "rejects other role %s from staging_in_progress",
+    (role) => {
+      expect(canProvisionComplete(role, "staging_in_progress")).toBe(false);
+    },
+  );
+
+  it.each<CourseStatus>([
+    "course_created",
+    "waiting_on_admin",
+    "ready_for_instructor",
+    "instructor_approved",
+    "final_approved",
+  ])("rejects status %s even for super_admin (only staging_in_progress is provisionable)", (from) => {
+    expect(canProvisionComplete("super_admin", from)).toBe(false);
+  });
 });
