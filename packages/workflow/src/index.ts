@@ -39,6 +39,7 @@ export {
 } from "./phase-breakdown";
 export {
   assertCanTransition,
+  canProvisionComplete,
   canTransition,
   COURSE_TRANSITIONS,
   getAllowedTransitions,

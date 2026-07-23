@@ -139,6 +139,20 @@ function transitionAllowsRole(transition: CourseTransition, role: EffectiveRole)
   return (transition.roles as readonly EffectiveRole[]).includes(role);
 }
 
+/**
+ * True when `role` may mark a course "provision complete" — the
+ * `staging_in_progress → final_approved` transition. Only `staging_in_progress`
+ * courses qualify; the role check is delegated to {@link canTransition}, so this
+ * is the single source of truth shared by the courses board (button visibility
+ * + eligible subset) and the bulk-provision server action.
+ */
+export function canProvisionComplete(role: EffectiveRole, from: CourseStatus): boolean {
+  return (
+    from === "staging_in_progress" &&
+    canTransition({ role, from: "staging_in_progress", to: "final_approved" })
+  );
+}
+
 const ADMIN_OVERRIDE_ROLES = ["admin_full", "super_admin"] as const satisfies readonly EffectiveRole[];
 
 export function isAdminOverride({ role, from, to }: TransitionInput): boolean {

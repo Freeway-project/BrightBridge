@@ -573,6 +573,41 @@ export async function batchApproveToStagingAction(courseIds: string[]): Promise<
   return { succeeded, failed };
 }
 
+/**
+ * Bulk "Mark Provision Complete": moves each selected course
+ * `staging_in_progress → final_approved` so staff don't have to provision them
+ * one at a time on the board. Gated to the exact roles that edge allows
+ * (`standard_user` / `super_admin` — not `admin_full`); `transitionCourseStatus`
+ * re-checks the transition graph and per-course access and writes the audit row,
+ * so a course that isn't actually in `staging_in_progress` throws and is counted
+ * as failed rather than silently forced.
+ */
+export async function batchProvisionCompleteAction(
+  courseIds: string[],
+): Promise<{ succeeded: number; failed: number }> {
+  const ctx = await requireProfile();
+  requireAnyRole(ctx, ["standard_user", "super_admin"]);
+
+  let succeeded = 0;
+  let failed = 0;
+  for (const courseId of courseIds) {
+    try {
+      await transitionCourseStatus({
+        courseId,
+        toStatus: "final_approved",
+        note: "Bulk marked provision complete.",
+      });
+      succeeded++;
+    } catch {
+      failed++;
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/ta");
+  return { succeeded, failed };
+}
+
 type InstructorMailMergeRow = {
   instructorName: string;
   instructorEmail: string;

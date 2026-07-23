@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
+  canProvisionComplete,
   getAllowedTransitions,
   getCourseStatusLabel,
   WORKFLOW_PHASES,
@@ -17,9 +18,9 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { transitionCourseAction } from "../actions"
+import { batchProvisionCompleteAction, transitionCourseAction } from "../actions"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ReassignDialog, type ReassignTarget } from "./reassign-dialog"
+import { ReassignDialog } from "./reassign-dialog"
 import { CreateCourseDialog } from "./create-course-dialog"
 import type { ProfileOption } from "@/lib/repositories/contracts"
 import { Plus } from "lucide-react"
@@ -54,22 +55,27 @@ type Props = {
   readOnly?: boolean
 }
 
+type SelectedCard = { id: string; title: string; status: CourseStatus }
+
 export function CoursesBoard({ columns, role, tas = [], listView, readOnly = false }: Props) {
+  const router = useRouter()
   const [view, setView] = useState<"board" | "list">("list")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [reassignOpen, setReassignOpen] = useState(false)
-  const [reassignTargets, setReassignTargets] = useState<ReassignTarget[]>([])
+  const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([])
   const [createOpen, setCreateOpen] = useState(false)
+  const [provisionPending, startProvision] = useTransition()
+  const [provisionError, setProvisionError] = useState<string | null>(null)
 
-  function toggleSelection(id: string, title: string) {
+  function toggleSelection(id: string, title: string, status: CourseStatus) {
     setSelectedIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) {
         next.delete(id)
-        setReassignTargets((targets) => targets.filter((t) => t.id !== id))
+        setSelectedCards((cards) => cards.filter((c) => c.id !== id))
       } else {
         next.add(id)
-        setReassignTargets((targets) => [...targets, { id, title }])
+        setSelectedCards((cards) => [...cards, { id, title, status }])
       }
       return next
     })
@@ -77,6 +83,36 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
 
   function openReassign() {
     setReassignOpen(true)
+  }
+
+  // Only staging_in_progress cards the operator's role can advance are eligible;
+  // non-eligible selected cards stay selectable for "Reassign selected".
+  const eligibleForProvision = selectedCards.filter((c) => canProvisionComplete(role, c.status))
+
+  function provisionSelected() {
+    const ids = eligibleForProvision.map((c) => c.id)
+    if (ids.length === 0) return
+    if (!window.confirm(
+      `Mark ${ids.length} course${ids.length !== 1 ? "s" : ""} as provision complete? This moves them to "Final Approved".`,
+    )) return
+    setProvisionError(null)
+    startProvision(async () => {
+      try {
+        const res = await batchProvisionCompleteAction(ids)
+        setSelectedIds((prev) => {
+          const next = new Set(prev)
+          ids.forEach((id) => next.delete(id))
+          return next
+        })
+        setSelectedCards((cards) => cards.filter((c) => !ids.includes(c.id)))
+        if (res.failed > 0) {
+          setProvisionError(`${res.succeeded} provisioned, ${res.failed} could not be provisioned.`)
+        }
+        router.refresh()
+      } catch {
+        setProvisionError("Could not provision the selected courses. Please try again.")
+      }
+    })
   }
 
   return (
@@ -109,11 +145,14 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
 
       {view === "board" && !readOnly && selectedIds.size > 0 && (
         <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 backdrop-blur">
-          <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
-            {selectedIds.size} course{selectedIds.size !== 1 ? "s" : ""} selected
-          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+              {selectedIds.size} course{selectedIds.size !== 1 ? "s" : ""} selected
+            </span>
+            {provisionError && <span className="text-xs text-red-500">{provisionError}</span>}
+          </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setSelectedIds(new Set()); setReassignTargets([]) }}>
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setSelectedIds(new Set()); setSelectedCards([]); setProvisionError(null) }}>
               Clear
             </Button>
             <Button
@@ -124,6 +163,17 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
             >
               Reassign selected
             </Button>
+            {eligibleForProvision.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 border-emerald-500/40 text-xs text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
+                onClick={provisionSelected}
+                disabled={provisionPending}
+              >
+                {provisionPending ? "Provisioning…" : `Mark Provision Complete (${eligibleForProvision.length})`}
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -132,7 +182,7 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
         <ReassignDialog
           open={reassignOpen}
           onOpenChange={setReassignOpen}
-          courses={reassignTargets}
+          courses={selectedCards}
           tas={tas}
           onDone={(ids) => {
             setSelectedIds((prev) => {
@@ -140,7 +190,7 @@ export function CoursesBoard({ columns, role, tas = [], listView, readOnly = fal
               ids.forEach((id) => next.delete(id))
               return next
             })
-            setReassignTargets((targets) => targets.filter((t) => !ids.includes(t.id)))
+            setSelectedCards((cards) => cards.filter((c) => !ids.includes(c.id)))
           }}
         />
       )}
@@ -164,7 +214,7 @@ function BoardView({
   role: EffectiveRole;
   readOnly: boolean;
   selectedIds: Set<string>;
-  onToggleSelection: (id: string, title: string) => void;
+  onToggleSelection: (id: string, title: string, status: CourseStatus) => void;
 }) {
   const phases = WORKFLOW_PHASES.map((p) => {
     const phaseColumns = columns.filter((c) => c.phase === p.key)
@@ -263,7 +313,7 @@ function Column({
   role: EffectiveRole;
   readOnly: boolean;
   selectedIds: Set<string>;
-  onToggleSelection: (id: string, title: string) => void;
+  onToggleSelection: (id: string, title: string, status: CourseStatus) => void;
 }) {
   const hidden = column.count - column.cards.length
   const colors = PHASE_COLORS[column.phase] ?? PHASE_COLORS.staging
@@ -286,7 +336,7 @@ function Column({
             role={role}
             readOnly={readOnly}
             selected={selectedIds.has(card.id)}
-            onToggleSelection={() => onToggleSelection(card.id, card.title)}
+            onToggleSelection={() => onToggleSelection(card.id, card.title, card.status)}
           />
         ))}
         {hidden > 0 && (
